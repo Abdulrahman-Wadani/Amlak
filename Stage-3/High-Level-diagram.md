@@ -57,13 +57,13 @@ flowchart TD
         Facade["Amlak Facade"]
 
         subgraph Services["Business Services"]
-
             Auth["Authentication & Authorization"]
             UserManagement["User Management"]
             PlaceManagement["Place Management"]
             BookingManagement["Booking Management"]
             ExpenseManagement["Expense Management"]
             ReportService["Reports & Financial Analysis"]
+            Notfication["Notfication Management"]
 
         end
 
@@ -73,7 +73,7 @@ flowchart TD
         Facade --> BookingManagement
         Facade --> ExpenseManagement
         Facade --> ReportService
-
+        Facade --> Notfication
     end
 
 
@@ -151,7 +151,7 @@ flowchart TD
     %% OTP EXTERNAL SERVICE
     %% ========================================
 
-    Auth -->|"Send OTP"| OTPService
+    Notfication -->|"Send OTP"| OTPService
 
 
 
