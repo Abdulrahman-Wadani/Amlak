@@ -1,6 +1,11 @@
 ```mermaid
 classDiagram
 
+    class BaseClass {
+        +datetime created_at
+        +datetime updated_at
+    }
+
     class User {
         +int id
         +string username
@@ -11,7 +16,6 @@ classDiagram
         +Role role
         +int owner_id
         +string picture_path
-        +datetime created_at
         +register()
         +login()
         +updateProfile()
@@ -50,7 +54,6 @@ classDiagram
         +int owner_id
         +string place_name
         +string status
-        +datetime created_at
         +add()
         +update()
         +delete()
@@ -73,7 +76,6 @@ classDiagram
         +int place_id
         +date booking_date
         +decimal cost
-        +datetime created_at
         +add()
         +cancel()
         +view()
@@ -85,7 +87,6 @@ classDiagram
         +string description
         +decimal amount
         +date expense_date
-        +datetime created_at
         +add()
         +update()
         +delete()
@@ -119,7 +120,6 @@ classDiagram
         +int user_id
         +string message
         +boolean is_read
-        +datetime created_at
         +send()
         +markAsRead()
     }
@@ -134,6 +134,13 @@ classDiagram
         +calculateProfit()
     }
 
+
+    BaseClass <|-- User
+    BaseClass <|-- Place
+    BaseClass <|-- PlaceChecklist
+    BaseClass <|-- Booking
+    BaseClass <|-- Expense
+    BaseClass <|-- Notification
 
     User <|-- Owner
     User <|-- Worker
