@@ -40,6 +40,12 @@ The system caters to different user types, each with specific permissions and re
 | **Booking** | Worker | As a worker, I want to manage (add/cancel) bookings on a calendar, including guest info and pricing, so that I can maintain an accurate reservation schedule. | Must Have |
 | **Financial** | Manager | As a manager, I want to log all property expenses (maintenance, bills, taxes) so that I can maintain accurate financial records. | Must Have |
 | **Financial** | Manager | As a manager, I want to generate financial reports so that I can effectively track profit, loss, and overall financial health. | Must Have | 
+| **Financial** | Admin | As an Admin I want to manage plans and payments so I can edit account limits and refund users. | Should Have | 
+| **Content management** | Admin | As an Admin I want to create, edit and delete web content so that information stay up to date. | Must Have |
+| **User management**| Admin | As an Admin I want to view, edit and deactivate user accounts so that I can control their access. | Must Have | 
+| support| Admin | As an Admin I want to view user support requests so that I can resolve problems. | Must Have | 
+| **Notification** | Admin | As an Admin I want to send notifications to users so I can communicate updates. | Must Have | 
+| **Reporting & Analytics** | Admin | As an Admin I want to view statistics and filter data so I can export information. | Should Have | 
 
 ## 3. Non-Functional Requirements (NFRs)
 
