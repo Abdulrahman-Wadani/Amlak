@@ -4,16 +4,16 @@ classDiagram
     class BaseClass {
         +datetime created_at
         +datetime updated_at
+        +string id
     }
 
     class User {
-        +int id
         +string username
         +string password
         +string email
         +string phone
         +string fullname
-        +Role role
+        +string role
         +int owner_id
         +string picture_path
         +register()
@@ -37,6 +37,7 @@ classDiagram
     }
 
     class Worker {
+        +int owner_id
         +viewPlace()
         +addBooking()
         +cancelBooking()
@@ -50,7 +51,6 @@ classDiagram
     }
 
     class Place {
-        +int id
         +int owner_id
         +string place_name
         +string status
@@ -61,7 +61,6 @@ classDiagram
     }
 
     class PlaceChecklist {
-        +int id
         +int place_id
         +string checklist_item
         +boolean is_completed
@@ -72,7 +71,6 @@ classDiagram
     }
 
     class Booking {
-        +int id
         +int place_id
         +date booking_date
         +decimal cost
@@ -82,7 +80,6 @@ classDiagram
     }
 
     class Expense {
-        +int id
         +int place_id
         +string description
         +decimal amount
@@ -94,7 +91,6 @@ classDiagram
     }
 
     class OTP {
-        +int id
         +int user_id
         +string otp_token
         +datetime expires_at
@@ -104,7 +100,6 @@ classDiagram
     }
 
     class PasswordReset {
-        +int id
         +int user_id
         +string reset_token
         +datetime expires_at
@@ -115,7 +110,6 @@ classDiagram
     }
 
     class Notification {
-        +int id
         +int expense_id
         +int user_id
         +string message
@@ -146,9 +140,11 @@ classDiagram
     User <|-- Worker
     User <|-- Admin
 
+    Owner "1" --> "*" Worker : manages
+    Owner "1" --> "*" Place : owns
+
     User "1" --> "*" OTP : has
     User "1" --> "*" PasswordReset : requests
-    User "1" --> "*" Place : owns
     User "1" --> "*" Notification : receives
 
     Place "1" --> "*" PlaceChecklist : has
