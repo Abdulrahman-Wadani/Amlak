@@ -38,6 +38,13 @@ erDiagram
         datetime created_at
     }
 
+    PLACE_CHECKLIST {
+        int id PK
+        int place_id FK
+        string checklist_item
+        boolean is_completed
+    }
+
     BOOKING {
         int id PK
         int place_id FK
@@ -67,6 +74,7 @@ erDiagram
     USER ||--o{ OTP : has
     USER ||--o{ PASSWORD_RESET : requests
     USER ||--o{ PLACE : owns
+    PLACE ||--o{ PLACE_CHECKLIST : has
     PLACE ||--o{ BOOKING : has
     PLACE ||--o{ EXPENSE : has
     EXPENSE ||--o{ NOTIFICATION : triggers
