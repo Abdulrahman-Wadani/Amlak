@@ -82,13 +82,8 @@ To ensure the system is secure, reliable, and scalable, the following technical 
 ```mermaid
 flowchart TD
 
-    %% ========================================
-    %% PRESENTATION LAYER
-    %% ========================================
-
     subgraph Presentation["Presentation Layer"]
-
-        React["React Web Application"]
+        React["React Web & Mobile Applications"]
 
         Login["Login"]
         Register["Create Account"]
@@ -100,6 +95,10 @@ flowchart TD
         Expenses["Expenses"]
         Reports["Reports"]
         Finance["Finance Report"]
+        Assets["Assets Management"]
+        Tickets["Maintenance Tickets"]
+        CMS["Web Content CMS"]
+        Support["Support Tickets"]
 
         React --> Login
         React --> Register
@@ -111,30 +110,22 @@ flowchart TD
         React --> Expenses
         React --> Reports
         React --> Finance
-
+        React --> Assets
+        React --> Tickets
+        React --> CMS
+        React --> Support
     end
-
-
-    %% ========================================
-    %% API LAYER
-    %% ========================================
 
     subgraph API["API Layer - Node.js / Express"]
-
         REST["REST API"]
+        Middleware["Auth & RBAC Middleware"]
         Controllers["API Controllers"]
 
-        REST --> Controllers
-
+        REST --> Middleware
+        Middleware --> Controllers
     end
 
-
-    %% ========================================
-    %% BUSINESS LOGIC LAYER
-    %% ========================================
-
     subgraph Logic["Business Logic Layer"]
-
         Facade["Amlak Facade"]
 
         subgraph Services["Business Services"]
@@ -144,8 +135,9 @@ flowchart TD
             BookingManagement["Booking Management"]
             ExpenseManagement["Expense Management"]
             ReportService["Reports & Financial Analysis"]
-            Notfication["Notfication Management"]
-
+            Notification["Notification Service"]
+            MaintenanceSvc["Assets & Maintenance Service"]
+            AdminSvc["SaaS Admin & CMS Service"]
         end
 
         Facade --> Auth
@@ -154,39 +146,24 @@ flowchart TD
         Facade --> BookingManagement
         Facade --> ExpenseManagement
         Facade --> ReportService
-        Facade --> Notfication
+        Facade --> Notification
+        Facade --> MaintenanceSvc
+        Facade --> AdminSvc
     end
-
-
-    %% ========================================
-    %% DATABASE LAYER
-    %% ========================================
 
     subgraph Database["Database Layer"]
-
-        UsersDB["Users"]
-        PlacesDB["Places"]
-        BookingsDB["Bookings"]
-        ExpensesDB["Expenses"]
-        ReportsDB["Reports / Financial Data"]
-
+        UsersDB["Users & Roles"]
+        PlacesDB["Places & Bookings"]
+        ExpensesDB["Expenses & Finance"]
+        MaintenanceDB["Assets & Tickets"]
+        AdminDB["Web Content & Support"]
     end
-
-
-    %% ========================================
-    %% EXTERNAL SERVICES
-    %% ========================================
 
     subgraph External["External Services"]
-
-        OTPService["OTP Service"]
-
+        OTPService["OTP & SMS Gateway"]
+        PushService["Push Notifications"]
+        StorageService["Cloud Storage AWS S3"]
     end
-
-
-    %% ========================================
-    %% PRESENTATION / USER ACCESS
-    %% ========================================
 
     Login --> REST
     Register --> REST
@@ -198,53 +175,29 @@ flowchart TD
     Expenses --> REST
     Reports --> REST
     Finance --> REST
-
-
-    %% ========================================
-    %% API -> BUSINESS LOGIC
-    %% ========================================
+    Assets --> REST
+    Tickets --> REST
+    CMS --> REST
+    Support --> REST
 
     Controllers -->|"Request"| Facade
-
-
-    %% ========================================
-    %% BUSINESS LOGIC -> DATABASE
-    %% ========================================
-
-    Auth --> UsersDB
-
-    UserManagement --> UsersDB
-
-    PlaceManagement --> PlacesDB
-
-    BookingManagement --> BookingsDB
-
-    ExpenseManagement --> ExpensesDB
-
-    ReportService --> ReportsDB
-
-    ReportService --> BookingsDB
-    ReportService --> ExpensesDB
-    ReportService --> PlacesDB
-
-
-    %% ========================================
-    %% OTP EXTERNAL SERVICE
-    %% ========================================
-
-    Notfication -->|"Send OTP"| OTPService
-
-
-
-    %% ========================================
-    %% RESPONSE FLOW
-    %% ========================================
-
     Facade -->|"Response"| Controllers
-
     Controllers -->|"JSON Response"| REST
 
-    REST --> React    
+    Auth --> UsersDB
+    UserManagement --> UsersDB
+    PlaceManagement --> PlacesDB
+    BookingManagement --> PlacesDB
+    ExpenseManagement --> ExpensesDB
+    ReportService --> ExpensesDB
+    ReportService --> PlacesDB
+    MaintenanceSvc --> MaintenanceDB
+    AdminSvc --> AdminDB
+
+    Notification -->|"Send OTP"| OTPService
+    Notification -->|"Send Alerts"| PushService
+    MaintenanceSvc -->|"Upload Photos"| StorageService
+    Auth -->|"Upload Avatars"| StorageService   
 ```
 
 ## 5 Class-diagram
