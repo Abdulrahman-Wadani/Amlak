@@ -485,82 +485,168 @@ classDiagram
 ```mermaid
 erDiagram
 
+    ROLE {
+        string id PK
+        string name
+        string description
+        datetime created_at
+        datetime updated_at
+    }
+
+    PERMISSION {
+        string id PK
+        string name
+        string description
+        datetime created_at
+        datetime updated_at
+    }
+
+    ROLE_PERMISSION {
+        string role_id PK,FK
+        string permission_id PK,FK
+    }
+
     USER {
-        int id PK
-        string username
+        string id PK
+        string role_id FK
+        string status
         string password
         string email
         string phone
         string fullname
-        enum role
-        int owner_id FK
-        string picture_path "NULL"
+        string picture_path
         datetime created_at
+        datetime updated_at
     }
 
-    OTP {
-        int id PK
-        int user_id FK
-        string otp_token
+    VERIFICATION_TOKEN {
+        string id PK
+        string user_id FK
+        string token
+        string token_type
         datetime expires_at
         boolean is_used
+        datetime created_at
+        datetime updated_at
     }
 
-    PASSWORD_RESET {
-        int id PK
-        int user_id FK
-        string reset_token
-        datetime expires_at
-        boolean is_used
+    NOTIFICATION {
+        string id PK
+        string user_id FK
+        string sender_id FK
+        string message
+        boolean is_read
+        datetime created_at
+        datetime updated_at
     }
 
     PLACE {
-        int id PK
-        int owner_id FK
+        string id PK
+        string owner_id FK
         string place_name
         string status
         datetime created_at
+        datetime updated_at
     }
 
     PLACE_CHECKLIST {
-        int id PK
-        int place_id FK
+        string id PK
+        string place_id FK
         string checklist_item
         boolean is_completed
+        datetime created_at
+        datetime updated_at
     }
 
     BOOKING {
-        int id PK
-        int place_id FK
+        string id PK
+        string place_id FK
         date booking_date
         decimal cost
         datetime created_at
+        datetime updated_at
     }
 
     EXPENSE {
-        int id PK
-        int place_id FK
+        string id PK
+        string place_id FK
         string description
         decimal amount
         date expense_date
         datetime created_at
+        datetime updated_at
     }
 
-    NOTIFICATION {
-        int id PK
-        int expense_id FK
-        int user_id FK
-        string message
-        boolean is_read
+    ASSET {
+        string id PK
+        string place_id FK
+        string name
+        string type
+        string status
+        date purchase_date
         datetime created_at
+        datetime updated_at
     }
 
-    USER ||--o{ OTP : has
-    USER ||--o{ PASSWORD_RESET : requests
-    USER ||--o{ PLACE : owns
-    PLACE ||--o{ PLACE_CHECKLIST : has
-    PLACE ||--o{ BOOKING : has
-    PLACE ||--o{ EXPENSE : has
-    EXPENSE ||--o{ NOTIFICATION : triggers
-    USER ||--o{ NOTIFICATION : receives
+    PERIODIC_MAINTENANCE {
+        string id PK
+        string asset_id FK
+        string description
+        string frequency
+        date next_due_date
+        datetime created_at
+        datetime updated_at
+    }
+
+    MAINTENANCE_TICKET {
+        string id PK
+        string place_id FK
+        string asset_id FK
+        string reporter_id FK
+        string ticket_type
+        string description
+        string status
+        string photo_url
+        datetime created_at
+        datetime updated_at
+    }
+
+    WEB_CONTENT {
+        string id PK
+        string author_id FK
+        string title
+        string slug
+        string body
+        boolean is_published
+        datetime created_at
+        datetime updated_at
+    }
+
+    SUPPORT_TICKET {
+        string id PK
+        string user_id FK
+        string subject
+        string description
+        string status
+        datetime created_at
+        datetime updated_at
+    }
+
+    ROLE ||--o{ USER : "assigns"
+    ROLE ||--o{ ROLE_PERMISSION : "has"
+    PERMISSION ||--o{ ROLE_PERMISSION : "included in"
+    USER ||--o{ VERIFICATION_TOKEN : "requests"
+    USER ||--o{ NOTIFICATION : "receives"
+    USER ||--o{ NOTIFICATION : "sends"
+    USER ||--o{ PLACE : "owns"
+    USER ||--o{ MAINTENANCE_TICKET : "reports"
+    USER ||--o{ SUPPORT_TICKET : "submits"
+    USER ||--o{ WEB_CONTENT : "authors"
+    PLACE ||--o{ ASSET : "contains"
+    PLACE ||--o{ PLACE_CHECKLIST : "has"
+    PLACE ||--o{ BOOKING : "has"
+    PLACE ||--o{ EXPENSE : "has"
+    PLACE ||--o{ MAINTENANCE_TICKET : "needs"
+    ASSET ||--o{ PERIODIC_MAINTENANCE : "scheduled for"
+    ASSET ||--o{ MAINTENANCE_TICKET : "involves"
 ```
