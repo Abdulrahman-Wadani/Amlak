@@ -265,23 +265,27 @@ classDiagram
         +string fullname
         +string picture_path
         +string role_id
+        +string status %%: "ACTIVE", "DEACTIVATED" - [User Management Admin]
         
         +List~Place~ managed_places
         +List~MaintenanceTicket~ reported_tickets
         +List~Notification~ notifications
-        
+        +List~SupportTicket~ support_tickets
+        +List~WebContent~ authored_contents
+
         +register()
         +login()
         +updateProfile()
         +resetPassword()
         +requestVerificationCode()
         +hasPermission(string permission_name)
+        +changeStatus() %% [User Management Admin]
     }
 
     class Role {
         +string name
         +string description
-
+        
         +List~Permission~ permissions
         +List~User~ users
         
@@ -411,6 +415,30 @@ classDiagram
         +calculateProfit()
     }
 
+    class SupportTicket {
+        +string user_id
+        +string subject
+        +string description
+        +string status %% "OPEN", "IN_PROGRESS", "RESOLVED"
+        
+        +submit()
+        +updateStatus()
+        +resolve()
+    }
+
+    class WebContent {
+        +string author_id
+        +string title
+        +string slug
+        +string body
+        +boolean is_published
+        
+        +create()
+        +update()
+        +delete()
+        +publish()
+    }
+
     %% Inheritance from BaseClass
     BaseClass <|-- User
     BaseClass <|-- Role
@@ -422,6 +450,8 @@ classDiagram
     BaseClass <|-- Expense
     BaseClass <|-- Notification
     BaseClass <|-- VerificationToken
+    BaseClass <|-- WebContent
+    BaseClass <|-- SupportTicket
 
     %% RBAC Relationships (Roles & Permissions)
     Role "1" --> "*" User : assigned to
@@ -432,6 +462,8 @@ classDiagram
     User "1" --> "*" VerificationToken : requests
     User "1" --> "*" Notification : receives
     User "1" --> "*" MaintenanceTicket : reports / handles
+    User "1" --> "*" SupportTicket
+    User "1" --> "*" WebContent : authors / creates
 
     %% Place Relationships
     Place "1" --> "*" PlaceChecklist : has
