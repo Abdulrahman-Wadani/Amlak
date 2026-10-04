@@ -77,7 +77,11 @@ To ensure the system is secure, reliable, and scalable, the following technical 
 
 * **Audit Logging:** Critical actions, such as approving maintenance tickets, recording expenses, or deleting a property, must be logged with a timestamp and the user ID for auditing purposes.
 
-## 4 high-level architecture diagram
+## 4 Figma design guide
+
+https://www.figma.com/design/E2nABXzciiIHZAPG5mNXVM/Abdulwahab-Almatrudi-s-team-library?node-id=3342-3806&t=WxAnupDwu3UPe9A0-1
+
+## 5 high-level architecture diagram
 
 ```mermaid
 flowchart TD
@@ -200,7 +204,7 @@ flowchart TD
     Auth -->|"Upload Avatars"| StorageService   
 ```
 
-## 5 Class-diagram
+## 6 Class-diagram
 
 ```mermaid
 classDiagram
@@ -433,7 +437,7 @@ classDiagram
     Asset "1" --> "*" MaintenanceTicket : needs
 ```
 
-## 6 ER-diagram
+## 7 ER-diagram
 
 ```mermaid
 erDiagram
