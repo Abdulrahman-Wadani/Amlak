@@ -2,7 +2,7 @@
 
 ## 1. System Roles Explained
 
-* **Admin:** The highest level of authority. Admins represent the platform owners. They manage user accounts, web content, support requests and platform notifications.
+* **Admin:** The highest level of authority. Admins represent the platform owners and have full control over everything in the system: user accounts, web content, support requests and notifications, and also every manager's places, workers, assets, checklists, bookings, tickets, expenses and financial reports.
 
 * **Manager:** The owner/supervisor of properties. Managers handle property and asset CRUD, assign workers to their properties, build checklists, review maintenance tickets, schedule periodic maintenance, log expenses and generate financial reports.
 
@@ -56,7 +56,7 @@
 ### 3.1 Data scoping
 * A **Manager** sees only places where `place.owner_id = manager.id`, and everything under them (assets, bookings, tickets, expenses, checklists, assigned workers).
 * A **Worker** sees only places listed in `PLACE_WORKER` for that worker (with `is_active = true`), and only operational data under them. Expenses and financial reports are never returned to a Worker.
-* An **Admin** sees all users, content and support tickets, but does not edit Manager business data.
+* An **Admin** is not scoped: they can view, create, edit and delete any record in the system, across all managers and places. When an Admin creates a place, they must choose the Manager who owns it (`owner_id`). Every Admin change to business data is written to `AUDIT_LOG` like any other critical action.
 
 ### 3.2 Bookings
 * A booking covers `check_in_date` to `check_out_date`. Two `CONFIRMED` bookings on the same place cannot overlap.
@@ -126,29 +126,29 @@ PENDING_REVIEW ──approve──> APPROVED ──start──> IN_PROGRESS ─�
 | Permission | Admin | Manager | Worker | User |
 | :--- | :---: | :---: | :---: | :---: |
 | `profile:manage_own` | ✅ | ✅ | ✅ | ✅ |
-| `place:create / update / delete` | ❌ | 🔸 | ❌ | ❌ |
-| `place:view` | ❌ | 🔸 | 🔸 | ❌ |
-| `place_worker:assign` | ❌ | 🔸 | ❌ | ❌ |
-| `asset:create / update / delete` | ❌ | 🔸 | ❌ | ❌ |
-| `asset:view` | ❌ | 🔸 | 🔸 | ❌ |
-| `dashboard:view` | ❌ | 🔸 | ❌ | ❌ |
-| `checklist_template:manage` | ❌ | 🔸 | ❌ | ❌ |
-| `checklist_run:execute` | ❌ | 🔸 | 🔸 | ❌ |
-| `booking:create / cancel / view` | ❌ | 🔸 | 🔸 | ❌ |
-| `ticket:create` (damage report) | ❌ | 🔸 | 🔸 | ❌ |
-| `ticket:approve / reject` | ❌ | 🔸 | ❌ | ❌ |
-| `ticket:complete` (with photos) | ❌ | 🔸 | 🔸 (assignee only) | ❌ |
-| `periodic_maintenance:manage` | ❌ | 🔸 | ❌ | ❌ |
-| `expense:manage` | ❌ | 🔸 | ❌ | ❌ |
-| `financial_report:view` | ❌ | 🔸 | ❌ | ❌ |
+| `place:create / update / delete` | ✅ | 🔸 | ❌ | ❌ |
+| `place:view` | ✅ | 🔸 | 🔸 | ❌ |
+| `place_worker:assign` | ✅ | 🔸 | ❌ | ❌ |
+| `asset:create / update / delete` | ✅ | 🔸 | ❌ | ❌ |
+| `asset:view` | ✅ | 🔸 | 🔸 | ❌ |
+| `dashboard:view` | ✅ | 🔸 | ❌ | ❌ |
+| `checklist_template:manage` | ✅ | 🔸 | ❌ | ❌ |
+| `checklist_run:execute` | ✅ | 🔸 | 🔸 | ❌ |
+| `booking:create / cancel / view` | ✅ | 🔸 | 🔸 | ❌ |
+| `ticket:create` (damage report) | ✅ | 🔸 | 🔸 | ❌ |
+| `ticket:approve / reject` | ✅ | 🔸 | ❌ | ❌ |
+| `ticket:complete` (with photos) | ✅ | 🔸 | 🔸 (assignee only) | ❌ |
+| `periodic_maintenance:manage` | ✅ | 🔸 | ❌ | ❌ |
+| `expense:manage` | ✅ | 🔸 | ❌ | ❌ |
+| `financial_report:view` | ✅ | 🔸 | ❌ | ❌ |
 | `user:view / update / deactivate` | ✅ | ❌ | ❌ | ❌ |
 | `web_content:manage` | ✅ | ❌ | ❌ | ❌ |
-| `support_ticket:create` | ❌ | ✅ | ✅ | ✅ |
+| `support_ticket:create` | ✅ | ✅ | ✅ | ✅ |
 | `support_ticket:view_all / resolve` | ✅ | ❌ | ❌ | ❌ |
 | `notification:send` | ✅ | ❌ | ❌ | ❌ |
 | `audit_log:view` | ✅ | 🔸 | ❌ | ❌ |
 
-The 🔸 checks are enforced in the service layer (ownership / assignment lookup), not only by role in the middleware.
+The 🔸 checks are enforced in the service layer (ownership / assignment lookup), not only by role in the middleware. Admin requests skip the ownership / assignment lookup and can act on any place.
 
 ---
 
