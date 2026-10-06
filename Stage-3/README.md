@@ -115,7 +115,7 @@ PENDING_REVIEW ──approve──> APPROVED ──start──> IN_PROGRESS ─�
 | `VERIFICATION_TOKEN.token_type` | `EMAIL_OTP`, `PASSWORD_RESET` |
 | `NOTIFICATION.type` | `ANNOUNCEMENT`, `MAINTENANCE_REMINDER`, `OVERDUE_ALERT`, `TICKET_UPDATE`, `SYSTEM` |
 | `SUPPORT_TICKET.status` | `OPEN`, `IN_PROGRESS`, `RESOLVED` |
-| `AUDIT_LOG.action` | `CREATE`, `UPDATE`, `DELETE`, `APPROVE`, `REJECT`, `CANCEL`, `DEACTIVATE`, `LOGIN` |
+| `AUDIT_LOG.action` | `CREATE`, `UPDATE`, `DELETE`, `APPROVE`, `REJECT`, `COMPLETE`, `CANCEL`, `DEACTIVATE`, `LOGIN` |
 
 ---
 
@@ -1040,3 +1040,550 @@ erDiagram
 * `EXPENSE(place_id, expense_date)` for reports
 * `NOTIFICATION(user_id, is_read)`
 * `AUDIT_LOG(entity_type, entity_id)`, `AUDIT_LOG(user_id, created_at)`
+
+---
+
+## 10. High-Level Sequence Diagrams
+
+These diagrams show how the components from the architecture (Section 7) interact for three critical use cases:
+
+1. **User logs in** and then retrieves data with the access token. Shows authentication, JWT, refresh tokens, RBAC and data scoping.
+2. **Worker creates a booking.** Shows saving a new record with validation, overlap check, transaction and automatic checklist runs.
+3. **Maintenance ticket lifecycle.** A worker reports damage with photos, a manager approves it, and the worker completes it. Shows S3 uploads, notifications, email and audit logging.
+
+### 10.1 User Login and Authenticated Request
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as User
+    participant App as React / React Native App
+    participant API as REST API
+    participant MW as Auth & RBAC Middleware
+    participant C as Auth Controller
+    participant PC as Place Controller
+    participant F as Amlak Facade
+    participant AS as Auth Service
+    participant PS as Place Service
+    participant AL as Audit Log Service
+    participant DB as Database
+
+    rect rgba(100, 149, 237, 0.08)
+    Note over U,DB: Login
+    U->>App: Enter email and password
+    App->>API: POST /api/auth/login (email, password)
+    API->>MW: Public route, apply rate limit only
+    MW->>C: Forward request
+    C->>C: Validate request body
+    C->>F: login(email, password)
+    F->>AS: authenticate(email, password)
+    AS->>DB: SELECT user and role WHERE email = ?
+    DB-->>AS: User row or none
+    AS->>AS: Verify password against password_hash (argon2id)
+
+    alt User not found or wrong password
+        AS-->>F: InvalidCredentials
+        F-->>C: Error
+        C-->>App: 401 Invalid email or password
+        App-->>U: Show error message
+    else status = PENDING_VERIFICATION
+        AS-->>F: EmailNotVerified
+        F-->>C: Error
+        C-->>App: 403 Email not verified
+        App-->>U: Redirect to OTP verification screen
+    else status = DEACTIVATED
+        AS-->>F: AccountDeactivated
+        F-->>C: Error
+        C-->>App: 403 Account deactivated
+        App-->>U: Show contact-support message
+    else Credentials valid and status = ACTIVE
+        AS->>AS: Sign access JWT (user_id, role, 15 min)
+        AS->>AS: Generate refresh token (30 days)
+        AS->>DB: INSERT REFRESH_TOKEN (token_hash, device_info, expires_at)
+        AS->>AL: record(LOGIN, user_id, ip_address)
+        AL->>DB: INSERT AUDIT_LOG
+        AS-->>F: Tokens and user profile
+        F-->>C: Result
+        C-->>App: 200 OK (access token, user, role) + refresh token cookie or secure storage
+        App->>App: Store access token in memory
+        App-->>U: Open dashboard for the user's role
+    end
+    end
+
+    rect rgba(60, 179, 113, 0.08)
+    Note over U,DB: Retrieve data with the access token
+    U->>App: Open Places screen
+    App->>API: GET /api/places (Authorization: Bearer JWT)
+    API->>MW: Verify JWT signature and expiry
+    alt Token missing, invalid or expired
+        MW-->>App: 401 Unauthorized
+        App->>API: POST /api/auth/refresh (refresh token)
+        Note right of App: Auth Service rotates the refresh token<br/>and issues a new access token,<br/>then the app retries the request
+    else Token valid
+        MW->>MW: Check role has permission place:view
+        MW->>PC: Forward with user_id and role
+        PC->>F: getPlaces(user)
+        F->>PS: listPlaces(user)
+        PS->>PS: Build scope filter for the user's role
+        PS->>DB: SELECT places with scope filter
+        Note right of DB: Admin: all places<br/>Manager: owner_id = user_id<br/>Worker: joined through active PLACE_WORKER
+        DB-->>PS: Place rows
+        PS-->>F: Places
+        F-->>PC: Places
+        PC-->>App: 200 OK (places JSON)
+        App-->>U: Render places list
+    end
+    end
+```
+
+### 10.2 Worker Creates a Booking
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor W as Worker
+    participant App as React Native App
+    participant MW as REST API + Auth & RBAC Middleware
+    participant C as Booking Controller
+    participant F as Amlak Facade
+    participant BS as Booking Service
+    participant CS as Checklist Service
+    participant AL as Audit Log Service
+    participant DB as Database
+
+    W->>App: Select dates on calendar, enter guest info and price
+    App->>MW: POST /api/places/:placeId/bookings (Bearer JWT)
+    MW->>MW: Verify JWT and permission booking:create
+
+    alt Invalid token or missing permission
+        MW-->>App: 401 / 403
+    else Authorized
+        MW->>C: Forward with user_id and role
+        C->>C: Validate body (guest_name, guest_phone, check_in < check_out, total_price >= 0)
+        alt Validation fails
+            C-->>App: 422 Validation errors
+            App-->>W: Highlight invalid fields
+        else Body valid
+            C->>F: createBooking(user, placeId, data)
+            F->>BS: create(user, placeId, data)
+            BS->>DB: SELECT PLACE_WORKER WHERE place_id = ? AND worker_id = ? AND is_active
+            DB-->>BS: Assignment row or none
+
+            alt Worker not assigned to this place
+                BS-->>F: Forbidden
+                F-->>C: Error
+                C-->>App: 403 Not assigned to this place
+            else Worker assigned
+                BS->>DB: BEGIN TRANSACTION
+                BS->>DB: SELECT CONFIRMED bookings overlapping the new dates (FOR UPDATE)
+                DB-->>BS: Overlapping bookings
+
+                alt Overlap found
+                    BS->>DB: ROLLBACK
+                    BS-->>F: Conflict
+                    F-->>C: Error
+                    C-->>App: 409 Dates already booked
+                    App-->>W: Show conflicting booking on calendar
+                else No overlap
+                    BS->>DB: INSERT BOOKING (status = CONFIRMED, created_by = worker)
+                    BS->>CS: createRunsForBooking(booking)
+                    CS->>DB: SELECT active PRE_BOOKING and POST_BOOKING templates with items
+                    DB-->>CS: Templates and items
+                    CS->>DB: INSERT CHECKLIST_RUN per template (status = PENDING)
+                    CS->>DB: INSERT CHECKLIST_RUN_ITEM per template item (is_checked = false)
+                    CS-->>BS: Runs created
+                    BS->>AL: record(CREATE, BOOKING, booking_id, new_values)
+                    AL->>DB: INSERT AUDIT_LOG
+                    BS->>DB: COMMIT
+                    BS-->>F: Booking with checklist runs
+                    F-->>C: Result
+                    C-->>App: 201 Created (booking JSON)
+                    App-->>W: Show booking on calendar with pre-booking checklist
+                end
+            end
+        end
+    end
+```
+
+### 10.3 Maintenance Ticket Lifecycle (Report, Approve, Complete)
+
+To keep this diagram readable, the API layer (REST API, middleware, controllers and facade) is shown as one participant. Every request passes JWT verification, the RBAC permission check and the place scope check from 10.1.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor W as Worker
+    participant MApp as React Native App
+    actor M as Manager
+    participant WApp as React Web App
+    participant API as API Layer
+    participant MS as Maintenance Service
+    participant NS as Notification Service
+    participant AL as Audit Log Service
+    participant DB as Database
+    participant S3 as AWS S3
+    participant Mail as Email Provider
+
+    rect rgba(255, 165, 0, 0.08)
+    Note over W,Mail: 1. Worker reports a damaged asset
+    W->>MApp: Take photos, pick asset, describe damage, set priority
+    MApp->>MApp: Compress and resize photos
+    MApp->>API: POST /api/uploads/presign (file count, content type)
+    API->>MS: requestUploadUrls(user)
+    MS->>S3: Generate pre-signed PUT URLs
+    S3-->>MS: Upload URLs and file keys
+    MS-->>API: URLs and keys
+    API-->>MApp: 200 OK
+    MApp->>S3: PUT photos directly
+    S3-->>MApp: 200 OK
+    MApp->>API: POST /api/places/:placeId/tickets (asset_id, description, priority, file keys)
+    API->>API: ticket:create + worker assigned to place
+    API->>MS: createTicket(user, data)
+    MS->>DB: INSERT MAINTENANCE_TICKET (CORRECTIVE, PENDING_REVIEW, reporter_id)
+    MS->>DB: INSERT TICKET_ATTACHMENT per photo (type = DAMAGE)
+    MS->>AL: record(CREATE, MAINTENANCE_TICKET)
+    AL->>DB: INSERT AUDIT_LOG
+    MS->>NS: notify(place owner, TICKET_UPDATE)
+    NS->>DB: INSERT NOTIFICATION
+    NS-)Mail: Queue email "New ticket to review"
+    MS-->>API: Ticket
+    API-->>MApp: 201 Created
+    MApp-->>W: Show ticket as Pending Review
+    end
+
+    rect rgba(100, 149, 237, 0.08)
+    Note over W,Mail: 2. Manager reviews the ticket
+    Mail-->>M: Email notification
+    M->>WApp: Open ticket
+    WApp->>API: GET /api/tickets/:id
+    API->>API: ticket:approve + manager owns place (or Admin)
+    API->>MS: getTicket(id)
+    MS->>DB: SELECT ticket with attachments
+    MS->>S3: Generate pre-signed GET URLs for photos
+    MS-->>API: Ticket with photo URLs
+    API-->>WApp: 200 OK
+    WApp-->>M: Show details, photos, priority
+
+    alt Manager approves
+        M->>WApp: Approve with estimated cost, assignee, due date
+        WApp->>API: PATCH /api/tickets/:id/approve
+        API->>MS: approve(user, id, data)
+        MS->>DB: BEGIN TRANSACTION
+        MS->>DB: UPDATE ticket SET status = APPROVED, reviewed_by, reviewed_at, assignee_id, estimated_cost, due_date
+        MS->>DB: UPDATE ASSET SET status = NEEDS_MAINTENANCE
+        MS->>AL: record(APPROVE, MAINTENANCE_TICKET, old_values, new_values)
+        AL->>DB: INSERT AUDIT_LOG
+        MS->>DB: COMMIT
+        MS->>NS: notify(assignee, TICKET_UPDATE)
+        NS->>DB: INSERT NOTIFICATION
+        NS-)Mail: Queue email "Task assigned to you"
+        API-->>WApp: 200 OK
+    else Manager rejects
+        M->>WApp: Reject with reason
+        WApp->>API: PATCH /api/tickets/:id/reject (rejection_reason)
+        API->>MS: reject(user, id, reason)
+        MS->>DB: UPDATE ticket SET status = REJECTED, rejection_reason, reviewed_by, reviewed_at
+        MS->>AL: record(REJECT, MAINTENANCE_TICKET)
+        AL->>DB: INSERT AUDIT_LOG
+        MS->>NS: notify(reporter, TICKET_UPDATE)
+        NS->>DB: INSERT NOTIFICATION
+        API-->>WApp: 200 OK
+    end
+    end
+
+    rect rgba(60, 179, 113, 0.08)
+    Note over W,Mail: 3. Assigned worker completes the work
+    W->>MApp: Upload after photos, enter actual cost, mark complete
+    MApp->>S3: PUT after photos (pre-signed URLs, as in step 1)
+    MApp->>API: PATCH /api/tickets/:id/complete (file keys, actual_cost)
+    API->>API: ticket:complete + user is the assignee
+    API->>MS: complete(user, id, data)
+
+    alt No AFTER photo provided
+        MS-->>API: Validation error
+        API-->>MApp: 422 At least one after photo is required
+    else AFTER photo provided
+        MS->>DB: BEGIN TRANSACTION
+        MS->>DB: INSERT TICKET_ATTACHMENT per photo (type = AFTER)
+        MS->>DB: UPDATE ticket SET status = COMPLETED, actual_cost, completed_at
+        MS->>DB: UPDATE ASSET SET status = GOOD
+        MS->>AL: record(COMPLETE, MAINTENANCE_TICKET)
+        AL->>DB: INSERT AUDIT_LOG
+        MS->>DB: COMMIT
+        MS->>NS: notify(place owner, TICKET_UPDATE)
+        NS->>DB: INSERT NOTIFICATION
+        API-->>MApp: 200 OK
+        MApp-->>W: Show ticket as Completed
+    end
+    end
+```
+
+---
+
+## 11. SCM and QA Strategy
+
+### 11.1 Chosen approach and why
+
+| Decision | Choice | Why it fits Amlak |
+| :--- | :--- | :--- |
+| Version control | **Git** on **GitHub** | Industry standard; GitHub gives pull requests, branch protection, Actions (CI/CD), Issues and Projects in one place. |
+| Repository layout | **One monorepo**: `apps/api`, `apps/web`, `apps/mobile`, `packages/shared` | API, web and mobile share types, enums (Section 3.7) and validation schemas, so a change to a field is one pull request, not three. |
+| Branching | **Simplified GitFlow**: `main` + `develop` + short-lived `feature/*`, `fix/*`, `hotfix/*` | Maps one-to-one onto our environments (`develop` → staging, `main` → production). Full GitFlow `release/*` branches are dropped because we ship one version of a SaaS, not several versions in parallel. Pure trunk-based development was considered but needs feature flags and very mature CI, which is more than a startup team needs on day one. |
+| Commits | **Conventional Commits**, enforced by commitlint | Readable history and automatic changelogs and version numbers. |
+| Merging | **Pull request + review + green CI**, squash merge | Every change is reviewed and tested before it reaches `develop`; one clean commit per feature. |
+| Backend tests | **Jest** + **Supertest** + a real test database | Jest for unit tests; Supertest calls the Express routes in-process, so we test middleware, RBAC and SQL together without starting a server. |
+| Web tests | **Jest** + **React Testing Library**, **Playwright** for E2E | Playwright runs Chromium, Firefox and WebKit (Safari) and parallelises for free. |
+| Mobile tests | **jest-expo** + React Native Testing Library, **Maestro** for E2E | Maestro needs no native build changes, works with Expo and its YAML tests are readable by non-developers. |
+| API exploration | **Postman** collection, run in CI with **Newman** | Shared, documented requests for every endpoint; the same collection becomes a smoke test after each deploy. |
+| CI/CD | **GitHub Actions**, **Expo EAS** for mobile builds | Lives next to the code, free for small teams, native PR status checks. |
+
+### 11.2 Branching strategy
+
+| Branch | Purpose | Created from | Merges into | Deploys to | Lifetime |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `main` | Production code. Always releasable. Every merge is tagged `vX.Y.Z`. | — | — | **Production** (after manual approval) | Permanent |
+| `develop` | Integration branch. All finished work lands here first. | `main` | `main` | **Staging** (automatic) | Permanent |
+| `feature/<ticket>-<short-name>` | One user story or task, e.g. `feature/AML-24-booking-overlap` | `develop` | `develop` | Preview (optional) | 1–3 days |
+| `fix/<ticket>-<short-name>` | Non-urgent bug found on staging | `develop` | `develop` | — | < 1 day |
+| `hotfix/<ticket>-<short-name>` | Urgent production bug | `main` | `main` **and** `develop` | Production | Hours |
+
+```mermaid
+gitGraph
+    commit id: "init"
+    branch develop
+    checkout develop
+    commit id: "project setup"
+    branch feature/AML-12-login
+    checkout feature/AML-12-login
+    commit id: "feat(auth): login api"
+    commit id: "test(auth): login tests"
+    checkout develop
+    merge feature/AML-12-login id: "PR #12 squash"
+    branch feature/AML-24-bookings
+    checkout feature/AML-24-bookings
+    commit id: "feat(booking): create"
+    commit id: "feat(booking): overlap check"
+    checkout develop
+    merge feature/AML-24-bookings id: "PR #24 squash"
+    checkout main
+    merge develop id: "release" tag: "v1.0.0"
+    branch hotfix/AML-31-otp-expiry
+    checkout hotfix/AML-31-otp-expiry
+    commit id: "fix(auth): otp expiry"
+    checkout main
+    merge hotfix/AML-31-otp-expiry id: "hotfix" tag: "v1.0.1"
+    checkout develop
+    merge hotfix/AML-31-otp-expiry id: "back-merge"
+```
+
+**Branch protection rules (GitHub settings)**
+
+| Rule | `main` | `develop` |
+| :--- | :---: | :---: |
+| Direct pushes blocked (pull requests only) | ✅ | ✅ |
+| Required approving reviews | 2 (or 1 + tech lead) | 1 |
+| Required status checks: lint, type-check, unit, integration, build | ✅ | ✅ |
+| Required: E2E suite | ✅ | — (runs nightly on staging) |
+| Branch must be up to date before merging | ✅ | ✅ |
+| Force pushes and deletion blocked | ✅ | ✅ |
+| Merge method | Merge commit from `develop` / `hotfix` | Squash merge |
+
+### 11.3 Commit conventions
+
+Format: `<type>(<scope>): <summary>`, written in the imperative, under 72 characters.
+
+| Type | Use for | Version bump |
+| :--- | :--- | :--- |
+| `feat` | New feature | Minor (1.**1**.0) |
+| `fix` | Bug fix | Patch (1.0.**1**) |
+| `feat!` / `BREAKING CHANGE:` | Incompatible API change | Major (**2**.0.0) |
+| `test`, `docs`, `refactor`, `perf`, `style`, `chore`, `ci`, `build` | Everything else | None |
+
+Scopes follow the services in Section 7: `auth`, `users`, `places`, `bookings`, `checklists`, `maintenance`, `expenses`, `reports`, `notifications`, `cms`, `support`, `audit`, `web`, `mobile`, `db`, `ci`.
+
+Examples:
+```
+feat(booking): reject overlapping confirmed bookings
+fix(auth): expire OTP after 10 minutes
+test(maintenance): cover approve and reject flows
+```
+
+**Commit habits**
+* Commit small, working steps, at least daily; push the feature branch daily so work is backed up and visible.
+* One logical change per commit; never mix formatting with behaviour changes.
+* Never commit secrets. `.env` is git-ignored, and only `.env.example` is tracked. Secrets live in GitHub Actions secrets.
+* **Husky** git hooks run automatically: `pre-commit` → lint-staged (ESLint + Prettier on changed files); `commit-msg` → commitlint.
+
+### 11.4 Pull requests and code review
+
+**Workflow for every task**
+1. Pick an issue from the GitHub Projects board (each Must Have story is broken into issues `AML-<n>`).
+2. Create `feature/AML-<n>-<name>` from the latest `develop`.
+3. Write code **and tests** together.
+4. Open a pull request early as a **Draft** so others can see progress.
+5. When ready, mark it "Ready for review"; CI must be green.
+6. A reviewer approves or requests changes; the author resolves every comment.
+7. Squash merge into `develop`; the branch is deleted automatically; staging redeploys.
+
+**Pull request rules**
+* Keep pull requests small: aim for under **400 changed lines**; split bigger stories.
+* Title follows Conventional Commits (it becomes the squash commit message).
+* Description uses the template below and links the issue (`Closes #24`).
+* Reviewers respond within **one working day**.
+* **CODEOWNERS** auto-requests the right reviewer per folder (e.g. `apps/api/src/auth/**` → security owner).
+
+**Pull request template** (`.github/pull_request_template.md`)
+```markdown
+## What and why
+Closes #
+
+## How to test
+1.
+
+## Screenshots (UI changes)
+
+## Checklist
+- [ ] Tests added or updated and passing
+- [ ] RBAC and place scoping applied to new endpoints (Section 4)
+- [ ] Critical actions write to AUDIT_LOG (Section 5)
+- [ ] DB migration included and reversible (if schema changed)
+- [ ] No secrets, console logs or commented-out code
+- [ ] Postman collection updated (if API changed)
+```
+
+**What reviewers check**
+| Area | Questions |
+| :--- | :--- |
+| Correctness | Does it meet the story's acceptance criteria and business rules (Section 3)? |
+| Security | Is the route protected? Is data scoped to the owner or assigned worker? Is input validated? |
+| Tests | Do tests cover the happy path, errors and permission denials? |
+| Data | Are migrations safe and reversible? Are indexes added for new queries? |
+| Readability | Clear names, no duplication, small functions? |
+
+### 11.5 Testing strategy
+
+We follow the **testing pyramid**: many fast unit tests, fewer integration tests, and a small number of end-to-end tests for the critical flows.
+
+```mermaid
+flowchart TD
+    E2E["End-to-end (~5%)<br/>Playwright (web) · Maestro (mobile)<br/>Critical user flows only"]
+    INT["Integration (~25%)<br/>Jest + Supertest + test database<br/>Every API endpoint"]
+    UNIT["Unit (~70%)<br/>Jest · React Testing Library · jest-expo<br/>Business rules, services, components"]
+    E2E --- INT --- UNIT
+```
+
+#### Test types
+
+| Type | What it tests | Tools | Where it runs | Example in Amlak |
+| :--- | :--- | :--- | :--- | :--- |
+| **Static analysis** | Code style, type errors, unsafe patterns | TypeScript, ESLint, Prettier | Pre-commit + every PR | Wrong enum value for `BOOKING.status` caught at compile time |
+| **Unit** | One function, service or component in isolation; database and email mocked | Jest, React Testing Library, jest-expo | Every PR | `isOverdue()`, overlap rule, profit calculation, `advanceNextDueDate()` |
+| **Integration (API)** | Real HTTP request → middleware → controller → service → real test database | Jest + Supertest, PostgreSQL in Docker | Every PR | `POST /bookings` returns 409 on overlap; a Worker gets 403 on `/reports/financial` |
+| **Contract / API smoke** | Every endpoint responds with the documented shape | Postman collection + Newman | After each staging and production deploy | Login → get places → create booking against staging |
+| **End-to-end (web)** | Real browser drives the deployed web app | Playwright | Before merge to `main`, nightly on staging | Manager approves a ticket |
+| **End-to-end (mobile)** | Real app on a simulator or emulator | Maestro | Before merge to `main`, nightly on staging | Worker reports damage with a photo |
+| **Security** | Vulnerable dependencies, leaked secrets, missing protections | `npm audit`, Dependabot, GitHub secret scanning, CodeQL | Every PR + weekly | Known CVE in a package blocks the merge |
+| **Performance** | 500 ms response time target (Section 5) | k6 | Before each production release, on staging | Dashboard and booking calendar endpoints under load |
+| **Manual / exploratory** | UX, layout on real devices, edge cases automation misses | Test checklist on staging | Each release candidate | Checklist on a real phone, camera and location prompts |
+| **User acceptance (UAT)** | The story does what the product owner expects | Staging + acceptance criteria | Before each release | Product owner signs off |
+
+#### What must be tested (non-negotiable)
+
+1. **RBAC and data scoping:** for every protected endpoint, one test per role proving Admin ✅, the owner Manager ✅, another Manager ❌, an assigned Worker ✅/❌ per Section 4, and an unassigned Worker ❌.
+2. **Business rules from Section 3:** booking overlap, ticket lifecycle transitions (including illegal ones such as completing a rejected ticket), "after" photo required, preventive ticket generation, financial report maths.
+3. **Authentication:** wrong password, unverified email, deactivated account, expired and reused OTP, refresh token rotation and revocation.
+4. **Audit log:** every action listed in Section 5 writes exactly one `AUDIT_LOG` row.
+5. **Scheduler jobs:** reminders and overdue alerts are sent once and never duplicated (run the job twice in the test).
+
+#### Critical end-to-end flows
+
+| # | Flow | Platform |
+| :--- | :--- | :--- |
+| 1 | Register → receive OTP → verify → log in | Web + mobile |
+| 2 | Manager creates a place, adds an asset and assigns a worker | Web |
+| 3 | Worker creates a booking, then completes its pre-booking checklist | Mobile |
+| 4 | Worker reports damage with photo → Manager approves → Worker completes with after photo | Mobile + web |
+| 5 | Manager logs an expense and generates a financial report | Web |
+| 6 | Admin deactivates a user, who is then logged out and blocked | Web |
+
+#### Coverage and quality gates
+
+| Gate | Threshold | Enforced by |
+| :--- | :--- | :--- |
+| Unit + integration line coverage (overall) | ≥ 80% | Jest `coverageThreshold`, CI fails below |
+| Coverage of `auth`, RBAC middleware, `bookings`, `maintenance`, `reports` | ≥ 90% | Per-folder Jest threshold |
+| Lint and type errors | 0 | CI |
+| High or critical vulnerabilities | 0 | `npm audit --audit-level=high` |
+| Critical E2E flows | 100% passing | Required check on `main` |
+
+#### Test data
+* Integration tests run against a fresh **PostgreSQL container** (same engine as production), with migrations applied before the suite and each test wrapped in a transaction that is rolled back.
+* **Seed scripts** create one user per role, two managers with separate places, and assigned and unassigned workers, so scoping can be tested.
+* **Factories** (e.g. `@faker-js/faker`) build test records; no real customer data is ever used outside production.
+* External services are faked in tests: email via a mock transport, S3 via a local mock.
+
+### 11.6 Environments
+
+| Environment | Branch | Database | Email | Purpose |
+| :--- | :--- | :--- | :--- | :--- |
+| Local | any | Docker PostgreSQL | Mailpit (local inbox) | Development |
+| CI | pull request | Throwaway Docker PostgreSQL | Mock | Automated tests |
+| Staging | `develop` | Staging database, seeded test data | Sandbox mode | QA, E2E, UAT, demos |
+| Production | `main` (tag) | Production database, backups enabled | Live provider | Real users |
+
+Each environment has its own secrets, S3 bucket and JWT signing keys. Staging never contains production data.
+
+### 11.7 CI/CD pipeline
+
+```mermaid
+flowchart LR
+    subgraph PR["Pull request to develop"]
+        A["Install and cache"] --> B["Lint, format, type-check"]
+        B --> C["Unit tests"]
+        B --> D["Integration tests<br/>(Postgres container)"]
+        B --> S["Security scan<br/>(audit, CodeQL)"]
+        C --> E["Build api, web, mobile"]
+        D --> E
+        S --> E
+        E --> R["Review approved"]
+    end
+
+    subgraph STG["Merge to develop"]
+        F["Deploy API and web to staging"] --> G["Run DB migrations"]
+        G --> H["Postman smoke tests"]
+        H --> I["EAS build / update<br/>(staging channel)"]
+        I --> J["Nightly: Playwright + Maestro E2E"]
+    end
+
+    subgraph PROD["Merge develop to main"]
+        K["Full test suite + E2E"] --> L["k6 performance check"]
+        L --> M{"Manual approval"}
+        M --> N["Tag vX.Y.Z and changelog"]
+        N --> O["Back up DB and run migrations"]
+        O --> P["Deploy API and web to production"]
+        P --> Q["Smoke tests and monitoring"]
+        Q --> T["EAS submit to App Store and Google Play"]
+    end
+
+    R --> F
+    J --> K
+```
+
+**Deployment rules**
+* **Staging** deploys automatically on every merge to `develop`.
+* **Production** deploys only from `main`, only after a manual approval in GitHub Environments, and only when staging has passed E2E.
+* **Database migrations** are versioned in the repository, run automatically before the new code starts, and must be backward compatible with the previous release (add first, remove in a later release).
+* **Mobile:** JavaScript-only fixes ship as Expo EAS **over-the-air updates**; native changes go through a new store build.
+* **Rollback:** redeploy the previous tag for API and web; republish the previous EAS update for mobile. A failed post-deploy smoke test triggers rollback.
+* **Monitoring:** error tracking (e.g. Sentry) on API, web and mobile, plus uptime checks on the API health endpoint.
+
+### 11.8 Definition of Done
+
+A story is **done** only when:
+- [ ] Code is merged to `develop` through a reviewed pull request with green CI.
+- [ ] Unit and integration tests cover the acceptance criteria, including RBAC denials.
+- [ ] Coverage gates still pass.
+- [ ] The Postman collection and API docs are updated.
+- [ ] It works on staging, on web and on a real mobile device where relevant.
+- [ ] Critical flows touched by the change still pass E2E.
+- [ ] The product owner has accepted it against its acceptance criteria.
