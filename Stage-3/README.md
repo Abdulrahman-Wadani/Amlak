@@ -273,13 +273,13 @@ flowchart TD
 
 ```mermaid
 classDiagram
- 
+
     class BaseClass {
         +string id
         +datetime created_at
         +datetime updated_at
     }
- 
+
     class User {
         +string role_id
         +string email
@@ -300,7 +300,6 @@ classDiagram
         +List~MaintenanceTicket~ assigned_tickets
         +List~TicketAttachment~ uploaded_attachments
         +List~Booking~ created_bookings
-        +List~ChecklistRun~ checklist_runs
         +List~Expense~ logged_expenses
         +List~Notification~ notifications
         +List~SupportTicket~ support_tickets
@@ -321,7 +320,7 @@ classDiagram
         +hasPermission(string permission_name)
         +changeStatus()
     }
- 
+
     class Role {
         +string name
         +string description
@@ -330,12 +329,12 @@ classDiagram
         +addPermission()
         +removePermission()
     }
- 
+
     class Permission {
         +string name
         +string description
     }
- 
+
     class VerificationToken {
         +string user_id
         +string token_hash
@@ -346,7 +345,7 @@ classDiagram
         +generate()
         +verify()
     }
- 
+
     class RefreshToken {
         +string user_id
         +string token_hash
@@ -357,7 +356,7 @@ classDiagram
         +rotate()
         +revoke()
     }
- 
+
     class Place {
         +string owner_id
         +string place_name
@@ -374,7 +373,6 @@ classDiagram
         +datetime deleted_at
         +List~Asset~ assets
         +List~PlaceWorker~ workers
-        +List~ChecklistTemplate~ checklist_templates
         +List~Booking~ bookings
         +List~Expense~ expenses
         +List~MaintenanceTicket~ maintenance_tickets
@@ -388,7 +386,7 @@ classDiagram
         +getHealthSummary()
         +getMaintenanceBudgetStatus()
     }
- 
+
     class PlaceWorker {
         +string place_id
         +string worker_id
@@ -396,7 +394,7 @@ classDiagram
         +boolean is_active
         +datetime assigned_at
     }
- 
+
     class Asset {
         +string place_id
         +string name
@@ -411,7 +409,7 @@ classDiagram
         +softDelete()
         +changeStatus()
     }
- 
+
     class PeriodicMaintenance {
         +string asset_id
         +string description
@@ -425,7 +423,7 @@ classDiagram
         +triggerTicket()
         +advanceNextDueDate()
     }
- 
+
     class MaintenanceTicket {
         +string place_id
         +string asset_id
@@ -457,7 +455,7 @@ classDiagram
         +complete()
         +isOverdue() boolean
     }
- 
+
     class TicketAttachment {
         +string ticket_id
         +string uploaded_by
@@ -466,54 +464,7 @@ classDiagram
         +upload()
         +delete()
     }
- 
-    class ChecklistTemplate {
-        +string place_id
-        +string name
-        +string checklist_type
-        +boolean is_active
-        +List~ChecklistTemplateItem~ items
-        +List~ChecklistRun~ runs
-        +create()
-        +update()
-        +deactivate()
-        +view()
-    }
- 
-    class ChecklistTemplateItem {
-        +string template_id
-        +string description
-        +int sort_order
-        +boolean requires_photo
-        +boolean is_active
-        +List~ChecklistRunItem~ run_items
-        +deactivate()
-    }
- 
-    class ChecklistRun {
-        +string template_id
-        +string booking_id
-        +string worker_id
-        +string status
-        +datetime started_at
-        +datetime completed_at
-        +List~ChecklistRunItem~ items
-        +start()
-        +complete()
-        +cancel()
-    }
- 
-    class ChecklistRunItem {
-        +string run_id
-        +string template_item_id
-        +string description
-        +boolean requires_photo
-        +boolean is_checked
-        +string note
-        +string photo_url
-        +check()
-    }
- 
+
     class Booking {
         +string place_id
         +string created_by
@@ -534,7 +485,6 @@ classDiagram
         +datetime checked_out_at
         +string checked_out_by
         +datetime readiness_alert_sent_at
-        +List~ChecklistRun~ checklist_runs
         +add()
         +cancel(string reason)
         +view()
@@ -543,7 +493,7 @@ classDiagram
         +checkIn()
         +checkOut()
     }
- 
+
     class Expense {
         +string place_id
         +string ticket_id
@@ -558,7 +508,7 @@ classDiagram
         +delete()
         +view()
     }
- 
+
     class FinancialReport {
         +string place_id
         +date period_start
@@ -572,7 +522,7 @@ classDiagram
         +calculateExpenses()
         +calculateProfit()
     }
- 
+
     class Notification {
         +string user_id
         +string sender_id
@@ -585,7 +535,7 @@ classDiagram
         +sendToRole(string role_id)
         +markAsRead()
     }
- 
+
     class SupportTicket {
         +string user_id
         +string assigned_admin_id
@@ -599,7 +549,7 @@ classDiagram
         +resolve(string response)
         +reopen()
     }
- 
+
     class WebContent {
         +string author_id
         +string title
@@ -612,7 +562,7 @@ classDiagram
         +delete()
         +publish()
     }
- 
+
     class AuditLog {
         +string user_id
         +string action
@@ -623,7 +573,7 @@ classDiagram
         +string ip_address
         +record()
     }
- 
+
     %% Inheritance from BaseClass
     BaseClass <|-- User
     BaseClass <|-- Role
@@ -636,21 +586,17 @@ classDiagram
     BaseClass <|-- PeriodicMaintenance
     BaseClass <|-- MaintenanceTicket
     BaseClass <|-- TicketAttachment
-    BaseClass <|-- ChecklistTemplate
-    BaseClass <|-- ChecklistTemplateItem
-    BaseClass <|-- ChecklistRun
-    BaseClass <|-- ChecklistRunItem
     BaseClass <|-- Booking
     BaseClass <|-- Expense
     BaseClass <|-- Notification
     BaseClass <|-- SupportTicket
     BaseClass <|-- WebContent
     BaseClass <|-- AuditLog
- 
+
     %% RBAC
     Role "1" --> "*" User : assigned to
     Role "*" --> "*" Permission : grants
- 
+
     %% User relationships
     User "1" --> "*" User : employs (manager → workers)
     User "1" --> "*" VerificationToken : requests
@@ -660,36 +606,27 @@ classDiagram
     User "1" --> "*" MaintenanceTicket : reports / handles
     User "1" --> "*" TicketAttachment : uploads
     User "1" --> "*" Booking : creates
-    User "1" --> "*" ChecklistRun : performs
     User "1" --> "*" Expense : logs
     User "1" --> "*" Notification : receives
     User "1" --> "*" SupportTicket : submits
     User "1" --> "*" SupportTicket : handles (admin)
     User "1" --> "*" WebContent : authors
     User "1" --> "*" AuditLog : performs
- 
+
     %% Place relationships
     Place "1" --> "*" PlaceWorker : staffed by
     Place "1" --> "*" Asset : contains
-    Place "1" --> "*" ChecklistTemplate : has
     Place "1" --> "*" Booking : has
     Place "1" --> "*" Expense : has
     Place "1" --> "*" MaintenanceTicket : needs
- 
-    %% Checklists
-    ChecklistTemplate "1" --> "*" ChecklistTemplateItem : contains
-    ChecklistTemplate "1" --> "*" ChecklistRun : instantiated as
-    Booking "1" --> "*" ChecklistRun : requires
-    ChecklistRun "1" --> "*" ChecklistRunItem : contains
-    ChecklistTemplateItem "1" --> "*" ChecklistRunItem : answered by
- 
+
     %% Maintenance
     Asset "1" --> "*" PeriodicMaintenance : scheduled for
     Asset "1" --> "*" MaintenanceTicket : needs
     PeriodicMaintenance "1" --> "*" MaintenanceTicket : generates
     MaintenanceTicket "1" --> "*" TicketAttachment : has
     MaintenanceTicket "1" --> "*" Expense : paid by
- 
+
     %% Functional dependencies
     FinancialReport ..> Booking : uses
     FinancialReport ..> Expense : uses
@@ -700,7 +637,7 @@ classDiagram
 
 ```mermaid
 erDiagram
- 
+
     ROLE {
         string id PK
         string name "ADMIN|MANAGER|WORKER"
@@ -708,7 +645,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     PERMISSION {
         string id PK
         string name "e.g. ticket:approve"
@@ -716,12 +653,12 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     ROLE_PERMISSION {
         string role_id PK, FK
         string permission_id PK, FK
     }
- 
+
     USER {
         string id PK
         string role_id FK
@@ -737,7 +674,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     VERIFICATION_TOKEN {
         string id PK
         string user_id FK
@@ -749,7 +686,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     REFRESH_TOKEN {
         string id PK
         string user_id FK
@@ -760,7 +697,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     PLACE {
         string id PK
         string owner_id FK
@@ -779,7 +716,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     PLACE_WORKER {
         string id PK
         string place_id FK "unique with worker_id"
@@ -790,7 +727,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     ASSET {
         string id PK
         string place_id FK
@@ -802,7 +739,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     PERIODIC_MAINTENANCE {
         string id PK
         string asset_id FK
@@ -815,7 +752,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     MAINTENANCE_TICKET {
         string id PK
         string place_id FK
@@ -841,7 +778,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     TICKET_ATTACHMENT {
         string id PK
         string ticket_id FK
@@ -851,53 +788,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
-    CHECKLIST_TEMPLATE {
-        string id PK
-        string place_id FK
-        string name
-        string checklist_type "PRE_BOOKING|POST_BOOKING"
-        boolean is_active
-        datetime created_at
-        datetime updated_at
-    }
- 
-    CHECKLIST_TEMPLATE_ITEM {
-        string id PK
-        string template_id FK
-        string description
-        int sort_order
-        boolean requires_photo
-        boolean is_active "false = removed, never hard-deleted"
-        datetime created_at
-        datetime updated_at
-    }
- 
-    CHECKLIST_RUN {
-        string id PK
-        string template_id FK
-        string booking_id FK
-        string worker_id FK "nullable until started"
-        string status "PENDING|IN_PROGRESS|COMPLETED|CANCELLED"
-        datetime started_at
-        datetime completed_at
-        datetime created_at
-        datetime updated_at
-    }
- 
-    CHECKLIST_RUN_ITEM {
-        string id PK
-        string run_id FK
-        string template_item_id FK
-        string description "copied from template item"
-        boolean requires_photo "copied from template item"
-        boolean is_checked
-        string note
-        string photo_url
-        datetime created_at
-        datetime updated_at
-    }
- 
+
     BOOKING {
         string id PK
         string place_id FK
@@ -922,7 +813,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     EXPENSE {
         string id PK
         string place_id FK
@@ -936,7 +827,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     NOTIFICATION {
         string id PK
         string user_id FK
@@ -948,7 +839,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     SUPPORT_TICKET {
         string id PK
         string user_id FK
@@ -961,7 +852,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     WEB_CONTENT {
         string id PK
         string author_id FK
@@ -973,7 +864,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     AUDIT_LOG {
         string id PK
         string user_id FK
@@ -985,11 +876,15 @@ erDiagram
         string ip_address
         datetime created_at
     }
- 
+
+
+    %% RBAC
     ROLE ||--o{ USER : "assigns"
     ROLE ||--o{ ROLE_PERMISSION : "has"
     PERMISSION ||--o{ ROLE_PERMISSION : "included in"
- 
+
+
+    %% USER
     USER |o--o{ USER : "employs"
     USER ||--o{ VERIFICATION_TOKEN : "requests"
     USER ||--o{ REFRESH_TOKEN : "holds"
@@ -998,32 +893,28 @@ erDiagram
     USER |o--o{ MAINTENANCE_TICKET : "reports / handles"
     USER ||--o{ TICKET_ATTACHMENT : "uploads"
     USER ||--o{ BOOKING : "creates"
-    USER ||--o{ CHECKLIST_RUN : "performs"
     USER ||--o{ EXPENSE : "logs"
     USER ||--o{ NOTIFICATION : "receives"
     USER ||--o{ SUPPORT_TICKET : "submits"
     USER |o--o{ SUPPORT_TICKET : "handles (admin)"
     USER ||--o{ WEB_CONTENT : "authors"
     USER ||--o{ AUDIT_LOG : "performs"
- 
+
+
+    %% PLACE
     PLACE ||--o{ PLACE_WORKER : "staffed by"
     PLACE ||--o{ ASSET : "contains"
-    PLACE ||--o{ CHECKLIST_TEMPLATE : "has"
     PLACE ||--o{ BOOKING : "has"
     PLACE ||--o{ EXPENSE : "has"
     PLACE ||--o{ MAINTENANCE_TICKET : "needs"
- 
+
+
+    %% ASSET & MAINTENANCE
     ASSET ||--o{ PERIODIC_MAINTENANCE : "scheduled for"
     ASSET |o--o{ MAINTENANCE_TICKET : "involves"
     PERIODIC_MAINTENANCE |o--o{ MAINTENANCE_TICKET : "generates"
     MAINTENANCE_TICKET ||--o{ TICKET_ATTACHMENT : "has"
     MAINTENANCE_TICKET |o--o{ EXPENSE : "paid by"
- 
-    CHECKLIST_TEMPLATE ||--o{ CHECKLIST_TEMPLATE_ITEM : "contains"
-    CHECKLIST_TEMPLATE ||--o{ CHECKLIST_RUN : "instantiated as"
-    BOOKING ||--o{ CHECKLIST_RUN : "requires"
-    CHECKLIST_RUN ||--o{ CHECKLIST_RUN_ITEM : "contains"
-    CHECKLIST_TEMPLATE_ITEM ||--o{ CHECKLIST_RUN_ITEM : "answered by"
 ```
 ---
 
