@@ -1195,7 +1195,7 @@ sequenceDiagram
 ```
 
 
-### 10.3 Maintenance Ticket Lifecycle (Report, Approve, Complete)
+### 8.3 Maintenance Ticket Lifecycle (Report, Approve, Complete)
 
 To keep this diagram readable, the API layer (REST API, middleware, controllers and facade) is shown as one participant. Every request passes JWT verification, the RBAC permission check and the place scope check from 8.1.
 ```mermaid
