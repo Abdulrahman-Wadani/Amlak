@@ -34,9 +34,11 @@ Authorization: Bearer <JWT_TOKEN>
 ### Authentication
 - `POST /auth/register` — Register a user
 - `POST /auth/login` — Login
+* `POST /auth/refresh-token` — Refresh access token
 - `POST /auth/verification-code` — Request a verification code
 - `POST /auth/verify` — Verify OTP or verification token
 - `POST /auth/password/reset` — Reset password
+
 
 ### Users
 - `GET /users/me` — Get current user profile
@@ -266,6 +268,75 @@ No path/query/header parameters.
   "message": "Bearer Token is required"
 }
 ```
+
+## 3. `POST /auth/refresh-token`
+
+**Summary:** Refresh access token
+
+**Description:** Generates a new JWT access token using a valid refresh token.
+
+**Authentication:** Required (Bearer JWT)
+
+### Parameters
+
+No path/query/header parameters.
+
+### Request Body
+
+**Required:** Yes
+
+#### `application/json`
+
+**Schema:** `RefreshTokenRequest`
+
+| Field           | Type     | Required | Description         |
+| --------------- | -------- | -------- | ------------------- |
+| `refresh_token` | `string` | Yes      | Valid refresh token |
+
+**Example request:**
+
+```json
+{
+  "refresh_token": "string"
+}
+```
+
+### Responses
+
+#### `200` — Access token refreshed
+
+**Response schema:** `RefreshTokenResponse`
+
+```json
+{
+  "access_token": "string",
+  "token_type": "Bearer"
+}
+```
+
+#### `401` — Invalid or expired refresh token
+
+**Response schema:** `Error`
+
+```json
+{
+  "code": "INVALID_REFRESH_TOKEN",
+  "message": "Invalid or expired refresh token",
+  "details": "string"
+}
+```
+
+#### `403` — Bearer Token is required.
+
+**Response schema:** `ErrorResponse`
+
+```json
+{
+  "message": "Bearer Token is required"
+}
+```
+
+
 
 ## 3. `POST /auth/verification-code`
 
