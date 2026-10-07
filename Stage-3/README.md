@@ -66,7 +66,7 @@ Prioritized with **MoSCoW**: **Must Have** (in this release, fully modeled below
 
 * **JWT with refresh tokens:** Access tokens are short-lived (15 minutes) and carry `user_id` and `role`. Refresh tokens are long-lived (30 days), stored **hashed** in `REFRESH_TOKEN`, rotated on every use and revoked on logout or account deactivation. Web clients keep the refresh token in an `HttpOnly`, `Secure`, `SameSite=Strict` cookie. Mobile clients keep it in secure storage (Keychain / Keystore).
 
-* **RBAC:** Every route is protected by role-based middleware (Section 4), and every query that touches place data is additionally scoped by ownership (Manager) or assignment (Worker). A Worker must never be able to access expenses or financial reports.
+* **RBAC:** Every route is protected by role-based middleware, and every query that touches place data is additionally scoped by ownership (Manager) or assignment (Worker). A Worker must never be able to access expenses or financial reports.
 
 * **Password storage:** Passwords are **hashed** with argon2id (or bcrypt, cost ≥ 12) and never encrypted or stored in plain text.
 
@@ -95,7 +95,7 @@ Prioritized with **MoSCoW**: **Must Have** (in this release, fully modeled below
 
 * **Email gateway:** The system integrates with a transactional email provider (SendGrid or AWS SES) for OTPs, worker invitations, maintenance reminders and overdue alerts. Failed sends are retried up to 3 times with backoff. SMS is out of scope for this version.
 * **In-app notifications:** Every reminder, alert and admin announcement is also stored in `NOTIFICATION` so users can see it in the app.
-* **Job scheduler:** A scheduled job runner (e.g. node-cron or BullMQ repeatable jobs) runs the daily jobs in Business Rules §5. Jobs are idempotent: the `reminder_sent_at` and `overdue_alert_sent_at` fields prevent duplicate emails.
+* **Job scheduler:** A scheduled job runner (e.g. node-cron or BullMQ repeatable jobs). Jobs are idempotent: the `reminder_sent_at` and `overdue_alert_sent_at` fields prevent duplicate emails.
 * **Audit logging:** Critical actions are written to `AUDIT_LOG` with timestamp, user ID, action, entity type, entity ID, and before/after values. At minimum: approving, rejecting, reassigning and completing tickets; creating, updating and deleting expenses; deleting or restoring a place; removing an asset; cancelling a booking; checking guests in and out; creating, assigning, unassigning, moving and deactivating workers; changing a user's role; and deactivating or reactivating any account. Audit records are append-only.
 
 
