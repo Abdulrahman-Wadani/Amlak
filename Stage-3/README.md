@@ -1057,8 +1057,8 @@ sequenceDiagram
     F->>AS: authenticate(email, password)
     AS->>DB: SELECT user and role WHERE email = ?
     DB-->>AS: User row or none
-    AS->>AS: If status = INVITED, stop (no password yet)&#59; otherwise verify password against password_hash (argon2id)
- 
+    AS->>AS: If status = INVITED, stop here (no password yet), otherwise verify password against password_hash (argon2id)
+
     alt User not found or wrong password
         AS-->>F: InvalidCredentials
         F-->>C: Error
