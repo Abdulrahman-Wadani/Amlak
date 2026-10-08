@@ -95,7 +95,6 @@ Prioritized with **MoSCoW**: **Must Have** (in this release, fully modeled below
 
 * **Email gateway:** The system integrates with a transactional email provider (SendGrid or AWS SES) for OTPs, worker invitations, maintenance reminders and overdue alerts. Failed sends are retried up to 3 times with backoff. SMS is out of scope for this version.
 * **In-app notifications:** Every reminder, alert and admin announcement is also stored in `NOTIFICATION` so users can see it in the app.
-* **Job scheduler:** A scheduled job runner (e.g. node-cron or BullMQ repeatable jobs). Jobs are idempotent: the `reminder_sent_at` and `overdue_alert_sent_at` fields prevent duplicate emails.
 * **Audit logging:** Critical actions are written to `AUDIT_LOG` with timestamp, user ID, action, entity type, entity ID, and before/after values. At minimum: approving, rejecting, reassigning and completing tickets; creating, updating and deleting expenses; deleting or restoring a place; removing an asset; cancelling a booking; checking guests in and out; creating, assigning, unassigning, moving and deactivating workers; changing a user's role; and deactivating or reactivating any account. Audit records are append-only.
 
 
@@ -920,96 +919,54 @@ erDiagram
 
 ## 8. High-Level Sequence Diagrams
 
+In these diagrams, **API** means the REST API, the JWT/RBAC/scope middleware, the controllers and the Amlak Facade together. Every authenticated request passes the checks described in 8.1.
+
 ### 8.1 User Login and Authenticated Request
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor U as User
-    participant App as React Web App
-    participant API as REST API
-    participant MW as Auth & RBAC Middleware
-    participant C as Auth Controller
-    participant PC as Place Controller
-    participant F as Amlak Facade
+    participant App as Web App
+    participant API as API
     participant AS as Auth Service
-    participant PS as Place Service
-    participant AL as Audit Log Service
     participant DB as Database
- 
-    rect rgba(100, 149, 237, 0.08)
+
     Note over U,DB: Login
     U->>App: Enter email and password
-    App->>API: POST /api/auth/login (email, password)
-    API->>MW: Public route, apply rate limit only
-    MW->>C: Forward request
-    C->>C: Validate request body
-    C->>F: login(email, password)
-    F->>AS: authenticate(email, password)
-    AS->>DB: SELECT user and role WHERE email = ?
-    DB-->>AS: User row or none
-    AS->>AS: If status = INVITED, stop here (no password yet), otherwise verify password against password_hash (argon2id)
+    App->>API: POST /api/auth/login
+    API->>AS: authenticate(email, password)
+    AS->>DB: Find user by email
+    DB-->>AS: User or none
 
-    alt User not found or wrong password
-        AS-->>F: InvalidCredentials
-        F-->>C: Error
-        C-->>App: 401 Invalid email or password
-        App-->>U: Show error message
-    else status = PENDING_VERIFICATION
-        AS-->>F: EmailNotVerified
-        F-->>C: Error
-        C-->>App: 403 Email not verified
-        App-->>U: Redirect to OTP verification screen
-    else status = INVITED (worker has not set a password yet)
-        AS-->>F: AccountSetupPending
-        F-->>C: Error
-        C-->>App: 403 Account setup not finished
-        App-->>U: Tell the worker to use the invitation email link
-    else status = DEACTIVATED, or a worker whose manager is DEACTIVATED
-        AS-->>F: AccountDeactivated
-        F-->>C: Error
-        C-->>App: 403 Account deactivated
-        App-->>U: Show contact-support message
-    else Credentials valid and status = ACTIVE
-        AS->>AS: Sign access JWT (user_id, role, 15 min)
-        AS->>AS: Generate refresh token (30 days)
-        AS->>DB: INSERT REFRESH_TOKEN (token_hash, device_info, expires_at)
-        AS->>AL: record(LOGIN, user_id, ip_address)
-        AL->>DB: INSERT AUDIT_LOG
-        AS-->>F: Tokens and user profile
-        F-->>C: Result
-        C-->>App: 200 OK (access token, user, role) + refresh token in HttpOnly cookie
-        App->>App: Store access token in memory
-        App-->>U: Open dashboard for the user's role
+    alt Wrong email or password
+        AS-->>API: InvalidCredentials
+        API-->>App: 401 Invalid email or password
+    else Status is not ACTIVE (unverified, invited, deactivated, or manager deactivated)
+        AS-->>API: Status error
+        API-->>App: 403 with reason
+        App-->>U: Go to OTP screen, invitation hint or support message
+    else Valid and ACTIVE
+        AS->>DB: Save hashed refresh token and audit log
+        AS-->>API: Access token (15 min) and refresh token (30 days)
+        API-->>App: 200 OK, refresh token in HttpOnly cookie
+        App-->>U: Open the dashboard for the user's role
     end
-    end
- 
-    rect rgba(60, 179, 113, 0.08)
-    Note over U,DB: Retrieve data with the access token
-    U->>App: Open Places screen
-    App->>API: GET /api/places (Authorization: Bearer JWT)
-    API->>MW: Verify JWT signature and expiry
-    alt Token missing, invalid or expired
-        MW-->>App: 401 Unauthorized
-        App->>API: POST /api/auth/refresh (refresh token)
-        Note right of App: Auth Service rotates the refresh token<br/>and issues a new access token,<br/>then the app retries the request
-    else Token valid
-        MW->>MW: Check role has permission place:view
-        MW->>PC: Forward with user_id and role
-        PC->>F: getPlaces(user)
-        F->>PS: listPlaces(user)
-        PS->>PS: Build scope filter for the user's role
-        PS->>DB: SELECT places with scope filter
-        Note right of DB: Admin: all places<br/>Manager: owner_id = user_id<br/>Worker: joined through active PLACE_WORKER<br/>All: deleted_at IS NULL
-        DB-->>PS: Place rows
-        PS-->>F: Places
-        F-->>PC: Places
-        PC-->>App: 200 OK (places JSON)
-        App-->>U: Render places list
-    end
+
+    Note over U,DB: Authenticated request
+    U->>App: Open Places
+    App->>API: GET /api/places (Bearer JWT)
+    alt Token expired or invalid
+        API-->>App: 401
+        App->>API: POST /api/auth/refresh, then retry
+    else Token valid and role has place:view
+        API->>DB: Select places in the user's scope
+        Note right of DB: Admin all, Manager owned,<br/>Worker assigned, never deleted
+        DB-->>API: Places
+        API-->>App: 200 OK
+        App-->>U: Show places
     end
 ```
-
 
 ### 8.2 Worker Creates a Booking
 
@@ -1017,188 +974,126 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor W as Worker
-    participant App as React Web App (phone)
-    participant MW as REST API + Auth & RBAC Middleware
-    participant C as Booking Controller
-    participant F as Amlak Facade
+    participant App as Web App
+    participant API as API
     participant BS as Booking Service
-    participant CS as Checklist Service
-    participant AL as Audit Log Service
     participant DB as Database
- 
-    W->>App: Select dates on calendar, enter guest info and price
-    App->>MW: POST /api/places/:placeId/bookings (Bearer JWT)
-    MW->>MW: Verify JWT and permission booking:create
- 
-    alt Invalid token or missing permission
-        MW-->>App: 401 / 403
-    else Authorized
-        MW->>C: Forward with user_id and role
-        C->>C: Validate body (guest_name, guest_phone, check_in < check_out, total_price >= 0)
-        alt Validation fails
-            C-->>App: 422 Validation errors
-            App-->>W: Highlight invalid fields
-        else Body valid
-            C->>F: createBooking(user, placeId, data)
-            F->>BS: create(user, placeId, data)
-            BS->>DB: SELECT PLACE (status, deleted_at, owner_id) and active PLACE_WORKER for this user
-            DB-->>BS: Place and assignment row or none
- 
-            alt User is not an assigned worker, the owner or an Admin
-                BS-->>F: Forbidden
-                F-->>C: Error
-                C-->>App: 403 No access to this place
-            else Place not ACTIVE or deleted
-                BS-->>F: PlaceClosed
-                F-->>C: Error
-                C-->>App: 422 Place is not open for bookings
-            else Worker assigned and place open
-                BS->>DB: BEGIN TRANSACTION
-                BS->>DB: SELECT non-cancelled bookings overlapping the new dates (FOR UPDATE)
-                Note right of DB: Overlap = existing.check_in_date < new.check_out_date<br/>AND existing.check_out_date > new.check_in_date<br/>(so a booking may start on another's check-out day)
-                DB-->>BS: Overlapping bookings
- 
-                alt Overlap found
-                    BS->>DB: ROLLBACK
-                    BS-->>F: Conflict
-                    F-->>C: Error
-                    C-->>App: 409 Dates already booked
-                    App-->>W: Show conflicting booking on calendar
-                else No overlap
-                    BS->>DB: INSERT BOOKING (status = CONFIRMED, created_by = worker)
-                    BS->>CS: createRunsForBooking(booking)
-                    CS->>DB: SELECT active PRE_BOOKING and POST_BOOKING templates with items
-                    DB-->>CS: Templates and items
-                    CS->>DB: INSERT CHECKLIST_RUN per template (status = PENDING)
-                    CS->>DB: INSERT CHECKLIST_RUN_ITEM per template item (is_checked = false)
-                    CS-->>BS: Runs created
-                    BS->>AL: record(CREATE, BOOKING, booking_id, new_values)
-                    AL->>DB: INSERT AUDIT_LOG
-                    BS->>DB: COMMIT
-                    BS-->>F: Booking with checklist runs
-                    F-->>C: Result
-                    C-->>App: 201 Created (booking JSON)
-                    App-->>W: Show booking on calendar with pre-booking checklist
-                end
-            end
+
+    W->>App: Pick dates, enter guest info and price
+    App->>API: POST /api/places/:placeId/bookings
+    API->>API: Check JWT, booking:create and request body
+    Note right of API: Failures here return 401, 403 or 422
+    API->>BS: create(user, placeId, data)
+    BS->>DB: Check user can access the place and it is ACTIVE
+
+    alt No access or place closed
+        BS-->>API: Error
+        API-->>App: 403 or 422
+    else Allowed
+        BS->>DB: Look for overlapping bookings (inside a transaction)
+        Note right of DB: A new booking may start<br/>on another's check-out day
+        alt Dates overlap
+            BS-->>API: Conflict
+            API-->>App: 409 Dates already booked
+        else Dates free
+            BS->>DB: Insert booking (CONFIRMED)
+            BS->>DB: Create pre- and post-booking checklist runs
+            BS->>DB: Write audit log and commit
+            BS-->>API: Booking
+            API-->>App: 201 Created
+            App-->>W: Show booking and its checklist
         end
     end
 ```
 
+### 8.3 Maintenance Ticket Lifecycle
 
-### 8.3 Maintenance Ticket Lifecycle (Report, Approve, Complete)
+#### 8.3.1 Worker reports damage
 
-To keep this diagram readable, the API layer (REST API, middleware, controllers and facade) is shown as one participant. Every request passes JWT verification, the RBAC permission check and the place scope check from 8.1.
 ```mermaid
 sequenceDiagram
     autonumber
     actor W as Worker
-    participant MApp as React Web App (worker phone)
-    actor M as Manager
-    participant WApp as React Web App (manager desktop)
-    participant API as API Layer
-    participant MS as Maintenance Service
-    participant NS as Notification Service
-    participant AL as Audit Log Service
-    participant DB as Database
+    participant App as Web App
     participant S3 as AWS S3
-    participant Mail as Email Provider
- 
-    rect rgba(255, 165, 0, 0.08)
-    Note over W,Mail: 1. Worker reports a damaged asset
-    W->>MApp: Take photos, pick asset, describe damage, set priority
-    MApp->>MApp: Compress and resize photos
-    MApp->>API: POST /api/uploads/presign (file count, content type)
-    API->>MS: requestUploadUrls(user)
-    MS->>S3: Generate pre-signed PUT URLs
-    S3-->>MS: Upload URLs and file keys
-    MS-->>API: URLs and keys
-    API-->>MApp: 200 OK
-    MApp->>S3: PUT photos directly
-    S3-->>MApp: 200 OK
-    MApp->>API: POST /api/places/:placeId/tickets (asset_id, description, priority, file keys)
-    API->>API: ticket:create + worker assigned to place
+    participant API as API
+    participant MS as Maintenance Service
+    participant DB as Database
+    participant NS as Notification Service
+
+    W->>App: Take photos, pick asset, describe damage, set priority
+    App->>API: Request upload URLs
+    API-->>App: Pre-signed S3 URLs
+    App->>S3: Upload compressed photos
+    App->>API: POST /api/places/:placeId/tickets
     API->>MS: createTicket(user, data)
-    MS->>DB: INSERT MAINTENANCE_TICKET (CORRECTIVE, PENDING_REVIEW, reporter_id)
-    MS->>DB: INSERT TICKET_ATTACHMENT per photo (type = DAMAGE)
-    MS->>AL: record(CREATE, MAINTENANCE_TICKET)
-    AL->>DB: INSERT AUDIT_LOG
-    MS->>NS: notify(place owner, TICKET_UPDATE)
-    NS->>DB: INSERT NOTIFICATION
-    NS-)Mail: Queue email "New ticket to review"
-    MS-->>API: Ticket
-    API-->>MApp: 201 Created
-    MApp-->>W: Show ticket as Pending Review
-    end
- 
-    rect rgba(100, 149, 237, 0.08)
-    Note over W,Mail: 2. Manager reviews the ticket
-    Mail-->>M: Email notification
-    M->>WApp: Open ticket
-    WApp->>API: GET /api/tickets/:id
-    API->>API: ticket:approve + manager owns place (or Admin)
-    API->>MS: getTicket(id)
-    MS->>DB: SELECT ticket with attachments
-    MS->>S3: Generate pre-signed GET URLs for photos
-    MS-->>API: Ticket with photo URLs
-    API-->>WApp: 200 OK
-    WApp-->>M: Show details, photos, priority
- 
-    alt Manager approves
-        M->>WApp: Approve with estimated cost, assignee, due date
-        WApp->>API: PATCH /api/tickets/:id/approve
+    MS->>DB: Save ticket (PENDING_REVIEW), DAMAGE photos and audit log
+    MS->>NS: Notify the place owner (in-app and email)
+    API-->>App: 201 Created
+    App-->>W: Show ticket as Pending Review
+```
+
+#### 8.3.2 Manager reviews the ticket
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor M as Manager
+    participant App as Web App
+    participant API as API
+    participant MS as Maintenance Service
+    participant DB as Database
+    participant NS as Notification Service
+
+    M->>App: Open ticket
+    App->>API: GET /api/tickets/:id
+    API-->>App: Ticket with photo URLs
+
+    alt Approve
+        M->>App: Set estimated cost, assignee and due date
+        App->>API: POST /api/tickets/:id/approve
         API->>MS: approve(user, id, data)
-        MS->>DB: SELECT active PLACE_WORKER for assignee on this place
-        DB-->>MS: Assignment row or none
-        Note right of MS: If the assignee is not an active worker<br/>on this place (and not the Manager),<br/>return 422 and stop here
-        MS->>DB: BEGIN TRANSACTION
-        MS->>DB: UPDATE ticket SET status = APPROVED, reviewed_by, reviewed_at, assignee_id, estimated_cost, due_date
-        MS->>DB: If the ticket has an asset: UPDATE ASSET SET status = NEEDS_MAINTENANCE
-        MS->>AL: record(APPROVE, MAINTENANCE_TICKET, old_values, new_values)
-        AL->>DB: INSERT AUDIT_LOG
-        MS->>DB: COMMIT
-        MS->>NS: notify(assignee, TICKET_UPDATE)
-        NS->>DB: INSERT NOTIFICATION
-        NS-)Mail: Queue email "Task assigned to you"
-        API-->>WApp: 200 OK
-    else Manager rejects
-        M->>WApp: Reject with reason
-        WApp->>API: PATCH /api/tickets/:id/reject (rejection_reason)
+        MS->>DB: Check assignee works on this place (else 422)
+        MS->>DB: Ticket APPROVED, asset NEEDS_MAINTENANCE, audit log
+        MS->>NS: Notify the assignee
+    else Reject
+        M->>App: Enter reason
+        App->>API: POST /api/tickets/:id/reject
         API->>MS: reject(user, id, reason)
-        MS->>DB: UPDATE ticket SET status = REJECTED, rejection_reason, reviewed_by, reviewed_at
-        MS->>AL: record(REJECT, MAINTENANCE_TICKET)
-        AL->>DB: INSERT AUDIT_LOG
-        MS->>NS: notify(reporter, TICKET_UPDATE)
-        NS->>DB: INSERT NOTIFICATION
-        API-->>WApp: 200 OK
+        MS->>DB: Ticket REJECTED with reason, audit log
+        MS->>NS: Notify the reporter
     end
-    end
- 
-    rect rgba(60, 179, 113, 0.08)
-    Note over W,Mail: 3. Assigned worker completes the work
-    Note over W,DB: Earlier, the worker tapped Start: status = IN_PROGRESS, started_at set, optional BEFORE photos uploaded, asset (if any) = UNDER_MAINTENANCE
-    W->>MApp: Upload after photos, enter actual cost, mark complete
-    MApp->>S3: PUT after photos (pre-signed URLs, as in step 1)
-    MApp->>API: PATCH /api/tickets/:id/complete (file keys, actual_cost, completion_notes)
-    API->>API: ticket:complete + user is the assignee (or the place's Manager)
+    API-->>App: 200 OK
+```
+
+#### 8.3.3 Worker completes the work
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor W as Worker
+    participant App as Web App
+    participant S3 as AWS S3
+    participant API as API
+    participant MS as Maintenance Service
+    participant DB as Database
+    participant NS as Notification Service
+
+    Note over W,NS: Earlier, Start set the ticket to IN_PROGRESS and the asset to UNDER_MAINTENANCE
+    W->>App: Add after photos, actual cost and notes
+    App->>S3: Upload photos
+    App->>API: POST /api/tickets/:id/complete
     API->>MS: complete(user, id, data)
- 
-    alt No AFTER photo provided
+
+    alt No after photo
         MS-->>API: Validation error
-        API-->>MApp: 422 At least one after photo is required
-    else AFTER photo provided
-        MS->>DB: BEGIN TRANSACTION
-        MS->>DB: INSERT TICKET_ATTACHMENT per photo (type = AFTER)
-        MS->>DB: UPDATE ticket SET status = COMPLETED, actual_cost, completion_notes, completed_at
-        MS->>DB: If the ticket has an asset with no other open tickets: UPDATE ASSET SET status = GOOD
-        MS->>AL: record(COMPLETE, MAINTENANCE_TICKET)
-        AL->>DB: INSERT AUDIT_LOG
-        MS->>DB: COMMIT
-        MS->>NS: notify(place owner, TICKET_UPDATE)
-        NS->>DB: INSERT NOTIFICATION
-        API-->>MApp: 200 OK
-        MApp-->>W: Show ticket as Completed
-    end
+        API-->>App: 422 At least one after photo is required
+    else After photo provided
+        MS->>DB: Save AFTER photos, ticket COMPLETED, audit log
+        MS->>DB: Asset GOOD if it has no other open tickets
+        MS->>NS: Notify the place owner
+        API-->>App: 200 OK
+        App-->>W: Show ticket as Completed
     end
 ```
 
@@ -1266,3 +1161,27 @@ sequenceDiagram
 1. **Pull request:** GitHub Actions runs the unit and integration tests automatically.
 2. **Staging:** merging into `develop` deploys to staging automatically, where end-to-end tests run.
 3. **Production:** merging `develop` into `main` deploys to production after all tests pass and the team manually approves.
+
+---
+
+## 10. Technical Justifications
+
+| Area | Decision | Why | Trade-off accepted |
+| :--- | :--- | :--- | :--- |
+| **Client** | One responsive React web app for all roles, no native mobile app | One codebase for a small team. Workers only need the camera and location, and browsers provide both over HTTPS. Updates reach every user immediately, with no app-store releases. | No offline mode and no native push notifications, so the system relies on email and in-app notifications. |
+| **Back end** | Node.js with Express | The same language as the React front end, so types, enums and validation can be shared through `packages/shared`. The workload is mostly database and network I/O, which Node handles well. | Express imposes little structure, so the team must enforce the layered design itself. |
+| **Architecture** | A single API (modular monolith) with layers: controllers, a Facade, then services | Controllers handle only HTTP and services hold the business rules, so the rules can be unit-tested without a server. One deployable unit is enough at this scale, and booking and checklist creation can share one database transaction. | Some extra indirection, and the services must be scaled together. |
+| **Database** | A relational database | The data is highly relational (users, places, workers, bookings, tickets, expenses). The system needs transactions (a booking and its checklist runs succeed or fail together), row locking against double bookings, and SQL aggregation for financial reports. | Schema changes need migrations. |
+| **Authentication** | Short-lived JWT access tokens (15 min) plus rotating refresh tokens (30 days), stored hashed | Access tokens are checked without a database lookup, which keeps requests fast. Refresh tokens can be revoked on logout or deactivation, and rotation limits the damage if one is stolen. An `HttpOnly` cookie keeps the refresh token out of reach of JavaScript (XSS). | A deactivated user's access token stays valid for up to 15 minutes. |
+| **Authorization** | RBAC plus data scoping (ownership for Managers, assignment for Workers) | A role alone is not enough: two Managers have the same permissions but must never see each other's places. Scoping in every query enforces this at the data level. | Every query in a service must apply the scope filter, which code review has to check. |
+| **Passwords and OTPs** | argon2id hashing. OTPs are hashed, expire after 10 minutes, and have attempt and resend limits | argon2id is OWASP's first recommendation for password storage [Certain]. A 6-digit code is easy to brute-force without attempt limits. | Hashing deliberately costs CPU time on login. |
+| **Deletion** | Soft delete for places and assets | Past bookings, tickets and expenses still point to them, and financial reports for past periods must stay correct. Deleted items can also be restored. | Every query must filter on `deleted_at IS NULL`. |
+| **Audit log** | Append-only `AUDIT_LOG` for critical actions | Gives accountability for money, access and booking changes, and shows who changed what if there is a dispute. | Extra writes, and the log table keeps growing. |
+| **Financial reports** | Computed on demand, not stored, and only `EXPENSE` rows count as costs | One source of truth, so stored totals can never drift out of date. Counting only expenses avoids counting a ticket's `actual_cost` twice. | Reports cost a query each time, which the indexes on `place_id` and dates keep fast. |
+| **File storage** | AWS S3 with pre-signed upload URLs, and images compressed in the browser first | Large files never pass through the API server. Compressing first saves workers' mobile data and storage costs. | Extra upload steps on the client, and failed uploads can leave orphaned files in S3 that need cleanup. |
+| **Notifications** | Email (SendGrid or SES) plus in-app notifications, no SMS | Email is cheap and enough for reminders and alerts. Storing every notification in-app means nothing is lost if an email is missed. SMS adds cost and is marked Won't Have. | Urgent issues depend on the user checking email or the app. |
+| **Background jobs** | A daily scheduler with idempotent jobs (`reminder_sent_at`, `overdue_alert_sent_at`) | Preventive tickets, reminders and overdue alerts must happen without user action. Idempotency makes a rerun or crash safe, with no duplicate emails. | Needs a job runner to operate and monitor. |
+| **Localization** | Arabic and English with full right-to-left support | The target market is Saudi Arabia, where Arabic is the primary language and English is common in business. | Every screen, email and template needs two versions and RTL testing. |
+| **Scope** | MoSCoW prioritization | Makes the release scope explicit and records out-of-scope items (SMS, guest booking, channel sync) as deliberate decisions rather than omissions. | Should and Could items may be delayed indefinitely. |
+| **Source control** | Monorepo, Simplified GitFlow, Conventional Commits, protected branches | A field change touches the API, the web app and shared types in one pull request. `develop` maps to staging and `main` to production. Full GitFlow release branches aren't needed for a single SaaS version. | Merging hotfixes back into both `main` and `develop` takes discipline. |
+| **Testing** | Jest (unit), Supertest (API), Playwright (end-to-end), manual checks on real phones | Most tests sit at the fast, cheap unit and API levels, and a small number of browser tests cover the critical flows. Supertest with a real test database catches permission bugs that mocks would hide. | End-to-end tests are slower and more brittle. |
