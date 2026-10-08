@@ -121,9 +121,6 @@ Authorization: Bearer <JWT_TOKEN>
 
 **Description:** Creates a new user account.
 
-**Authentication:** Required (Bearer JWT)
-
-
 ### Parameters
 
 No path/query/header parameters.
@@ -202,9 +199,6 @@ No response body.
 
 **Description:** Authenticates a user and returns a JWT.
 
-**Authentication:** Required (Bearer JWT)
-
-
 ### Parameters
 
 No path/query/header parameters.
@@ -241,6 +235,7 @@ No path/query/header parameters.
 {
   "access_token": "string",
   "token_type": "Bearer",
+  "refresh_token": "Bearer",
   "user": "string"
 }
 ```
@@ -274,8 +269,6 @@ No path/query/header parameters.
 **Summary:** Refresh access token
 
 **Description:** Generates a new JWT access token using a valid refresh token.
-
-**Authentication:** Required (Bearer JWT)
 
 ### Parameters
 
@@ -342,9 +335,6 @@ No path/query/header parameters.
 
 **Summary:** Request a verification code
 
-**Authentication:** Required (Bearer JWT)
-
-
 ### Parameters
 
 No path/query/header parameters.
@@ -392,9 +382,6 @@ No response body.
 ## 4. `POST /auth/verify`
 
 **Summary:** Verify OTP or verification token
-
-**Authentication:** Required (Bearer JWT)
-
 
 ### Parameters
 
@@ -456,9 +443,6 @@ No response body.
 ## 5. `POST /auth/password/reset`
 
 **Summary:** Reset password
-
-**Authentication:** Required (Bearer JWT)
-
 
 ### Parameters
 
@@ -3147,3 +3131,178 @@ Flexible analytics response because the source requirements do not define indivi
 ## Swagger / OpenAPI
 
 This README documents the same API contract represented by the OpenAPI YAML file. The YAML can be imported directly into Swagger Editor or Swagger UI to obtain the interactive Swagger interface.
+# External APIs
+
+Amlak integrates with external third-party APIs to provide authentication/OTP delivery and location/map services.
+
+## 1. Authentication / OTP API
+
+**Purpose:** Send OTP verification codes to users through SMS.
+
+**External Service:** Authentication / OTP Service
+
+### Send OTP
+
+```http
+POST /api/v1/send-otp
+Authorization: Bearer YOUR_API_KEY
+Content-Type: application/json
+```
+
+### Request
+
+```json
+{
+  "receiver": "+966512345678",
+  "channel": "SMS"
+}
+```
+
+### Request Fields
+
+| Field      | Type     | Required | Description                               |
+| ---------- | -------- | -------- | ----------------------------------------- |
+| `receiver` | `string` | Yes      | User phone number in international format |
+| `channel`  | `string` | Yes      | OTP delivery channel, e.g. `SMS`          |
+
+### Example Response
+
+**HTTP 200 — OTP sent successfully**
+
+```json
+{
+  "success": true,
+  "message": "OTP sent successfully",
+  "data": {
+    "request_id": "otp_8f7c2a91",
+    "receiver": "+966512345678",
+    "channel": "SMS",
+    "expires_in": 300
+  }
+}
+```
+
+### Error Response
+
+**HTTP 400 — Invalid request**
+
+```json
+{
+  "success": false,
+  "message": "Invalid receiver or channel"
+}
+```
+
+### Authentication
+
+The external API uses an API key:
+
+```http
+Authorization: Bearer YOUR_API_KEY
+```
+
+The API key must be stored securely as a server-side environment variable and must not be exposed to the frontend.
+
+---
+
+## 2. Google Maps API
+
+**Purpose:** Location services for Amlak properties, including converting property addresses into geographic coordinates and working with map locations.
+
+**External Service:** Google Maps Platform
+
+### Geocoding Request
+
+```http
+GET https://maps.googleapis.com/maps/api/geocode/json
+  ?address=Riyadh, Saudi Arabia
+  &key=YOUR_GOOGLE_MAPS_API_KEY
+```
+
+### Example Request
+
+```http
+GET https://maps.googleapis.com/maps/api/geocode/json?address=Riyadh%2C%20Saudi%20Arabia&key=YOUR_GOOGLE_MAPS_API_KEY
+```
+
+### Example Response
+
+**HTTP 200 — Location found**
+
+```json
+{
+  "results": [
+    {
+      "formatted_address": "Riyadh, Saudi Arabia",
+      "geometry": {
+        "location": {
+          "lat": 24.7136,
+          "lng": 46.6753
+        },
+        "location_type": "APPROXIMATE"
+      },
+      "place_id": "ChIJ...",
+      "types": [
+        "locality",
+        "political"
+      ]
+    }
+  ],
+  "status": "OK"
+}
+```
+
+### Main Response Fields
+
+| Field                   | Type     | Description                  |
+| ----------------------- | -------- | ---------------------------- |
+| `formatted_address`     | `string` | Formatted location address   |
+| `geometry.location.lat` | `number` | Latitude                     |
+| `geometry.location.lng` | `number` | Longitude                    |
+| `place_id`              | `string` | Google Maps place identifier |
+| `status`                | `string` | Request result status        |
+
+### Possible Status Values
+
+| Status             | Description                            |
+| ------------------ | -------------------------------------- |
+| `OK`               | Request completed successfully         |
+| `ZERO_RESULTS`     | No location was found                  |
+| `INVALID_REQUEST`  | Invalid request parameters             |
+| `REQUEST_DENIED`   | API key or API permissions are invalid |
+| `OVER_QUERY_LIMIT` | API quota exceeded                     |
+
+### Authentication
+
+Google Maps requests use an API key:
+
+```text
+YOUR_GOOGLE_MAPS_API_KEY
+```
+
+The key should be stored securely in the backend environment configuration.
+
+Example:
+
+```env
+OTP_API_KEY=your_otp_api_key
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+```
+
+### Amlak Integration
+
+The Google Maps API can be used when creating or updating a `Place`:
+
+```text
+Place Address
+     ↓
+Google Maps Geocoding API
+     ↓
+Latitude + Longitude
+     ↓
+PLACE
+     ├── address
+     ├── city
+     ├── latitude
+     └── longitude
+```
