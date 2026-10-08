@@ -1166,22 +1166,32 @@ sequenceDiagram
 
 ## 10. Technical Justifications
 
-| Area | Decision | Why | Trade-off accepted |
-| :--- | :--- | :--- | :--- |
-| **Client** | One responsive React web app for all roles, no native mobile app | One codebase for a small team. Workers only need the camera and location, and browsers provide both over HTTPS. Updates reach every user immediately, with no app-store releases. | No offline mode and no native push notifications, so the system relies on email and in-app notifications. |
-| **Back end** | Node.js with Express | The same language as the React front end, so types, enums and validation can be shared through `packages/shared`. The workload is mostly database and network I/O, which Node handles well. | Express imposes little structure, so the team must enforce the layered design itself. |
-| **Architecture** | A single API (modular monolith) with layers: controllers, a Facade, then services | Controllers handle only HTTP and services hold the business rules, so the rules can be unit-tested without a server. One deployable unit is enough at this scale, and booking and checklist creation can share one database transaction. | Some extra indirection, and the services must be scaled together. |
-| **Database** | A relational database | The data is highly relational (users, places, workers, bookings, tickets, expenses). The system needs transactions (a booking and its checklist runs succeed or fail together), row locking against double bookings, and SQL aggregation for financial reports. | Schema changes need migrations. |
-| **Authentication** | Short-lived JWT access tokens (15 min) plus rotating refresh tokens (30 days), stored hashed | Access tokens are checked without a database lookup, which keeps requests fast. Refresh tokens can be revoked on logout or deactivation, and rotation limits the damage if one is stolen. An `HttpOnly` cookie keeps the refresh token out of reach of JavaScript (XSS). | A deactivated user's access token stays valid for up to 15 minutes. |
-| **Authorization** | RBAC plus data scoping (ownership for Managers, assignment for Workers) | A role alone is not enough: two Managers have the same permissions but must never see each other's places. Scoping in every query enforces this at the data level. | Every query in a service must apply the scope filter, which code review has to check. |
-| **Passwords and OTPs** | argon2id hashing. OTPs are hashed, expire after 10 minutes, and have attempt and resend limits | argon2id is OWASP's first recommendation for password storage [Certain]. A 6-digit code is easy to brute-force without attempt limits. | Hashing deliberately costs CPU time on login. |
-| **Deletion** | Soft delete for places and assets | Past bookings, tickets and expenses still point to them, and financial reports for past periods must stay correct. Deleted items can also be restored. | Every query must filter on `deleted_at IS NULL`. |
-| **Audit log** | Append-only `AUDIT_LOG` for critical actions | Gives accountability for money, access and booking changes, and shows who changed what if there is a dispute. | Extra writes, and the log table keeps growing. |
-| **Financial reports** | Computed on demand, not stored, and only `EXPENSE` rows count as costs | One source of truth, so stored totals can never drift out of date. Counting only expenses avoids counting a ticket's `actual_cost` twice. | Reports cost a query each time, which the indexes on `place_id` and dates keep fast. |
-| **File storage** | AWS S3 with pre-signed upload URLs, and images compressed in the browser first | Large files never pass through the API server. Compressing first saves workers' mobile data and storage costs. | Extra upload steps on the client, and failed uploads can leave orphaned files in S3 that need cleanup. |
-| **Notifications** | Email (SendGrid or SES) plus in-app notifications, no SMS | Email is cheap and enough for reminders and alerts. Storing every notification in-app means nothing is lost if an email is missed. SMS adds cost and is marked Won't Have. | Urgent issues depend on the user checking email or the app. |
-| **Background jobs** | A daily scheduler with idempotent jobs (`reminder_sent_at`, `overdue_alert_sent_at`) | Preventive tickets, reminders and overdue alerts must happen without user action. Idempotency makes a rerun or crash safe, with no duplicate emails. | Needs a job runner to operate and monitor. |
-| **Localization** | Arabic and English with full right-to-left support | The target market is Saudi Arabia, where Arabic is the primary language and English is common in business. | Every screen, email and template needs two versions and RTL testing. |
-| **Scope** | MoSCoW prioritization | Makes the release scope explicit and records out-of-scope items (SMS, guest booking, channel sync) as deliberate decisions rather than omissions. | Should and Could items may be delayed indefinitely. |
-| **Source control** | Monorepo, Simplified GitFlow, Conventional Commits, protected branches | A field change touches the API, the web app and shared types in one pull request. `develop` maps to staging and `main` to production. Full GitFlow release branches aren't needed for a single SaaS version. | Merging hotfixes back into both `main` and `develop` takes discipline. |
-| **Testing** | Jest (unit), Supertest (API), Playwright (end-to-end), manual checks on real phones | Most tests sit at the fast, cheap unit and API levels, and a small number of browser tests cover the critical flows. Supertest with a real test database catches permission bugs that mocks would hide. | End-to-end tests are slower and more brittle. |
+1. Why Node.js?
+  It's a popular choice for modern web apps. It's scalable, performant and supports async I/O.
+
+2. Why Express for the API?
+  Simplifies the development process with built in routing and middleware support.
+
+3. Why React?
+  React is powerful for building dynamic and intractive user interfaces, it allows us to create fast, scalable apps.
+
+4. Why Facade layered architecture?
+  The Facade is the central orchestrator separating the business logic layer from the API layer.
+
+5. Why relational database?
+  The data is highly relational, the transactions either succeed or fail together.
+
+5. Why PostgreSQL?
+  ACID transactions, solves double booking with row locking.
+
+6. Why JWT with refresh tokens?
+  Stateless verification, login lifetime limit, no need for re-login.
+
+7. Why Hashing sensitive data?
+  To Prevent malicious attackers from getting usable data.
+
+8. Why email OTP verification?
+  Proves email ownership before granting access.
+
+9. Why Docker?
+  One consistent environment everywhere, and the deploys are reproducible.
