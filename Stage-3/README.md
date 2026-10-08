@@ -920,96 +920,54 @@ erDiagram
 
 ## 8. High-Level Sequence Diagrams
 
+In these diagrams, **API** means the REST API, the JWT/RBAC/scope middleware, the controllers and the Amlak Facade together. Every authenticated request passes the checks described in 8.1.
+
 ### 8.1 User Login and Authenticated Request
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor U as User
-    participant App as React Web App
-    participant API as REST API
-    participant MW as Auth & RBAC Middleware
-    participant C as Auth Controller
-    participant PC as Place Controller
-    participant F as Amlak Facade
+    participant App as Web App
+    participant API as API
     participant AS as Auth Service
-    participant PS as Place Service
-    participant AL as Audit Log Service
     participant DB as Database
- 
-    rect rgba(100, 149, 237, 0.08)
+
     Note over U,DB: Login
     U->>App: Enter email and password
-    App->>API: POST /api/auth/login (email, password)
-    API->>MW: Public route, apply rate limit only
-    MW->>C: Forward request
-    C->>C: Validate request body
-    C->>F: login(email, password)
-    F->>AS: authenticate(email, password)
-    AS->>DB: SELECT user and role WHERE email = ?
-    DB-->>AS: User row or none
-    AS->>AS: If status = INVITED, stop here (no password yet), otherwise verify password against password_hash (argon2id)
+    App->>API: POST /api/auth/login
+    API->>AS: authenticate(email, password)
+    AS->>DB: Find user by email
+    DB-->>AS: User or none
 
-    alt User not found or wrong password
-        AS-->>F: InvalidCredentials
-        F-->>C: Error
-        C-->>App: 401 Invalid email or password
-        App-->>U: Show error message
-    else status = PENDING_VERIFICATION
-        AS-->>F: EmailNotVerified
-        F-->>C: Error
-        C-->>App: 403 Email not verified
-        App-->>U: Redirect to OTP verification screen
-    else status = INVITED (worker has not set a password yet)
-        AS-->>F: AccountSetupPending
-        F-->>C: Error
-        C-->>App: 403 Account setup not finished
-        App-->>U: Tell the worker to use the invitation email link
-    else status = DEACTIVATED, or a worker whose manager is DEACTIVATED
-        AS-->>F: AccountDeactivated
-        F-->>C: Error
-        C-->>App: 403 Account deactivated
-        App-->>U: Show contact-support message
-    else Credentials valid and status = ACTIVE
-        AS->>AS: Sign access JWT (user_id, role, 15 min)
-        AS->>AS: Generate refresh token (30 days)
-        AS->>DB: INSERT REFRESH_TOKEN (token_hash, device_info, expires_at)
-        AS->>AL: record(LOGIN, user_id, ip_address)
-        AL->>DB: INSERT AUDIT_LOG
-        AS-->>F: Tokens and user profile
-        F-->>C: Result
-        C-->>App: 200 OK (access token, user, role) + refresh token in HttpOnly cookie
-        App->>App: Store access token in memory
-        App-->>U: Open dashboard for the user's role
+    alt Wrong email or password
+        AS-->>API: InvalidCredentials
+        API-->>App: 401 Invalid email or password
+    else Status is not ACTIVE (unverified, invited, deactivated, or manager deactivated)
+        AS-->>API: Status error
+        API-->>App: 403 with reason
+        App-->>U: Go to OTP screen, invitation hint or support message
+    else Valid and ACTIVE
+        AS->>DB: Save hashed refresh token and audit log
+        AS-->>API: Access token (15 min) and refresh token (30 days)
+        API-->>App: 200 OK, refresh token in HttpOnly cookie
+        App-->>U: Open the dashboard for the user's role
     end
-    end
- 
-    rect rgba(60, 179, 113, 0.08)
-    Note over U,DB: Retrieve data with the access token
-    U->>App: Open Places screen
-    App->>API: GET /api/places (Authorization: Bearer JWT)
-    API->>MW: Verify JWT signature and expiry
-    alt Token missing, invalid or expired
-        MW-->>App: 401 Unauthorized
-        App->>API: POST /api/auth/refresh (refresh token)
-        Note right of App: Auth Service rotates the refresh token<br/>and issues a new access token,<br/>then the app retries the request
-    else Token valid
-        MW->>MW: Check role has permission place:view
-        MW->>PC: Forward with user_id and role
-        PC->>F: getPlaces(user)
-        F->>PS: listPlaces(user)
-        PS->>PS: Build scope filter for the user's role
-        PS->>DB: SELECT places with scope filter
-        Note right of DB: Admin: all places<br/>Manager: owner_id = user_id<br/>Worker: joined through active PLACE_WORKER<br/>All: deleted_at IS NULL
-        DB-->>PS: Place rows
-        PS-->>F: Places
-        F-->>PC: Places
-        PC-->>App: 200 OK (places JSON)
-        App-->>U: Render places list
-    end
+
+    Note over U,DB: Authenticated request
+    U->>App: Open Places
+    App->>API: GET /api/places (Bearer JWT)
+    alt Token expired or invalid
+        API-->>App: 401
+        App->>API: POST /api/auth/refresh, then retry
+    else Token valid and role has place:view
+        API->>DB: Select places in the user's scope
+        Note right of DB: Admin all, Manager owned,<br/>Worker assigned, never deleted
+        DB-->>API: Places
+        API-->>App: 200 OK
+        App-->>U: Show places
     end
 ```
-
 
 ### 8.2 Worker Creates a Booking
 
@@ -1017,188 +975,126 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor W as Worker
-    participant App as React Web App (phone)
-    participant MW as REST API + Auth & RBAC Middleware
-    participant C as Booking Controller
-    participant F as Amlak Facade
+    participant App as Web App
+    participant API as API
     participant BS as Booking Service
-    participant CS as Checklist Service
-    participant AL as Audit Log Service
     participant DB as Database
- 
-    W->>App: Select dates on calendar, enter guest info and price
-    App->>MW: POST /api/places/:placeId/bookings (Bearer JWT)
-    MW->>MW: Verify JWT and permission booking:create
- 
-    alt Invalid token or missing permission
-        MW-->>App: 401 / 403
-    else Authorized
-        MW->>C: Forward with user_id and role
-        C->>C: Validate body (guest_name, guest_phone, check_in < check_out, total_price >= 0)
-        alt Validation fails
-            C-->>App: 422 Validation errors
-            App-->>W: Highlight invalid fields
-        else Body valid
-            C->>F: createBooking(user, placeId, data)
-            F->>BS: create(user, placeId, data)
-            BS->>DB: SELECT PLACE (status, deleted_at, owner_id) and active PLACE_WORKER for this user
-            DB-->>BS: Place and assignment row or none
- 
-            alt User is not an assigned worker, the owner or an Admin
-                BS-->>F: Forbidden
-                F-->>C: Error
-                C-->>App: 403 No access to this place
-            else Place not ACTIVE or deleted
-                BS-->>F: PlaceClosed
-                F-->>C: Error
-                C-->>App: 422 Place is not open for bookings
-            else Worker assigned and place open
-                BS->>DB: BEGIN TRANSACTION
-                BS->>DB: SELECT non-cancelled bookings overlapping the new dates (FOR UPDATE)
-                Note right of DB: Overlap = existing.check_in_date < new.check_out_date<br/>AND existing.check_out_date > new.check_in_date<br/>(so a booking may start on another's check-out day)
-                DB-->>BS: Overlapping bookings
- 
-                alt Overlap found
-                    BS->>DB: ROLLBACK
-                    BS-->>F: Conflict
-                    F-->>C: Error
-                    C-->>App: 409 Dates already booked
-                    App-->>W: Show conflicting booking on calendar
-                else No overlap
-                    BS->>DB: INSERT BOOKING (status = CONFIRMED, created_by = worker)
-                    BS->>CS: createRunsForBooking(booking)
-                    CS->>DB: SELECT active PRE_BOOKING and POST_BOOKING templates with items
-                    DB-->>CS: Templates and items
-                    CS->>DB: INSERT CHECKLIST_RUN per template (status = PENDING)
-                    CS->>DB: INSERT CHECKLIST_RUN_ITEM per template item (is_checked = false)
-                    CS-->>BS: Runs created
-                    BS->>AL: record(CREATE, BOOKING, booking_id, new_values)
-                    AL->>DB: INSERT AUDIT_LOG
-                    BS->>DB: COMMIT
-                    BS-->>F: Booking with checklist runs
-                    F-->>C: Result
-                    C-->>App: 201 Created (booking JSON)
-                    App-->>W: Show booking on calendar with pre-booking checklist
-                end
-            end
+
+    W->>App: Pick dates, enter guest info and price
+    App->>API: POST /api/places/:placeId/bookings
+    API->>API: Check JWT, booking:create and request body
+    Note right of API: Failures here return 401, 403 or 422
+    API->>BS: create(user, placeId, data)
+    BS->>DB: Check user can access the place and it is ACTIVE
+
+    alt No access or place closed
+        BS-->>API: Error
+        API-->>App: 403 or 422
+    else Allowed
+        BS->>DB: Look for overlapping bookings (inside a transaction)
+        Note right of DB: A new booking may start<br/>on another's check-out day
+        alt Dates overlap
+            BS-->>API: Conflict
+            API-->>App: 409 Dates already booked
+        else Dates free
+            BS->>DB: Insert booking (CONFIRMED)
+            BS->>DB: Create pre- and post-booking checklist runs
+            BS->>DB: Write audit log and commit
+            BS-->>API: Booking
+            API-->>App: 201 Created
+            App-->>W: Show booking and its checklist
         end
     end
 ```
 
+### 8.3 Maintenance Ticket Lifecycle
 
-### 8.3 Maintenance Ticket Lifecycle (Report, Approve, Complete)
+#### 8.3.1 Worker reports damage
 
-To keep this diagram readable, the API layer (REST API, middleware, controllers and facade) is shown as one participant. Every request passes JWT verification, the RBAC permission check and the place scope check from 8.1.
 ```mermaid
 sequenceDiagram
     autonumber
     actor W as Worker
-    participant MApp as React Web App (worker phone)
-    actor M as Manager
-    participant WApp as React Web App (manager desktop)
-    participant API as API Layer
-    participant MS as Maintenance Service
-    participant NS as Notification Service
-    participant AL as Audit Log Service
-    participant DB as Database
+    participant App as Web App
     participant S3 as AWS S3
-    participant Mail as Email Provider
- 
-    rect rgba(255, 165, 0, 0.08)
-    Note over W,Mail: 1. Worker reports a damaged asset
-    W->>MApp: Take photos, pick asset, describe damage, set priority
-    MApp->>MApp: Compress and resize photos
-    MApp->>API: POST /api/uploads/presign (file count, content type)
-    API->>MS: requestUploadUrls(user)
-    MS->>S3: Generate pre-signed PUT URLs
-    S3-->>MS: Upload URLs and file keys
-    MS-->>API: URLs and keys
-    API-->>MApp: 200 OK
-    MApp->>S3: PUT photos directly
-    S3-->>MApp: 200 OK
-    MApp->>API: POST /api/places/:placeId/tickets (asset_id, description, priority, file keys)
-    API->>API: ticket:create + worker assigned to place
+    participant API as API
+    participant MS as Maintenance Service
+    participant DB as Database
+    participant NS as Notification Service
+
+    W->>App: Take photos, pick asset, describe damage, set priority
+    App->>API: Request upload URLs
+    API-->>App: Pre-signed S3 URLs
+    App->>S3: Upload compressed photos
+    App->>API: POST /api/places/:placeId/tickets
     API->>MS: createTicket(user, data)
-    MS->>DB: INSERT MAINTENANCE_TICKET (CORRECTIVE, PENDING_REVIEW, reporter_id)
-    MS->>DB: INSERT TICKET_ATTACHMENT per photo (type = DAMAGE)
-    MS->>AL: record(CREATE, MAINTENANCE_TICKET)
-    AL->>DB: INSERT AUDIT_LOG
-    MS->>NS: notify(place owner, TICKET_UPDATE)
-    NS->>DB: INSERT NOTIFICATION
-    NS-)Mail: Queue email "New ticket to review"
-    MS-->>API: Ticket
-    API-->>MApp: 201 Created
-    MApp-->>W: Show ticket as Pending Review
-    end
- 
-    rect rgba(100, 149, 237, 0.08)
-    Note over W,Mail: 2. Manager reviews the ticket
-    Mail-->>M: Email notification
-    M->>WApp: Open ticket
-    WApp->>API: GET /api/tickets/:id
-    API->>API: ticket:approve + manager owns place (or Admin)
-    API->>MS: getTicket(id)
-    MS->>DB: SELECT ticket with attachments
-    MS->>S3: Generate pre-signed GET URLs for photos
-    MS-->>API: Ticket with photo URLs
-    API-->>WApp: 200 OK
-    WApp-->>M: Show details, photos, priority
- 
-    alt Manager approves
-        M->>WApp: Approve with estimated cost, assignee, due date
-        WApp->>API: PATCH /api/tickets/:id/approve
+    MS->>DB: Save ticket (PENDING_REVIEW), DAMAGE photos and audit log
+    MS->>NS: Notify the place owner (in-app and email)
+    API-->>App: 201 Created
+    App-->>W: Show ticket as Pending Review
+```
+
+#### 8.3.2 Manager reviews the ticket
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor M as Manager
+    participant App as Web App
+    participant API as API
+    participant MS as Maintenance Service
+    participant DB as Database
+    participant NS as Notification Service
+
+    M->>App: Open ticket
+    App->>API: GET /api/tickets/:id
+    API-->>App: Ticket with photo URLs
+
+    alt Approve
+        M->>App: Set estimated cost, assignee and due date
+        App->>API: POST /api/tickets/:id/approve
         API->>MS: approve(user, id, data)
-        MS->>DB: SELECT active PLACE_WORKER for assignee on this place
-        DB-->>MS: Assignment row or none
-        Note right of MS: If the assignee is not an active worker<br/>on this place (and not the Manager),<br/>return 422 and stop here
-        MS->>DB: BEGIN TRANSACTION
-        MS->>DB: UPDATE ticket SET status = APPROVED, reviewed_by, reviewed_at, assignee_id, estimated_cost, due_date
-        MS->>DB: If the ticket has an asset: UPDATE ASSET SET status = NEEDS_MAINTENANCE
-        MS->>AL: record(APPROVE, MAINTENANCE_TICKET, old_values, new_values)
-        AL->>DB: INSERT AUDIT_LOG
-        MS->>DB: COMMIT
-        MS->>NS: notify(assignee, TICKET_UPDATE)
-        NS->>DB: INSERT NOTIFICATION
-        NS-)Mail: Queue email "Task assigned to you"
-        API-->>WApp: 200 OK
-    else Manager rejects
-        M->>WApp: Reject with reason
-        WApp->>API: PATCH /api/tickets/:id/reject (rejection_reason)
+        MS->>DB: Check assignee works on this place (else 422)
+        MS->>DB: Ticket APPROVED, asset NEEDS_MAINTENANCE, audit log
+        MS->>NS: Notify the assignee
+    else Reject
+        M->>App: Enter reason
+        App->>API: POST /api/tickets/:id/reject
         API->>MS: reject(user, id, reason)
-        MS->>DB: UPDATE ticket SET status = REJECTED, rejection_reason, reviewed_by, reviewed_at
-        MS->>AL: record(REJECT, MAINTENANCE_TICKET)
-        AL->>DB: INSERT AUDIT_LOG
-        MS->>NS: notify(reporter, TICKET_UPDATE)
-        NS->>DB: INSERT NOTIFICATION
-        API-->>WApp: 200 OK
+        MS->>DB: Ticket REJECTED with reason, audit log
+        MS->>NS: Notify the reporter
     end
-    end
- 
-    rect rgba(60, 179, 113, 0.08)
-    Note over W,Mail: 3. Assigned worker completes the work
-    Note over W,DB: Earlier, the worker tapped Start: status = IN_PROGRESS, started_at set, optional BEFORE photos uploaded, asset (if any) = UNDER_MAINTENANCE
-    W->>MApp: Upload after photos, enter actual cost, mark complete
-    MApp->>S3: PUT after photos (pre-signed URLs, as in step 1)
-    MApp->>API: PATCH /api/tickets/:id/complete (file keys, actual_cost, completion_notes)
-    API->>API: ticket:complete + user is the assignee (or the place's Manager)
+    API-->>App: 200 OK
+```
+
+#### 8.3.3 Worker completes the work
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor W as Worker
+    participant App as Web App
+    participant S3 as AWS S3
+    participant API as API
+    participant MS as Maintenance Service
+    participant DB as Database
+    participant NS as Notification Service
+
+    Note over W,NS: Earlier, Start set the ticket to IN_PROGRESS and the asset to UNDER_MAINTENANCE
+    W->>App: Add after photos, actual cost and notes
+    App->>S3: Upload photos
+    App->>API: POST /api/tickets/:id/complete
     API->>MS: complete(user, id, data)
- 
-    alt No AFTER photo provided
+
+    alt No after photo
         MS-->>API: Validation error
-        API-->>MApp: 422 At least one after photo is required
-    else AFTER photo provided
-        MS->>DB: BEGIN TRANSACTION
-        MS->>DB: INSERT TICKET_ATTACHMENT per photo (type = AFTER)
-        MS->>DB: UPDATE ticket SET status = COMPLETED, actual_cost, completion_notes, completed_at
-        MS->>DB: If the ticket has an asset with no other open tickets: UPDATE ASSET SET status = GOOD
-        MS->>AL: record(COMPLETE, MAINTENANCE_TICKET)
-        AL->>DB: INSERT AUDIT_LOG
-        MS->>DB: COMMIT
-        MS->>NS: notify(place owner, TICKET_UPDATE)
-        NS->>DB: INSERT NOTIFICATION
-        API-->>MApp: 200 OK
-        MApp-->>W: Show ticket as Completed
-    end
+        API-->>App: 422 At least one after photo is required
+    else After photo provided
+        MS->>DB: Save AFTER photos, ticket COMPLETED, audit log
+        MS->>DB: Asset GOOD if it has no other open tickets
+        MS->>NS: Notify the place owner
+        API-->>App: 200 OK
+        App-->>W: Show ticket as Completed
     end
 ```
 
