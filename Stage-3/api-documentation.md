@@ -26,7 +26,9 @@ Authorization: Bearer <JWT_TOKEN>
 ### Missing Token Response
 
 ```json
-{"message":"Bearer Token is required"}
+{
+  "message": "Bearer Token is required"
+}
 ```
 
 ## Endpoint Index
@@ -42,27 +44,27 @@ Authorization: Bearer <JWT_TOKEN>
 
 ### Users
 - `GET /users/me` — Get current user profile
-- `PATCH /users/me` — Update current user profile
+- `PUT /users/me` — Update current user profile
 
 ### Admin
 - `GET /users` — List users
 - `POST /users` — Create a user
 - `GET /users/{userId}` — Get a user
-- `PATCH /users/{userId}` — Update a user
+- `PUT /users/{userId}` — Update a user
 - `DELETE /users/{userId}` — Deactivate a user
 
 ### Places
 - `GET /places` — List places
 - `POST /places` — Create a place
 - `GET /places/{placeId}` — Get a place
-- `PATCH /places/{placeId}` — Update a place
+- `PUT /places/{placeId}` — Update a place
 - `DELETE /places/{placeId}` — Delete a place
 
 ### Assets
 - `GET /places/{placeId}/assets` — List assets for a place
 - `POST /places/{placeId}/assets` — Add an asset
 - `GET /assets/{assetId}` — Get an asset
-- `PATCH /assets/{assetId}` — Update an asset
+- `PUT /assets/{assetId}` — Update an asset
 - `DELETE /assets/{assetId}` — Delete an asset
 
 ### Maintenance
@@ -85,7 +87,7 @@ Authorization: Bearer <JWT_TOKEN>
 - `GET /places/{placeId}/expenses` — List expenses
 - `POST /places/{placeId}/expenses` — Add an expense
 - `GET /expenses/{expenseId}` — Get an expense
-- `PATCH /expenses/{expenseId}` — Update an expense
+- `PUT /expenses/{expenseId}` — Update an expense
 - `DELETE /expenses/{expenseId}` — Delete an expense
 
 ### Reports
@@ -101,13 +103,13 @@ Authorization: Bearer <JWT_TOKEN>
 - `GET /support-tickets` — List support tickets
 - `POST /support-tickets` — Submit a support ticket
 - `GET /support-tickets/{ticketId}` — Get a support ticket
-- `PATCH /support-tickets/{ticketId}` — Update support ticket status
+- `PUT /support-tickets/{ticketId}` — Update support ticket status
 
 ### Web Content
 - `GET /content` — List web content
 - `POST /content` — Create web content
 - `GET /content/{contentId}` — Get web content
-- `PATCH /content/{contentId}` — Update web content
+- `PUT /content/{contentId}` — Update web content
 - `DELETE /content/{contentId}` — Delete web content
 - `POST /content/{contentId}/publish` — Publish web content
 
@@ -157,11 +159,24 @@ No path/query/header parameters.
 **Response schema:** `AuthResponse`
 
 
+**Expected Response:**
+
 ```json
 {
   "access_token": "string",
   "token_type": "Bearer",
-  "user": "string"
+  "user": {
+    "id": "00000000-0000-0000-0000-000000000001",
+    "created_at": "2026-01-01T10:00:00Z",
+    "updated_at": "2026-01-01T10:00:00Z",
+    "email": "user@example.com",
+    "phone": "+966512345678",
+    "fullname": "Amlak User",
+    "picture_path": null,
+    "role_id": "00000000-0000-0000-0000-000000000002",
+    "role": "MANAGER",
+    "status": "ACTIVE"
+  }
 }
 ```
 
@@ -169,6 +184,8 @@ No path/query/header parameters.
 
 **Response schema:** `Error`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -186,6 +203,8 @@ No response body.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -231,12 +250,25 @@ No path/query/header parameters.
 **Response schema:** `AuthResponse`
 
 
+**Expected Response:**
+
 ```json
 {
   "access_token": "string",
   "token_type": "Bearer",
   "refresh_token": "Bearer",
-  "user": "string"
+  "user": {
+    "id": "00000000-0000-0000-0000-000000000001",
+    "created_at": "2026-01-01T10:00:00Z",
+    "updated_at": "2026-01-01T10:00:00Z",
+    "email": "user@example.com",
+    "phone": "+966512345678",
+    "fullname": "Amlak User",
+    "picture_path": null,
+    "role_id": "00000000-0000-0000-0000-000000000002",
+    "role": "MANAGER",
+    "status": "ACTIVE"
+  }
 }
 ```
 
@@ -244,6 +276,8 @@ No path/query/header parameters.
 
 **Response schema:** `Error`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -257,6 +291,8 @@ No path/query/header parameters.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -300,6 +336,8 @@ No path/query/header parameters.
 
 **Response schema:** `RefreshTokenResponse`
 
+**Expected Response:**
+
 ```json
 {
   "access_token": "string",
@@ -310,6 +348,8 @@ No path/query/header parameters.
 #### `401` — Invalid or expired refresh token
 
 **Response schema:** `Error`
+
+**Expected Response:**
 
 ```json
 {
@@ -322,6 +362,8 @@ No path/query/header parameters.
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
+
+**Expected Response:**
 
 ```json
 {
@@ -373,6 +415,8 @@ No response body.
 **Response schema:** `ErrorResponse`
 
 
+**Expected Response:**
+
 ```json
 {
   "message": "Bearer Token is required"
@@ -421,6 +465,8 @@ No response body.
 **Response schema:** `Error`
 
 
+**Expected Response:**
+
 ```json
 {
   "code": "string",
@@ -433,6 +479,8 @@ No response body.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -482,6 +530,8 @@ No response body.
 **Response schema:** `Error`
 
 
+**Expected Response:**
+
 ```json
 {
   "code": "string",
@@ -494,6 +544,8 @@ No response body.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -528,10 +580,30 @@ No request body.
 **Response schema:** `User`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000001",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "email": "user@example.com",
+  "phone": "+966512345678",
+  "fullname": "Amlak User",
+  "picture_path": null,
+  "role_id": "00000000-0000-0000-0000-000000000002",
+  "role": "MANAGER",
+  "status": "ACTIVE"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -539,7 +611,7 @@ No request body.
 }
 ```
 
-## 2. `PATCH /users/me`
+## 2. `PUT /users/me`
 
 **Summary:** Update current user profile
 
@@ -580,10 +652,30 @@ No path/query/header parameters.
 **Response schema:** `User`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000001",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "email": "user@example.com",
+  "phone": "+966512345678",
+  "fullname": "Amlak User",
+  "picture_path": null,
+  "role_id": "00000000-0000-0000-0000-000000000002",
+  "role": "MANAGER",
+  "status": "ACTIVE"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -625,10 +717,17 @@ No request body.
 **Response schema:** `PaginatedUsers`
 
 
+**Expected Response:**
+
 ```json
 {
   "data": [],
-  "pagination": "string"
+  "pagination": {
+    "page": 1,
+    "page_size": 10,
+    "total": 1,
+    "total_pages": 1
+  }
 }
 ```
 
@@ -636,6 +735,8 @@ No request body.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -679,10 +780,30 @@ No path/query/header parameters.
 **Response schema:** `User`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000001",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "email": "user@example.com",
+  "phone": "+966512345678",
+  "fullname": "Amlak User",
+  "picture_path": null,
+  "role_id": "00000000-0000-0000-0000-000000000002",
+  "role": "MANAGER",
+  "status": "ACTIVE"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -715,10 +836,30 @@ No request body.
 **Response schema:** `User`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000001",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "email": "user@example.com",
+  "phone": "+966512345678",
+  "fullname": "Amlak User",
+  "picture_path": null,
+  "role_id": "00000000-0000-0000-0000-000000000002",
+  "role": "MANAGER",
+  "status": "ACTIVE"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -726,7 +867,7 @@ No request body.
 }
 ```
 
-## 4. `PATCH /users/{userId}`
+## 4. `PUT /users/{userId}`
 
 **Summary:** Update a user
 
@@ -773,10 +914,30 @@ No request body.
 **Response schema:** `User`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000001",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "email": "user@example.com",
+  "phone": "+966512345678",
+  "fullname": "Amlak User",
+  "picture_path": null,
+  "role_id": "00000000-0000-0000-0000-000000000002",
+  "role": "MANAGER",
+  "status": "ACTIVE"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -815,6 +976,8 @@ No response body.
 **Response schema:** `ErrorResponse`
 
 
+**Expected Response:**
+
 ```json
 {
   "message": "Bearer Token is required"
@@ -852,10 +1015,17 @@ No request body.
 **Response schema:** `PaginatedPlaces`
 
 
+**Expected Response:**
+
 ```json
 {
   "data": [],
-  "pagination": "string"
+  "pagination": {
+    "page": 1,
+    "page_size": 10,
+    "total": 1,
+    "total_pages": 1
+  }
 }
 ```
 
@@ -863,6 +1033,8 @@ No request body.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -913,10 +1085,26 @@ No path/query/header parameters.
 **Response schema:** `Place`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000010",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "owner_id": "00000000-0000-0000-0000-000000000001",
+  "place_name": "Al Noor Chalet",
+  "status": "ACTIVE"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -949,10 +1137,26 @@ No request body.
 **Response schema:** `Place`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000010",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "owner_id": "00000000-0000-0000-0000-000000000001",
+  "place_name": "Al Noor Chalet",
+  "status": "ACTIVE"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -960,7 +1164,7 @@ No request body.
 }
 ```
 
-## 4. `PATCH /places/{placeId}`
+## 4. `PUT /places/{placeId}`
 
 **Summary:** Update a place
 
@@ -1001,10 +1205,26 @@ No request body.
 **Response schema:** `Place`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000010",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "owner_id": "00000000-0000-0000-0000-000000000001",
+  "place_name": "Al Noor Chalet",
+  "status": "ACTIVE"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1041,6 +1261,8 @@ No response body.
 **Response schema:** `ErrorResponse`
 
 
+**Expected Response:**
+
 ```json
 {
   "message": "Bearer Token is required"
@@ -1075,10 +1297,19 @@ No request body.
 
 **Response schema:** `array<Asset>`
 
+
+
+**Expected Response:**
+
+```json
+[]
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1131,10 +1362,28 @@ No request body.
 **Response schema:** `Asset`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000020",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "place_id": "00000000-0000-0000-0000-000000000010",
+  "name": "Air Conditioner",
+  "type": "HVAC",
+  "purchase_date": "2025-12-01",
+  "status": "ACTIVE"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1167,10 +1416,28 @@ No request body.
 **Response schema:** `Asset`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000020",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "place_id": "00000000-0000-0000-0000-000000000010",
+  "name": "Air Conditioner",
+  "type": "HVAC",
+  "purchase_date": "2025-12-01",
+  "status": "ACTIVE"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1178,7 +1445,7 @@ No request body.
 }
 ```
 
-## 4. `PATCH /assets/{assetId}`
+## 4. `PUT /assets/{assetId}`
 
 **Summary:** Update an asset
 
@@ -1223,10 +1490,28 @@ No request body.
 **Response schema:** `Asset`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000020",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "place_id": "00000000-0000-0000-0000-000000000010",
+  "name": "Air Conditioner",
+  "type": "HVAC",
+  "purchase_date": "2025-12-01",
+  "status": "ACTIVE"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1263,6 +1548,8 @@ No response body.
 **Response schema:** `ErrorResponse`
 
 
+**Expected Response:**
+
 ```json
 {
   "message": "Bearer Token is required"
@@ -1297,10 +1584,19 @@ No request body.
 
 **Response schema:** `array<PeriodicMaintenance>`
 
+
+
+**Expected Response:**
+
+```json
+[]
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1351,10 +1647,27 @@ No request body.
 **Response schema:** `PeriodicMaintenance`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000030",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "asset_id": "00000000-0000-0000-0000-000000000020",
+  "description": "Routine AC maintenance",
+  "frequency": "MONTHLY",
+  "next_due_date": "2026-02-01"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1392,10 +1705,17 @@ No request body.
 **Response schema:** `PaginatedMaintenanceTickets`
 
 
+**Expected Response:**
+
 ```json
 {
   "data": [],
-  "pagination": "string"
+  "pagination": {
+    "page": 1,
+    "page_size": 10,
+    "total": 1,
+    "total_pages": 1
+  }
 }
 ```
 
@@ -1403,6 +1723,8 @@ No request body.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1455,10 +1777,30 @@ No path/query/header parameters.
 **Response schema:** `MaintenanceTicket`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000040",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "place_id": "00000000-0000-0000-0000-000000000010",
+  "asset_id": "00000000-0000-0000-0000-000000000020",
+  "ticket_type": "CORRECTIVE",
+  "reporter_id": "00000000-0000-0000-0000-000000000001",
+  "description": "Air conditioner is not cooling",
+  "status": "SUBMITTED",
+  "photo_url": "https://api.example.com/uploads/maintenance.jpg"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1491,10 +1833,30 @@ No request body.
 **Response schema:** `MaintenanceTicket`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000040",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "place_id": "00000000-0000-0000-0000-000000000010",
+  "asset_id": "00000000-0000-0000-0000-000000000020",
+  "ticket_type": "CORRECTIVE",
+  "reporter_id": "00000000-0000-0000-0000-000000000001",
+  "description": "Air conditioner is not cooling",
+  "status": "SUBMITTED",
+  "photo_url": "https://api.example.com/uploads/maintenance.jpg"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1525,10 +1887,30 @@ No request body.
 **Response schema:** `MaintenanceTicket`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000040",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "place_id": "00000000-0000-0000-0000-000000000010",
+  "asset_id": "00000000-0000-0000-0000-000000000020",
+  "ticket_type": "CORRECTIVE",
+  "reporter_id": "00000000-0000-0000-0000-000000000001",
+  "description": "Air conditioner is not cooling",
+  "status": "SUBMITTED",
+  "photo_url": "https://api.example.com/uploads/maintenance.jpg"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1573,10 +1955,30 @@ No path/query/header parameters.
 **Response schema:** `MaintenanceTicket`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000040",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "place_id": "00000000-0000-0000-0000-000000000010",
+  "asset_id": "00000000-0000-0000-0000-000000000020",
+  "ticket_type": "CORRECTIVE",
+  "reporter_id": "00000000-0000-0000-0000-000000000001",
+  "description": "Air conditioner is not cooling",
+  "status": "SUBMITTED",
+  "photo_url": "https://api.example.com/uploads/maintenance.jpg"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1623,10 +2025,30 @@ No path/query/header parameters.
 **Response schema:** `MaintenanceTicket`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000040",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "place_id": "00000000-0000-0000-0000-000000000010",
+  "asset_id": "00000000-0000-0000-0000-000000000020",
+  "ticket_type": "CORRECTIVE",
+  "reporter_id": "00000000-0000-0000-0000-000000000001",
+  "description": "Air conditioner is not cooling",
+  "status": "SUBMITTED",
+  "photo_url": "https://api.example.com/uploads/maintenance.jpg"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1664,10 +2086,19 @@ No request body.
 
 **Response schema:** `array<Booking>`
 
+
+
+**Expected Response:**
+
+```json
+[]
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1716,10 +2147,26 @@ No request body.
 **Response schema:** `Booking`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000050",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "place_id": "00000000-0000-0000-0000-000000000010",
+  "booking_date": "2026-01-15",
+  "cost": 500.0
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1752,10 +2199,26 @@ No request body.
 **Response schema:** `Booking`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000050",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "place_id": "00000000-0000-0000-0000-000000000010",
+  "booking_date": "2026-01-15",
+  "cost": 500.0
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1790,10 +2253,26 @@ No request body.
 **Response schema:** `Booking`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000050",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "place_id": "00000000-0000-0000-0000-000000000010",
+  "booking_date": "2026-01-15",
+  "cost": 500.0
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1831,10 +2310,19 @@ No request body.
 
 **Response schema:** `array<Expense>`
 
+
+
+**Expected Response:**
+
+```json
+[]
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1885,10 +2373,27 @@ No request body.
 **Response schema:** `Expense`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000060",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "place_id": "00000000-0000-0000-0000-000000000010",
+  "description": "Cleaning service",
+  "amount": 150.0,
+  "expense_date": "2026-01-05"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1921,10 +2426,27 @@ No request body.
 **Response schema:** `Expense`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000060",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "place_id": "00000000-0000-0000-0000-000000000010",
+  "description": "Cleaning service",
+  "amount": 150.0,
+  "expense_date": "2026-01-05"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -1932,7 +2454,7 @@ No request body.
 }
 ```
 
-## 4. `PATCH /expenses/{expenseId}`
+## 4. `PUT /expenses/{expenseId}`
 
 **Summary:** Update an expense
 
@@ -1975,10 +2497,27 @@ No request body.
 **Response schema:** `Expense`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000060",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "place_id": "00000000-0000-0000-0000-000000000010",
+  "description": "Cleaning service",
+  "amount": 150.0,
+  "expense_date": "2026-01-05"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -2014,6 +2553,8 @@ No response body.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -2054,6 +2595,8 @@ No request body.
 **Response schema:** `FinancialReport`
 
 
+**Expected Response:**
+
 ```json
 {
   "total_income": 0,
@@ -2066,6 +2609,8 @@ No request body.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -2101,10 +2646,29 @@ No request body.
 
 **Response schema:** `AnalyticsResponse`
 
+
+
+**Expected Response:**
+
+```json
+{
+  "metrics": {
+    "total_places": 12,
+    "total_bookings": 35,
+    "total_expenses": 12500.0
+  },
+  "period": {
+    "from": "2026-01-01",
+    "to": "2026-01-31"
+  }
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -2138,10 +2702,19 @@ No request body.
 
 **Response schema:** `array<Notification>`
 
+
+
+**Expected Response:**
+
+```json
+[]
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -2196,6 +2769,8 @@ No response body.
 **Response schema:** `ErrorResponse`
 
 
+**Expected Response:**
+
 ```json
 {
   "message": "Bearer Token is required"
@@ -2227,10 +2802,27 @@ No request body.
 **Response schema:** `Notification`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000070",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "user_id": "00000000-0000-0000-0000-000000000001",
+  "sender_id": null,
+  "message": "Your maintenance ticket has been approved.",
+  "is_read": false
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -2264,10 +2856,19 @@ No request body.
 
 **Response schema:** `array<SupportTicket>`
 
+
+
+**Expected Response:**
+
+```json
+[]
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -2314,10 +2915,27 @@ No path/query/header parameters.
 **Response schema:** `SupportTicket`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000080",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "user_id": "00000000-0000-0000-0000-000000000001",
+  "subject": "Maintenance request",
+  "description": "Please inspect the AC unit.",
+  "status": "OPEN"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -2350,10 +2968,27 @@ No request body.
 **Response schema:** `SupportTicket`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000080",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "user_id": "00000000-0000-0000-0000-000000000001",
+  "subject": "Maintenance request",
+  "description": "Please inspect the AC unit.",
+  "status": "OPEN"
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -2361,7 +2996,7 @@ No request body.
 }
 ```
 
-## 4. `PATCH /support-tickets/{ticketId}`
+## 4. `PUT /support-tickets/{ticketId}`
 
 **Summary:** Update support ticket status
 
@@ -2404,6 +3039,8 @@ No response body.
 **Response schema:** `ErrorResponse`
 
 
+**Expected Response:**
+
 ```json
 {
   "message": "Bearer Token is required"
@@ -2436,10 +3073,19 @@ No request body.
 
 **Response schema:** `array<WebContent>`
 
+
+
+**Expected Response:**
+
+```json
+[]
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -2492,10 +3138,28 @@ No path/query/header parameters.
 **Response schema:** `WebContent`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000090",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "author_id": "00000000-0000-0000-0000-000000000001",
+  "title": "Welcome to Amlak",
+  "slug": "welcome-to-amlak",
+  "body": "Welcome to Amlak.",
+  "is_published": true
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -2528,10 +3192,28 @@ No request body.
 **Response schema:** `WebContent`
 
 
+
+
+**Expected Response:**
+
+```json
+{
+  "id": "00000000-0000-0000-0000-000000000090",
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z",
+  "author_id": "00000000-0000-0000-0000-000000000001",
+  "title": "Welcome to Amlak",
+  "slug": "welcome-to-amlak",
+  "body": "Welcome to Amlak.",
+  "is_published": true
+}
+```
 #### `403` — Bearer Token is required.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
@@ -2539,7 +3221,7 @@ No request body.
 }
 ```
 
-## 4. `PATCH /content/{contentId}`
+## 4. `PUT /content/{contentId}`
 
 **Summary:** Update web content
 
@@ -2588,6 +3270,8 @@ No response body.
 **Response schema:** `ErrorResponse`
 
 
+**Expected Response:**
+
 ```json
 {
   "message": "Bearer Token is required"
@@ -2623,6 +3307,8 @@ No response body.
 **Response schema:** `ErrorResponse`
 
 
+**Expected Response:**
+
 ```json
 {
   "message": "Bearer Token is required"
@@ -2655,6 +3341,8 @@ No response body.
 
 **Response schema:** `ErrorResponse`
 
+
+**Expected Response:**
 
 ```json
 {
