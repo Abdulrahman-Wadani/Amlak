@@ -18,7 +18,7 @@ Prioritized with **MoSCoW**: **Must Have** (in this release, fully modeled below
  
 | Category | Role | User Story | Priority |
 | :--- | :--- | :--- | :--- |
-| **Authentication** | Manager | As a property manager, I want to register an account using my full name, email, and password so that I can securely save my data. *(Registration always creates a Manager account.)* | Must Have |
+| **Authentication** | Manager | As a property manager, I want to register an account using my full name, phone, email, and password so that I can securely save my data. *(Registration always creates a Manager account.)* | Must Have |
 | **Authentication** | User | As a user, I want to log in using my credentials so that I can securely access my account and resume my activities. | Must Have |
 | **Authentication** | User | As a user, I want to receive a one-time code by email when I register so that my identity is verified. | Must Have |
 | **Authentication** | User | As a user, I want to manage my basic information (e.g., profile picture, name) so that my account profile remains accurate and complete. | Must Have |
@@ -32,7 +32,7 @@ Prioritized with **MoSCoW**: **Must Have** (in this release, fully modeled below
 | **Onboarding** | Manager/Worker | As a manager/worker, I want contextual tooltips during my first login so that I can easily navigate and discover key features. | Could Have |
 | **Property & Asset** | Manager | As a manager, I want to add, edit, and delete properties so that I can accurately track their maintenance and financial data. | Must Have |
 | **Property & Asset** | Manager | As a manager, I want to add, edit and remove assets in my properties so that I can track their condition and maintenance. | Must Have |
-| **Property & Asset** | Manager | As a manager, I want to create, edit and deactivate worker accounts so that my staff can access the app without registering themselves. | Must Have |
+| **Property & Asset** | Manager | As a manager, I want to create, edit, delete and deactivate worker accounts so that my staff can access the app without registering themselves. | Must Have |
 | **Property & Asset** | Manager | As a manager, I want to assign and unassign workers to my properties so that each worker only sees and operates on the places they are responsible for. | Must Have |
 | **Property & Asset** | Worker | As a worker, I want to report damaged assets or required maintenance so that the property remains in optimal condition. | Must Have |
 | **Property & Asset** | Manager | As a manager, I want a unified dashboard showing property and asset health so that I can monitor the status of all locations at a glance. | Must Have |
