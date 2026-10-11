@@ -258,8 +258,6 @@ flowchart TD
 | `PeriodicMaintenance` | Recurring maintenance schedule for an asset | `schedule`, `triggerTicket`, `advanceNextDueDate` |
 | `MaintenanceTicket` | A repair or preventive job from report to completion | `submit`, `approve`, `reject`, `reassign`, `start`, `complete`, `isOverdue` |
 | `TicketAttachment` | Damage, before and after photos of a ticket | `upload`, `delete` |
-| `ChecklistTemplate`, `ChecklistTemplateItem` | The manager's reusable pre-/post-booking checklist and its tasks | `create`, `update`, `deactivate` |
-| `ChecklistRun`, `ChecklistRunItem` | One completed copy of a checklist for one booking, with ticks, notes and photos | `start`, `complete`, `cancel`, `check` |
 | `Booking` | A guest stay: dates, guest, price, check-in and check-out. `isReadyForCheckIn()` is true when its own `PRE_BOOKING` run is completed and the previous booking on the place is checked out with its `POST_BOOKING` run completed | `add`, `cancel`, `hasOverlap`, `isReadyForCheckIn`, `checkIn`, `checkOut` |
 | `Expense` | A cost for a place (maintenance, utilities, taxes…), optionally linked to a ticket. Financial reports count **only** expenses; a ticket's `actual_cost` is informational until the Manager logs it as an expense | `add`, `update`, `delete` |
 | `FinancialReport` | Computed (not stored) income, expenses and profit for a period | `generate`, `calculateIncome`, `calculateExpenses`, `calculateProfit` |
