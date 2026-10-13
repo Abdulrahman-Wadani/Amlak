@@ -87,6 +87,7 @@
 }
 
 :root {
+    --radius: 0px;
     --background: #E8EEF6; /* paper */
     --foreground: #1B2430; /* ink */
     --card: #FFFFFF; /* surface */
@@ -101,7 +102,7 @@
     --muted-foreground: rgba(27,36,48,.68); /* ink */
     --accent: #EDF1F6; /* surfaceAlt */
     --accent-foreground: #1B2430; /* ink */
-    --destructive: #E34234;
+    --destructive: #E45B47; /* crit.500 */
     --destructive-foreground: #FFFFFF; /* surface */
     --border: rgba(27,36,48,.16); /* core.rule */
     --input: rgba(27,36,48,.16); /* core.rule */
