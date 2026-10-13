@@ -1,0 +1,22 @@
+
+services:
+  postgres:
+    build: .
+    container_name: amlak-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: amlak
+      POSTGRES_USER: amlak_user
+      POSTGRES_PASSWORD: amlak_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U amlak_user -d amlak"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
