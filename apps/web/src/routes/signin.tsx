@@ -1,3 +1,4 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { type SubmitEvent, useState } from "react";
 import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function App() {
+export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -76,7 +77,7 @@ export default function App() {
             Sign in
           </Button>
         </form>
-
+        {/* biome-ignore lint/a11y/useValidAnchor: placeholder link until /forgot-password route exists */}
         <a href="#" className="mt-4 inline-block text-sm text-info-700 hover:underline">
           Forgot password?
         </a>
@@ -84,3 +85,5 @@ export default function App() {
     </div>
   );
 }
+
+export const Route = createFileRoute("/signin")({ component: SignIn });
