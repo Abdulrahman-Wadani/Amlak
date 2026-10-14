@@ -11,6 +11,7 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -19,7 +20,12 @@ export default function SignIn() {
       setSuccess(false);
     } else {
       setError("");
-      setSuccess(true);
+      setLoading(true);
+      // mock network delay will be replaced with real fetch
+      setTimeout(() => {
+        setSuccess(true);
+        setLoading(false);
+      }, 1500);
     }
   }
 
@@ -37,9 +43,10 @@ export default function SignIn() {
               id="email"
               type="email"
               placeholder="you@amlak.com"
-              className="h-[42px]"
+              className={`h-[42px] ${loading ? "opacity-60" : ""}`}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
             />
           </div>
 
@@ -51,9 +58,10 @@ export default function SignIn() {
               id="password"
               type="password"
               placeholder="••••••••"
-              className="h-[42px]"
+              className={`h-[42px] ${loading ? "opacity-60" : ""}`}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
             />
           </div>
 
@@ -73,8 +81,15 @@ export default function SignIn() {
             </Alert>
           )}
 
-          <Button type="submit" className="h-10 w-full">
-            Sign in
+          <Button type="submit" disabled={loading} className="h-10 w-full">
+            {loading ? (
+              <>
+                <span className="size-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                Signing in…
+              </>
+            ) : (
+              "Sign in"
+            )}
           </Button>
         </form>
         {/* biome-ignore lint/a11y/useValidAnchor: placeholder link until /forgot-password route exists */}
