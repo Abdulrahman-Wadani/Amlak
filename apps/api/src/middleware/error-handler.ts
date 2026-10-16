@@ -3,6 +3,9 @@ import { AppError } from "../errors.ts";
 
 export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
 	if (error instanceof AppError) {
+		if (error.code === "UNAUTHENTICATED") {
+			res.set("WWW-Authenticate", "Bearer");
+		}
 		res.status(error.status).json({
 			code: error.code,
 			message: error.message,
