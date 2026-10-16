@@ -2,11 +2,12 @@
 
 ## 1. System Roles Explained
 
-* **Admin:** The highest level of authority. Admins represent the platform owners and have full control over everything in the system: user accounts, web content, support requests and notifications, and also every manager's places, workers, assets, checklists, bookings, tickets, expenses and financial reports.
+* **Admin:** The highest level of authority. Admins represent the platform owners and manage user accounts, web content, support requests and notifications. They have no access to managers' places or anything in them.
 
-* **Manager:** The owner/supervisor of properties. Managers handle property and asset CRUD, assign workers to their properties, build checklists, review maintenance tickets, schedule periodic maintenance, log expenses and generate financial reports.
+* **Manager:** The owner/supervisor of properties. Managers handle property and asset CRUD, create worker accounts and assign workers to their properties, review maintenance tickets, schedule periodic maintenance, manage bookings, log expenses and generate financial reports.
 
-* **Worker:** On-site operational staff, always assigned to one or more properties by a Manager. Workers run checklists, manage bookings, report damaged assets and submit photo proof. A Worker can only see data for places they are assigned to, and never sees financial data.
+* **Worker:** On-site operational staff, always assigned to one or more properties by a Manager. Workers manage bookings, report damaged assets and submit photo proof. A Worker can only see data for places they are assigned to, and never sees financial data.
+
 ---
 
 ## 2. Prioritized User Stories
@@ -39,8 +40,8 @@ Prioritized with **MoSCoW**: **Must Have** (in this release, fully modeled below
 | **Maintenance** | Manager | As a manager, I want to schedule periodic asset maintenance so that properties remain safe, functional, and in good condition. | Must Have |
 | **Maintenance** | Worker | As a worker, I want to receive email reminders for upcoming maintenance tasks so that I do not miss any scheduled work. | Must Have |
 | **Maintenance** | Manager | As a manager, I want to receive automated email alerts for overdue or incomplete maintenance tasks so that I can address operational delays promptly. | Must Have |
-| **Booking** | Worker | As a worker, I want to manage (add/cancel) bookings on a calendar, including guest info and pricing, so that I can maintain an accurate reservation schedule. | Must Have |
-| **Booking** | Worker | As a worker, I want to check guests in and out, so that every guest arrives to a checked and prepared place. | Must Have |
+| **Booking** | Manager/Worker | As a manager/worker, I want to manage (add/cancel) bookings on a calendar, including guest info and pricing, so that I can maintain an accurate reservation schedule. | Must Have |
+| **Booking** | Manager/Worker | As a manager/worker, I want to check guests in and out, so that every guest arrives to a checked and prepared place. | Must Have |
 | **Financial** | Manager | As a manager, I want to log all property expenses (maintenance, bills, taxes) so that I can maintain accurate financial records. | Must Have |
 | **Financial** | Manager | As a manager, I want to generate financial reports so that I can effectively track profit, loss, and overall financial health. | Must Have |
 | **Financial** | Admin | As an Admin I want to manage plans and payments so I can edit account limits and refund users. | Should Have |
@@ -61,7 +62,7 @@ Prioritized with **MoSCoW**: **Must Have** (in this release, fully modeled below
 
 ### Security & Authentication
 
-* **JWT with refresh tokens:** Access tokens are short-lived (15 minutes) and carry `user_id` and `role`. Refresh tokens are long-lived (30 days), stored **hashed** in `REFRESH_TOKEN`, rotated on every use and revoked on logout or account deactivation. Web clients keep the refresh token in an `HttpOnly`, `Secure`, `SameSite=Strict` cookie. Mobile clients keep it in secure storage (Keychain / Keystore).
+* **JWT with refresh tokens:** Access tokens are short-lived (15 minutes) and carry `user_id` and `role`. Refresh tokens are long-lived (30 days), stored **hashed** in `REFRESH_TOKEN`, rotated on every use and revoked on logout or account deactivation. Web clients keep the refresh token in an `HttpOnly`, `Secure`, `SameSite=Strict` cookie.
 
 * **RBAC:** Every route is protected by role-based middleware, and every query that touches place data is additionally scoped by ownership (Manager) or assignment (Worker). A Worker must never be able to access expenses or financial reports.
 
@@ -77,22 +78,22 @@ Prioritized with **MoSCoW**: **Must Have** (in this release, fully modeled below
 
 * **Response time:** API endpoints, especially dashboard metrics and booking calendars, respond within 500 ms under normal load. Dashboard aggregates use indexed queries on `place_id`, `status` and date columns.
 
-* **Media optimization:** Uploaded images (ticket attachments, checklist photos, profile pictures, receipts) are compressed and resized before being stored in cloud storage (AWS S3). Clients upload directly to S3 using pre-signed URLs.
+* **Media optimization:** Uploaded images (ticket attachments, profile pictures, receipts) are sent to the API in the same request as their data. The server compresses and resizes them, then stores them in a private cloud storage bucket (AWS S3); the database keeps only the object keys.
 
 ### Usability & Accessibility
 
 * **Arabic and English:** full right-to-left support for Arabic in the web app, emails and notifications.
 * **Single web app:** one responsive React web app for every role; there is no separate mobile app. Workers use it in their phone's browser. Camera access uses the browser file input with the camera (`capture`), and location uses the browser Geolocation API; both require HTTPS.
-* **Phone-first worker screens:** checklists, damage reports, check-in and photo capture are designed for one-handed use on a phone screen (minimum width 360 px), with large touch targets.
+* **Phone-first worker screens:** damage reports, check-in and photo capture are designed for one-handed use on a phone screen (minimum width 360 px), with large touch targets.
 * **Supported browsers:** the latest two versions of Chrome, Safari (including iPhone), Edge and Firefox, on desktop and phone, using the shared design system from the Figma guide.
-* **Permission explanations:** the camera is used for ticket, checklist and receipt photos; location is used only to fill a place's map pin from the user's current position when adding or editing a place (workers are not tracked). The browser's camera and location permissions are requested only when first needed, preceded by an in-app screen explaining why; if the user blocks them, the app shows how to re-enable them in the browser settings.
+* **Permission explanations:** the camera is used for ticket and receipt photos; location is used only to fill a place's map pin from the user's current position when adding or editing a place (workers are not tracked). The browser's camera and location permissions are requested only when first needed, preceded by an in-app screen explaining why; if the user blocks them, the app shows how to re-enable them in the browser settings.
 
 
 ### Reliability & Integrations
 
 * **Email gateway:** The system integrates with a transactional email provider (SendGrid or AWS SES) for OTPs, worker invitations, maintenance reminders and overdue alerts. Failed sends are retried up to 3 times with backoff. SMS is out of scope for this version.
 * **In-app notifications:** Every reminder, alert and admin announcement is also stored in `NOTIFICATION` so users can see it in the app.
-* **Audit logging:** Critical actions are written to `AUDIT_LOG` with timestamp, user ID, action, entity type, entity ID, and before/after values. At minimum: approving, rejecting, reassigning and completing tickets; creating, updating and deleting expenses; deleting or restoring a place; removing an asset; cancelling a booking; checking guests in and out; creating, assigning, unassigning, moving and deactivating workers; changing a user's role; and deactivating or reactivating any account. Audit records are append-only.
+* **Audit logging:** Critical actions are written to `AUDIT_LOG` with timestamp, user ID, action, entity type, entity ID, and before/after values. At minimum: approving, rejecting, reassigning and completing tickets; creating, updating and deleting expenses; deleting a place; removing an asset; cancelling a booking; checking guests in and out; creating, deleting, assigning, unassigning and deactivating workers; and deactivating or reactivating any account. Audit records are append-only.
 
 
 ---
@@ -127,7 +128,6 @@ flowchart TD
             Places["Places & Worker Assignment"]
             Workers["My Workers (accounts)"]
             Assets["Assets & Periodic Maintenance"]
-            Checklists["Checklists"]
             Bookings["Bookings Calendar"]
             Tickets["Maintenance Tickets"]
             Expenses["Expenses"]
@@ -163,7 +163,6 @@ flowchart TD
             UserManagement["User Management"]
             PlaceManagement["Place & Worker Assignment"]
             BookingManagement["Booking Management"]
-            ChecklistSvc["Checklist Service"]
             MaintenanceSvc["Assets & Maintenance Service"]
             ExpenseManagement["Expense Management"]
             ReportService["Financial Reports"]
@@ -178,7 +177,6 @@ flowchart TD
         Facade --> UserManagement
         Facade --> PlaceManagement
         Facade --> BookingManagement
-        Facade --> ChecklistSvc
         Facade --> MaintenanceSvc
         Facade --> ExpenseManagement
         Facade --> ReportService
@@ -193,7 +191,6 @@ flowchart TD
     subgraph Database["Database Layer"]
         UsersDB["Users, Roles & Tokens"]
         PlacesDB["Places, Workers & Bookings"]
-        ChecklistDB["Checklist Templates & Runs"]
         MaintenanceDB["Assets, Schedules & Tickets"]
         FinanceDB["Expenses"]
         NotificationsDB["Notifications"]
@@ -218,8 +215,6 @@ flowchart TD
     UserManagement --> UsersDB
     PlaceManagement --> PlacesDB
     BookingManagement --> PlacesDB
-    BookingManagement -->|"Create checklist runs"| ChecklistSvc
-    ChecklistSvc --> ChecklistDB
     MaintenanceSvc --> MaintenanceDB
     ExpenseManagement --> FinanceDB
     ReportService --> FinanceDB
@@ -230,7 +225,6 @@ flowchart TD
  
     Notification -->|"OTP, invitations, password resets, reminders, alerts"| EmailService
     MaintenanceSvc -->|"Ticket photos"| StorageService
-    ChecklistSvc -->|"Checklist photos"| StorageService
     ExpenseManagement -->|"Receipts"| StorageService
     UserManagement -->|"Avatars"| StorageService
 ```
@@ -238,42 +232,42 @@ flowchart TD
 
 ---
 
-## 6. classes
+## 6. Classes
 
 ### 6.1 Back-end classes
- 
+
 | Class | Responsibility | Key methods |
 | :--- | :--- | :--- |
-| `BaseClass` | Shared `id`, `created_at`, `updated_at` for every entity | — |
-| `User` | Any account (Admin, Manager, Worker): login, profile, language; a Manager employs workers | `register`, `login`, `logout`, `verifyEmail`, `requestPasswordReset`, `resetPassword`, `createWorkerAccount`, `completeAccountSetup`, `hasPermission`, `changeStatus` |
-| `Role`, `Permission` | Role-based access: Admin, Manager, Worker and their permissions | `addPermission`, `removePermission` |
+| `BaseClass` | Shared `id`, `created_at`, `updated_at` for every entity except `AuditLog` | — |
+| `User` | Any account (Admin, Manager, Worker): login, profile, language; a Manager employs workers | `register`, `login`, `logout`, `verifyEmail`, `requestPasswordReset`, `resetPassword`, `createWorkerAccount`, `deleteWorkerAccount`, `completeAccountSetup`, `changeStatus` |
+| `Role` | Admin, Manager or Worker. The table keeps `USER.role_id` valid; routes check the role by name | — |
 | `VerificationToken` | Hashed one-time codes and links: email OTP, password reset, worker invitation | `generate`, `verify` |
 | `RefreshToken` | Long-lived login sessions, rotated on use, revoked on logout or deactivation | `issue`, `rotate`, `revoke` |
-| `Place` | A rental property with map location (can be filled from the browser's current location), currency, time zone and maintenance budget; soft-deleted | `add`, `update`, `softDelete`, `restore`, `assignWorker`, `getHealthSummary`, `getMaintenanceBudgetStatus` |
+| `Place` | A rental property with map location (can be filled from the browser's current location), currency, time zone and maintenance budget; soft-deleted | `add`, `update`, `softDelete`, `assignWorker`, `unassignWorker`, `getHealthSummary`, `getMaintenanceBudgetStatus` |
 | `PlaceWorker` | Which workers are assigned to which place | — |
 | `Asset` | Equipment in a place (AC, pool pump…) and its health; soft-deleted | `add`, `update`, `softDelete`, `changeStatus` |
-| `PeriodicMaintenance` | Recurring maintenance schedule for an asset | `schedule`, `triggerTicket`, `advanceNextDueDate` |
-| `MaintenanceTicket` | A repair or preventive job from report to completion | `submit`, `approve`, `reject`, `reassign`, `start`, `complete`, `isOverdue` |
-| `TicketAttachment` | Damage, before and after photos of a ticket | `upload`, `delete` |
-| `Booking` | A guest stay: dates, guest, price, check-in and check-out. `isReadyForCheckIn()` is true when its own `PRE_BOOKING` run is completed and the previous booking on the place is checked out with its `POST_BOOKING` run completed | `add`, `cancel`, `hasOverlap`, `isReadyForCheckIn`, `checkIn`, `checkOut` |
+| `PeriodicMaintenance` | Recurring maintenance schedule for an asset; stopped, never deleted | `schedule`, `deactivate`, `triggerTicket`, `advanceNextDueDate` |
+| `MaintenanceTicket` | A repair or preventive job: pending review, then approved or rejected, then completed | `submit`, `approve`, `reject`, `reassign`, `complete`, `isOverdue` |
+| `TicketAttachment` | Damage and after photos of a ticket | `upload` |
+| `Booking` | A guest stay: dates, guest, price, check-in and check-out. `isReadyForCheckIn()` is true from `check_in_date` (in the place's time zone) while no other booking on the place is checked in | `add`, `cancel`, `hasOverlap`, `isReadyForCheckIn`, `checkIn`, `checkOut` |
 | `Expense` | A cost for a place (maintenance, utilities, taxes…), optionally linked to a ticket. Financial reports count **only** expenses; a ticket's `actual_cost` is informational until the Manager logs it as an expense | `add`, `update`, `delete` |
-| `FinancialReport` | Computed (not stored) income, expenses and profit for a period | `generate`, `calculateIncome`, `calculateExpenses`, `calculateProfit` |
+| `FinancialReport` | Computed (not stored) income, expenses and profit for one place and period, in the place's currency | `generate`, `calculateIncome`, `calculateExpenses`, `calculateProfit` |
 | `Notification` | In-app message (and email) to a user, stored in the recipient's `preferred_language` (an Admin writes announcements in both languages; the service saves the matching version for each recipient) | `send`, `sendBulk`, `sendToRole`, `markAsRead` |
-| `SupportTicket` | A user's support request and the Admin's response | `submit`, `assign`, `resolve`, `reopen` |
+| `SupportTicket` | A user's support request and the Admin's response | `submit`, `resolve` |
 | `WebContent` | Public website page, per language | `create`, `update`, `delete`, `publish` |
-| `AuditLog` | Append-only record of critical actions | `record` |
+| `AuditLog` | Append-only record of critical actions; has `id` and `created_at` but no `updated_at` | `record` |
 
 ### 6.2 classDiagram
 
 ```mermaid
 classDiagram
- 
+
     class BaseClass {
         +string id
         +datetime created_at
         +datetime updated_at
     }
- 
+
     class User {
         +string role_id
         +string email
@@ -313,13 +307,13 @@ classDiagram
         +completeAccountSetup(string password)
         +changeStatus()
     }
- 
+
     class Role {
         +string name
         +string description
         +List~User~ users
     }
- 
+
     class VerificationToken {
         +string user_id
         +string token_hash
@@ -330,7 +324,7 @@ classDiagram
         +generate()
         +verify()
     }
- 
+
     class RefreshToken {
         +string user_id
         +string token_hash
@@ -341,7 +335,7 @@ classDiagram
         +rotate()
         +revoke()
     }
- 
+
     class Place {
         +string owner_id
         +string place_name
@@ -370,7 +364,7 @@ classDiagram
         +getHealthSummary()
         +getMaintenanceBudgetStatus()
     }
- 
+
     class PlaceWorker {
         +string place_id
         +string worker_id
@@ -378,7 +372,7 @@ classDiagram
         +boolean is_active
         +datetime assigned_at
     }
- 
+
     class Asset {
         +string place_id
         +string name
@@ -393,11 +387,12 @@ classDiagram
         +softDelete()
         +changeStatus()
     }
- 
+
     class PeriodicMaintenance {
         +string asset_id
         +string description
-        +string frequency
+        +int interval_count
+        +string interval_unit
         +date next_due_date
         +int lead_days
         +string default_assignee_id
@@ -408,7 +403,7 @@ classDiagram
         +triggerTicket()
         +advanceNextDueDate()
     }
- 
+
     class MaintenanceTicket {
         +string place_id
         +string asset_id
@@ -438,7 +433,7 @@ classDiagram
         +complete(decimal actual_cost, string completion_notes)
         +isOverdue() boolean
     }
- 
+
     class TicketAttachment {
         +string ticket_id
         +string uploaded_by
@@ -446,7 +441,7 @@ classDiagram
         +string attachment_type
         +upload()
     }
- 
+
     class Booking {
         +string place_id
         +string created_by
@@ -474,7 +469,7 @@ classDiagram
         +checkIn()
         +checkOut()
     }
- 
+
     class Expense {
         +string place_id
         +string ticket_id
@@ -489,7 +484,7 @@ classDiagram
         +delete()
         +view()
     }
- 
+
     class FinancialReport {
         +string place_id
         +string currency
@@ -504,7 +499,7 @@ classDiagram
         +calculateExpenses()
         +calculateProfit()
     }
- 
+
     class Notification {
         +string user_id
         +string sender_id
@@ -517,7 +512,7 @@ classDiagram
         +sendToRole(string role_id)
         +markAsRead()
     }
- 
+
     class SupportTicket {
         +string user_id
         +string resolved_by
@@ -529,7 +524,7 @@ classDiagram
         +submit()
         +resolve(string response)
     }
- 
+
     class WebContent {
         +string author_id
         +string title
@@ -542,7 +537,7 @@ classDiagram
         +delete()
         +publish()
     }
- 
+
     class AuditLog {
         +string id
         +string user_id
@@ -555,7 +550,7 @@ classDiagram
         +datetime created_at
         +record()
     }
- 
+
     %% Inheritance from BaseClass (AuditLog is append-only, so it has no updated_at)
     BaseClass <|-- User
     BaseClass <|-- Role
@@ -572,10 +567,10 @@ classDiagram
     BaseClass <|-- Notification
     BaseClass <|-- SupportTicket
     BaseClass <|-- WebContent
- 
+
     %% Roles (routes check the role name, services check ids)
     Role "1" --> "*" User : assigned to
- 
+
     %% User relationships
     User "1" --> "*" User : employs (manager → workers)
     User "1" --> "*" VerificationToken : requests
@@ -592,33 +587,33 @@ classDiagram
     User "1" --> "*" SupportTicket : resolves (admin)
     User "1" --> "*" WebContent : authors
     User "1" --> "*" AuditLog : performs
- 
+
     %% Place relationships
     Place "1" --> "*" PlaceWorker : staffed by
     Place "1" --> "*" Asset : contains
     Place "1" --> "*" Booking : has
     Place "1" --> "*" Expense : has
     Place "1" --> "*" MaintenanceTicket : needs
- 
+
     %% Maintenance
     Asset "1" --> "*" PeriodicMaintenance : scheduled for
     Asset "1" --> "*" MaintenanceTicket : needs
     PeriodicMaintenance "1" --> "*" MaintenanceTicket : generates
     MaintenanceTicket "1" --> "*" TicketAttachment : has
     MaintenanceTicket "1" --> "*" Expense : paid by
- 
+
     %% Functional dependencies
     FinancialReport ..> Booking : uses
     FinancialReport ..> Expense : uses
-
 ```
+
 ---
 
 ## 7. ER Diagram
 
 ```mermaid
 erDiagram
- 
+
     ROLE {
         string id PK
         string name UK "ADMIN|MANAGER|WORKER"
@@ -626,7 +621,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     USER {
         string id PK
         string role_id FK
@@ -642,7 +637,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     VERIFICATION_TOKEN {
         string id PK
         string user_id FK
@@ -654,7 +649,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     REFRESH_TOKEN {
         string id PK
         string user_id FK
@@ -665,7 +660,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     PLACE {
         string id PK
         string owner_id FK
@@ -684,7 +679,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     PLACE_WORKER {
         string id PK
         string place_id FK "unique with worker_id"
@@ -695,7 +690,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     ASSET {
         string id PK
         string place_id FK
@@ -707,20 +702,21 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     PERIODIC_MAINTENANCE {
         string id PK
         string asset_id FK
         string default_assignee_id FK "nullable; a worker on the place or its owner"
         string description
-        string frequency "MONTHLY|QUARTERLY|YEARLY"
+        int interval_count "1-365"
+        string interval_unit "DAY|WEEK|MONTH|YEAR"
         date next_due_date
         int lead_days "days before next_due_date that the ticket is created"
         boolean is_active "false = stopped"
         datetime created_at
         datetime updated_at
     }
- 
+
     MAINTENANCE_TICKET {
         string id PK
         string place_id FK
@@ -745,17 +741,17 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     TICKET_ATTACHMENT {
         string id PK
         string ticket_id FK
         string uploaded_by FK
         string file_url "S3 object key"
-        string attachment_type "DAMAGE|AFTER"
+        string attachment_type "DAMAGE|AFTER_REPAIR"
         datetime created_at
         datetime updated_at
     }
- 
+
     BOOKING {
         string id PK
         string place_id FK
@@ -779,7 +775,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     EXPENSE {
         string id PK
         string place_id FK
@@ -793,7 +789,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     NOTIFICATION {
         string id PK
         string user_id FK
@@ -805,7 +801,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     SUPPORT_TICKET {
         string id PK
         string user_id FK
@@ -818,7 +814,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     WEB_CONTENT {
         string id PK
         string author_id FK
@@ -830,7 +826,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
- 
+
     AUDIT_LOG {
         string id PK
         string user_id FK
@@ -842,12 +838,12 @@ erDiagram
         string ip_address
         datetime created_at
     }
- 
- 
+
+
     %% ROLES
     ROLE ||--o{ USER : "assigns"
- 
- 
+
+
     %% USER
     USER |o--o{ USER : "employs"
     USER ||--o{ VERIFICATION_TOKEN : "requests"
@@ -867,24 +863,24 @@ erDiagram
     USER |o--o{ SUPPORT_TICKET : "resolves (admin)"
     USER ||--o{ WEB_CONTENT : "authors"
     USER ||--o{ AUDIT_LOG : "performs"
- 
- 
+
+
     %% PLACE
     PLACE ||--o{ PLACE_WORKER : "staffed by"
     PLACE ||--o{ ASSET : "contains"
     PLACE ||--o{ BOOKING : "has"
     PLACE ||--o{ EXPENSE : "has"
     PLACE ||--o{ MAINTENANCE_TICKET : "needs"
- 
- 
+
+
     %% ASSET & MAINTENANCE
     ASSET ||--o{ PERIODIC_MAINTENANCE : "scheduled for"
     ASSET |o--o{ MAINTENANCE_TICKET : "involves"
     PERIODIC_MAINTENANCE |o--o{ MAINTENANCE_TICKET : "generates"
     MAINTENANCE_TICKET ||--o{ TICKET_ATTACHMENT : "has"
     MAINTENANCE_TICKET |o--o{ EXPENSE : "paid by"
-
 ```
+
 ---
 
 ## 8. High-Level Sequence Diagrams
@@ -904,7 +900,7 @@ sequenceDiagram
 
     Note over U,DB: Login
     U->>App: Enter email and password
-    App->>API: POST /api/auth/login
+    App->>API: POST /api/v1/auth/login
     API->>AS: authenticate(email, password)
     AS->>DB: Find user by email
     DB-->>AS: User or none
@@ -925,13 +921,13 @@ sequenceDiagram
 
     Note over U,DB: Authenticated request
     U->>App: Open Places
-    App->>API: GET /api/places (Bearer JWT)
+    App->>API: GET /api/v1/places (Bearer JWT)
     alt Token expired or invalid
         API-->>App: 401
-        App->>API: POST /api/auth/refresh, then retry
-    else Token valid and role has place:view
+        App->>API: POST /api/v1/auth/refresh, then retry
+    else Token valid and role is Manager or Worker
         API->>DB: Select places in the user's scope
-        Note right of DB: Admin all, Manager owned,<br/>Worker assigned, never deleted
+        Note right of DB: Manager owned, Worker assigned,<br/>never deleted
         DB-->>API: Places
         API-->>App: 200 OK
         App-->>U: Show places
@@ -950,8 +946,8 @@ sequenceDiagram
     participant DB as Database
 
     W->>App: Pick dates, enter guest info and price
-    App->>API: POST /api/places/:placeId/bookings
-    API->>API: Check JWT, booking:create and request body
+    App->>API: POST /api/v1/places/:placeId/bookings
+    API->>API: Check JWT, role and request body
     Note right of API: Failures here return 401, 403 or 422
     API->>BS: create(user, placeId, data)
     BS->>DB: Check user can access the place and it is ACTIVE
@@ -967,11 +963,10 @@ sequenceDiagram
             API-->>App: 409 Dates already booked
         else Dates free
             BS->>DB: Insert booking (CONFIRMED)
-            BS->>DB: Create pre- and post-booking checklist runs
             BS->>DB: Write audit log and commit
             BS-->>API: Booking
             API-->>App: 201 Created
-            App-->>W: Show booking and its checklist
+            App-->>W: Show booking
         end
     end
 ```
@@ -992,11 +987,9 @@ sequenceDiagram
     participant NS as Notification Service
 
     W->>App: Take photos, pick asset, describe damage, set priority
-    App->>API: Request upload URLs
-    API-->>App: Pre-signed S3 URLs
-    App->>S3: Upload compressed photos
-    App->>API: POST /api/places/:placeId/tickets
-    API->>MS: createTicket(user, data)
+    App->>API: POST /api/v1/places/:placeId/tickets (multipart, with photos)
+    API->>MS: createTicket(user, data, photos)
+    MS->>S3: Store resized photos
     MS->>DB: Save ticket (PENDING_REVIEW), DAMAGE photos and audit log
     MS->>NS: Notify the place owner (in-app and email)
     API-->>App: 201 Created
@@ -1016,19 +1009,19 @@ sequenceDiagram
     participant NS as Notification Service
 
     M->>App: Open ticket
-    App->>API: GET /api/tickets/:id
+    App->>API: GET /api/v1/tickets/:id
     API-->>App: Ticket with photo URLs
 
     alt Approve
         M->>App: Set estimated cost, assignee and due date
-        App->>API: POST /api/tickets/:id/approve
+        App->>API: POST /api/v1/tickets/:id/approve
         API->>MS: approve(user, id, data)
-        MS->>DB: Check assignee works on this place (else 422)
+        MS->>DB: Check the assignee works on this place or owns it (else 422)
         MS->>DB: Ticket APPROVED, asset NEEDS_MAINTENANCE, audit log
         MS->>NS: Notify the assignee
     else Reject
         M->>App: Enter reason
-        App->>API: POST /api/tickets/:id/reject
+        App->>API: POST /api/v1/tickets/:id/reject
         API->>MS: reject(user, id, reason)
         MS->>DB: Ticket REJECTED with reason, audit log
         MS->>NS: Notify the reporter
@@ -1049,17 +1042,16 @@ sequenceDiagram
     participant DB as Database
     participant NS as Notification Service
 
-    Note over W,NS: Earlier, Start set the ticket to IN_PROGRESS and the asset to UNDER_MAINTENANCE
     W->>App: Add after photos, actual cost and notes
-    App->>S3: Upload photos
-    App->>API: POST /api/tickets/:id/complete
-    API->>MS: complete(user, id, data)
+    App->>API: POST /api/v1/tickets/:id/complete (multipart, with photos)
+    API->>MS: complete(user, id, data, photos)
 
     alt No after photo
         MS-->>API: Validation error
         API-->>App: 422 At least one after photo is required
     else After photo provided
-        MS->>DB: Save AFTER photos, ticket COMPLETED, audit log
+        MS->>S3: Store resized photos
+        MS->>DB: Save AFTER_REPAIR photos, ticket COMPLETED, audit log
         MS->>DB: Asset GOOD if it has no other open tickets
         MS->>NS: Notify the place owner
         API-->>App: 200 OK
@@ -1084,9 +1076,9 @@ sequenceDiagram
 | :--- | :--- | :--- | :--- | :--- |
 | `main` | Production code, always releasable; every merge is tagged `vX.Y.Z` | — | — | Production (after manual approval) |
 | `develop` | Integration branch; all finished work lands here first | `main` | `main` | Staging (automatic) |
-| `feature/<ticket>-<name>` | One user story or task (lives 1–3 days) | `develop` | `develop` | — |
-| `fix/<ticket>-<name>` | Non-urgent bug found on staging | `develop` | `develop` | — |
-| `hotfix/<ticket>-<name>` | Urgent production bug | `main` | `main` and `develop` | Production |
+| `feat/<scope>-<description>` | One user story or task (lives 1–3 days). Also `docs/`, `chore/`, `refactor/` and the other commit types | `develop` | `develop` | — |
+| `fix/<scope>-<description>` | Non-urgent bug found on staging | `develop` | `develop` | — |
+| `hotfix/<scope>-<description>` | Urgent production bug | `main` | `main` and `develop` | Production |
 
 **Why:** `develop` maps to staging and `main` to production. Full GitFlow release branches are not needed because we ship one SaaS version. Trunk-based development needs feature flags and very mature CI.
 
@@ -1094,7 +1086,7 @@ sequenceDiagram
 
 **Commits**
 - Small commits, one logical change each; feature branches are pushed at least once a day.
-- Format: **Conventional Commits** (`type(scope): summary`), e.g. `feat(booking): block check-in until checklists are done`.
+- Format: **Conventional Commits** (`type(scope): summary`), e.g. `feat(bookings): add booking overlap check`. The full rules are in `CONTRIBUTING.md`.
 - Git hooks (Husky) run lint and format checks before each commit and check the message format (commitlint).
 - Secrets are never committed (`.env` is git-ignored).
 
@@ -1114,7 +1106,7 @@ sequenceDiagram
 
 - **Unit tests:** test each function and component on its own (e.g. booking overlap, check-in readiness, profit calculation).
 - **Integration tests:** test every API endpoint with a real test database, including permissions for each role.
-- **End-to-end tests:** test critical user flows in a real browser (e.g. check-in after checklists, ticket approval).
+- **End-to-end tests:** test critical user flows in a real browser (e.g. booking check-in and check-out, ticket approval).
 - **Manual testing:** check the main flows on real phones and desktops before each release.
 
 #### 9.2.2 Testing tools
