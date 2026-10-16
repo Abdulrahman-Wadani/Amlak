@@ -7,9 +7,6 @@
 * **Manager:** The owner/supervisor of properties. Managers handle property and asset CRUD, assign workers to their properties, build checklists, review maintenance tickets, schedule periodic maintenance, log expenses and generate financial reports.
 
 * **Worker:** On-site operational staff, always assigned to one or more properties by a Manager. Workers run checklists, manage bookings, report damaged assets and submit photo proof. A Worker can only see data for places they are assigned to, and never sees financial data.
-
-* **User:** A newly registered or unassigned account. Has access to account settings, onboarding and profile only, until an Admin changes their role.
-
 ---
 
 ## 2. Prioritized User Stories
@@ -270,13 +267,13 @@ flowchart TD
 
 ```mermaid
 classDiagram
-
+ 
     class BaseClass {
         +string id
         +datetime created_at
         +datetime updated_at
     }
-
+ 
     class User {
         +string role_id
         +string email
@@ -300,7 +297,7 @@ classDiagram
         +List~Expense~ logged_expenses
         +List~Notification~ notifications
         +List~SupportTicket~ support_tickets
-        +List~SupportTicket~ handled_support_tickets
+        +List~SupportTicket~ resolved_support_tickets
         +List~WebContent~ authored_contents
         +List~AuditLog~ audit_logs
         +register()
@@ -312,26 +309,17 @@ classDiagram
         +requestPasswordReset(string email)
         +verifyEmail()
         +createWorkerAccount()
-        +resendInvitation()
+        +deleteWorkerAccount()
         +completeAccountSetup(string password)
-        +hasPermission(string permission_name)
         +changeStatus()
     }
-
+ 
     class Role {
         +string name
         +string description
-        +List~Permission~ permissions
         +List~User~ users
-        +addPermission()
-        +removePermission()
     }
-
-    class Permission {
-        +string name
-        +string description
-    }
-
+ 
     class VerificationToken {
         +string user_id
         +string token_hash
@@ -342,7 +330,7 @@ classDiagram
         +generate()
         +verify()
     }
-
+ 
     class RefreshToken {
         +string user_id
         +string token_hash
@@ -353,7 +341,7 @@ classDiagram
         +rotate()
         +revoke()
     }
-
+ 
     class Place {
         +string owner_id
         +string place_name
@@ -376,14 +364,13 @@ classDiagram
         +add()
         +update()
         +softDelete()
-        +restore()
         +view()
         +assignWorker(string worker_id)
         +unassignWorker(string worker_id)
         +getHealthSummary()
         +getMaintenanceBudgetStatus()
     }
-
+ 
     class PlaceWorker {
         +string place_id
         +string worker_id
@@ -391,7 +378,7 @@ classDiagram
         +boolean is_active
         +datetime assigned_at
     }
-
+ 
     class Asset {
         +string place_id
         +string name
@@ -406,7 +393,7 @@ classDiagram
         +softDelete()
         +changeStatus()
     }
-
+ 
     class PeriodicMaintenance {
         +string asset_id
         +string description
@@ -417,10 +404,11 @@ classDiagram
         +boolean is_active
         +List~MaintenanceTicket~ generated_tickets
         +schedule()
+        +deactivate()
         +triggerTicket()
         +advanceNextDueDate()
     }
-
+ 
     class MaintenanceTicket {
         +string place_id
         +string asset_id
@@ -437,7 +425,6 @@ classDiagram
         +string reviewed_by
         +datetime reviewed_at
         +string rejection_reason
-        +datetime started_at
         +datetime completed_at
         +string completion_notes
         +datetime reminder_sent_at
@@ -445,23 +432,21 @@ classDiagram
         +List~TicketAttachment~ attachments
         +List~Expense~ expenses
         +submit()
-        +approve()
+        +approve(string assignee_id, date due_date, decimal estimated_cost)
         +reject(string reason)
-        +reassign(string worker_id, date due_date)
-        +start()
-        +complete()
+        +reassign(string assignee_id, date due_date)
+        +complete(decimal actual_cost, string completion_notes)
         +isOverdue() boolean
     }
-
+ 
     class TicketAttachment {
         +string ticket_id
         +string uploaded_by
         +string file_url
         +string attachment_type
         +upload()
-        +delete()
     }
-
+ 
     class Booking {
         +string place_id
         +string created_by
@@ -481,7 +466,6 @@ classDiagram
         +string checked_in_by
         +datetime checked_out_at
         +string checked_out_by
-        +datetime readiness_alert_sent_at
         +add()
         +cancel(string reason)
         +view()
@@ -490,7 +474,7 @@ classDiagram
         +checkIn()
         +checkOut()
     }
-
+ 
     class Expense {
         +string place_id
         +string ticket_id
@@ -505,9 +489,10 @@ classDiagram
         +delete()
         +view()
     }
-
+ 
     class FinancialReport {
         +string place_id
+        +string currency
         +date period_start
         +date period_end
         +decimal total_income
@@ -519,7 +504,7 @@ classDiagram
         +calculateExpenses()
         +calculateProfit()
     }
-
+ 
     class Notification {
         +string user_id
         +string sender_id
@@ -532,21 +517,19 @@ classDiagram
         +sendToRole(string role_id)
         +markAsRead()
     }
-
+ 
     class SupportTicket {
         +string user_id
-        +string assigned_admin_id
+        +string resolved_by
         +string subject
         +string description
         +string status
         +string admin_response
         +datetime resolved_at
         +submit()
-        +assign(string admin_id)
         +resolve(string response)
-        +reopen()
     }
-
+ 
     class WebContent {
         +string author_id
         +string title
@@ -559,8 +542,9 @@ classDiagram
         +delete()
         +publish()
     }
-
+ 
     class AuditLog {
+        +string id
         +string user_id
         +string action
         +string entity_type
@@ -568,13 +552,13 @@ classDiagram
         +json old_values
         +json new_values
         +string ip_address
+        +datetime created_at
         +record()
     }
-
-    %% Inheritance from BaseClass
+ 
+    %% Inheritance from BaseClass (AuditLog is append-only, so it has no updated_at)
     BaseClass <|-- User
     BaseClass <|-- Role
-    BaseClass <|-- Permission
     BaseClass <|-- VerificationToken
     BaseClass <|-- RefreshToken
     BaseClass <|-- Place
@@ -588,45 +572,45 @@ classDiagram
     BaseClass <|-- Notification
     BaseClass <|-- SupportTicket
     BaseClass <|-- WebContent
-    BaseClass <|-- AuditLog
-
-    %% RBAC
+ 
+    %% Roles (routes check the role name, services check ids)
     Role "1" --> "*" User : assigned to
-    Role "*" --> "*" Permission : grants
-
+ 
     %% User relationships
     User "1" --> "*" User : employs (manager → workers)
     User "1" --> "*" VerificationToken : requests
     User "1" --> "*" RefreshToken : holds
     User "1" --> "*" Place : owns
-    User "1" --> "*" PlaceWorker : assigned via
-    User "1" --> "*" MaintenanceTicket : reports / handles
+    User "1" --> "*" PlaceWorker : is assigned / assigns
+    User "1" --> "*" PeriodicMaintenance : is default assignee
+    User "1" --> "*" MaintenanceTicket : reports / is assigned / reviews
     User "1" --> "*" TicketAttachment : uploads
-    User "1" --> "*" Booking : creates
+    User "1" --> "*" Booking : creates / cancels / checks in-out
     User "1" --> "*" Expense : logs
-    User "1" --> "*" Notification : receives
+    User "1" --> "*" Notification : receives / sends
     User "1" --> "*" SupportTicket : submits
-    User "1" --> "*" SupportTicket : handles (admin)
+    User "1" --> "*" SupportTicket : resolves (admin)
     User "1" --> "*" WebContent : authors
     User "1" --> "*" AuditLog : performs
-
+ 
     %% Place relationships
     Place "1" --> "*" PlaceWorker : staffed by
     Place "1" --> "*" Asset : contains
     Place "1" --> "*" Booking : has
     Place "1" --> "*" Expense : has
     Place "1" --> "*" MaintenanceTicket : needs
-
+ 
     %% Maintenance
     Asset "1" --> "*" PeriodicMaintenance : scheduled for
     Asset "1" --> "*" MaintenanceTicket : needs
     PeriodicMaintenance "1" --> "*" MaintenanceTicket : generates
     MaintenanceTicket "1" --> "*" TicketAttachment : has
     MaintenanceTicket "1" --> "*" Expense : paid by
-
+ 
     %% Functional dependencies
     FinancialReport ..> Booking : uses
     FinancialReport ..> Expense : uses
+
 ```
 ---
 
@@ -634,28 +618,15 @@ classDiagram
 
 ```mermaid
 erDiagram
-
+ 
     ROLE {
         string id PK
-        string name "ADMIN|MANAGER|WORKER"
+        string name UK "ADMIN|MANAGER|WORKER"
         string description
         datetime created_at
         datetime updated_at
     }
-
-    PERMISSION {
-        string id PK
-        string name "e.g. ticket:approve"
-        string description
-        datetime created_at
-        datetime updated_at
-    }
-
-    ROLE_PERMISSION {
-        string role_id PK, FK
-        string permission_id PK, FK
-    }
-
+ 
     USER {
         string id PK
         string role_id FK
@@ -663,7 +634,7 @@ erDiagram
         string password_hash
         string phone
         string fullname
-        string picture_path
+        string picture_path "S3 object key, nullable"
         string status "INVITED|PENDING_VERIFICATION|ACTIVE|DEACTIVATED"
         datetime email_verified_at
         string preferred_language "ar|en"
@@ -671,7 +642,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
-
+ 
     VERIFICATION_TOKEN {
         string id PK
         string user_id FK
@@ -683,7 +654,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
-
+ 
     REFRESH_TOKEN {
         string id PK
         string user_id FK
@@ -694,7 +665,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
-
+ 
     PLACE {
         string id PK
         string owner_id FK
@@ -707,13 +678,13 @@ erDiagram
         decimal longitude
         string status "ACTIVE|INACTIVE|UNDER_MAINTENANCE"
         decimal monthly_maintenance_budget "nullable"
-        string currency "default SAR"
-        string timezone "default Asia/Riyadh"
-        datetime deleted_at "nullable, set = soft deleted"
+        string currency "default SAR, set at creation"
+        string timezone "default Asia/Riyadh, set at creation"
+        datetime deleted_at "nullable, set = deleted"
         datetime created_at
         datetime updated_at
     }
-
+ 
     PLACE_WORKER {
         string id PK
         string place_id FK "unique with worker_id"
@@ -724,7 +695,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
-
+ 
     ASSET {
         string id PK
         string place_id FK
@@ -736,38 +707,37 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
-
+ 
     PERIODIC_MAINTENANCE {
         string id PK
         string asset_id FK
-        string default_assignee_id FK "nullable"
+        string default_assignee_id FK "nullable; a worker on the place or its owner"
         string description
         string frequency "MONTHLY|QUARTERLY|YEARLY"
         date next_due_date
-        int lead_days
-        boolean is_active
+        int lead_days "days before next_due_date that the ticket is created"
+        boolean is_active "false = stopped"
         datetime created_at
         datetime updated_at
     }
-
+ 
     MAINTENANCE_TICKET {
         string id PK
         string place_id FK
         string asset_id FK "nullable"
         string periodic_maintenance_id FK "nullable"
         string reporter_id FK "nullable for scheduler"
-        string assignee_id FK "nullable until approved"
+        string assignee_id FK "nullable until approved; a worker on the place or its owner"
         string reviewed_by FK "nullable until reviewed"
         string ticket_type "CORRECTIVE|PREVENTIVE"
         string priority "LOW|MEDIUM|HIGH|URGENT"
         string description
         decimal estimated_cost "nullable until approved"
         decimal actual_cost "nullable until completed"
-        string status "PENDING_REVIEW|APPROVED|REJECTED|IN_PROGRESS|COMPLETED"
-        date due_date
+        string status "PENDING_REVIEW|APPROVED|REJECTED|COMPLETED"
+        date due_date "nullable until approved or generated"
         datetime reviewed_at
         string rejection_reason
-        datetime started_at
         datetime completed_at
         string completion_notes
         datetime reminder_sent_at
@@ -775,17 +745,17 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
-
+ 
     TICKET_ATTACHMENT {
         string id PK
         string ticket_id FK
         string uploaded_by FK
-        string file_url
-        string attachment_type "DAMAGE|BEFORE|AFTER"
+        string file_url "S3 object key"
+        string attachment_type "DAMAGE|AFTER"
         datetime created_at
         datetime updated_at
     }
-
+ 
     BOOKING {
         string id PK
         string place_id FK
@@ -795,7 +765,7 @@ erDiagram
         string guest_email
         int guest_count
         date check_in_date
-        date check_out_date
+        date check_out_date "the next stay may start on this day"
         decimal total_price
         string status "CONFIRMED|CHECKED_IN|CHECKED_OUT|CANCELLED"
         string notes
@@ -806,11 +776,10 @@ erDiagram
         string checked_in_by FK "nullable"
         datetime checked_out_at
         string checked_out_by FK "nullable"
-        datetime readiness_alert_sent_at
         datetime created_at
         datetime updated_at
     }
-
+ 
     EXPENSE {
         string id PK
         string place_id FK
@@ -820,36 +789,36 @@ erDiagram
         string description
         decimal amount
         date expense_date
-        string receipt_url
+        string receipt_url "S3 object key, nullable"
         datetime created_at
         datetime updated_at
     }
-
+ 
     NOTIFICATION {
         string id PK
         string user_id FK
         string sender_id FK "nullable for system"
-        string type
+        string type "TICKET_SUBMITTED|TICKET_ASSIGNED|TICKET_REJECTED|TICKET_COMPLETED|MAINTENANCE_REMINDER|MAINTENANCE_OVERDUE|SUPPORT_RESOLVED|ANNOUNCEMENT"
         string title
         string message
         boolean is_read
         datetime created_at
         datetime updated_at
     }
-
+ 
     SUPPORT_TICKET {
         string id PK
         string user_id FK
-        string assigned_admin_id FK "nullable"
+        string resolved_by FK "nullable until resolved"
         string subject
         string description
-        string status "OPEN|IN_PROGRESS|RESOLVED"
+        string status "OPEN|RESOLVED"
         string admin_response
         datetime resolved_at
         datetime created_at
         datetime updated_at
     }
-
+ 
     WEB_CONTENT {
         string id PK
         string author_id FK
@@ -861,7 +830,7 @@ erDiagram
         datetime created_at
         datetime updated_at
     }
-
+ 
     AUDIT_LOG {
         string id PK
         string user_id FK
@@ -873,45 +842,48 @@ erDiagram
         string ip_address
         datetime created_at
     }
-
-
-    %% RBAC
+ 
+ 
+    %% ROLES
     ROLE ||--o{ USER : "assigns"
-    ROLE ||--o{ ROLE_PERMISSION : "has"
-    PERMISSION ||--o{ ROLE_PERMISSION : "included in"
-
-
+ 
+ 
     %% USER
     USER |o--o{ USER : "employs"
     USER ||--o{ VERIFICATION_TOKEN : "requests"
     USER ||--o{ REFRESH_TOKEN : "holds"
     USER ||--o{ PLACE : "owns"
     USER ||--o{ PLACE_WORKER : "is assigned"
-    USER |o--o{ MAINTENANCE_TICKET : "reports / handles"
+    USER ||--o{ PLACE_WORKER : "assigns"
+    USER |o--o{ PERIODIC_MAINTENANCE : "is default assignee"
+    USER |o--o{ MAINTENANCE_TICKET : "reports / is assigned / reviews"
     USER ||--o{ TICKET_ATTACHMENT : "uploads"
     USER ||--o{ BOOKING : "creates"
+    USER |o--o{ BOOKING : "cancels / checks in / checks out"
     USER ||--o{ EXPENSE : "logs"
     USER ||--o{ NOTIFICATION : "receives"
+    USER |o--o{ NOTIFICATION : "sends"
     USER ||--o{ SUPPORT_TICKET : "submits"
-    USER |o--o{ SUPPORT_TICKET : "handles (admin)"
+    USER |o--o{ SUPPORT_TICKET : "resolves (admin)"
     USER ||--o{ WEB_CONTENT : "authors"
     USER ||--o{ AUDIT_LOG : "performs"
-
-
+ 
+ 
     %% PLACE
     PLACE ||--o{ PLACE_WORKER : "staffed by"
     PLACE ||--o{ ASSET : "contains"
     PLACE ||--o{ BOOKING : "has"
     PLACE ||--o{ EXPENSE : "has"
     PLACE ||--o{ MAINTENANCE_TICKET : "needs"
-
-
+ 
+ 
     %% ASSET & MAINTENANCE
     ASSET ||--o{ PERIODIC_MAINTENANCE : "scheduled for"
     ASSET |o--o{ MAINTENANCE_TICKET : "involves"
     PERIODIC_MAINTENANCE |o--o{ MAINTENANCE_TICKET : "generates"
     MAINTENANCE_TICKET ||--o{ TICKET_ATTACHMENT : "has"
     MAINTENANCE_TICKET |o--o{ EXPENSE : "paid by"
+
 ```
 ---
 
