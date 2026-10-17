@@ -6,22 +6,36 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+function emailProblem(value: string): string {
+  if (!value) return "Email is required.";
+  if (!/^\S+@\S+\.\S+$/.test(value)) return "Enter a valid email address.";
+  return "";
+}
+
+function passwordProblem(value: string): string {
+  return value ? "" : "Password is required.";
+}
+
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!email || !password) {
-      setError("Email and password are required.");
+    const nextEmailError = emailProblem(email);
+    const nextPasswordError = passwordProblem(password);
+    setEmailError(nextEmailError);
+    setPasswordError(nextPasswordError);
+
+    if (nextEmailError || nextPasswordError) {
       setSuccess(false);
     } else {
-      setError("");
       setLoading(true);
-      // mock network delay will be replaced with real fetch
+      // mock network delay
       setTimeout(() => {
         setSuccess(true);
         setLoading(false);
@@ -43,11 +57,17 @@ export default function SignIn() {
               id="email"
               type="email"
               placeholder="you@amlak.com"
-              className={`h-[42px] ${loading ? "opacity-60" : ""}`}
+              className={`h-[42px] ${emailError ? "border-crit-700 bg-crit-50" : ""} ${loading ? "opacity-60" : ""}`}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
             />
+            {emailError && (
+              <p className="flex items-center gap-1.5 text-xs text-crit-700">
+                <span className="size-[6px] bg-crit" />
+                {emailError}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -58,11 +78,17 @@ export default function SignIn() {
               id="password"
               type="password"
               placeholder="••••••••"
-              className={`h-[42px] ${loading ? "opacity-60" : ""}`}
+              className={`h-[42px] ${passwordError ? "border-crit-700 bg-crit-50" : ""} ${loading ? "opacity-60" : ""}`}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
             />
+            {passwordError && (
+              <p className="flex items-center gap-1.5 text-xs text-crit-700">
+                <span className="size-[6px] bg-crit" />
+                {passwordError}
+              </p>
+            )}
           </div>
 
           <label className="flex cursor-pointer items-center gap-2 text-[12px]">
@@ -70,11 +96,6 @@ export default function SignIn() {
             Remember me
           </label>
 
-          {error && (
-            <Alert variant="destructive">
-              <AlertTitle>{error}</AlertTitle>
-            </Alert>
-          )}
           {success && (
             <Alert>
               <AlertTitle>Signed in (mock)</AlertTitle>
