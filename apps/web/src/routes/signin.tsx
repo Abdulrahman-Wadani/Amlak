@@ -1,54 +1,60 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { type SubmitEvent, useState } from "react";
-import { Alert, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { createFileRoute } from "@tanstack/react-router"
+import { type SubmitEvent, useState } from "react"
+import { Alert, AlertTitle } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 function emailProblem(value: string): string {
-  if (!value) return "Email is required.";
-  if (!/^\S+@\S+\.\S+$/.test(value)) return "Enter a valid email address.";
-  return "";
+  if (!value) return "Email is required."
+  if (!/^\S+@\S+\.\S+$/.test(value)) return "Enter a valid email address."
+  return ""
 }
 
 function passwordProblem(value: string): string {
-  return value ? "" : "Password is required.";
+  return value ? "" : "Password is required."
 }
 
 export default function SignIn() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [emailError, setEmailError] = useState("")
+  const [passwordError, setPasswordError] = useState("")
+  const [success, setSuccess] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const nextEmailError = emailProblem(email);
-    const nextPasswordError = passwordProblem(password);
-    setEmailError(nextEmailError);
-    setPasswordError(nextPasswordError);
+    e.preventDefault()
+    const nextEmailError = emailProblem(email)
+    const nextPasswordError = passwordProblem(password)
+    setEmailError(nextEmailError)
+    setPasswordError(nextPasswordError)
 
     if (nextEmailError || nextPasswordError) {
-      setSuccess(false);
+      setSuccess(false)
     } else {
-      setLoading(true);
+      setLoading(true)
       // mock network delay
       setTimeout(() => {
-        setSuccess(true);
-        setLoading(false);
-      }, 1500);
+        setSuccess(true)
+        setLoading(false)
+      }, 1500)
     }
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm p-8">
-        <h1 className="mb-6 text-[28px] font-extrabold tracking-tight">Sign in</h1>
+        <h1 className="mb-6 text-[28px] font-extrabold tracking-tight">
+          Sign in
+        </h1>
 
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className="flex flex-col gap-5"
+        >
           <div className="flex flex-col gap-2">
             <Label htmlFor="email" className="text-sm font-bold">
               Email
@@ -114,12 +120,15 @@ export default function SignIn() {
           </Button>
         </form>
         {/* biome-ignore lint/a11y/useValidAnchor: placeholder link until /forgot-password route exists */}
-        <a href="#" className="mt-4 inline-block text-sm text-info-700 hover:underline">
+        <a
+          href="#"
+          className="mt-4 inline-block text-sm text-info-700 hover:underline"
+        >
           Forgot password?
         </a>
       </Card>
     </div>
-  );
+  )
 }
 
-export const Route = createFileRoute("/signin")({ component: SignIn });
+export const Route = createFileRoute("/signin")({ component: SignIn })
