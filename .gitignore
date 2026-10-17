@@ -10,3 +10,9 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+# Dependencies
+node_modules/
+
+# Generated Prisma client
+apps/api/src/generated/
