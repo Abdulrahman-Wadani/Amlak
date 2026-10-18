@@ -5,16 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
-function emailProblem(value: string): string {
-  if (!value) return "Email is required."
-  if (!/^\S+@\S+\.\S+$/.test(value)) return "Enter a valid email address."
-  return ""
-}
-
-function passwordProblem(value: string): string {
-  return value ? "" : "Password is required."
-}
+import { signInInput } from "@/lib/validators"
 
 export default function SignIn() {
   const [email, setEmail] = useState("")
@@ -26,12 +17,14 @@ export default function SignIn() {
 
   function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
-    const nextEmailError = emailProblem(email)
-    const nextPasswordError = passwordProblem(password)
-    setEmailError(nextEmailError)
-    setPasswordError(nextPasswordError)
+    const result = signInInput.safeParse({ email, password })
+    const issues = result.success ? [] : result.error.issues
+    setEmailError(issues.find((i) => i.path[0] === "email")?.message ?? "")
+    setPasswordError(
+      issues.find((i) => i.path[0] === "password")?.message ?? ""
+    )
 
-    if (nextEmailError || nextPasswordError) {
+    if (issues.length > 0) {
       setSuccess(false)
     } else {
       setLoading(true)
