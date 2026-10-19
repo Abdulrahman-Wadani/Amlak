@@ -1,0 +1,5 @@
+{
+	"name": "amlak",
+	"private": true,
+	"workspaces": ["apps/api", "packages/*"]
+}
