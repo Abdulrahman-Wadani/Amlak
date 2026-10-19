@@ -1,3 +1,4 @@
+import { ROLES } from "@amlak/shared";
 import { jwtVerify, SignJWT } from "jose";
 import { z } from "zod";
 import { config } from "../config.ts";
@@ -6,7 +7,7 @@ const secret = new TextEncoder().encode(config.JWT_SECRET);
 
 const accessTokenSchema = z.object({
 	user_id: z.uuid(),
-	role: z.enum(["ADMIN", "MANAGER", "WORKER"]),
+	role: z.enum(ROLES),
 });
 
 export type AuthUser = z.infer<typeof accessTokenSchema>;

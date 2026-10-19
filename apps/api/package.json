@@ -8,12 +8,13 @@
 		"check": "biome check",
 		"fix": "biome check --write",
 		"typecheck": "tsc",
-		"dev": "node --watch src/server.ts",
-		"start": "node src/server.ts"
+		"dev": "bun --watch src/server.ts",
+		"start": "bun src/server.ts"
 	},
 	"keywords": [],
 	"type": "module",
 	"dependencies": {
+		"@amlak/shared": "workspace:*",
 		"@prisma/adapter-pg": "^7.10.0",
 		"@prisma/client": "^7.10.0",
 		"dotenv": "^18.0.7",
