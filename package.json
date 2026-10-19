@@ -1,0 +1,9 @@
+{
+	"name": "amlak",
+	"private": true,
+	"workspaces": ["apps/api", "packages/*"],
+	"scripts": {
+		"check": "bun run --filter \"*\" check",
+		"typecheck": "bun run --filter \"*\" typecheck"
+	}
+}
