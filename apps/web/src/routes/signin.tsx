@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { useAuth } from "@/lib/auth"
 import { type SubmitEvent, useState } from "react"
 import { Alert, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -14,8 +15,10 @@ export default function SignIn() {
   const [passwordError, setPasswordError] = useState("")
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
+  const { login } = useAuth()
+  const navigate = useNavigate()
 
-  function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     const result = signInInput.safeParse({ email, password })
     const issues = result.success ? [] : result.error.issues
@@ -28,11 +31,8 @@ export default function SignIn() {
       setSuccess(false)
     } else {
       setLoading(true)
-      // mock network delay
-      setTimeout(() => {
-        setSuccess(true)
-        setLoading(false)
-      }, 1500)
+      await login(email, password)
+      navigate({ to: "/home"})
     }
   }
 
