@@ -8,8 +8,8 @@
 		"check": "biome check",
 		"fix": "biome check --write",
 		"typecheck": "tsc",
-		"dev": "node --watch src/server.ts",
-		"start": "node src/server.ts"
+		"dev": "bun --watch src/server.ts",
+		"start": "bun src/server.ts"
 	},
 	"keywords": [],
 	"type": "module",
