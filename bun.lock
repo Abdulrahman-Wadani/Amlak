@@ -9,6 +9,7 @@
       "name": "api",
       "version": "1.0.0",
       "dependencies": {
+        "@amlak/shared": "workspace:*",
         "@prisma/adapter-pg": "^7.10.0",
         "@prisma/client": "^7.10.0",
         "dotenv": "^18.0.7",
@@ -25,8 +26,17 @@
         "typescript": "^7.0.2",
       },
     },
+    "packages/shared": {
+      "name": "@amlak/shared",
+      "devDependencies": {
+        "@biomejs/biome": "2.5.15",
+        "typescript": "^7.0.2",
+      },
+    },
   },
   "packages": {
+    "@amlak/shared": ["@amlak/shared@workspace:packages/shared"],
+
     "@biomejs/biome": ["@biomejs/biome@2.5.15", "", { "optionalDependencies": { "@biomejs/cli-darwin-arm64": "2.5.15", "@biomejs/cli-darwin-x64": "2.5.15", "@biomejs/cli-linux-arm64": "2.5.15", "@biomejs/cli-linux-arm64-musl": "2.5.15", "@biomejs/cli-linux-x64": "2.5.15", "@biomejs/cli-linux-x64-musl": "2.5.15", "@biomejs/cli-win32-arm64": "2.5.15", "@biomejs/cli-win32-x64": "2.5.15" }, "bin": { "biome": "bin/biome" } }, "sha512-WZTW4slm/pdkh92K6t/3aEN++44JD1PQ7squ7RCMLI1flHGl43DVOIGXvCjHiZgBMO1V4uYxoFNtqrIA4qGuIQ=="],
 
     "@biomejs/cli-darwin-arm64": ["@biomejs/cli-darwin-arm64@2.5.15", "", { "os": "darwin", "cpu": "arm64" }, "sha512-BZVzFhJ/mUvTLMYbc9x6el0o2Uv5zP7bACYyhFb6fSc1giroXm7PL0a5KqMJ9F+/BnkYRjagD/ROSDVOZ6eapg=="],

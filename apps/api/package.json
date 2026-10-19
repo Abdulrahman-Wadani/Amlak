@@ -14,6 +14,7 @@
 	"keywords": [],
 	"type": "module",
 	"dependencies": {
+		"@amlak/shared": "workspace:*",
 		"@prisma/adapter-pg": "^7.10.0",
 		"@prisma/client": "^7.10.0",
 		"dotenv": "^18.0.7",

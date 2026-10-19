@@ -1,0 +1,17 @@
+{
+	"name": "@amlak/shared",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"check": "biome check",
+		"fix": "biome check --write",
+		"typecheck": "tsc"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.15",
+		"typescript": "^7.0.2"
+	}
+}

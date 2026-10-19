@@ -1,7 +1,7 @@
+import { ROLES } from "@amlak/shared";
 import { jwtVerify, SignJWT } from "jose";
 import { z } from "zod";
 import { config } from "../config.ts";
-import { ROLES } from "./roles.ts";
 
 const secret = new TextEncoder().encode(config.JWT_SECRET);
 

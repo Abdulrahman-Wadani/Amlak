@@ -1,4 +1,4 @@
-import { ROLES } from "../src/auth/roles.ts";
+import { ROLES } from "@amlak/shared";
 import { prisma } from "../src/db.ts";
 
 for (const name of ROLES) {
