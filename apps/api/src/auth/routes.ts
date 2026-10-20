@@ -1,4 +1,5 @@
 import {
+	type AccessToken,
 	type LoginResponse,
 	loginSchema,
 	registerSchema,
@@ -8,7 +9,7 @@ import {
 import { type Response, Router } from "express";
 import { parse } from "../validation.ts";
 import * as auth from "./service.ts";
-import { REFRESH_TOKEN_MS } from "./sessions.ts";
+import { REFRESH_TOKEN_MS, type Session } from "./sessions.ts";
 import { ACCESS_TOKEN_SECONDS } from "./tokens.ts";
 
 export const authRouter = Router();
@@ -34,14 +35,23 @@ authRouter.post("/auth/login", async (req, res) => {
 	const input = parse(loginSchema, req.body);
 	const { session, user } = await auth.login(input);
 	setRefreshCookie(res, session.refreshToken);
-	const body: LoginResponse = {
+	const body: LoginResponse = { ...accessTokenBody(session), user };
+	res.json(body);
+});
+
+authRouter.post("/auth/refresh", async (req, res) => {
+	const session = await auth.refresh(req.cookies.refresh_token);
+	setRefreshCookie(res, session.refreshToken);
+	res.json(accessTokenBody(session));
+});
+
+function accessTokenBody(session: Session): AccessToken {
+	return {
 		access_token: session.accessToken,
 		token_type: "Bearer",
 		expires_in: ACCESS_TOKEN_SECONDS,
-		user,
 	};
-	res.json(body);
-});
+}
 
 function setRefreshCookie(res: Response, token: string) {
 	res.cookie("refresh_token", token, {

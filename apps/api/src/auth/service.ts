@@ -13,7 +13,7 @@ import { AppError } from "../errors.ts";
 import { toUser } from "../users/present.ts";
 import { hashCode, newVerificationCode } from "./codes.ts";
 import { hashPassword, verifyPassword } from "./passwords.ts";
-import { type Session, startSession } from "./sessions.ts";
+import { endSession, type Session, startSession } from "./sessions.ts";
 
 const CODE_LIFETIME_MS = 10 * 60 * 1000;
 const MAX_CODE_ATTEMPTS = 5;
@@ -190,6 +190,31 @@ export async function login(
 		role: user.role.name as Role,
 	});
 	return { session, user: toUser(user) };
+}
+
+export async function refresh(
+	refreshToken: string | undefined,
+): Promise<Session> {
+	const userId = refreshToken ? await endSession(refreshToken) : null;
+	if (!userId) {
+		throw sessionExpired();
+	}
+
+	const user = await prisma.user.findUniqueOrThrow({
+		where: { id: userId },
+		include: { role: true, manager: true },
+	});
+	if (inactiveReason(user.status, user.manager?.status)) {
+		throw sessionExpired();
+	}
+	return startSession({ user_id: user.id, role: user.role.name as Role });
+}
+
+function sessionExpired(): AppError {
+	return new AppError(
+		"UNAUTHENTICATED",
+		"Your session is invalid or has expired",
+	);
 }
 
 function inactiveReason(status: UserStatus, managerStatus?: UserStatus) {

@@ -18,6 +18,18 @@ export async function startSession(user: AuthUser): Promise<Session> {
 	return { accessToken: await signAccessToken(user), refreshToken };
 }
 
+export async function endSession(refreshToken: string): Promise<string | null> {
+	const [revoked] = await prisma.refreshToken.updateManyAndReturn({
+		where: {
+			token_hash: hashToken(refreshToken),
+			revoked_at: null,
+			expires_at: { gt: new Date() },
+		},
+		data: { revoked_at: new Date() },
+	});
+	return revoked?.user_id ?? null;
+}
+
 function hashToken(token: string): string {
 	return createHash("sha256").update(token).digest("hex");
 }
