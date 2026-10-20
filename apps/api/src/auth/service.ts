@@ -1,4 +1,9 @@
-import type { RegisterInput, User, VerifyEmailInput } from "@amlak/shared";
+import type {
+	RegisterInput,
+	User,
+	VerificationCodeInput,
+	VerifyEmailInput,
+} from "@amlak/shared";
 import { prisma } from "../db.ts";
 import { sendEmail } from "../email.ts";
 import { AppError } from "../errors.ts";
@@ -8,6 +13,9 @@ import { hashPassword } from "./passwords.ts";
 
 const CODE_LIFETIME_MS = 10 * 60 * 1000;
 const MAX_CODE_ATTEMPTS = 5;
+const RESEND_WAIT_MS = 60 * 1000;
+const MAX_CODES_PER_HOUR = 5;
+const HOUR_MS = 60 * 60 * 1000;
 
 export async function register(input: RegisterInput): Promise<User> {
 	const existing = await prisma.user.findUnique({
@@ -30,22 +38,12 @@ export async function register(input: RegisterInput): Promise<User> {
 			password_hash: await hashPassword(input.password),
 			status: "PENDING_VERIFICATION",
 			role_id: managerRole.id,
-			verification_tokens: {
-				create: {
-					token_type: "EMAIL_OTP",
-					token_hash: hashCode(code),
-					expires_at: new Date(Date.now() + CODE_LIFETIME_MS),
-				},
-			},
+			verification_tokens: { create: emailCodeToken(code) },
 		},
 		include: { role: true },
 	});
 
-	await sendEmail({
-		to: user.email,
-		subject: "Your Amlak verification code",
-		text: `Your code is ${code}. It expires in 10 minutes.`,
-	});
+	await sendCodeEmail(user.email, code);
 	return toUser(user);
 }
 
@@ -96,5 +94,68 @@ export async function verifyEmail(input: VerifyEmailInput) {
 function invalidCode(): AppError {
 	return new AppError("VALIDATION_ERROR", "Some fields are invalid", {
 		fields: { code: "The code is wrong or has expired" },
+	});
+}
+
+export async function sendVerificationCode(
+	input: VerificationCodeInput,
+): Promise<void> {
+	const user = await prisma.user.findUnique({
+		where: { email: input.email },
+	});
+	if (user?.status !== "PENDING_VERIFICATION") {
+		return;
+	}
+
+	const lastHour = await prisma.verificationToken.findMany({
+		where: {
+			user_id: user.id,
+			token_type: "EMAIL_OTP",
+			created_at: { gt: new Date(Date.now() - HOUR_MS) },
+		},
+		orderBy: { created_at: "desc" },
+	});
+	const newest = lastHour[0];
+	const oldest = lastHour[lastHour.length - 1];
+	if (newest && Date.now() - newest.created_at.getTime() < RESEND_WAIT_MS) {
+		throw rateLimited(newest.created_at.getTime() + RESEND_WAIT_MS);
+	}
+	if (oldest && lastHour.length >= MAX_CODES_PER_HOUR) {
+		throw rateLimited(oldest.created_at.getTime() + HOUR_MS);
+	}
+
+	const code = newVerificationCode();
+	await prisma.$transaction([
+		prisma.verificationToken.updateMany({
+			where: { user_id: user.id, token_type: "EMAIL_OTP", is_used: false },
+			data: { is_used: true },
+		}),
+		prisma.verificationToken.create({
+			data: { user_id: user.id, ...emailCodeToken(code) },
+		}),
+	]);
+	await sendCodeEmail(user.email, code);
+}
+
+function emailCodeToken(code: string) {
+	return {
+		token_type: "EMAIL_OTP" as const,
+		token_hash: hashCode(code),
+		expires_at: new Date(Date.now() + CODE_LIFETIME_MS),
+	};
+}
+
+function sendCodeEmail(to: string, code: string): Promise<void> {
+	return sendEmail({
+		to,
+		subject: "Your Amlak verification code",
+		text: `Your code is ${code}. It expires in 10 minutes.`,
+	});
+}
+
+function rateLimited(allowedAt: number): AppError {
+	const seconds = Math.ceil((allowedAt - Date.now()) / 1000);
+	return new AppError("RATE_LIMITED", "Too many codes requested", {
+		retry_after_seconds: seconds,
 	});
 }

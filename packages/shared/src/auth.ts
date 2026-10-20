@@ -35,3 +35,9 @@ export const verifyEmailSchema = z.object({
 });
 
 export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
+
+export const verificationCodeSchema = z.object({
+	email: emailSchema,
+});
+
+export type VerificationCodeInput = z.infer<typeof verificationCodeSchema>;
