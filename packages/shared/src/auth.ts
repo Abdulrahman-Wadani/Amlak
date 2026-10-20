@@ -28,3 +28,16 @@ export const registerSchema = z.object({
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
+
+export const verifyEmailSchema = z.object({
+	email: emailSchema,
+	code: z.string().regex(/^\d{6}$/, "Enter the 6-digit code"),
+});
+
+export type VerifyEmailInput = z.infer<typeof verifyEmailSchema>;
+
+export const verificationCodeSchema = z.object({
+	email: emailSchema,
+});
+
+export type VerificationCodeInput = z.infer<typeof verificationCodeSchema>;
