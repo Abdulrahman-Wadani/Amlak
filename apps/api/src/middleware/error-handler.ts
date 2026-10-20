@@ -6,6 +6,9 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
 		if (error.code === "UNAUTHENTICATED") {
 			res.set("WWW-Authenticate", "Bearer");
 		}
+		if (error.code === "RATE_LIMITED") {
+			res.set("Retry-After", String(error.details?.retry_after_seconds));
+		}
 		res.status(error.status).json({
 			code: error.code,
 			message: error.message,
