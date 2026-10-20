@@ -1,13 +1,25 @@
 import {
+	type AccessToken,
+	type LoginResponse,
+	loginSchema,
 	registerSchema,
 	verificationCodeSchema,
 	verifyEmailSchema,
 } from "@amlak/shared";
-import { Router } from "express";
+import { type CookieOptions, type Response, Router } from "express";
 import { parse } from "../validation.ts";
 import * as auth from "./service.ts";
+import { REFRESH_TOKEN_MS, type Session } from "./sessions.ts";
+import { ACCESS_TOKEN_SECONDS } from "./tokens.ts";
 
 export const authRouter = Router();
+
+const refreshCookie: CookieOptions = {
+	httpOnly: true,
+	secure: true,
+	sameSite: "strict",
+	path: "/api/v1/auth",
+};
 
 authRouter.post("/auth/register", async (req, res) => {
 	const input = parse(registerSchema, req.body);
@@ -25,3 +37,38 @@ authRouter.post("/auth/verification-code", async (req, res) => {
 	await auth.sendVerificationCode(input);
 	res.status(204).end();
 });
+
+authRouter.post("/auth/login", async (req, res) => {
+	const input = parse(loginSchema, req.body);
+	const { session, user } = await auth.login(input);
+	setRefreshCookie(res, session.refreshToken);
+	const body: LoginResponse = { ...accessTokenBody(session), user };
+	res.json(body);
+});
+
+authRouter.post("/auth/refresh", async (req, res) => {
+	const session = await auth.refresh(req.cookies.refresh_token);
+	setRefreshCookie(res, session.refreshToken);
+	res.json(accessTokenBody(session));
+});
+
+authRouter.post("/auth/logout", async (req, res) => {
+	await auth.logout(req.cookies.refresh_token);
+	res.clearCookie("refresh_token", refreshCookie);
+	res.status(204).end();
+});
+
+function accessTokenBody(session: Session): AccessToken {
+	return {
+		access_token: session.accessToken,
+		token_type: "Bearer",
+		expires_in: ACCESS_TOKEN_SECONDS,
+	};
+}
+
+function setRefreshCookie(res: Response, token: string) {
+	res.cookie("refresh_token", token, {
+		...refreshCookie,
+		maxAge: REFRESH_TOKEN_MS,
+	});
+}

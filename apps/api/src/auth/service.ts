@@ -1,6 +1,9 @@
 import type {
+	LoginInput,
 	RegisterInput,
+	Role,
 	User,
+	UserStatus,
 	VerificationCodeInput,
 	VerifyEmailInput,
 } from "@amlak/shared";
@@ -9,7 +12,8 @@ import { sendEmail } from "../email.ts";
 import { AppError } from "../errors.ts";
 import { toUser } from "../users/present.ts";
 import { hashCode, newVerificationCode } from "./codes.ts";
-import { hashPassword } from "./passwords.ts";
+import { hashPassword, verifyPassword } from "./passwords.ts";
+import { endSession, type Session, startSession } from "./sessions.ts";
 
 const CODE_LIFETIME_MS = 10 * 60 * 1000;
 const MAX_CODE_ATTEMPTS = 5;
@@ -158,4 +162,71 @@ function rateLimited(allowedAt: number): AppError {
 	return new AppError("RATE_LIMITED", "Too many codes requested", {
 		retry_after_seconds: seconds,
 	});
+}
+
+export async function login(
+	input: LoginInput,
+): Promise<{ session: Session; user: User }> {
+	const user = await prisma.user.findUnique({
+		where: { email: input.email },
+		include: { role: true, manager: true },
+	});
+	if (
+		!user?.password_hash ||
+		!(await verifyPassword(input.password, user.password_hash))
+	) {
+		throw new AppError("INVALID_CREDENTIALS", "Wrong email or password");
+	}
+
+	const reason = inactiveReason(user.status, user.manager?.status);
+	if (reason) {
+		throw new AppError("ACCOUNT_NOT_ACTIVE", "This account cannot log in", {
+			reason,
+		});
+	}
+
+	const session = await startSession({
+		user_id: user.id,
+		role: user.role.name as Role,
+	});
+	return { session, user: toUser(user) };
+}
+
+export async function refresh(
+	refreshToken: string | undefined,
+): Promise<Session> {
+	const userId = refreshToken ? await endSession(refreshToken) : null;
+	if (!userId) {
+		throw sessionExpired();
+	}
+
+	const user = await prisma.user.findUniqueOrThrow({
+		where: { id: userId },
+		include: { role: true, manager: true },
+	});
+	if (inactiveReason(user.status, user.manager?.status)) {
+		throw sessionExpired();
+	}
+	return startSession({ user_id: user.id, role: user.role.name as Role });
+}
+
+export async function logout(refreshToken: string | undefined): Promise<void> {
+	if (refreshToken) {
+		await endSession(refreshToken);
+	}
+}
+
+function sessionExpired(): AppError {
+	return new AppError(
+		"UNAUTHENTICATED",
+		"Your session is invalid or has expired",
+	);
+}
+
+function inactiveReason(status: UserStatus, managerStatus?: UserStatus) {
+	if (status === "PENDING_VERIFICATION") return "EMAIL_NOT_VERIFIED";
+	if (status === "INVITED") return "INVITATION_PENDING";
+	if (status === "DEACTIVATED") return "ACCOUNT_DEACTIVATED";
+	if (managerStatus === "DEACTIVATED") return "MANAGER_DEACTIVATED";
+	return null;
 }
