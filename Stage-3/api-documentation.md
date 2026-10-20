@@ -1,57 +1,188 @@
-# Amlak Property & Maintenance Management API
+# Amlak API — MVP
 
-> Complete API documentation generated from the Amlak OpenAPI 3.0.3 specification.
+> REST contract for the Amlak MVP web app. It covers every Must Have story in the SRS, built the simplest way that works. Data shapes follow the SRS §6 classes and §7 ER diagram in `amlak-srs-diagrams.md`. If this document and those diagrams disagree, fix this document.
 
-## API Overview
+## Overview
 
-- **Version:** `1.0.0`
-- **OpenAPI:** `3.0.3`
-- **Total endpoints:** **58**
-- **Authentication:** JWT Bearer Token
-- **Missing Authorization:** `403` with `Bearer Token is required.`
+- **Version:** `1.0.0` (MVP)
+- **Endpoints:** **67**
+- **Format:** JSON with `snake_case` fields and UUID ids. Endpoints that take photos use `multipart/form-data`.
+- **Authentication:** 15-minute JWT access token, plus a 30-day refresh token in an `HttpOnly` cookie
 
 ## Base URLs
 
-- `https://api.example.com/api/v1` — Proposed production base URL - replace with the actual API URL
-- `http://localhost:3000/api/v1` — Proposed local development URL
+- `https://api.example.com/api/v1` — Proposed production URL; replace with the real one
+- `http://localhost:3001/api/v1` — Local development (the port comes from `PORT` in `.env`)
+
+Paths below are relative to the base URL.
+
+## Conventions
+
+| Topic | Rule |
+|---|---|
+| Body | JSON, except endpoints that take files. Those use `multipart/form-data`, with each field as a text part and each file as a file part |
+| Dates | `date` fields use `YYYY-MM-DD` in the place's time zone (`Place.timezone`) |
+| Timestamps | `*_at` fields use ISO 8601 in UTC, e.g. `2026-01-01T10:00:00Z` |
+| Money | A number with at most 2 decimals, in the place's `currency`. Amounts in different currencies are never added together |
+| Updates | `PUT` bodies are partial: omitted fields stay unchanged. To clear a nullable field, send `null` in JSON or an empty value in multipart |
+| Lists | Every list returns `{ "data": [...], "pagination": {...} }` and accepts `page` (default 1) and `page_size` (default 20, max 100) |
+| Language | Error messages, emails and notifications use the user's `preferred_language`. Public endpoints read the `Accept-Language` header: `ar` or `en`, default `ar` |
+| Deleting | Deleting a place or asset sets `deleted_at`. Deleted places and assets, and everything in them, are hidden from every endpoint |
+| Open ticket | A maintenance ticket in `PENDING_REVIEW` or `APPROVED` |
+| Notifications | Nobody is notified about their own action |
 
 ## Authentication
 
-All endpoints require the `Authorization` header unless an endpoint explicitly overrides this requirement.
+Send the access token on every endpoint not marked **Public**:
 
 ```http
-Authorization: Bearer <JWT_TOKEN>
+Authorization: Bearer <access_token>
 ```
 
-### Missing Token Response
+The access token is a JWT valid for 15 minutes that carries `user_id` and `role`. The refresh token is valid for 30 days. It is stored hashed in `REFRESH_TOKEN`, replaced on every refresh, and revoked on logout, password reset and deactivation. The API sets it as a cookie that the web app's JavaScript cannot read:
+
+```http
+Set-Cookie: refresh_token=<token>; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth; Max-Age=2592000
+```
+
+When a request returns `401 UNAUTHENTICATED`, the web app calls `POST /auth/refresh` once and retries. If the refresh fails, it shows the login screen.
+
+| Status | Meaning | Becomes `ACTIVE` through |
+|---|---|---|
+| `PENDING_VERIFICATION` | A registered Manager who has not verified their email | `POST /auth/verify-email` |
+| `INVITED` | A Worker who has not set a password yet | `POST /auth/account-setup` |
+| `ACTIVE` | Can log in | — |
+| `DEACTIVATED` | Blocked; history is kept | `PUT /users/{userId}` or `PUT /workers/{workerId}` |
+
+Only `ACTIVE` users can log in or refresh, and a Worker whose Manager is `DEACTIVATED` is rejected too. Deactivating a user revokes their refresh tokens; deactivating a Manager also revokes their workers' tokens. An access token issued before a deactivation keeps working until it expires, at most 15 minutes later.
+
+## Roles and Access
+
+There are three roles: `ADMIN`, `MANAGER` and `WORKER`. They are rows in the `ROLE` table, so `USER.role_id` can only point to a real role. Managers register themselves, Managers create Workers, and Admins are created by a seed script.
+
+Access is checked in two steps:
+
+1. **Role.** Each endpoint lists the roles that can call it. The route compares that list with the `role` name in the access token. Endpoints marked **Any role** need only a valid access token.
+2. **Ids.** The service then checks that the record belongs to the caller:
+
+| Record | The caller must be |
+|---|---|
+| A place and everything in it | Its owner (`PLACE.owner_id`), or a Worker with an active `PLACE_WORKER` row for it |
+| A worker account | That worker's Manager (`USER.manager_id`) |
+| A ticket being completed | Its assignee (`MAINTENANCE_TICKET.assignee_id`) |
+| A support ticket | Its submitter (`SUPPORT_TICKET.user_id`), or an Admin |
+| A notification | Its recipient (`NOTIFICATION.user_id`) |
+
+Failing either step returns `403 FORBIDDEN`, and lists contain only the caller's rows. Admins have no access to places or anything in them.
+
+**Financial data.** Workers never receive expenses, financial reports, `monthly_maintenance_budget`, the dashboard's `maintenance_budget` or a ticket's `estimated_cost`.
+
+## Errors
+
+Every error has the same body. `message` is written in the caller's language and can be shown to the user as is. `details` is optional and always an object.
 
 ```json
 {
-  "message": "Bearer Token is required"
+  "code": "CONFLICT",
+  "message": "These dates overlap another booking",
+  "details": { "conflicting_booking_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c51" }
 }
 ```
 
+A validation error lists every bad field:
+
+```json
+{
+  "code": "VALIDATION_ERROR",
+  "message": "Some fields are invalid",
+  "details": {
+    "fields": {
+      "email": "Invalid email address",
+      "password": "Too small: expected string to have >=8 characters"
+    }
+  }
+}
+```
+
+| Status | `code` | When |
+|---|---|---|
+| 401 | `UNAUTHENTICATED` | The access token or the refresh cookie is missing, invalid or expired. Sent with `WWW-Authenticate: Bearer` |
+| 401 | `INVALID_CREDENTIALS` | Wrong email or password at login |
+| 403 | `ACCOUNT_NOT_ACTIVE` | The login password is right but the account cannot log in; `details.reason` says why |
+| 403 | `FORBIDDEN` | The caller's role cannot use the endpoint, or the record belongs to someone else |
+| 404 | `NOT_FOUND` | The resource does not exist or is deleted |
+| 409 | `CONFLICT` | Current data blocks the action: the resource is in the wrong status, a value is taken, dates overlap, or other records must be handled first. `details` names them |
+| 422 | `VALIDATION_ERROR` | The body is malformed, or a field is missing or invalid. `details.fields` maps each bad field to a reason |
+| 429 | `RATE_LIMITED` | Too many requests; the `Retry-After` header gives the wait in seconds |
+| 500 | `INTERNAL_ERROR` | Unexpected server error |
+
+Any endpoint can return the errors in this table, so each endpoint below lists only the cases specific to it. The web app needs to branch on `code` only for `UNAUTHENTICATED` (refresh, then retry), `ACCOUNT_NOT_ACTIVE` (route by reason) and `VALIDATION_ERROR` (mark the fields).
+
+## Photos
+
+Photos travel in the same request as the data they belong to, as file parts of a `multipart/form-data` body:
+
+| Endpoint | File part | Files |
+|---|---|---|
+| `PUT /users/me` | `picture` | 0–1 |
+| `POST /places/{placeId}/tickets` | `photos` | 0–5, saved as `DAMAGE` |
+| `POST /tickets/{ticketId}/complete` | `photos` | 1–5, saved as `AFTER_REPAIR` |
+| `POST /places/{placeId}/expenses`, `PUT /expenses/{expenseId}` | `receipt` | 0–1 |
+
+Each file must be JPEG, PNG or WebP and at most 10 MB. The server resizes and compresses each image, stores it in a private, encrypted S3 bucket and saves the object key in the database. Responses return images as pre-signed URLs valid for 1 hour.
+
+To send several photos, repeat the part:
+
+```bash
+curl -X POST https://api.example.com/api/v1/places/9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10/tickets \
+  -H "Authorization: Bearer <access_token>" \
+  -F asset_id=9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c20 \
+  -F priority=HIGH \
+  -F "description=Living-room AC blows warm air" \
+  -F photos=@ac-front.jpg \
+  -F photos=@ac-label.jpg
+```
+
+## Audit Log
+
+These actions write an `AUDIT_LOG` row with the user, action, entity and before/after values. The log is append-only and has no endpoint.
+
+- Logging in
+- Submitting, approving, rejecting, reassigning and completing tickets
+- Adding, cancelling, checking in and checking out bookings
+- Adding, updating and deleting expenses
+- Deleting a place and removing an asset
+- Creating, deleting, assigning and unassigning workers
+- Deactivating and reactivating any account
+
 ## Endpoint Index
 
-### Authentication
-- `POST /auth/register` — Register a user
-- `POST /auth/login` — Login
-* `POST /auth/refresh-token` — Refresh access token
-- `POST /auth/verification-code` — Request a verification code
-- `POST /auth/verify` — Verify OTP or verification token
-- `POST /auth/password/reset` — Reset password
+### Auth
+- `POST /auth/register` — Register a manager account
+- `POST /auth/verify-email` — Verify the registration code
+- `POST /auth/verification-code` — Send a new registration code
+- `POST /auth/login` — Log in
+- `POST /auth/refresh` — Get a new access token
+- `POST /auth/logout` — Log out
+- `POST /auth/password/forgot` — Email a password reset link
+- `POST /auth/password/reset` — Set a new password from the link
+- `POST /auth/account-setup` — Worker sets a password from the invitation
 
+### Profile
+- `GET /users/me` — Get my profile
+- `PUT /users/me` — Update my profile and picture
 
-### Users
-- `GET /users/me` — Get current user profile
-- `PUT /users/me` — Update current user profile
-
-### Admin
+### Users (Admin)
 - `GET /users` — List users
-- `POST /users` — Create a user
 - `GET /users/{userId}` — Get a user
-- `PUT /users/{userId}` — Update a user
-- `DELETE /users/{userId}` — Deactivate a user
+- `PUT /users/{userId}` — Edit, deactivate or reactivate a user
+
+### Workers
+- `GET /workers` — List my workers
+- `POST /workers` — Create a worker and email the invitation
+- `GET /workers/{workerId}` — Get a worker
+- `PUT /workers/{workerId}` — Edit, deactivate or reactivate a worker
+- `DELETE /workers/{workerId}` — Delete a worker who never set up their account
 
 ### Places
 - `GET /places` — List places
@@ -59,2224 +190,1829 @@ Authorization: Bearer <JWT_TOKEN>
 - `GET /places/{placeId}` — Get a place
 - `PUT /places/{placeId}` — Update a place
 - `DELETE /places/{placeId}` — Delete a place
+- `GET /places/{placeId}/workers` — List the workers assigned to a place
+- `POST /places/{placeId}/workers` — Assign a worker
+- `DELETE /places/{placeId}/workers/{workerId}` — Unassign a worker
+
+### Dashboard
+- `GET /dashboard` — Property and asset health
 
 ### Assets
-- `GET /places/{placeId}/assets` — List assets for a place
+- `GET /places/{placeId}/assets` — List a place's assets
 - `POST /places/{placeId}/assets` — Add an asset
 - `GET /assets/{assetId}` — Get an asset
 - `PUT /assets/{assetId}` — Update an asset
-- `DELETE /assets/{assetId}` — Delete an asset
+- `DELETE /assets/{assetId}` — Remove an asset
 
-### Maintenance
-- `GET /assets/{assetId}/maintenance-schedules` — List periodic maintenance schedules
+### Maintenance Schedules
+- `GET /assets/{assetId}/maintenance-schedules` — List an asset's schedules
 - `POST /assets/{assetId}/maintenance-schedules` — Schedule periodic maintenance
-- `GET /maintenance-tickets` — List maintenance tickets
-- `POST /maintenance-tickets` — Submit a maintenance ticket
-- `GET /maintenance-tickets/{ticketId}` — Get a maintenance ticket
-- `POST /maintenance-tickets/{ticketId}/approve` — Approve a maintenance ticket
-- `POST /maintenance-tickets/{ticketId}/reject` — Reject a maintenance ticket
-- `POST /maintenance-tickets/{ticketId}/complete` — Complete a maintenance ticket
+- `DELETE /maintenance-schedules/{scheduleId}` — Stop a schedule
+
+### Maintenance Tickets
+- `GET /tickets` — List tickets
+- `POST /places/{placeId}/tickets` — Report damage, with photos
+- `GET /tickets/{ticketId}` — Get a ticket with its photos
+- `POST /tickets/{ticketId}/approve` — Approve and assign
+- `POST /tickets/{ticketId}/reject` — Reject
+- `POST /tickets/{ticketId}/reassign` — Change the assignee or due date
+- `POST /tickets/{ticketId}/complete` — Complete, with after photos
 
 ### Bookings
-- `GET /places/{placeId}/bookings` — List bookings for a place
+- `GET /places/{placeId}/bookings` — Booking calendar
 - `POST /places/{placeId}/bookings` — Add a booking
 - `GET /bookings/{bookingId}` — Get a booking
-- `POST /bookings/{bookingId}` — Cancel a booking
+- `POST /bookings/{bookingId}/cancel` — Cancel a booking
+- `POST /bookings/{bookingId}/check-in` — Check the guest in
+- `POST /bookings/{bookingId}/check-out` — Check the guest out
 
 ### Expenses
-- `GET /places/{placeId}/expenses` — List expenses
-- `POST /places/{placeId}/expenses` — Add an expense
+- `GET /places/{placeId}/expenses` — List a place's expenses
+- `POST /places/{placeId}/expenses` — Log an expense, with a receipt photo
 - `GET /expenses/{expenseId}` — Get an expense
 - `PUT /expenses/{expenseId}` — Update an expense
 - `DELETE /expenses/{expenseId}` — Delete an expense
 
 ### Reports
-- `GET /reports/financial` — Generate financial report
-- `GET /reports/analytics` — Get reporting and analytics
+- `GET /reports/financial` — Income, expenses and profit for a period
 
 ### Notifications
-- `GET /notifications` — List current user's notifications
-- `POST /notifications` — Send notification
-- `POST /notifications/{notificationId}/read` — Mark notification as read
+- `GET /notifications` — List my notifications
+- `POST /notifications/{notificationId}/read` — Mark a notification as read
+- `POST /notifications` — Send an announcement (Admin)
 
 ### Support
 - `GET /support-tickets` — List support tickets
 - `POST /support-tickets` — Submit a support ticket
 - `GET /support-tickets/{ticketId}` — Get a support ticket
-- `PUT /support-tickets/{ticketId}` — Update support ticket status
+- `POST /support-tickets/{ticketId}/resolve` — Resolve with a response
 
 ### Web Content
-- `GET /content` — List web content
-- `POST /content` — Create web content
-- `GET /content/{contentId}` — Get web content
-- `PUT /content/{contentId}` — Update web content
-- `DELETE /content/{contentId}` — Delete web content
-- `POST /content/{contentId}/publish` — Publish web content
+- `GET /content` — List pages
+- `POST /content` — Create a page
+- `GET /content/{contentId}` — Get a page
+- `PUT /content/{contentId}` — Edit, publish or unpublish a page
+- `DELETE /content/{contentId}` — Delete a page
 
 ---
 
-# Authentication
+# Auth
 
-## 1. `POST /auth/register`
+## `POST /auth/register`
 
-**Summary:** Register a user
+Register a manager account. **Public.**
 
-**Description:** Creates a new user account.
+Creates a `MANAGER` with status `PENDING_VERIFICATION` and emails a 6-digit code that is valid for 10 minutes.
 
-### Parameters
-
-No path/query/header parameters.
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `RegisterRequest`
-
-| Field | Type | Required | Description |
+| Body field | Type | Required | Rules |
 |---|---|---|---|
-| `fullname` | `string` | Yes | - |
-| `email` | `string (email)` | Yes | - |
-| `password` | `string (password)` | Yes | - |
-| `phone` | `string` | No | - |
+| `fullname` | string | Yes | |
+| `email` | string (email) | Yes | Unique |
+| `phone` | string | Yes | E.164 format, e.g. `+966512345678` |
+| `password` | string | Yes | At least 8 characters |
+| `preferred_language` | `Language` | No | Default `ar` |
 
-**Example request:**
+**201** → `User`. No tokens are issued until the email is verified.
+
+Example response (`201 Created`):
+
 ```json
 {
-  "fullname": "string",
-  "email": "user@example.com",
-  "password": "string",
-  "phone": "string"
+  "id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "email": "sara@example.com",
+  "fullname": "Sara Alqahtani",
+  "phone": "+966512345678",
+  "picture_url": null,
+  "role": "MANAGER",
+  "status": "PENDING_VERIFICATION",
+  "preferred_language": "ar",
+  "email_verified_at": null,
+  "manager_id": null,
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:00:00Z"
 }
 ```
 
-### Responses
+**Errors:** `409 CONFLICT` — the email is taken
 
-#### `201` — User created
+## `POST /auth/verify-email`
 
-**Response schema:** `AuthResponse`
+Verify the registration code. **Public.**
 
+| Body field | Type | Required |
+|---|---|---|
+| `email` | string (email) | Yes |
+| `code` | string | Yes |
 
-**Expected Response:**
+**204** → the user becomes `ACTIVE` and `email_verified_at` is set. The web app then calls `POST /auth/login`.
+
+```http
+HTTP/1.1 204 No Content
+```
+
+**Errors:**
+- `422 VALIDATION_ERROR` — the code is wrong, expired or used, or has failed 5 times
+- `409 CONFLICT` — the email is already verified
+
+## `POST /auth/verification-code`
+
+Send a new registration code. **Public.**
+
+| Body field | Type | Required |
+|---|---|---|
+| `email` | string (email) | Yes |
+
+**204** → if the email belongs to a `PENDING_VERIFICATION` user, a new code is emailed and the previous one stops working. Every other email gets the same response, so the endpoint does not reveal which accounts exist.
+
+```http
+HTTP/1.1 204 No Content
+```
+
+**Errors:** `429 RATE_LIMITED` — more than 1 request per 60 seconds or 5 per hour for the same user
+
+## `POST /auth/login`
+
+Log in. **Public.**
+
+| Body field | Type | Required |
+|---|---|---|
+| `email` | string (email) | Yes |
+| `password` | string | Yes |
+
+**200** → the access token and the user. The refresh token cookie is set too.
 
 ```json
 {
-  "access_token": "string",
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "token_type": "Bearer",
+  "expires_in": 900,
   "user": {
-    "id": "00000000-0000-0000-0000-000000000001",
-    "created_at": "2026-01-01T10:00:00Z",
-    "updated_at": "2026-01-01T10:00:00Z",
-    "email": "user@example.com",
+    "id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+    "email": "sara@example.com",
+    "fullname": "Sara Alqahtani",
     "phone": "+966512345678",
-    "fullname": "Amlak User",
-    "picture_path": null,
-    "role_id": "00000000-0000-0000-0000-000000000002",
+    "picture_url": null,
     "role": "MANAGER",
-    "status": "ACTIVE"
+    "status": "ACTIVE",
+    "preferred_language": "ar",
+    "email_verified_at": "2026-01-01T10:05:00Z",
+    "manager_id": null,
+    "created_at": "2026-01-01T10:00:00Z",
+    "updated_at": "2026-01-01T10:05:00Z"
   }
 }
 ```
 
-#### `400` — Invalid request
+**Errors:**
+- `401 INVALID_CREDENTIALS` — wrong email or password
+- `403 ACCOUNT_NOT_ACTIVE` — the password is right, but the account cannot log in. The status is checked only after the password matches, so a stranger learns nothing about the account. `details.reason` tells the web app what to show:
 
-**Response schema:** `Error`
+| `details.reason` | The web app shows |
+|---|---|
+| `EMAIL_NOT_VERIFIED` | The code screen, after calling `POST /auth/verification-code` |
+| `INVITATION_PENDING` | A hint to open the invitation email |
+| `ACCOUNT_DEACTIVATED` | The contact-support message |
+| `MANAGER_DEACTIVATED` | The contact-support message |
 
+## `POST /auth/refresh`
 
-**Expected Response:**
+Get a new access token. **Public:** authenticated by the refresh token cookie. No body.
 
-```json
-{
-  "code": "string",
-  "message": "string",
-  "details": "string"
-}
-```
-
-#### `409` — Email already exists
-
-No response body.
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
+**200** → a new access token, and a new refresh token cookie that replaces the old one.
 
 ```json
-{
-  "message": "Bearer Token is required"
-}
+{ "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...", "token_type": "Bearer", "expires_in": 900 }
 ```
 
-## 2. `POST /auth/login`
+**Errors:** `401 UNAUTHENTICATED` — the cookie is missing, expired or revoked, or the user (or a Worker's Manager) is not `ACTIVE`
 
-**Summary:** Login
+## `POST /auth/logout`
 
-**Description:** Authenticates a user and returns a JWT.
+Log out. **Public:** uses the refresh token cookie. No body.
 
-### Parameters
+**204** → the refresh token is revoked and the cookie is cleared. Also succeeds when there is no cookie.
 
-No path/query/header parameters.
+```http
+HTTP/1.1 204 No Content
+Set-Cookie: refresh_token=; HttpOnly; Secure; SameSite=Strict; Path=/api/v1/auth; Max-Age=0
+```
 
-### Request Body
+## `POST /auth/password/forgot`
 
-**Required:** Yes
+Email a password reset link. **Public.**
 
-#### `application/json`
+| Body field | Type | Required |
+|---|---|---|
+| `email` | string (email) | Yes |
 
-**Schema:** `LoginRequest`
+**204** → if the email belongs to an `ACTIVE` user, they get a single-use link valid for 60 minutes: `https://app.example.com/reset-password?email=<email>&token=<token>`. Any earlier link stops working. Every other email gets the same response.
 
-| Field | Type | Required | Description |
+```http
+HTTP/1.1 204 No Content
+```
+
+**Errors:** `429 RATE_LIMITED` — same limits as `POST /auth/verification-code`
+
+## `POST /auth/password/reset`
+
+Set a new password from the reset link. **Public.**
+
+| Body field | Type | Required | Rules |
 |---|---|---|---|
-| `email` | `string (email)` | Yes | - |
-| `password` | `string (password)` | Yes | - |
+| `email` | string (email) | Yes | |
+| `token` | string | Yes | From the link |
+| `new_password` | string | Yes | At least 8 characters |
 
-**Example request:**
-```json
-{
-  "email": "user@example.com",
-  "password": "string"
-}
+**204** → the password changes and all the user's refresh tokens are revoked, so every device has to log in again.
+
+```http
+HTTP/1.1 204 No Content
 ```
 
-### Responses
+**Errors:** `422 VALIDATION_ERROR` — the link is wrong, expired or used
 
-#### `200` — Authenticated
+## `POST /auth/account-setup`
 
-**Response schema:** `AuthResponse`
+A worker sets their password from the invitation. **Public.**
 
+The invitation email links to `https://app.example.com/account-setup?email=<email>&token=<token>`, valid for 7 days.
 
-**Expected Response:**
-
-```json
-{
-  "access_token": "string",
-  "token_type": "Bearer",
-  "refresh_token": "Bearer",
-  "user": {
-    "id": "00000000-0000-0000-0000-000000000001",
-    "created_at": "2026-01-01T10:00:00Z",
-    "updated_at": "2026-01-01T10:00:00Z",
-    "email": "user@example.com",
-    "phone": "+966512345678",
-    "fullname": "Amlak User",
-    "picture_path": null,
-    "role_id": "00000000-0000-0000-0000-000000000002",
-    "role": "MANAGER",
-    "status": "ACTIVE"
-  }
-}
-```
-
-#### `401` — Authentication required or JWT is invalid
-
-**Response schema:** `Error`
-
-
-**Expected Response:**
-
-```json
-{
-  "code": "string",
-  "message": "string",
-  "details": "string"
-}
-```
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 3. `POST /auth/refresh-token`
-
-**Summary:** Refresh access token
-
-**Description:** Generates a new JWT access token using a valid refresh token.
-
-### Parameters
-
-No path/query/header parameters.
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `RefreshTokenRequest`
-
-| Field           | Type     | Required | Description         |
-| --------------- | -------- | -------- | ------------------- |
-| `refresh_token` | `string` | Yes      | Valid refresh token |
-
-**Example request:**
-
-```json
-{
-  "refresh_token": "string"
-}
-```
-
-### Responses
-
-#### `200` — Access token refreshed
-
-**Response schema:** `RefreshTokenResponse`
-
-**Expected Response:**
-
-```json
-{
-  "access_token": "string",
-  "token_type": "Bearer"
-}
-```
-
-#### `401` — Invalid or expired refresh token
-
-**Response schema:** `Error`
-
-**Expected Response:**
-
-```json
-{
-  "code": "INVALID_REFRESH_TOKEN",
-  "message": "Invalid or expired refresh token",
-  "details": "string"
-}
-```
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-
-
-## 3. `POST /auth/verification-code`
-
-**Summary:** Request a verification code
-
-### Parameters
-
-No path/query/header parameters.
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `VerificationCodeRequest`
-
-| Field | Type | Required | Description |
+| Body field | Type | Required | Rules |
 |---|---|---|---|
-| `email` | `string (email)` | Yes | - |
+| `email` | string (email) | Yes | |
+| `token` | string | Yes | From the link |
+| `password` | string | Yes | At least 8 characters |
 
-**Example request:**
+**204** → the worker goes from `INVITED` to `ACTIVE`, and `email_verified_at` is set because opening the link proves the email. The worker then logs in.
+
+```http
+HTTP/1.1 204 No Content
+```
+
+**Errors:** `422 VALIDATION_ERROR` — the link is wrong, expired or used, or the account is no longer `INVITED`
+
+---
+
+# Profile
+
+## `GET /users/me`
+
+Get my profile. **Any role.**
+
+**200** → `User`
+
+Example response (`200 OK`):
+
 ```json
 {
-  "email": "user@example.com"
+  "id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "email": "sara@example.com",
+  "fullname": "Sara Alqahtani",
+  "phone": "+966512345678",
+  "picture_url": null,
+  "role": "MANAGER",
+  "status": "ACTIVE",
+  "preferred_language": "ar",
+  "email_verified_at": "2026-01-01T10:05:00Z",
+  "manager_id": null,
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:05:00Z"
 }
 ```
 
-### Responses
+## `PUT /users/me`
 
-#### `200` — Verification code requested
+Update my profile. **Any role.** Body: `multipart/form-data`.
 
-No response body.
-
-#### `429` — Too many requests
-
-No response body.
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 4. `POST /auth/verify`
-
-**Summary:** Verify OTP or verification token
-
-### Parameters
-
-No path/query/header parameters.
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `VerifyTokenRequest`
-
-| Field | Type | Required | Description |
+| Field | Type | Required | Rules |
 |---|---|---|---|
-| `email` | `string (email)` | Yes | - |
-| `token` | `string` | Yes | - |
-| `token_type` | `string` | No | Allowed: OTP, EMAIL_VERIFICATION, PASSWORD_RESET |
+| `fullname` | string | No | |
+| `phone` | string | No | E.164 |
+| `preferred_language` | `Language` | No | |
+| `picture` | file | No | Replaces the profile picture |
 
-**Example request:**
-```json
-{
-  "email": "user@example.com",
-  "token": "string",
-  "token_type": "OTP"
-}
-```
+Email, role and status cannot be changed here.
 
-### Responses
+**200** → `User`
 
-#### `200` — Token verified
-
-No response body.
-
-#### `400` — Invalid request
-
-**Response schema:** `Error`
-
-
-**Expected Response:**
+Example response (`200 OK`):
 
 ```json
 {
-  "code": "string",
-  "message": "string",
-  "details": "string"
-}
-```
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 5. `POST /auth/password/reset`
-
-**Summary:** Reset password
-
-### Parameters
-
-No path/query/header parameters.
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `PasswordResetRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `email` | `string (email)` | Yes | - |
-| `token` | `string` | Yes | - |
-| `new_password` | `string (password)` | Yes | - |
-
-**Example request:**
-```json
-{
-  "email": "user@example.com",
-  "token": "string",
-  "new_password": "string"
-}
-```
-
-### Responses
-
-#### `200` — Password reset successfully
-
-No response body.
-
-#### `400` — Invalid request
-
-**Response schema:** `Error`
-
-
-**Expected Response:**
-
-```json
-{
-  "code": "string",
-  "message": "string",
-  "details": "string"
-}
-```
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
+  "id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "email": "sara@example.com",
+  "fullname": "Sara A. Alqahtani",
+  "phone": "+966512345678",
+  "picture_url": "https://amlak-uploads.s3.amazonaws.com/profiles/6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01/8c9d0e1f-2a3b-4c5d-9e6f-7a8b9c0d1e2f.jpg?X-Amz-Signature=...",
+  "role": "MANAGER",
+  "status": "ACTIVE",
+  "preferred_language": "ar",
+  "email_verified_at": "2026-01-01T10:05:00Z",
+  "manager_id": null,
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-10-12T10:00:00Z"
 }
 ```
 
 ---
 
-# Users
+# Users (Admin)
 
-## 1. `GET /users/me`
+Every account, of every role. Managers manage their own workers under [Workers](#workers) instead.
 
-**Summary:** Get current user profile
+## `GET /users`
 
-**Authentication:** Required (Bearer JWT)
+List users. **Roles:** Admin
 
-
-### Parameters
-
-No path/query/header parameters.
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Current user
-
-**Response schema:** `User`
-
-
-
-
-**Expected Response:**
-
-```json
-{
-  "id": "00000000-0000-0000-0000-000000000001",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "email": "user@example.com",
-  "phone": "+966512345678",
-  "fullname": "Amlak User",
-  "picture_path": null,
-  "role_id": "00000000-0000-0000-0000-000000000002",
-  "role": "MANAGER",
-  "status": "ACTIVE"
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 2. `PUT /users/me`
-
-**Summary:** Update current user profile
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-No path/query/header parameters.
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `UserUpdateRequest`
-
-| Field | Type | Required | Description |
+| Query | Type | Required | Notes |
 |---|---|---|---|
-| `fullname` | `string` | No | - |
-| `phone` | `string` | No | - |
-| `picture_path` | `string` | No | - |
+| `role` | `RoleName` | No | |
+| `status` | `UserStatus` | No | |
+| `search` | string | No | Matches name or email |
+| `page`, `page_size` | integer | No | |
 
-**Example request:**
-```json
-{
-  "fullname": "string",
-  "phone": "string",
-  "picture_path": "string"
-}
-```
+**200** → paginated `User`
 
-### Responses
-
-#### `200` — Profile updated
-
-**Response schema:** `User`
-
-
-
-
-**Expected Response:**
+Example response (`200 OK`):
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000001",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "email": "user@example.com",
-  "phone": "+966512345678",
-  "fullname": "Amlak User",
-  "picture_path": null,
-  "role_id": "00000000-0000-0000-0000-000000000002",
-  "role": "MANAGER",
-  "status": "ACTIVE"
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
----
-
-# Admin
-
-## 1. `GET /users`
-
-**Summary:** List users
-
-**Description:** Admin-only user management endpoint.
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `page` | `query` | `integer` | No | - |
-| `page_size` | `query` | `integer` | No | - |
-| `role` | `query` | `RoleName` | No | - |
-| `status` | `query` | `UserStatus` | No | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Users
-
-**Response schema:** `PaginatedUsers`
-
-
-**Expected Response:**
-
-```json
-{
-  "data": [],
+  "data": [
+    {
+      "id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+      "email": "sara@example.com",
+      "fullname": "Sara Alqahtani",
+      "phone": "+966512345678",
+      "picture_url": null,
+      "role": "MANAGER",
+      "status": "ACTIVE",
+      "preferred_language": "ar",
+      "email_verified_at": "2026-01-01T10:05:00Z",
+      "manager_id": null,
+      "created_at": "2026-01-01T10:00:00Z",
+      "updated_at": "2026-01-01T10:05:00Z"
+    },
+    {
+      "id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "email": "omar@example.com",
+      "fullname": "Omar Alshehri",
+      "phone": "+966555987654",
+      "picture_url": null,
+      "role": "WORKER",
+      "status": "ACTIVE",
+      "preferred_language": "ar",
+      "email_verified_at": "2026-01-03T08:00:00Z",
+      "manager_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+      "created_at": "2026-01-02T09:00:00Z",
+      "updated_at": "2026-01-03T08:00:00Z"
+    }
+  ],
   "pagination": {
     "page": 1,
-    "page_size": 10,
+    "page_size": 20,
+    "total": 2,
+    "total_pages": 1
+  }
+}
+```
+
+## `GET /users/{userId}`
+
+Get a user. **Roles:** Admin
+
+**200** → `User`
+
+Example response (`200 OK`):
+
+```json
+{
+  "id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "email": "sara@example.com",
+  "fullname": "Sara Alqahtani",
+  "phone": "+966512345678",
+  "picture_url": null,
+  "role": "MANAGER",
+  "status": "ACTIVE",
+  "preferred_language": "ar",
+  "email_verified_at": "2026-01-01T10:05:00Z",
+  "manager_id": null,
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-01-01T10:05:00Z"
+}
+```
+
+## `PUT /users/{userId}`
+
+Edit, deactivate or reactivate a user. **Roles:** Admin
+
+| Body field | Type | Required | Rules |
+|---|---|---|---|
+| `fullname` | string | No | |
+| `phone` | string | No | E.164 |
+| `status` | `ACTIVE` or `DEACTIVATED` | No | See below |
+
+- **Deactivating** works from any status and revokes the user's refresh tokens. For a Manager, it also revokes their workers' tokens.
+- **Reactivating** works only for a `DEACTIVATED` user whose email was verified.
+- Admins cannot change their own status.
+
+**200** → `User`
+
+Example response (`200 OK`):
+
+```json
+{
+  "id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "email": "sara@example.com",
+  "fullname": "Sara Alqahtani",
+  "phone": "+966512345678",
+  "picture_url": null,
+  "role": "MANAGER",
+  "status": "DEACTIVATED",
+  "preferred_language": "ar",
+  "email_verified_at": "2026-01-01T10:05:00Z",
+  "manager_id": null,
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-10-12T11:00:00Z"
+}
+```
+
+**Errors:**
+- `409 CONFLICT` — the user cannot be reactivated
+- `422 VALIDATION_ERROR` — an Admin changing their own status
+
+---
+
+# Workers
+
+A Manager's own worker accounts.
+
+## `GET /workers`
+
+List my workers. **Roles:** Manager
+
+| Query | Type | Required |
+|---|---|---|
+| `status` | `UserStatus` | No |
+| `page`, `page_size` | integer | No |
+
+**200** → paginated `Worker`
+
+Example response (`200 OK`):
+
+```json
+{
+  "data": [
+    {
+      "id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "email": "omar@example.com",
+      "fullname": "Omar Alshehri",
+      "phone": "+966555987654",
+      "picture_url": null,
+      "role": "WORKER",
+      "status": "ACTIVE",
+      "preferred_language": "ar",
+      "email_verified_at": "2026-01-03T08:00:00Z",
+      "manager_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+      "created_at": "2026-01-02T09:00:00Z",
+      "updated_at": "2026-01-03T08:00:00Z",
+      "assigned_places": [
+        {
+          "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+          "place_name": "Al Noor Chalet"
+        }
+      ]
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "page_size": 20,
     "total": 1,
     "total_pages": 1
   }
 }
 ```
 
-#### `403` — Bearer Token is required.
+## `POST /workers`
 
-**Response schema:** `ErrorResponse`
+Create a worker and email the invitation. **Roles:** Manager
 
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 2. `POST /users`
-
-**Summary:** Create a user
-
-**Description:** Admin-only user creation.
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-No path/query/header parameters.
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `AdminUserCreateRequest`
-
-| Field | Type | Required | Description |
+| Body field | Type | Required | Rules |
 |---|---|---|---|
-| `fullname` | `string` | Yes | - |
-| `email` | `string (email)` | Yes | - |
-| `password` | `string (password)` | Yes | - |
-| `phone` | `string` | No | - |
-| `role_id` | `string (uuid)` | No | - |
+| `fullname` | string | Yes | |
+| `email` | string (email) | Yes | Unique |
+| `phone` | string | Yes | E.164 |
+| `preferred_language` | `Language` | No | Default: the Manager's language |
 
-### Responses
+**201** → `Worker` with `role: WORKER` and `status: INVITED`. The worker gets an account-setup link valid for 7 days; see `POST /auth/account-setup`.
 
-#### `201` — User created
-
-**Response schema:** `User`
-
-
-
-
-**Expected Response:**
+Example response (`201 Created`):
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000001",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "email": "user@example.com",
-  "phone": "+966512345678",
-  "fullname": "Amlak User",
-  "picture_path": null,
-  "role_id": "00000000-0000-0000-0000-000000000002",
-  "role": "MANAGER",
-  "status": "ACTIVE"
+  "id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "email": "omar@example.com",
+  "fullname": "Omar Alshehri",
+  "phone": "+966555987654",
+  "picture_url": null,
+  "role": "WORKER",
+  "status": "INVITED",
+  "preferred_language": "ar",
+  "email_verified_at": null,
+  "manager_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "created_at": "2026-01-02T09:00:00Z",
+  "updated_at": "2026-01-02T09:00:00Z",
+  "assigned_places": []
 }
 ```
-#### `403` — Bearer Token is required.
 
-**Response schema:** `ErrorResponse`
+**Errors:** `409 CONFLICT` — the email is taken
 
+## `GET /workers/{workerId}`
 
-**Expected Response:**
+Get a worker. **Roles:** Manager
+
+**200** → `Worker`
+
+Example response (`200 OK`):
 
 ```json
 {
-  "message": "Bearer Token is required"
+  "id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "email": "omar@example.com",
+  "fullname": "Omar Alshehri",
+  "phone": "+966555987654",
+  "picture_url": null,
+  "role": "WORKER",
+  "status": "ACTIVE",
+  "preferred_language": "ar",
+  "email_verified_at": "2026-01-03T08:00:00Z",
+  "manager_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "created_at": "2026-01-02T09:00:00Z",
+  "updated_at": "2026-01-03T08:00:00Z",
+  "assigned_places": [
+    {
+      "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+      "place_name": "Al Noor Chalet"
+    }
+  ]
 }
 ```
 
-## 3. `GET /users/{userId}`
+## `PUT /workers/{workerId}`
 
-**Summary:** Get a user
+Edit, deactivate or reactivate a worker. **Roles:** Manager
 
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `userId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — User
-
-**Response schema:** `User`
-
-
-
-
-**Expected Response:**
-
-```json
-{
-  "id": "00000000-0000-0000-0000-000000000001",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "email": "user@example.com",
-  "phone": "+966512345678",
-  "fullname": "Amlak User",
-  "picture_path": null,
-  "role_id": "00000000-0000-0000-0000-000000000002",
-  "role": "MANAGER",
-  "status": "ACTIVE"
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 4. `PUT /users/{userId}`
-
-**Summary:** Update a user
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `userId` | `path` | `string (uuid)` | Yes | - |
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `AdminUserUpdateRequest`
-
-| Field | Type | Required | Description |
+| Body field | Type | Required | Rules |
 |---|---|---|---|
-| `fullname` | `string` | No | - |
-| `phone` | `string` | No | - |
-| `picture_path` | `string` | No | - |
-| `role_id` | `string (uuid)` | No | - |
-| `status` | `UserStatus` | No | Allowed: ACTIVE, DEACTIVATED |
+| `fullname` | string | No | |
+| `phone` | string | No | E.164 |
+| `status` | `ACTIVE` or `DEACTIVATED` | No | Same rules as `PUT /users/{userId}` |
 
-**Example request:**
-```json
-{
-  "fullname": "string",
-  "phone": "string",
-  "picture_path": "string",
-  "role_id": "00000000-0000-0000-0000-000000000000",
-  "status": "ACTIVE"
-}
-```
+Deactivating keeps the worker's assignments and history. Their open tickets stay assigned to them until the Manager reassigns them.
 
-### Responses
+**200** → `Worker`
 
-#### `200` — User updated
-
-**Response schema:** `User`
-
-
-
-
-**Expected Response:**
+Example response (`200 OK`):
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000001",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "email": "user@example.com",
-  "phone": "+966512345678",
-  "fullname": "Amlak User",
-  "picture_path": null,
-  "role_id": "00000000-0000-0000-0000-000000000002",
-  "role": "MANAGER",
-  "status": "ACTIVE"
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
+  "id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "email": "omar@example.com",
+  "fullname": "Omar Alshehri",
+  "phone": "+966555000111",
+  "picture_url": null,
+  "role": "WORKER",
+  "status": "ACTIVE",
+  "preferred_language": "ar",
+  "email_verified_at": "2026-01-03T08:00:00Z",
+  "manager_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "created_at": "2026-01-02T09:00:00Z",
+  "updated_at": "2026-10-12T12:00:00Z",
+  "assigned_places": [
+    {
+      "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+      "place_name": "Al Noor Chalet"
+    }
+  ]
 }
 ```
 
-## 5. `DELETE /users/{userId}`
+**Errors:** `409 CONFLICT` — reactivating a worker who never set up their account
 
-**Summary:** Deactivate a user
+## `DELETE /workers/{workerId}`
 
-**Description:** Deactivates the account rather than physically deleting it.
+Delete a worker who never set up their account. **Roles:** Manager
 
-**Authentication:** Required (Bearer JWT)
+Allowed only while `email_verified_at` is empty. Removes the account, its tokens and its assignments. To resend an invitation, delete the worker and create them again. A worker who has used their account is deactivated instead, so their history stays.
 
+**204**
 
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `userId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `204` — User deactivated
-
-No response body.
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
+```http
+HTTP/1.1 204 No Content
 ```
+
+**Errors:** `409 CONFLICT` — the worker has set up their account
 
 ---
 
 # Places
 
-## 1. `GET /places`
+## `GET /places`
 
-**Summary:** List places
+List places. **Roles:** Manager, Worker
 
-**Authentication:** Required (Bearer JWT)
+| Query | Type | Required |
+|---|---|---|
+| `status` | `PlaceStatus` | No |
+| `page`, `page_size` | integer | No |
 
+**200** → paginated `Place`
 
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `page` | `query` | `integer` | No | - |
-| `page_size` | `query` | `integer` | No | - |
-| `status` | `query` | `string` | No | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Places
-
-**Response schema:** `PaginatedPlaces`
-
-
-**Expected Response:**
+Example response (`200 OK`):
 
 ```json
 {
-  "data": [],
+  "data": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+      "owner_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+      "place_name": "Al Noor Chalet",
+      "place_type": "chalet",
+      "description": "Chalet with a private pool",
+      "address": "Al Malqa, Riyadh",
+      "city": "Riyadh",
+      "latitude": 24.8143,
+      "longitude": 46.6194,
+      "status": "ACTIVE",
+      "monthly_maintenance_budget": 2000,
+      "currency": "SAR",
+      "timezone": "Asia/Riyadh",
+      "created_at": "2026-01-01T11:00:00Z",
+      "updated_at": "2026-01-01T11:00:00Z"
+    }
+  ],
   "pagination": {
     "page": 1,
-    "page_size": 10,
+    "page_size": 20,
     "total": 1,
     "total_pages": 1
   }
 }
 ```
 
-#### `403` — Bearer Token is required.
+Workers get the same shape without `monthly_maintenance_budget`.
 
-**Response schema:** `ErrorResponse`
+## `POST /places`
 
+Create a place. **Roles:** Manager. The caller becomes the owner.
 
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 2. `POST /places`
-
-**Summary:** Create a place
-
-**Description:** Manager-only place creation.
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-No path/query/header parameters.
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `PlaceCreateRequest`
-
-| Field | Type | Required | Description |
+| Body field | Type | Required | Rules |
 |---|---|---|---|
-| `owner_id` | `string (uuid)` | No | - |
-| `place_name` | `string` | Yes | - |
-| `status` | `string` | No | - |
+| `place_name` | string | Yes | |
+| `place_type` | string | Yes | Free text, e.g. chalet, apartment, villa |
+| `city` | string | Yes | |
+| `address` | string | No | |
+| `description` | string | No | |
+| `latitude` | number | No | −90 to 90; send together with `longitude` |
+| `longitude` | number | No | −180 to 180 |
+| `status` | `PlaceStatus` | No | Default `ACTIVE` |
+| `monthly_maintenance_budget` | number | No | ≥ 0 |
+| `currency` | string | No | ISO 4217 code, default `SAR`. Cannot change later |
+| `timezone` | string | No | IANA name, default `Asia/Riyadh`. Cannot change later |
 
-**Example request:**
-```json
-{
-  "owner_id": "00000000-0000-0000-0000-000000000000",
-  "place_name": "string",
-  "status": "string"
-}
-```
+The web app fills `latitude` and `longitude` from the browser's Geolocation API when the user picks "use my current location".
 
-### Responses
+**201** → `Place`
 
-#### `201` — Place created
-
-**Response schema:** `Place`
-
-
-
-
-**Expected Response:**
+Example response (`201 Created`):
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000010",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "owner_id": "00000000-0000-0000-0000-000000000001",
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "owner_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
   "place_name": "Al Noor Chalet",
-  "status": "ACTIVE"
+  "place_type": "chalet",
+  "description": "Chalet with a private pool",
+  "address": "Al Malqa, Riyadh",
+  "city": "Riyadh",
+  "latitude": 24.8143,
+  "longitude": 46.6194,
+  "status": "ACTIVE",
+  "monthly_maintenance_budget": 2000,
+  "currency": "SAR",
+  "timezone": "Asia/Riyadh",
+  "created_at": "2026-01-01T11:00:00Z",
+  "updated_at": "2026-01-01T11:00:00Z"
 }
 ```
-#### `403` — Bearer Token is required.
 
-**Response schema:** `ErrorResponse`
+## `GET /places/{placeId}`
 
+Get a place. **Roles:** Manager, Worker
 
-**Expected Response:**
+**200** → `Place`
+
+Example response (`200 OK`):
 
 ```json
 {
-  "message": "Bearer Token is required"
-}
-```
-
-## 3. `GET /places/{placeId}`
-
-**Summary:** Get a place
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `placeId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Place
-
-**Response schema:** `Place`
-
-
-
-
-**Expected Response:**
-
-```json
-{
-  "id": "00000000-0000-0000-0000-000000000010",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "owner_id": "00000000-0000-0000-0000-000000000001",
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "owner_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
   "place_name": "Al Noor Chalet",
-  "status": "ACTIVE"
+  "place_type": "chalet",
+  "description": "Chalet with a private pool",
+  "address": "Al Malqa, Riyadh",
+  "city": "Riyadh",
+  "latitude": 24.8143,
+  "longitude": 46.6194,
+  "status": "ACTIVE",
+  "monthly_maintenance_budget": 2000,
+  "currency": "SAR",
+  "timezone": "Asia/Riyadh",
+  "created_at": "2026-01-01T11:00:00Z",
+  "updated_at": "2026-01-01T11:00:00Z"
 }
 ```
-#### `403` — Bearer Token is required.
 
-**Response schema:** `ErrorResponse`
+Workers get the same shape without `monthly_maintenance_budget`.
 
+## `PUT /places/{placeId}`
 
-**Expected Response:**
+Update a place. **Roles:** Manager
+
+Body: the `POST /places` fields except `currency` and `timezone`, all optional.
+
+**200** → `Place`
+
+Example response (`200 OK`):
 
 ```json
 {
-  "message": "Bearer Token is required"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "owner_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "place_name": "Al Noor Chalet",
+  "place_type": "chalet",
+  "description": "Chalet with a private pool",
+  "address": "Al Malqa, Riyadh",
+  "city": "Riyadh",
+  "latitude": 24.8143,
+  "longitude": 46.6194,
+  "status": "UNDER_MAINTENANCE",
+  "monthly_maintenance_budget": 2000,
+  "currency": "SAR",
+  "timezone": "Asia/Riyadh",
+  "created_at": "2026-01-01T11:00:00Z",
+  "updated_at": "2026-10-12T13:00:00Z"
 }
 ```
 
-## 4. `PUT /places/{placeId}`
+## `DELETE /places/{placeId}`
 
-**Summary:** Update a place
+Delete a place. **Roles:** Manager
 
-**Authentication:** Required (Bearer JWT)
+Sets `deleted_at`. The place and everything in it disappear from every endpoint, its workers lose access, and the scheduler skips it. A deleted place cannot be restored through the API.
 
+**204**
 
-### Parameters
+```http
+HTTP/1.1 204 No Content
+```
 
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `placeId` | `path` | `string (uuid)` | Yes | - |
+**Errors:** `409 CONFLICT` — the place has `CONFIRMED` or `CHECKED_IN` bookings; `details.booking_ids`
 
-### Request Body
+## `GET /places/{placeId}/workers`
 
-**Required:** Yes
+List the workers assigned to a place. **Roles:** Manager
 
-#### `application/json`
+**200** → paginated `PlaceWorker`
 
-**Schema:** `PlaceUpdateRequest`
+Example response (`200 OK`):
 
-| Field | Type | Required | Description |
+```json
+{
+  "data": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c11",
+      "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+      "worker": {
+        "id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+        "fullname": "Omar Alshehri",
+        "phone": "+966555987654",
+        "status": "ACTIVE"
+      },
+      "assigned_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+      "assigned_at": "2026-01-03T09:00:00Z",
+      "created_at": "2026-01-03T09:00:00Z",
+      "updated_at": "2026-01-03T09:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "page_size": 20,
+    "total": 1,
+    "total_pages": 1
+  }
+}
+```
+
+## `POST /places/{placeId}/workers`
+
+Assign a worker. **Roles:** Manager
+
+| Body field | Type | Required | Rules |
 |---|---|---|---|
-| `place_name` | `string` | No | - |
-| `status` | `string` | No | - |
+| `worker_id` | uuid | Yes | One of the caller's workers who is not `DEACTIVATED` |
 
-**Example request:**
-```json
-{
-  "place_name": "string",
-  "status": "string"
-}
-```
+If the worker was assigned before, the earlier row is reactivated, because `place_id` + `worker_id` is unique.
 
-### Responses
+**201** → `PlaceWorker`
 
-#### `200` — Place updated
-
-**Response schema:** `Place`
-
-
-
-
-**Expected Response:**
+Example response (`201 Created`):
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000010",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "owner_id": "00000000-0000-0000-0000-000000000001",
-  "place_name": "Al Noor Chalet",
-  "status": "ACTIVE"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c11",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "worker": {
+    "id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+    "fullname": "Omar Alshehri",
+    "phone": "+966555987654",
+    "status": "ACTIVE"
+  },
+  "assigned_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "assigned_at": "2026-01-03T09:00:00Z",
+  "created_at": "2026-01-03T09:00:00Z",
+  "updated_at": "2026-01-03T09:00:00Z"
 }
 ```
-#### `403` — Bearer Token is required.
 
-**Response schema:** `ErrorResponse`
+**Errors:** `409 CONFLICT` — the worker is already assigned
 
+## `DELETE /places/{placeId}/workers/{workerId}`
 
-**Expected Response:**
+Unassign a worker. **Roles:** Manager
+
+Sets the assignment's `is_active` to `false`. Schedules that name the worker as default assignee keep the name, and their next tickets go to review instead; see [Background Jobs](#background-jobs).
+
+**204**
+
+```http
+HTTP/1.1 204 No Content
+```
+
+**Errors:**
+- `404 NOT_FOUND` — the worker is not assigned to this place
+- `409 CONFLICT` — the worker has `APPROVED` tickets on this place; `details.ticket_ids`. Reassign them first.
+
+---
+
+# Dashboard
+
+## `GET /dashboard`
+
+Property and asset health, one row per place. **Roles:** Manager, Worker
+
+| Query | Type | Required | Notes |
+|---|---|---|---|
+| `place_id` | uuid | No | Only this place |
+| `page`, `page_size` | integer | No | |
+
+**200**
 
 ```json
 {
-  "message": "Bearer Token is required"
+  "data": [
+    {
+      "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+      "place_name": "Al Noor Chalet",
+      "status": "ACTIVE",
+      "assets": { "GOOD": 8, "NEEDS_MAINTENANCE": 1, "UNDER_MAINTENANCE": 0, "OUT_OF_SERVICE": 1 },
+      "open_tickets": { "PENDING_REVIEW": 2, "APPROVED": 1, "overdue": 1 },
+      "today": { "check_ins": 1, "check_outs": 1 },
+      "maintenance_budget": { "currency": "SAR", "budget": 2000, "spent": 850, "remaining": 1150 }
+    }
+  ],
+  "pagination": { "page": 1, "page_size": 20, "total": 1, "total_pages": 1 }
 }
 ```
 
-## 5. `DELETE /places/{placeId}`
-
-**Summary:** Delete a place
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `placeId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `204` — Place deleted
-
-No response body.
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
+| Field | Meaning |
+|---|---|
+| `open_tickets.overdue` | `APPROVED` tickets past their `due_date` |
+| `today.check_ins` | `CONFIRMED` bookings with `check_in_date` today, in the place's time zone |
+| `today.check_outs` | `CHECKED_IN` bookings with `check_out_date` today |
+| `maintenance_budget.spent` | `MAINTENANCE` expenses in the current calendar month |
+| `maintenance_budget` | `null` when the place has no budget; never sent to Workers |
 
 ---
 
 # Assets
 
-## 1. `GET /places/{placeId}/assets`
+## `GET /places/{placeId}/assets`
 
-**Summary:** List assets for a place
+List a place's assets. **Roles:** Manager, Worker
 
-**Authentication:** Required (Bearer JWT)
+| Query | Type | Required |
+|---|---|---|
+| `status` | `AssetStatus` | No |
+| `page`, `page_size` | integer | No |
 
+**200** → paginated `Asset`
 
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `placeId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Assets
-
-**Response schema:** `array<Asset>`
-
-
-
-**Expected Response:**
-
-```json
-[]
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
+Example response (`200 OK`):
 
 ```json
 {
-  "message": "Bearer Token is required"
-}
-```
-
-## 2. `POST /places/{placeId}/assets`
-
-**Summary:** Add an asset
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `placeId` | `path` | `string (uuid)` | Yes | - |
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `AssetCreateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `name` | `string` | Yes | - |
-| `type` | `string` | Yes | - |
-| `purchase_date` | `string (date)` | No | - |
-| `status` | `string` | No | - |
-
-**Example request:**
-```json
-{
-  "name": "string",
-  "type": "string",
-  "purchase_date": "2026-01-01",
-  "status": "string"
-}
-```
-
-### Responses
-
-#### `201` — Asset created
-
-**Response schema:** `Asset`
-
-
-
-
-**Expected Response:**
-
-```json
-{
-  "id": "00000000-0000-0000-0000-000000000020",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "place_id": "00000000-0000-0000-0000-000000000010",
-  "name": "Air Conditioner",
-  "type": "HVAC",
-  "purchase_date": "2025-12-01",
-  "status": "ACTIVE"
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 3. `GET /assets/{assetId}`
-
-**Summary:** Get an asset
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `assetId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Asset
-
-**Response schema:** `Asset`
-
-
-
-
-**Expected Response:**
-
-```json
-{
-  "id": "00000000-0000-0000-0000-000000000020",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "place_id": "00000000-0000-0000-0000-000000000010",
-  "name": "Air Conditioner",
-  "type": "HVAC",
-  "purchase_date": "2025-12-01",
-  "status": "ACTIVE"
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 4. `PUT /assets/{assetId}`
-
-**Summary:** Update an asset
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `assetId` | `path` | `string (uuid)` | Yes | - |
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `AssetUpdateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `name` | `string` | No | - |
-| `type` | `string` | No | - |
-| `purchase_date` | `string (date)` | No | - |
-| `status` | `string` | No | - |
-
-**Example request:**
-```json
-{
-  "name": "string",
-  "type": "string",
-  "purchase_date": "2026-01-01",
-  "status": "string"
-}
-```
-
-### Responses
-
-#### `200` — Asset updated
-
-**Response schema:** `Asset`
-
-
-
-
-**Expected Response:**
-
-```json
-{
-  "id": "00000000-0000-0000-0000-000000000020",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "place_id": "00000000-0000-0000-0000-000000000010",
-  "name": "Air Conditioner",
-  "type": "HVAC",
-  "purchase_date": "2025-12-01",
-  "status": "ACTIVE"
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 5. `DELETE /assets/{assetId}`
-
-**Summary:** Delete an asset
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `assetId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `204` — Asset deleted
-
-No response body.
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
----
-
-# Maintenance
-
-## 1. `GET /assets/{assetId}/maintenance-schedules`
-
-**Summary:** List periodic maintenance schedules
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `assetId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Maintenance schedules
-
-**Response schema:** `array<PeriodicMaintenance>`
-
-
-
-**Expected Response:**
-
-```json
-[]
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 2. `POST /assets/{assetId}/maintenance-schedules`
-
-**Summary:** Schedule periodic maintenance
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `assetId` | `path` | `string (uuid)` | Yes | - |
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `PeriodicMaintenanceCreateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `description` | `string` | Yes | - |
-| `frequency` | `MaintenanceFrequency` | Yes | Allowed: MONTHLY, QUARTERLY, YEARLY |
-| `next_due_date` | `string (date)` | Yes | - |
-
-**Example request:**
-```json
-{
-  "description": "string",
-  "frequency": "MONTHLY",
-  "next_due_date": "2026-01-01"
-}
-```
-
-### Responses
-
-#### `201` — Schedule created
-
-**Response schema:** `PeriodicMaintenance`
-
-
-
-
-**Expected Response:**
-
-```json
-{
-  "id": "00000000-0000-0000-0000-000000000030",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "asset_id": "00000000-0000-0000-0000-000000000020",
-  "description": "Routine AC maintenance",
-  "frequency": "MONTHLY",
-  "next_due_date": "2026-02-01"
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 3. `GET /maintenance-tickets`
-
-**Summary:** List maintenance tickets
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `page` | `query` | `integer` | No | - |
-| `page_size` | `query` | `integer` | No | - |
-| `place_id` | `query` | `string (uuid)` | No | - |
-| `asset_id` | `query` | `string (uuid)` | No | - |
-| `status` | `query` | `MaintenanceStatus` | No | - |
-| `ticket_type` | `query` | `TicketType` | No | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Maintenance tickets
-
-**Response schema:** `PaginatedMaintenanceTickets`
-
-
-**Expected Response:**
-
-```json
-{
-  "data": [],
+  "data": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c20",
+      "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+      "name": "Living-room AC",
+      "type": "HVAC",
+      "status": "GOOD",
+      "purchase_date": "2025-06-15",
+      "created_at": "2026-01-01T12:00:00Z",
+      "updated_at": "2026-01-01T12:00:00Z"
+    }
+  ],
   "pagination": {
     "page": 1,
-    "page_size": 10,
+    "page_size": 20,
     "total": 1,
     "total_pages": 1
   }
 }
 ```
 
-#### `403` — Bearer Token is required.
+## `POST /places/{placeId}/assets`
 
-**Response schema:** `ErrorResponse`
+Add an asset. **Roles:** Manager
 
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 4. `POST /maintenance-tickets`
-
-**Summary:** Submit a maintenance ticket
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-No path/query/header parameters.
-
-### Request Body
-
-**Required:** Yes
-
-#### `multipart/form-data`
-
-**Schema:** `object`
-
-| Field | Type | Required | Description |
+| Body field | Type | Required | Rules |
 |---|---|---|---|
-| `place_id` | `string (uuid)` | Yes | - |
-| `asset_id` | `string (uuid)` | No | - |
-| `ticket_type` | `TicketType` | Yes | Allowed: CORRECTIVE, PREVENTIVE |
-| `description` | `string` | Yes | - |
-| `photo` | `string (binary)` | No | - |
+| `name` | string | Yes | |
+| `type` | string | Yes | Free text, e.g. HVAC, pool pump |
+| `purchase_date` | date | No | Not in the future |
+| `status` | `AssetStatus` | No | Default `GOOD` |
 
-**Example request:**
-```json
-{
-  "place_id": "00000000-0000-0000-0000-000000000000",
-  "asset_id": "00000000-0000-0000-0000-000000000000",
-  "ticket_type": "CORRECTIVE",
-  "description": "string",
-  "photo": "string"
-}
-```
+**201** → `Asset`
 
-### Responses
-
-#### `201` — Ticket created
-
-**Response schema:** `MaintenanceTicket`
-
-
-
-
-**Expected Response:**
+Example response (`201 Created`):
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000040",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "place_id": "00000000-0000-0000-0000-000000000010",
-  "asset_id": "00000000-0000-0000-0000-000000000020",
-  "ticket_type": "CORRECTIVE",
-  "reporter_id": "00000000-0000-0000-0000-000000000001",
-  "description": "Air conditioner is not cooling",
-  "status": "SUBMITTED",
-  "photo_url": "https://api.example.com/uploads/maintenance.jpg"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c20",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "name": "Living-room AC",
+  "type": "HVAC",
+  "status": "GOOD",
+  "purchase_date": "2025-06-15",
+  "created_at": "2026-01-01T12:00:00Z",
+  "updated_at": "2026-01-01T12:00:00Z"
 }
 ```
-#### `403` — Bearer Token is required.
 
-**Response schema:** `ErrorResponse`
+## `GET /assets/{assetId}`
 
+Get an asset. **Roles:** Manager, Worker
 
-**Expected Response:**
+**200** → `Asset`. Its repair history is `GET /tickets?asset_id=<assetId>`.
+
+Example response (`200 OK`):
 
 ```json
 {
-  "message": "Bearer Token is required"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c20",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "name": "Living-room AC",
+  "type": "HVAC",
+  "status": "GOOD",
+  "purchase_date": "2025-06-15",
+  "created_at": "2026-01-01T12:00:00Z",
+  "updated_at": "2026-01-01T12:00:00Z"
 }
 ```
 
-## 5. `GET /maintenance-tickets/{ticketId}`
+## `PUT /assets/{assetId}`
 
-**Summary:** Get a maintenance ticket
+Update an asset. **Roles:** Manager
 
-**Authentication:** Required (Bearer JWT)
+Body: the `POST` fields, all optional. Approving and completing tickets also change `status`; see [Maintenance Tickets](#maintenance-tickets).
 
+**200** → `Asset`
 
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `ticketId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Ticket
-
-**Response schema:** `MaintenanceTicket`
-
-
-
-
-**Expected Response:**
+Example response (`200 OK`):
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000040",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "place_id": "00000000-0000-0000-0000-000000000010",
-  "asset_id": "00000000-0000-0000-0000-000000000020",
-  "ticket_type": "CORRECTIVE",
-  "reporter_id": "00000000-0000-0000-0000-000000000001",
-  "description": "Air conditioner is not cooling",
-  "status": "SUBMITTED",
-  "photo_url": "https://api.example.com/uploads/maintenance.jpg"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c20",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "name": "Living-room AC",
+  "type": "HVAC",
+  "status": "OUT_OF_SERVICE",
+  "purchase_date": "2025-06-15",
+  "created_at": "2026-01-01T12:00:00Z",
+  "updated_at": "2026-10-12T14:00:00Z"
 }
 ```
-#### `403` — Bearer Token is required.
 
-**Response schema:** `ErrorResponse`
+## `DELETE /assets/{assetId}`
 
+Remove an asset. **Roles:** Manager
 
-**Expected Response:**
+Sets `deleted_at` and stops the asset's maintenance schedules.
+
+**204**
+
+```http
+HTTP/1.1 204 No Content
+```
+
+**Errors:** `409 CONFLICT` — the asset has open tickets; `details.ticket_ids`
+
+---
+
+# Maintenance Schedules
+
+## `GET /assets/{assetId}/maintenance-schedules`
+
+List an asset's active schedules. **Roles:** Manager, Worker
+
+**200** → paginated `PeriodicMaintenance`
+
+Example response (`200 OK`):
 
 ```json
 {
-  "message": "Bearer Token is required"
+  "data": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c30",
+      "asset_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c20",
+      "description": "Clean filters and check refrigerant",
+      "interval_count": 3,
+      "interval_unit": "MONTH",
+      "next_due_date": "2026-11-01",
+      "lead_days": 7,
+      "default_assignee_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "created_at": "2026-10-10T08:00:00Z",
+      "updated_at": "2026-10-10T08:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "page_size": 20,
+    "total": 1,
+    "total_pages": 1
+  }
 }
 ```
 
-## 6. `POST /maintenance-tickets/{ticketId}/approve`
+## `POST /assets/{assetId}/maintenance-schedules`
 
-**Summary:** Approve a maintenance ticket
+Schedule periodic maintenance. **Roles:** Manager
 
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-No path/query/header parameters.
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Ticket approved
-
-**Response schema:** `MaintenanceTicket`
-
-
-
-
-**Expected Response:**
-
-```json
-{
-  "id": "00000000-0000-0000-0000-000000000040",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "place_id": "00000000-0000-0000-0000-000000000010",
-  "asset_id": "00000000-0000-0000-0000-000000000020",
-  "ticket_type": "CORRECTIVE",
-  "reporter_id": "00000000-0000-0000-0000-000000000001",
-  "description": "Air conditioner is not cooling",
-  "status": "SUBMITTED",
-  "photo_url": "https://api.example.com/uploads/maintenance.jpg"
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 7. `POST /maintenance-tickets/{ticketId}/reject`
-
-**Summary:** Reject a maintenance ticket
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-No path/query/header parameters.
-
-### Request Body
-
-**Required:** No
-
-#### `application/json`
-
-**Schema:** `object`
-
-| Field | Type | Required | Description |
+| Body field | Type | Required | Rules |
 |---|---|---|---|
-| `reason` | `string` | No | - |
-
-**Example request:**
-```json
-{
-  "reason": "string"
-}
-```
-
-### Responses
-
-#### `200` — Ticket rejected
-
-**Response schema:** `MaintenanceTicket`
-
-
-
-
-**Expected Response:**
+| `description` | string | Yes | |
+| `interval_count` | integer | Yes | 1–365. With `interval_unit`, how often the maintenance repeats: `2` + `WEEK` is every two weeks |
+| `interval_unit` | `IntervalUnit` | Yes | |
+| `next_due_date` | date | Yes | Today or later |
+| `lead_days` | integer | No | 0–60, default 7. The ticket is created this many days before `next_due_date` |
+| `default_assignee_id` | uuid | No | Who gets the generated tickets; same rule as a ticket's [assignee](#maintenance-tickets) |
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000040",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "place_id": "00000000-0000-0000-0000-000000000010",
-  "asset_id": "00000000-0000-0000-0000-000000000020",
-  "ticket_type": "CORRECTIVE",
-  "reporter_id": "00000000-0000-0000-0000-000000000001",
-  "description": "Air conditioner is not cooling",
-  "status": "SUBMITTED",
-  "photo_url": "https://api.example.com/uploads/maintenance.jpg"
+  "description": "Clean filters and check refrigerant",
+  "interval_count": 3,
+  "interval_unit": "MONTH",
+  "next_due_date": "2026-11-01",
+  "lead_days": 7,
+  "default_assignee_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02"
 }
 ```
-#### `403` — Bearer Token is required.
 
-**Response schema:** `ErrorResponse`
+**201** → `PeriodicMaintenance`
 
-
-**Expected Response:**
+Example response (`201 Created`):
 
 ```json
 {
-  "message": "Bearer Token is required"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c30",
+  "asset_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c20",
+  "description": "Clean filters and check refrigerant",
+  "interval_count": 3,
+  "interval_unit": "MONTH",
+  "next_due_date": "2026-11-01",
+  "lead_days": 7,
+  "default_assignee_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "created_at": "2026-10-10T08:00:00Z",
+  "updated_at": "2026-10-10T08:00:00Z"
 }
 ```
 
-## 8. `POST /maintenance-tickets/{ticketId}/complete`
+**Errors:** `422 VALIDATION_ERROR` — `default_assignee_id` is not allowed for this place
 
-**Summary:** Complete a maintenance ticket
+## `DELETE /maintenance-schedules/{scheduleId}`
 
-**Authentication:** Required (Bearer JWT)
+Stop a schedule. **Roles:** Manager
 
+Sets `is_active` to `false`. Tickets the schedule already created stay. To change a schedule, stop it and create a new one.
 
-### Parameters
+**204**
 
-No path/query/header parameters.
+```http
+HTTP/1.1 204 No Content
+```
 
-### Request Body
+---
 
-**Required:** No
+# Maintenance Tickets
 
-#### `multipart/form-data`
+```text
+PENDING_REVIEW ──approve──▶ APPROVED ──complete──▶ COMPLETED
+       │
+       └──reject──▶ REJECTED
+```
 
-**Schema:** `object`
+| Action | Ticket becomes | Asset becomes |
+|---|---|---|
+| Approve | `APPROVED` | `NEEDS_MAINTENANCE` |
+| Complete | `COMPLETED` | `GOOD`, if it has no other open tickets |
+| Reject | `REJECTED` | Unchanged |
+| Reassign | Unchanged | Unchanged |
 
-| Field | Type | Required | Description |
+**Assignee.** A ticket's assignee is an `ACTIVE` Worker assigned to the ticket's place, or the place's owner. The owner option lets a Manager without workers handle their own tickets.
+
+People report `CORRECTIVE` tickets. `PREVENTIVE` tickets come only from the scheduler; see [Background Jobs](#background-jobs).
+
+## `GET /tickets`
+
+List tickets. **Roles:** Manager, Worker
+
+| Query | Type | Required | Notes |
 |---|---|---|---|
-| `completion_note` | `string` | No | - |
-| `photo` | `string (binary)` | No | - |
+| `place_id` | uuid | No | |
+| `asset_id` | uuid | No | An asset's repair history |
+| `status` | `TicketStatus` | No | |
+| `assignee_id` | uuid | No | Pass your own id for "my tasks" |
+| `overdue` | boolean | No | `true`: `APPROVED` tickets past their `due_date` |
+| `page`, `page_size` | integer | No | |
 
-**Example request:**
+**200** → paginated `MaintenanceTicket`, without `attachments`
+
+Example response (`200 OK`):
+
 ```json
 {
-  "completion_note": "string",
-  "photo": "string"
+  "data": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40",
+      "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+      "asset_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c20",
+      "periodic_maintenance_id": null,
+      "ticket_type": "CORRECTIVE",
+      "priority": "HIGH",
+      "status": "APPROVED",
+      "description": "Living-room AC blows warm air",
+      "reporter_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "assignee_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "due_date": "2026-10-14",
+      "is_overdue": false,
+      "estimated_cost": 350,
+      "actual_cost": null,
+      "reviewed_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+      "reviewed_at": "2026-10-11T12:00:00Z",
+      "rejection_reason": null,
+      "completed_at": null,
+      "completion_notes": null,
+      "created_at": "2026-10-11T09:30:00Z",
+      "updated_at": "2026-10-11T12:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "page_size": 20,
+    "total": 1,
+    "total_pages": 1
+  }
 }
 ```
 
-### Responses
+Workers get the same shape without `estimated_cost`.
 
-#### `200` — Ticket completed
+## `POST /places/{placeId}/tickets`
 
-**Response schema:** `MaintenanceTicket`
+Report damage or required maintenance. **Roles:** Manager, Worker. Body: `multipart/form-data`.
 
+| Field | Type | Required | Rules |
+|---|---|---|---|
+| `asset_id` | uuid | No | An asset of this place |
+| `priority` | `TicketPriority` | Yes | |
+| `description` | string | Yes | |
+| `photos` | file | No | Up to 5, saved as `DAMAGE` photos |
 
+Creates a `CORRECTIVE` ticket in `PENDING_REVIEW` with the caller as reporter, and notifies the place owner in-app and by email (`TICKET_SUBMITTED`).
 
+**201** → `MaintenanceTicket`
 
-**Expected Response:**
+Example response (`201 Created`):
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000040",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "place_id": "00000000-0000-0000-0000-000000000010",
-  "asset_id": "00000000-0000-0000-0000-000000000020",
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "asset_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c20",
+  "periodic_maintenance_id": null,
   "ticket_type": "CORRECTIVE",
-  "reporter_id": "00000000-0000-0000-0000-000000000001",
-  "description": "Air conditioner is not cooling",
-  "status": "SUBMITTED",
-  "photo_url": "https://api.example.com/uploads/maintenance.jpg"
+  "priority": "HIGH",
+  "status": "PENDING_REVIEW",
+  "description": "Living-room AC blows warm air",
+  "reporter_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "assignee_id": null,
+  "due_date": null,
+  "is_overdue": false,
+  "estimated_cost": null,
+  "actual_cost": null,
+  "reviewed_by": null,
+  "reviewed_at": null,
+  "rejection_reason": null,
+  "completed_at": null,
+  "completion_notes": null,
+  "attachments": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c41",
+      "attachment_type": "DAMAGE",
+      "file_url": "https://amlak-uploads.s3.amazonaws.com/tickets/9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40/0b8e5d7a-2c1f-4e3b-9a6d-7c8b9a0f1e2d.jpg?X-Amz-Signature=...",
+      "uploaded_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "created_at": "2026-10-11T09:30:00Z",
+      "updated_at": "2026-10-11T09:30:00Z"
+    }
+  ],
+  "created_at": "2026-10-11T09:30:00Z",
+  "updated_at": "2026-10-11T09:30:00Z"
 }
 ```
-#### `403` — Bearer Token is required.
 
-**Response schema:** `ErrorResponse`
+## `GET /tickets/{ticketId}`
 
+Get a ticket with its photos. **Roles:** Manager, Worker
 
-**Expected Response:**
+**200** → `MaintenanceTicket` with `attachments`
+
+Example response (`200 OK`):
 
 ```json
 {
-  "message": "Bearer Token is required"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "asset_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c20",
+  "periodic_maintenance_id": null,
+  "ticket_type": "CORRECTIVE",
+  "priority": "HIGH",
+  "status": "APPROVED",
+  "description": "Living-room AC blows warm air",
+  "reporter_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "assignee_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "due_date": "2026-10-14",
+  "is_overdue": false,
+  "estimated_cost": 350,
+  "actual_cost": null,
+  "reviewed_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "reviewed_at": "2026-10-11T12:00:00Z",
+  "rejection_reason": null,
+  "completed_at": null,
+  "completion_notes": null,
+  "attachments": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c41",
+      "attachment_type": "DAMAGE",
+      "file_url": "https://amlak-uploads.s3.amazonaws.com/tickets/9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40/0b8e5d7a-2c1f-4e3b-9a6d-7c8b9a0f1e2d.jpg?X-Amz-Signature=...",
+      "uploaded_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "created_at": "2026-10-11T09:30:00Z",
+      "updated_at": "2026-10-11T09:30:00Z"
+    }
+  ],
+  "created_at": "2026-10-11T09:30:00Z",
+  "updated_at": "2026-10-11T12:00:00Z"
 }
 ```
+
+Workers get the same shape without `estimated_cost`.
+
+## `POST /tickets/{ticketId}/approve`
+
+Approve and assign. **Roles:** Manager. The ticket must be `PENDING_REVIEW`.
+
+| Body field | Type | Required | Rules |
+|---|---|---|---|
+| `assignee_id` | uuid | Yes | See **Assignee** above |
+| `due_date` | date | Yes | Today or later |
+| `estimated_cost` | number | Yes | ≥ 0 |
+
+```json
+{
+  "assignee_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "due_date": "2026-10-14",
+  "estimated_cost": 350
+}
+```
+
+Sets `reviewed_by` and `reviewed_at`, and notifies the assignee (`TICKET_ASSIGNED`). The dashboard's `maintenance_budget` shows what is left of this month's budget.
+
+**200** → `MaintenanceTicket`
+
+Example response (`200 OK`):
+
+```json
+{
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "asset_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c20",
+  "periodic_maintenance_id": null,
+  "ticket_type": "CORRECTIVE",
+  "priority": "HIGH",
+  "status": "APPROVED",
+  "description": "Living-room AC blows warm air",
+  "reporter_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "assignee_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "due_date": "2026-10-14",
+  "is_overdue": false,
+  "estimated_cost": 350,
+  "actual_cost": null,
+  "reviewed_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "reviewed_at": "2026-10-11T12:00:00Z",
+  "rejection_reason": null,
+  "completed_at": null,
+  "completion_notes": null,
+  "attachments": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c41",
+      "attachment_type": "DAMAGE",
+      "file_url": "https://amlak-uploads.s3.amazonaws.com/tickets/9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40/0b8e5d7a-2c1f-4e3b-9a6d-7c8b9a0f1e2d.jpg?X-Amz-Signature=...",
+      "uploaded_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "created_at": "2026-10-11T09:30:00Z",
+      "updated_at": "2026-10-11T09:30:00Z"
+    }
+  ],
+  "created_at": "2026-10-11T09:30:00Z",
+  "updated_at": "2026-10-11T12:00:00Z"
+}
+```
+
+**Errors:** `422 VALIDATION_ERROR` — the assignee is not allowed for this place
+
+## `POST /tickets/{ticketId}/reject`
+
+Reject. **Roles:** Manager. The ticket must be `PENDING_REVIEW`.
+
+| Body field | Type | Required |
+|---|---|---|
+| `reason` | string | Yes |
+
+Sets `rejection_reason`, `reviewed_by` and `reviewed_at`, and notifies the reporter (`TICKET_REJECTED`). Scheduler tickets have no reporter.
+
+**200** → `MaintenanceTicket`
+
+Example response (`200 OK`):
+
+```json
+{
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "asset_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c20",
+  "periodic_maintenance_id": null,
+  "ticket_type": "CORRECTIVE",
+  "priority": "HIGH",
+  "status": "REJECTED",
+  "description": "Living-room AC blows warm air",
+  "reporter_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "assignee_id": null,
+  "due_date": null,
+  "is_overdue": false,
+  "estimated_cost": null,
+  "actual_cost": null,
+  "reviewed_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "reviewed_at": "2026-10-11T12:00:00Z",
+  "rejection_reason": "Already reported in another ticket",
+  "completed_at": null,
+  "completion_notes": null,
+  "attachments": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c41",
+      "attachment_type": "DAMAGE",
+      "file_url": "https://amlak-uploads.s3.amazonaws.com/tickets/9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40/0b8e5d7a-2c1f-4e3b-9a6d-7c8b9a0f1e2d.jpg?X-Amz-Signature=...",
+      "uploaded_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "created_at": "2026-10-11T09:30:00Z",
+      "updated_at": "2026-10-11T09:30:00Z"
+    }
+  ],
+  "created_at": "2026-10-11T09:30:00Z",
+  "updated_at": "2026-10-11T12:00:00Z"
+}
+```
+
+## `POST /tickets/{ticketId}/reassign`
+
+Change the assignee or due date. **Roles:** Manager. The ticket must be `APPROVED`.
+
+| Body field | Type | Required | Rules |
+|---|---|---|---|
+| `assignee_id` | uuid | Yes | See **Assignee** above |
+| `due_date` | date | Yes | Today or later |
+
+Clears `reminder_sent_at` and `overdue_alert_sent_at` so the reminders run again for the new date, and notifies the new assignee (`TICKET_ASSIGNED`).
+
+**200** → `MaintenanceTicket`
+
+Example response (`200 OK`):
+
+```json
+{
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "asset_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c20",
+  "periodic_maintenance_id": null,
+  "ticket_type": "CORRECTIVE",
+  "priority": "HIGH",
+  "status": "APPROVED",
+  "description": "Living-room AC blows warm air",
+  "reporter_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "assignee_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "due_date": "2026-10-16",
+  "is_overdue": false,
+  "estimated_cost": 350,
+  "actual_cost": null,
+  "reviewed_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "reviewed_at": "2026-10-11T12:00:00Z",
+  "rejection_reason": null,
+  "completed_at": null,
+  "completion_notes": null,
+  "attachments": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c41",
+      "attachment_type": "DAMAGE",
+      "file_url": "https://amlak-uploads.s3.amazonaws.com/tickets/9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40/0b8e5d7a-2c1f-4e3b-9a6d-7c8b9a0f1e2d.jpg?X-Amz-Signature=...",
+      "uploaded_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "created_at": "2026-10-11T09:30:00Z",
+      "updated_at": "2026-10-11T09:30:00Z"
+    }
+  ],
+  "created_at": "2026-10-11T09:30:00Z",
+  "updated_at": "2026-10-12T08:00:00Z"
+}
+```
+
+**Errors:** `422 VALIDATION_ERROR` — the assignee is not allowed for this place
+
+## `POST /tickets/{ticketId}/complete`
+
+Complete the work. **Roles:** Manager, Worker; assignee only. The ticket must be `APPROVED`. Body: `multipart/form-data`.
+
+| Field | Type | Required | Rules |
+|---|---|---|---|
+| `actual_cost` | number | Yes | ≥ 0 |
+| `completion_notes` | string | No | |
+| `photos` | file | Yes | 1–5, saved as `AFTER_REPAIR` photos |
+
+Sets `completed_at` and notifies the place owner (`TICKET_COMPLETED`). `actual_cost` is for information only: it reaches the financial report only when the Manager logs an expense with this `ticket_id`.
+
+**200** → `MaintenanceTicket`
+
+Example response (`200 OK`):
+
+```json
+{
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "asset_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c20",
+  "periodic_maintenance_id": null,
+  "ticket_type": "CORRECTIVE",
+  "priority": "HIGH",
+  "status": "COMPLETED",
+  "description": "Living-room AC blows warm air",
+  "reporter_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "assignee_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "due_date": "2026-10-14",
+  "is_overdue": false,
+  "estimated_cost": 350,
+  "actual_cost": 420,
+  "reviewed_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "reviewed_at": "2026-10-11T12:00:00Z",
+  "rejection_reason": null,
+  "completed_at": "2026-10-13T16:00:00Z",
+  "completion_notes": "Replaced the capacitor and refilled the refrigerant",
+  "attachments": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c41",
+      "attachment_type": "DAMAGE",
+      "file_url": "https://amlak-uploads.s3.amazonaws.com/tickets/9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40/0b8e5d7a-2c1f-4e3b-9a6d-7c8b9a0f1e2d.jpg?X-Amz-Signature=...",
+      "uploaded_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "created_at": "2026-10-11T09:30:00Z",
+      "updated_at": "2026-10-11T09:30:00Z"
+    },
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c42",
+      "attachment_type": "AFTER_REPAIR",
+      "file_url": "https://amlak-uploads.s3.amazonaws.com/tickets/9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40/5d2c8e1f-7a3b-4c9d-8e6f-1a2b3c4d5e6f.jpg?X-Amz-Signature=...",
+      "uploaded_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "created_at": "2026-10-13T16:00:00Z",
+      "updated_at": "2026-10-13T16:00:00Z"
+    }
+  ],
+  "created_at": "2026-10-11T09:30:00Z",
+  "updated_at": "2026-10-13T16:00:00Z"
+}
+```
+
+**Errors:** `422 VALIDATION_ERROR` — no after photo was sent
 
 ---
 
 # Bookings
 
-## 1. `GET /places/{placeId}/bookings`
+A stay runs from `check_in_date` to `check_out_date`. The check-out day is free for the next guest, so a booking may start on another booking's check-out day.
 
-**Summary:** List bookings for a place
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `placeId` | `path` | `string (uuid)` | Yes | - |
-| `from` | `query` | `string (date)` | No | - |
-| `to` | `query` | `string (date)` | No | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Bookings
-
-**Response schema:** `array<Booking>`
-
-
-
-**Expected Response:**
-
-```json
-[]
+```text
+CONFIRMED ──check-in──▶ CHECKED_IN ──check-out──▶ CHECKED_OUT
+    │
+    └──cancel──▶ CANCELLED
 ```
-#### `403` — Bearer Token is required.
 
-**Response schema:** `ErrorResponse`
+A `CONFIRMED` booking is ready for check-in (`ready_for_check_in`) when today is on or after `check_in_date` in the place's time zone and no other booking on the place is `CHECKED_IN`.
 
+## `GET /places/{placeId}/bookings`
 
-**Expected Response:**
+Booking calendar. **Roles:** Manager, Worker
+
+| Query | Type | Required |
+|---|---|---|
+| `from` | date | Yes |
+| `to` | date | Yes |
+| `status` | `BookingStatus` | No |
+| `page`, `page_size` | integer | No |
+
+Returns the bookings whose stay overlaps `from`–`to`.
+
+**200** → paginated `Booking`
+
+Example response (`200 OK`):
 
 ```json
 {
-  "message": "Bearer Token is required"
+  "data": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c50",
+      "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+      "created_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "guest_name": "Fahad Alharbi",
+      "guest_phone": "+966555123456",
+      "guest_email": null,
+      "guest_count": 6,
+      "check_in_date": "2026-10-20",
+      "check_out_date": "2026-10-22",
+      "total_price": 1800,
+      "currency": "SAR",
+      "status": "CONFIRMED",
+      "notes": "Late arrival, around 10 pm",
+      "ready_for_check_in": false,
+      "cancelled_at": null,
+      "cancelled_by": null,
+      "cancellation_reason": null,
+      "checked_in_at": null,
+      "checked_in_by": null,
+      "checked_out_at": null,
+      "checked_out_by": null,
+      "created_at": "2026-10-11T10:00:00Z",
+      "updated_at": "2026-10-11T10:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "page_size": 20,
+    "total": 1,
+    "total_pages": 1
+  }
 }
 ```
 
-## 2. `POST /places/{placeId}/bookings`
+## `POST /places/{placeId}/bookings`
 
-**Summary:** Add a booking
+Add a booking. **Roles:** Manager, Worker
 
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `placeId` | `path` | `string (uuid)` | Yes | - |
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `BookingCreateRequest`
-
-| Field | Type | Required | Description |
+| Body field | Type | Required | Rules |
 |---|---|---|---|
-| `booking_date` | `string (date)` | Yes | - |
-| `cost` | `number (double)` | Yes | - |
+| `guest_name` | string | Yes | |
+| `guest_phone` | string | Yes | E.164 |
+| `guest_email` | string (email) | No | |
+| `guest_count` | integer | Yes | ≥ 1 |
+| `check_in_date` | date | Yes | |
+| `check_out_date` | date | Yes | After `check_in_date` |
+| `total_price` | number | Yes | ≥ 0, in the place's currency |
+| `notes` | string | No | |
 
-**Example request:**
 ```json
 {
-  "booking_date": "2026-01-01",
-  "cost": 0
+  "guest_name": "Fahad Alharbi",
+  "guest_phone": "+966555123456",
+  "guest_count": 6,
+  "check_in_date": "2026-10-20",
+  "check_out_date": "2026-10-22",
+  "total_price": 1800,
+  "notes": "Late arrival, around 10 pm"
 }
 ```
 
-### Responses
+The overlap check and the insert run in one transaction that locks the place row, so two requests cannot book the same dates. The booking starts as `CONFIRMED`.
 
-#### `201` — Booking created
+**201** → `Booking`
 
-**Response schema:** `Booking`
-
-
-
-
-**Expected Response:**
+Example response (`201 Created`):
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000050",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "place_id": "00000000-0000-0000-0000-000000000010",
-  "booking_date": "2026-01-15",
-  "cost": 500.0
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 3. `GET /bookings/{bookingId}`
-
-**Summary:** Get a booking
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `bookingId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Booking
-
-**Response schema:** `Booking`
-
-
-
-
-**Expected Response:**
-
-```json
-{
-  "id": "00000000-0000-0000-0000-000000000050",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "place_id": "00000000-0000-0000-0000-000000000010",
-  "booking_date": "2026-01-15",
-  "cost": 500.0
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c50",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "created_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "guest_name": "Fahad Alharbi",
+  "guest_phone": "+966555123456",
+  "guest_email": null,
+  "guest_count": 6,
+  "check_in_date": "2026-10-20",
+  "check_out_date": "2026-10-22",
+  "total_price": 1800,
+  "currency": "SAR",
+  "status": "CONFIRMED",
+  "notes": "Late arrival, around 10 pm",
+  "ready_for_check_in": false,
+  "cancelled_at": null,
+  "cancelled_by": null,
+  "cancellation_reason": null,
+  "checked_in_at": null,
+  "checked_in_by": null,
+  "checked_out_at": null,
+  "checked_out_by": null,
+  "created_at": "2026-10-11T10:00:00Z",
+  "updated_at": "2026-10-11T10:00:00Z"
 }
 ```
 
-## 4. `POST /bookings/{bookingId}`
+**Errors:**
+- `409 CONFLICT` — the dates overlap another booking; `details.conflicting_booking_id`
+- `422 VALIDATION_ERROR` — the place is not `ACTIVE`
 
-**Summary:** Cancel a booking
+## `GET /bookings/{bookingId}`
 
-**Description:** The source model specifies cancel() but does not specify whether cancellation is PUT/PATCH/DELETE; POST is used here as a proposed command endpoint.
+Get a booking. **Roles:** Manager, Worker
 
-**Authentication:** Required (Bearer JWT)
+**200** → `Booking`
 
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `bookingId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Booking cancelled
-
-**Response schema:** `Booking`
-
-
-
-
-**Expected Response:**
+Example response (`200 OK`):
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000050",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "place_id": "00000000-0000-0000-0000-000000000010",
-  "booking_date": "2026-01-15",
-  "cost": 500.0
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c50",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "created_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "guest_name": "Fahad Alharbi",
+  "guest_phone": "+966555123456",
+  "guest_email": null,
+  "guest_count": 6,
+  "check_in_date": "2026-10-20",
+  "check_out_date": "2026-10-22",
+  "total_price": 1800,
+  "currency": "SAR",
+  "status": "CONFIRMED",
+  "notes": "Late arrival, around 10 pm",
+  "ready_for_check_in": false,
+  "cancelled_at": null,
+  "cancelled_by": null,
+  "cancellation_reason": null,
+  "checked_in_at": null,
+  "checked_in_by": null,
+  "checked_out_at": null,
+  "checked_out_by": null,
+  "created_at": "2026-10-11T10:00:00Z",
+  "updated_at": "2026-10-11T10:00:00Z"
 }
 ```
-#### `403` — Bearer Token is required.
 
-**Response schema:** `ErrorResponse`
+## `POST /bookings/{bookingId}/cancel`
 
+Cancel a booking. **Roles:** Manager, Worker. The booking must be `CONFIRMED`.
 
-**Expected Response:**
+| Body field | Type | Required |
+|---|---|---|
+| `reason` | string | Yes |
+
+Sets `cancelled_at`, `cancelled_by` and `cancellation_reason`. A cancelled booking frees its dates and does not count as income.
+
+**200** → `Booking`
+
+Example response (`200 OK`):
 
 ```json
 {
-  "message": "Bearer Token is required"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c50",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "created_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "guest_name": "Fahad Alharbi",
+  "guest_phone": "+966555123456",
+  "guest_email": null,
+  "guest_count": 6,
+  "check_in_date": "2026-10-20",
+  "check_out_date": "2026-10-22",
+  "total_price": 1800,
+  "currency": "SAR",
+  "status": "CANCELLED",
+  "notes": "Late arrival, around 10 pm",
+  "ready_for_check_in": false,
+  "cancelled_at": "2026-10-15T09:00:00Z",
+  "cancelled_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "cancellation_reason": "Guest changed plans",
+  "checked_in_at": null,
+  "checked_in_by": null,
+  "checked_out_at": null,
+  "checked_out_by": null,
+  "created_at": "2026-10-11T10:00:00Z",
+  "updated_at": "2026-10-15T09:00:00Z"
+}
+```
+
+## `POST /bookings/{bookingId}/check-in`
+
+Check the guest in. **Roles:** Manager, Worker. The booking must be ready for check-in. No body.
+
+Sets the status to `CHECKED_IN`, plus `checked_in_at` and `checked_in_by`.
+
+**200** → `Booking`
+
+Example response (`200 OK`):
+
+```json
+{
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c50",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "created_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "guest_name": "Fahad Alharbi",
+  "guest_phone": "+966555123456",
+  "guest_email": null,
+  "guest_count": 6,
+  "check_in_date": "2026-10-20",
+  "check_out_date": "2026-10-22",
+  "total_price": 1800,
+  "currency": "SAR",
+  "status": "CHECKED_IN",
+  "notes": "Late arrival, around 10 pm",
+  "ready_for_check_in": false,
+  "cancelled_at": null,
+  "cancelled_by": null,
+  "cancellation_reason": null,
+  "checked_in_at": "2026-10-20T19:10:00Z",
+  "checked_in_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "checked_out_at": null,
+  "checked_out_by": null,
+  "created_at": "2026-10-11T10:00:00Z",
+  "updated_at": "2026-10-20T19:10:00Z"
+}
+```
+
+**Errors:** `409 CONFLICT` — not ready: `details.reason` is `BEFORE_CHECK_IN_DATE`, or `PLACE_OCCUPIED` with `details.occupied_by_booking_id`
+
+## `POST /bookings/{bookingId}/check-out`
+
+Check the guest out. **Roles:** Manager, Worker. The booking must be `CHECKED_IN`. No body.
+
+Sets the status to `CHECKED_OUT`, plus `checked_out_at` and `checked_out_by`.
+
+**200** → `Booking`
+
+Example response (`200 OK`):
+
+```json
+{
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c50",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "created_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "guest_name": "Fahad Alharbi",
+  "guest_phone": "+966555123456",
+  "guest_email": null,
+  "guest_count": 6,
+  "check_in_date": "2026-10-20",
+  "check_out_date": "2026-10-22",
+  "total_price": 1800,
+  "currency": "SAR",
+  "status": "CHECKED_OUT",
+  "notes": "Late arrival, around 10 pm",
+  "ready_for_check_in": false,
+  "cancelled_at": null,
+  "cancelled_by": null,
+  "cancellation_reason": null,
+  "checked_in_at": "2026-10-20T19:10:00Z",
+  "checked_in_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "checked_out_at": "2026-10-22T08:45:00Z",
+  "checked_out_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "created_at": "2026-10-11T10:00:00Z",
+  "updated_at": "2026-10-22T08:45:00Z"
 }
 ```
 
@@ -2284,395 +2020,195 @@ No request body.
 
 # Expenses
 
-## 1. `GET /places/{placeId}/expenses`
+Workers have no access to this section or to Reports.
 
-**Summary:** List expenses
+## `GET /places/{placeId}/expenses`
 
-**Authentication:** Required (Bearer JWT)
+List a place's expenses. **Roles:** Manager
 
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `placeId` | `path` | `string (uuid)` | Yes | - |
-| `from` | `query` | `string (date)` | No | - |
-| `to` | `query` | `string (date)` | No | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Expenses
-
-**Response schema:** `array<Expense>`
-
-
-
-**Expected Response:**
-
-```json
-[]
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 2. `POST /places/{placeId}/expenses`
-
-**Summary:** Add an expense
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `placeId` | `path` | `string (uuid)` | Yes | - |
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `ExpenseCreateRequest`
-
-| Field | Type | Required | Description |
+| Query | Type | Required | Notes |
 |---|---|---|---|
-| `description` | `string` | Yes | - |
-| `amount` | `number (double)` | Yes | - |
-| `expense_date` | `string (date)` | Yes | - |
+| `from`, `to` | date | No | Filter on `expense_date` |
+| `category` | `ExpenseCategory` | No | |
+| `page`, `page_size` | integer | No | |
 
-**Example request:**
-```json
-{
-  "description": "string",
-  "amount": 0,
-  "expense_date": "2026-01-01"
-}
-```
+**200** → paginated `Expense`
 
-### Responses
-
-#### `201` — Expense created
-
-**Response schema:** `Expense`
-
-
-
-
-**Expected Response:**
+Example response (`200 OK`):
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000060",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "place_id": "00000000-0000-0000-0000-000000000010",
-  "description": "Cleaning service",
-  "amount": 150.0,
-  "expense_date": "2026-01-05"
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 3. `GET /expenses/{expenseId}`
-
-**Summary:** Get an expense
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `expenseId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Expense
-
-**Response schema:** `Expense`
-
-
-
-
-**Expected Response:**
-
-```json
-{
-  "id": "00000000-0000-0000-0000-000000000060",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "place_id": "00000000-0000-0000-0000-000000000010",
-  "description": "Cleaning service",
-  "amount": 150.0,
-  "expense_date": "2026-01-05"
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
+  "data": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c60",
+      "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+      "ticket_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40",
+      "created_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+      "category": "MAINTENANCE",
+      "description": "AC capacitor and refrigerant",
+      "amount": 420,
+      "currency": "SAR",
+      "expense_date": "2026-10-13",
+      "receipt_url": "https://amlak-uploads.s3.amazonaws.com/receipts/9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c60/3e4f5a6b-7c8d-4e9f-8a1b-2c3d4e5f6a7b.jpg?X-Amz-Signature=...",
+      "created_at": "2026-10-13T18:00:00Z",
+      "updated_at": "2026-10-13T18:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "page_size": 20,
+    "total": 1,
+    "total_pages": 1
+  }
 }
 ```
 
-## 4. `PUT /expenses/{expenseId}`
+## `POST /places/{placeId}/expenses`
 
-**Summary:** Update an expense
+Log an expense. **Roles:** Manager. Body: `multipart/form-data`.
 
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `expenseId` | `path` | `string (uuid)` | Yes | - |
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `ExpenseUpdateRequest`
-
-| Field | Type | Required | Description |
+| Field | Type | Required | Rules |
 |---|---|---|---|
-| `description` | `string` | No | - |
-| `amount` | `number (double)` | No | - |
-| `expense_date` | `string (date)` | No | - |
+| `category` | `ExpenseCategory` | Yes | |
+| `amount` | number | Yes | > 0, in the place's currency |
+| `expense_date` | date | Yes | |
+| `description` | string | No | |
+| `ticket_id` | uuid | No | A ticket of the same place |
+| `receipt` | file | No | Photo of the receipt |
 
-**Example request:**
+**201** → `Expense`
+
+Example response (`201 Created`):
+
 ```json
 {
-  "description": "string",
-  "amount": 0,
-  "expense_date": "2026-01-01"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c60",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "ticket_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40",
+  "created_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "category": "MAINTENANCE",
+  "description": "AC capacitor and refrigerant",
+  "amount": 420,
+  "currency": "SAR",
+  "expense_date": "2026-10-13",
+  "receipt_url": "https://amlak-uploads.s3.amazonaws.com/receipts/9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c60/3e4f5a6b-7c8d-4e9f-8a1b-2c3d4e5f6a7b.jpg?X-Amz-Signature=...",
+  "created_at": "2026-10-13T18:00:00Z",
+  "updated_at": "2026-10-13T18:00:00Z"
 }
 ```
 
-### Responses
+## `GET /expenses/{expenseId}`
 
-#### `200` — Expense updated
+Get an expense. **Roles:** Manager
 
-**Response schema:** `Expense`
+**200** → `Expense`
 
-
-
-
-**Expected Response:**
+Example response (`200 OK`):
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000060",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "place_id": "00000000-0000-0000-0000-000000000010",
-  "description": "Cleaning service",
-  "amount": 150.0,
-  "expense_date": "2026-01-05"
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c60",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "ticket_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40",
+  "created_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "category": "MAINTENANCE",
+  "description": "AC capacitor and refrigerant",
+  "amount": 420,
+  "currency": "SAR",
+  "expense_date": "2026-10-13",
+  "receipt_url": "https://amlak-uploads.s3.amazonaws.com/receipts/9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c60/3e4f5a6b-7c8d-4e9f-8a1b-2c3d4e5f6a7b.jpg?X-Amz-Signature=...",
+  "created_at": "2026-10-13T18:00:00Z",
+  "updated_at": "2026-10-13T18:00:00Z"
 }
 ```
 
-## 5. `DELETE /expenses/{expenseId}`
+## `PUT /expenses/{expenseId}`
 
-**Summary:** Delete an expense
+Update an expense. **Roles:** Manager. Body: `multipart/form-data`.
 
-**Authentication:** Required (Bearer JWT)
+Fields: the `POST` fields, all optional. An empty `ticket_id` unlinks the ticket, and a new `receipt` replaces the old one.
 
+**200** → `Expense`
 
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `expenseId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `204` — Expense deleted
-
-No response body.
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
+Example response (`200 OK`):
 
 ```json
 {
-  "message": "Bearer Token is required"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c60",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "ticket_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40",
+  "created_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "category": "MAINTENANCE",
+  "description": "AC capacitor and refrigerant",
+  "amount": 450,
+  "currency": "SAR",
+  "expense_date": "2026-10-13",
+  "receipt_url": "https://amlak-uploads.s3.amazonaws.com/receipts/9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c60/3e4f5a6b-7c8d-4e9f-8a1b-2c3d4e5f6a7b.jpg?X-Amz-Signature=...",
+  "created_at": "2026-10-13T18:00:00Z",
+  "updated_at": "2026-10-14T09:00:00Z"
 }
+```
+
+## `DELETE /expenses/{expenseId}`
+
+Delete an expense. **Roles:** Manager
+
+Deletes the row; its audit entry keeps the old values.
+
+**204**
+
+```http
+HTTP/1.1 204 No Content
 ```
 
 ---
 
 # Reports
 
-## 1. `GET /reports/financial`
+## `GET /reports/financial`
 
-**Summary:** Generate financial report
+Income, expenses and profit for a period. **Roles:** Manager
 
-**Description:** Returns total income, total expenses, and profit. The source specifies these metrics but does not define the income data model.
+| Query | Type | Required | Notes |
+|---|---|---|---|
+| `from` | date | Yes | |
+| `to` | date | Yes | |
+| `place_id` | uuid | No | One place; otherwise all the caller's places |
 
-**Authentication:** Required (Bearer JWT)
+The report is computed on request and never stored:
 
+- **Income**: `total_price` of bookings that are not `CANCELLED` and whose `check_in_date` falls in the period.
+- **Expenses**: `amount` of expenses whose `expense_date` falls in the period. A ticket's `actual_cost` never counts.
+- **Profit**: income minus expenses.
 
-### Parameters
+Places can use different currencies, so the report has one row per place plus totals per currency.
 
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `from` | `query` | `string (date)` | No | - |
-| `to` | `query` | `string (date)` | No | - |
-| `place_id` | `query` | `string (uuid)` | No | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Financial report
-
-**Response schema:** `FinancialReport`
-
-
-**Expected Response:**
+**200**
 
 ```json
 {
-  "total_income": 0,
-  "total_expenses": 0,
-  "profit": 0
-}
-```
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 2. `GET /reports/analytics`
-
-**Summary:** Get reporting and analytics
-
-**Description:** Admin-oriented statistics and filterable data for export.
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `from` | `query` | `string (date)` | No | - |
-| `to` | `query` | `string (date)` | No | - |
-| `metric` | `query` | `string` | No | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Analytics data
-
-**Response schema:** `AnalyticsResponse`
-
-
-
-**Expected Response:**
-
-```json
-{
-  "metrics": {
-    "total_places": 12,
-    "total_bookings": 35,
-    "total_expenses": 12500.0
-  },
-  "period": {
-    "from": "2026-01-01",
-    "to": "2026-01-31"
-  }
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
+  "period": { "from": "2026-10-01", "to": "2026-10-31" },
+  "places": [
+    {
+      "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+      "place_name": "Al Noor Chalet",
+      "currency": "SAR",
+      "total_income": 12500,
+      "total_expenses": 3150,
+      "profit": 9350,
+      "expenses_by_category": {
+        "MAINTENANCE": 1200,
+        "UTILITIES": 950,
+        "TAXES": 0,
+        "CLEANING": 800,
+        "SUPPLIES": 200,
+        "OTHER": 0
+      }
+    }
+  ],
+  "totals_by_currency": [
+    { "currency": "SAR", "total_income": 12500, "total_expenses": 3150, "profit": 9350 }
+  ]
 }
 ```
 
@@ -2680,370 +2216,218 @@ No request body.
 
 # Notifications
 
-## 1. `GET /notifications`
+## `GET /notifications`
 
-**Summary:** List current user's notifications
+List my notifications, newest first. **Any role.**
 
-**Authentication:** Required (Bearer JWT)
+| Query | Type | Required |
+|---|---|---|
+| `is_read` | boolean | No |
+| `page`, `page_size` | integer | No |
 
-
-### Parameters
-
-No path/query/header parameters.
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Notifications
-
-**Response schema:** `array<Notification>`
-
-
-
-**Expected Response:**
-
-```json
-[]
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
+**200** → paginated `Notification`, plus `unread_count` for the inbox badge:
 
 ```json
 {
-  "message": "Bearer Token is required"
+  "data": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c70",
+      "type": "TICKET_ASSIGNED",
+      "title": "تم إسناد تذكرة صيانة إليك",
+      "message": "مكيف الصالة في شاليه النور، الموعد 14 أكتوبر.",
+      "is_read": false,
+      "sender_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+      "created_at": "2026-10-11T12:00:00Z",
+      "updated_at": "2026-10-11T12:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "page_size": 20,
+    "total": 1,
+    "total_pages": 1
+  },
+  "unread_count": 1
 }
 ```
 
-## 2. `POST /notifications`
+## `POST /notifications/{notificationId}/read`
 
-**Summary:** Send notification
+Mark a notification as read. **Any role**, own notifications only.
 
-**Description:** Admin notification endpoint. Supports a target user, multiple users, or a role.
+**200** → `Notification`
 
-**Authentication:** Required (Bearer JWT)
+Example response (`200 OK`):
 
+```json
+{
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c70",
+  "type": "TICKET_ASSIGNED",
+  "title": "تم إسناد تذكرة صيانة إليك",
+  "message": "مكيف الصالة في شاليه النور، الموعد 14 أكتوبر.",
+  "is_read": true,
+  "sender_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "created_at": "2026-10-11T12:00:00Z",
+  "updated_at": "2026-10-11T12:30:00Z"
+}
+```
 
-### Parameters
+## `POST /notifications`
 
-No path/query/header parameters.
+Send an announcement. **Roles:** Admin
 
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `NotificationCreateRequest`
-
-| Field | Type | Required | Description |
+| Body field | Type | Required | Rules |
 |---|---|---|---|
-| `user_ids` | `array<string (uuid)>` | No | - |
-| `role_id` | `string (uuid)` | No | - |
-| `message` | `string` | Yes | - |
-
-**Example request:**
-```json
-{
-  "user_ids": [],
-  "role_id": "00000000-0000-0000-0000-000000000000",
-  "message": "string"
-}
-```
-
-### Responses
-
-#### `201` — Notification sent
-
-No response body.
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
+| `role` | `RoleName` | One of `role` and `user_ids` | Every user with this role |
+| `user_ids` | uuid[] | One of `role` and `user_ids` | Up to 1000 users |
+| `title_en` | string | Yes | |
+| `message_en` | string | Yes | |
+| `title_ar` | string | Yes | |
+| `message_ar` | string | Yes | |
 
 ```json
 {
-  "message": "Bearer Token is required"
+  "role": "MANAGER",
+  "title_en": "Scheduled maintenance",
+  "message_en": "Amlak will be unavailable on Friday from 2:00 to 3:00 am.",
+  "title_ar": "صيانة مجدولة",
+  "message_ar": "لن تتوفر خدمة أملاك يوم الجمعة من الساعة 2:00 إلى 3:00 صباحًا."
 }
 ```
 
-## 3. `POST /notifications/{notificationId}/read`
+Each `ACTIVE` recipient gets one `ANNOUNCEMENT` in their `preferred_language`, in-app and by email.
 
-**Summary:** Mark notification as read
+**201** → `{ "recipient_count": 42 }`
 
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `notificationId` | `path` | `string (uuid)` | Yes | ID of the notification to mark as read |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Notification marked as read
-
-**Response schema:** `Notification`
-
-
-
-
-**Expected Response:**
+Example response (`201 Created`):
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000070",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "user_id": "00000000-0000-0000-0000-000000000001",
-  "sender_id": null,
-  "message": "Your maintenance ticket has been approved.",
-  "is_read": false
+  "recipient_count": 42
 }
 ```
-#### `403` — Bearer Token is required.
 
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
+**Errors:** `422 VALIDATION_ERROR` — both or neither of `role` and `user_ids`
 
 ---
 
 # Support
 
-## 1. `GET /support-tickets`
+## `GET /support-tickets`
 
-**Summary:** List support tickets
+List support tickets. **Roles:** Admin, Manager, Worker. Admins see every ticket; Managers and Workers see their own.
 
-**Authentication:** Required (Bearer JWT)
+| Query | Type | Required |
+|---|---|---|
+| `status` | `SupportTicketStatus` | No |
+| `page`, `page_size` | integer | No |
 
+**200** → paginated `SupportTicket`
 
-### Parameters
-
-No path/query/header parameters.
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Support tickets
-
-**Response schema:** `array<SupportTicket>`
-
-
-
-**Expected Response:**
-
-```json
-[]
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
+Example response (`200 OK`):
 
 ```json
 {
-  "message": "Bearer Token is required"
+  "data": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c80",
+      "user_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+      "subject": "Receipt upload fails",
+      "description": "Uploading a PNG receipt returns an error.",
+      "status": "OPEN",
+      "admin_response": null,
+      "resolved_by": null,
+      "resolved_at": null,
+      "created_at": "2026-10-12T07:00:00Z",
+      "updated_at": "2026-10-12T07:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "page_size": 20,
+    "total": 1,
+    "total_pages": 1
+  }
 }
 ```
 
-## 2. `POST /support-tickets`
+## `POST /support-tickets`
 
-**Summary:** Submit a support ticket
+Submit a support ticket. **Roles:** Manager, Worker
 
-**Authentication:** Required (Bearer JWT)
+| Body field | Type | Required |
+|---|---|---|
+| `subject` | string | Yes |
+| `description` | string | Yes |
 
+**201** → `SupportTicket` with `status: OPEN`
 
-### Parameters
+Example response (`201 Created`):
 
-No path/query/header parameters.
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `SupportTicketCreateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `subject` | `string` | Yes | - |
-| `description` | `string` | Yes | - |
-
-**Example request:**
 ```json
 {
-  "subject": "string",
-  "description": "string"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c80",
+  "user_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "subject": "Receipt upload fails",
+  "description": "Uploading a PNG receipt returns an error.",
+  "status": "OPEN",
+  "admin_response": null,
+  "resolved_by": null,
+  "resolved_at": null,
+  "created_at": "2026-10-12T07:00:00Z",
+  "updated_at": "2026-10-12T07:00:00Z"
 }
 ```
 
-### Responses
+## `GET /support-tickets/{ticketId}`
 
-#### `201` — Support ticket created
+Get a support ticket. **Roles:** Admin, or the Manager or Worker who submitted it
 
-**Response schema:** `SupportTicket`
+**200** → `SupportTicket`
 
-
-
-
-**Expected Response:**
+Example response (`200 OK`):
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000080",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "user_id": "00000000-0000-0000-0000-000000000001",
-  "subject": "Maintenance request",
-  "description": "Please inspect the AC unit.",
-  "status": "OPEN"
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c80",
+  "user_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "subject": "Receipt upload fails",
+  "description": "Uploading a PNG receipt returns an error.",
+  "status": "OPEN",
+  "admin_response": null,
+  "resolved_by": null,
+  "resolved_at": null,
+  "created_at": "2026-10-12T07:00:00Z",
+  "updated_at": "2026-10-12T07:00:00Z"
 }
 ```
 
-## 3. `GET /support-tickets/{ticketId}`
+## `POST /support-tickets/{ticketId}/resolve`
 
-**Summary:** Get a support ticket
+Resolve with a response. **Roles:** Admin. The ticket must be `OPEN`.
 
-**Authentication:** Required (Bearer JWT)
+| Body field | Type | Required |
+|---|---|---|
+| `admin_response` | string | Yes |
 
+Sets the status to `RESOLVED`, plus `resolved_by` and `resolved_at`, and notifies the submitter in-app and by email (`SUPPORT_RESOLVED`). If the problem comes back, the user submits a new ticket.
 
-### Parameters
+**200** → `SupportTicket`
 
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `ticketId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Support ticket
-
-**Response schema:** `SupportTicket`
-
-
-
-
-**Expected Response:**
+Example response (`200 OK`):
 
 ```json
 {
-  "id": "00000000-0000-0000-0000-000000000080",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "user_id": "00000000-0000-0000-0000-000000000001",
-  "subject": "Maintenance request",
-  "description": "Please inspect the AC unit.",
-  "status": "OPEN"
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 4. `PUT /support-tickets/{ticketId}`
-
-**Summary:** Update support ticket status
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `ticketId` | `path` | `string (uuid)` | Yes | - |
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `object`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `status` | `SupportTicketStatus` | Yes | Allowed: OPEN, IN_PROGRESS, RESOLVED |
-
-**Example request:**
-```json
-{
-  "status": "OPEN"
-}
-```
-
-### Responses
-
-#### `200` — Support ticket updated
-
-No response body.
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c80",
+  "user_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "subject": "Receipt upload fails",
+  "description": "Uploading a PNG receipt returns an error.",
+  "status": "RESOLVED",
+  "admin_response": "Fixed: PNG receipts are accepted again.",
+  "resolved_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e00",
+  "resolved_at": "2026-10-12T15:00:00Z",
+  "created_at": "2026-10-12T07:00:00Z",
+  "updated_at": "2026-10-12T15:00:00Z"
 }
 ```
 
@@ -3051,946 +2435,489 @@ No response body.
 
 # Web Content
 
-## 1. `GET /content`
+## `GET /content`
 
-**Summary:** List web content
+List pages. **Public:** returns published pages, plus drafts when the caller sends an Admin token.
 
-**Authentication:** Required (Bearer JWT)
+| Query | Type | Required | Notes |
+|---|---|---|---|
+| `language` | `Language` | No | |
+| `slug` | string | No | With `language`, finds one page |
+| `page`, `page_size` | integer | No | |
 
+**200** → paginated `WebContent`
 
-### Parameters
-
-No path/query/header parameters.
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Published web content
-
-**Response schema:** `array<WebContent>`
-
-
-
-**Expected Response:**
-
-```json
-[]
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
+Example response (`200 OK`):
 
 ```json
 {
-  "message": "Bearer Token is required"
-}
-```
-
-## 2. `POST /content`
-
-**Summary:** Create web content
-
-**Description:** Admin-only CMS operation.
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-No path/query/header parameters.
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `WebContentCreateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `title` | `string` | Yes | - |
-| `slug` | `string` | Yes | - |
-| `body` | `string` | Yes | - |
-| `is_published` | `boolean` | No | Default: `False` |
-
-**Example request:**
-```json
-{
-  "title": "string",
-  "slug": "string",
-  "body": "string",
-  "is_published": false
-}
-```
-
-### Responses
-
-#### `201` — Content created
-
-**Response schema:** `WebContent`
-
-
-
-
-**Expected Response:**
-
-```json
-{
-  "id": "00000000-0000-0000-0000-000000000090",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "author_id": "00000000-0000-0000-0000-000000000001",
-  "title": "Welcome to Amlak",
-  "slug": "welcome-to-amlak",
-  "body": "Welcome to Amlak.",
-  "is_published": true
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 3. `GET /content/{contentId}`
-
-**Summary:** Get web content
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `contentId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Web content
-
-**Response schema:** `WebContent`
-
-
-
-
-**Expected Response:**
-
-```json
-{
-  "id": "00000000-0000-0000-0000-000000000090",
-  "created_at": "2026-01-01T10:00:00Z",
-  "updated_at": "2026-01-01T10:00:00Z",
-  "author_id": "00000000-0000-0000-0000-000000000001",
-  "title": "Welcome to Amlak",
-  "slug": "welcome-to-amlak",
-  "body": "Welcome to Amlak.",
-  "is_published": true
-}
-```
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 4. `PUT /content/{contentId}`
-
-**Summary:** Update web content
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `contentId` | `path` | `string (uuid)` | Yes | - |
-
-### Request Body
-
-**Required:** Yes
-
-#### `application/json`
-
-**Schema:** `WebContentUpdateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `title` | `string` | No | - |
-| `slug` | `string` | No | - |
-| `body` | `string` | No | - |
-| `is_published` | `boolean` | No | - |
-
-**Example request:**
-```json
-{
-  "title": "string",
-  "slug": "string",
-  "body": "string",
-  "is_published": false
-}
-```
-
-### Responses
-
-#### `200` — Content updated
-
-No response body.
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 5. `DELETE /content/{contentId}`
-
-**Summary:** Delete web content
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-| Name | Location | Type | Required | Description |
-|---|---|---|---|---|
-| `contentId` | `path` | `string (uuid)` | Yes | - |
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `204` — Content deleted
-
-No response body.
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
-## 6. `POST /content/{contentId}/publish`
-
-**Summary:** Publish web content
-
-**Authentication:** Required (Bearer JWT)
-
-
-### Parameters
-
-No path/query/header parameters.
-
-
-### Request Body
-
-No request body.
-
-### Responses
-
-#### `200` — Content published
-
-No response body.
-
-#### `403` — Bearer Token is required.
-
-**Response schema:** `ErrorResponse`
-
-
-**Expected Response:**
-
-```json
-{
-  "message": "Bearer Token is required"
-}
-```
-
----
-
-# Data Models / Schemas
-
-The following schemas are used by the endpoints above.
-
-## `RoleName`
-
-**Allowed values:** `ADMIN`, `MANAGER`, `WORKER`, `USER`
-
-## `UserStatus`
-
-**Allowed values:** `ACTIVE`, `DEACTIVATED`
-
-## `TicketType`
-
-**Allowed values:** `CORRECTIVE`, `PREVENTIVE`
-
-## `MaintenanceStatus`
-
-Status values are not explicitly enumerated in the source requirements; these are proposed API values.
-
-**Allowed values:** `SUBMITTED`, `APPROVED`, `REJECTED`, `IN_PROGRESS`, `COMPLETED`
-
-## `MaintenanceFrequency`
-
-**Allowed values:** `MONTHLY`, `QUARTERLY`, `YEARLY`
-
-## `SupportTicketStatus`
-
-**Allowed values:** `OPEN`, `IN_PROGRESS`, `RESOLVED`
-
-## `BaseEntity`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string (uuid)` | Yes | - |
-| `created_at` | `string (date-time)` | Yes | - |
-| `updated_at` | `string (date-time)` | Yes | - |
-
-## `User`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string (uuid)` | Yes | - |
-| `created_at` | `string (date-time)` | Yes | - |
-| `updated_at` | `string (date-time)` | Yes | - |
-| `email` | `string (email)` | Yes | - |
-| `phone` | `string` | No | - |
-| `fullname` | `string` | Yes | - |
-| `picture_path` | `string` | No | - |
-| `role_id` | `string (uuid)` | Yes | - |
-| `role` | `RoleName` | No | Allowed: ADMIN, MANAGER, WORKER, USER |
-| `status` | `UserStatus` | Yes | Allowed: ACTIVE, DEACTIVATED |
-
-## `Role`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string (uuid)` | Yes | - |
-| `created_at` | `string (date-time)` | Yes | - |
-| `updated_at` | `string (date-time)` | Yes | - |
-| `name` | `string` | Yes | - |
-| `description` | `string` | No | - |
-| `permissions` | `array<Permission>` | No | - |
-
-## `Permission`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string (uuid)` | Yes | - |
-| `created_at` | `string (date-time)` | Yes | - |
-| `updated_at` | `string (date-time)` | Yes | - |
-| `name` | `string` | No | - |
-| `description` | `string` | No | - |
-
-## `Place`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string (uuid)` | Yes | - |
-| `created_at` | `string (date-time)` | Yes | - |
-| `updated_at` | `string (date-time)` | Yes | - |
-| `owner_id` | `string (uuid)` | Yes | - |
-| `place_name` | `string` | Yes | - |
-| `status` | `string` | Yes | - |
-
-## `Asset`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string (uuid)` | Yes | - |
-| `created_at` | `string (date-time)` | Yes | - |
-| `updated_at` | `string (date-time)` | Yes | - |
-| `place_id` | `string (uuid)` | Yes | - |
-| `name` | `string` | Yes | - |
-| `type` | `string` | Yes | - |
-| `purchase_date` | `string (date)` | No | - |
-| `status` | `string` | Yes | - |
-
-## `PeriodicMaintenance`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string (uuid)` | Yes | - |
-| `created_at` | `string (date-time)` | Yes | - |
-| `updated_at` | `string (date-time)` | Yes | - |
-| `asset_id` | `string (uuid)` | Yes | - |
-| `description` | `string` | Yes | - |
-| `frequency` | `MaintenanceFrequency` | Yes | Allowed: MONTHLY, QUARTERLY, YEARLY |
-| `next_due_date` | `string (date)` | Yes | - |
-
-## `MaintenanceTicket`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string (uuid)` | Yes | - |
-| `created_at` | `string (date-time)` | Yes | - |
-| `updated_at` | `string (date-time)` | Yes | - |
-| `place_id` | `string (uuid)` | Yes | - |
-| `asset_id` | `string (uuid)` | No | - |
-| `ticket_type` | `TicketType` | Yes | Allowed: CORRECTIVE, PREVENTIVE |
-| `reporter_id` | `string (uuid)` | Yes | - |
-| `description` | `string` | Yes | - |
-| `status` | `MaintenanceStatus` | Yes | Status values are not explicitly enumerated in the source requirements; these are proposed API values. Allowed: SUBMITTED, APPROVED, REJECTED, IN_PROGRESS, COMPLETED |
-| `photo_url` | `string (uri)` | No | - |
-
-## `PlaceChecklist`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string (uuid)` | Yes | - |
-| `created_at` | `string (date-time)` | Yes | - |
-| `updated_at` | `string (date-time)` | Yes | - |
-| `place_id` | `string (uuid)` | Yes | - |
-| `checklist_item` | `string` | Yes | - |
-| `is_completed` | `boolean` | Yes | - |
-
-## `Booking`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string (uuid)` | Yes | - |
-| `created_at` | `string (date-time)` | Yes | - |
-| `updated_at` | `string (date-time)` | Yes | - |
-| `place_id` | `string (uuid)` | Yes | - |
-| `booking_date` | `string (date)` | Yes | - |
-| `cost` | `number (double)` | Yes | - |
-
-## `Expense`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string (uuid)` | Yes | - |
-| `created_at` | `string (date-time)` | Yes | - |
-| `updated_at` | `string (date-time)` | Yes | - |
-| `place_id` | `string (uuid)` | Yes | - |
-| `description` | `string` | Yes | - |
-| `amount` | `number (double)` | Yes | - |
-| `expense_date` | `string (date)` | Yes | - |
-
-## `VerificationToken`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string (uuid)` | Yes | - |
-| `created_at` | `string (date-time)` | Yes | - |
-| `updated_at` | `string (date-time)` | Yes | - |
-| `user_id` | `string (uuid)` | Yes | - |
-| `token` | `string` | Yes | - |
-| `token_type` | `string` | Yes | Allowed: OTP, PASSWORD_RESET, EMAIL_VERIFICATION |
-| `expires_at` | `string (date-time)` | Yes | - |
-| `is_used` | `boolean` | Yes | - |
-
-## `Notification`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string (uuid)` | Yes | - |
-| `created_at` | `string (date-time)` | Yes | - |
-| `updated_at` | `string (date-time)` | Yes | - |
-| `user_id` | `string (uuid)` | Yes | - |
-| `sender_id` | `string (uuid)` | No | - |
-| `message` | `string` | Yes | - |
-| `is_read` | `boolean` | Yes | - |
-
-## `FinancialReport`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `total_income` | `number (double)` | Yes | - |
-| `total_expenses` | `number (double)` | Yes | - |
-| `profit` | `number (double)` | Yes | - |
-
-## `SupportTicket`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string (uuid)` | Yes | - |
-| `created_at` | `string (date-time)` | Yes | - |
-| `updated_at` | `string (date-time)` | Yes | - |
-| `user_id` | `string (uuid)` | Yes | - |
-| `subject` | `string` | Yes | - |
-| `description` | `string` | Yes | - |
-| `status` | `SupportTicketStatus` | Yes | Allowed: OPEN, IN_PROGRESS, RESOLVED |
-
-## `WebContent`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `id` | `string (uuid)` | Yes | - |
-| `created_at` | `string (date-time)` | Yes | - |
-| `updated_at` | `string (date-time)` | Yes | - |
-| `author_id` | `string (uuid)` | Yes | - |
-| `title` | `string` | Yes | - |
-| `slug` | `string` | Yes | - |
-| `body` | `string` | Yes | - |
-| `is_published` | `boolean` | Yes | - |
-
-## `RegisterRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `fullname` | `string` | Yes | - |
-| `email` | `string (email)` | Yes | - |
-| `password` | `string (password)` | Yes | - |
-| `phone` | `string` | No | - |
-
-## `LoginRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `email` | `string (email)` | Yes | - |
-| `password` | `string (password)` | Yes | - |
-
-## `AuthResponse`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `access_token` | `string` | No | - |
-| `token_type` | `string` | No | - |
-| `user` | `User` | No | - |
-
-## `VerificationCodeRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `email` | `string (email)` | Yes | - |
-
-## `VerifyTokenRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `email` | `string (email)` | Yes | - |
-| `token` | `string` | Yes | - |
-| `token_type` | `string` | No | Allowed: OTP, EMAIL_VERIFICATION, PASSWORD_RESET |
-
-## `PasswordResetRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `email` | `string (email)` | Yes | - |
-| `token` | `string` | Yes | - |
-| `new_password` | `string (password)` | Yes | - |
-
-## `UserUpdateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `fullname` | `string` | No | - |
-| `phone` | `string` | No | - |
-| `picture_path` | `string` | No | - |
-
-## `AdminUserCreateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `fullname` | `string` | Yes | - |
-| `email` | `string (email)` | Yes | - |
-| `password` | `string (password)` | Yes | - |
-| `phone` | `string` | No | - |
-| `role_id` | `string (uuid)` | No | - |
-
-## `AdminUserUpdateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `fullname` | `string` | No | - |
-| `phone` | `string` | No | - |
-| `picture_path` | `string` | No | - |
-| `role_id` | `string (uuid)` | No | - |
-| `status` | `UserStatus` | No | Allowed: ACTIVE, DEACTIVATED |
-
-## `PlaceCreateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `owner_id` | `string (uuid)` | No | - |
-| `place_name` | `string` | Yes | - |
-| `status` | `string` | No | - |
-
-## `PlaceUpdateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `place_name` | `string` | No | - |
-| `status` | `string` | No | - |
-
-## `AssetCreateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `name` | `string` | Yes | - |
-| `type` | `string` | Yes | - |
-| `purchase_date` | `string (date)` | No | - |
-| `status` | `string` | No | - |
-
-## `AssetUpdateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `name` | `string` | No | - |
-| `type` | `string` | No | - |
-| `purchase_date` | `string (date)` | No | - |
-| `status` | `string` | No | - |
-
-## `PeriodicMaintenanceCreateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `description` | `string` | Yes | - |
-| `frequency` | `MaintenanceFrequency` | Yes | Allowed: MONTHLY, QUARTERLY, YEARLY |
-| `next_due_date` | `string (date)` | Yes | - |
-
-## `ChecklistCreateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `checklist_item` | `string` | Yes | - |
-| `is_completed` | `boolean` | No | Default: `False` |
-
-## `ChecklistUpdateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `checklist_item` | `string` | No | - |
-| `is_completed` | `boolean` | No | - |
-
-## `BookingCreateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `booking_date` | `string (date)` | Yes | - |
-| `cost` | `number (double)` | Yes | - |
-
-## `ExpenseCreateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `description` | `string` | Yes | - |
-| `amount` | `number (double)` | Yes | - |
-| `expense_date` | `string (date)` | Yes | - |
-
-## `ExpenseUpdateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `description` | `string` | No | - |
-| `amount` | `number (double)` | No | - |
-| `expense_date` | `string (date)` | No | - |
-
-## `NotificationCreateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `user_ids` | `array<string (uuid)>` | No | - |
-| `role_id` | `string (uuid)` | No | - |
-| `message` | `string` | Yes | - |
-
-## `SupportTicketCreateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `subject` | `string` | Yes | - |
-| `description` | `string` | Yes | - |
-
-## `WebContentCreateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `title` | `string` | Yes | - |
-| `slug` | `string` | Yes | - |
-| `body` | `string` | Yes | - |
-| `is_published` | `boolean` | No | Default: `False` |
-
-## `WebContentUpdateRequest`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `title` | `string` | No | - |
-| `slug` | `string` | No | - |
-| `body` | `string` | No | - |
-| `is_published` | `boolean` | No | - |
-
-## `Pagination`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `page` | `integer` | No | - |
-| `page_size` | `integer` | No | - |
-| `total` | `integer` | No | - |
-| `total_pages` | `integer` | No | - |
-
-## `PaginatedUsers`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `data` | `array<User>` | No | - |
-| `pagination` | `Pagination` | No | - |
-
-## `PaginatedPlaces`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `data` | `array<Place>` | No | - |
-| `pagination` | `Pagination` | No | - |
-
-## `PaginatedMaintenanceTickets`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `data` | `array<MaintenanceTicket>` | No | - |
-| `pagination` | `Pagination` | No | - |
-
-## `AnalyticsResponse`
-
-Flexible analytics response because the source requirements do not define individual metrics.
-
-## `Error`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `code` | `string` | No | - |
-| `message` | `string` | Yes | - |
-| `details` | `object` | No | - |
-
-## `ErrorResponse`
-
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `message` | `string` | Yes | - |
-
-## Common HTTP Status Codes
-
-| Code | Meaning |
-|---|---|
-| `200` | Successful request |
-| `201` | Resource created |
-| `204` | Successful request with no response body |
-| `400` | Invalid request |
-| `401` | Authentication required / invalid JWT |
-| `403` | Missing/invalid authorization or insufficient permissions |
-| `404` | Resource not found |
-| `409` | Conflict, such as duplicate email |
-| `429` | Too many requests |
-
-## Swagger / OpenAPI
-
-This README documents the same API contract represented by the OpenAPI YAML file. The YAML can be imported directly into Swagger Editor or Swagger UI to obtain the interactive Swagger interface.
-# External APIs
-
-Amlak integrates with external third-party APIs to provide authentication/OTP delivery and location/map services.
-
-## 1. Authentication / OTP API
-
-**Purpose:** Send OTP verification codes to users through SMS.
-
-**External Service:** Authentication / OTP Service
-
-### Send OTP
-
-```http
-POST /api/v1/send-otp
-Authorization: Bearer YOUR_API_KEY
-Content-Type: application/json
-```
-
-### Request
-
-```json
-{
-  "receiver": "+966512345678",
-  "channel": "SMS"
-}
-```
-
-### Request Fields
-
-| Field      | Type     | Required | Description                               |
-| ---------- | -------- | -------- | ----------------------------------------- |
-| `receiver` | `string` | Yes      | User phone number in international format |
-| `channel`  | `string` | Yes      | OTP delivery channel, e.g. `SMS`          |
-
-### Example Response
-
-**HTTP 200 — OTP sent successfully**
-
-```json
-{
-  "success": true,
-  "message": "OTP sent successfully",
-  "data": {
-    "request_id": "otp_8f7c2a91",
-    "receiver": "+966512345678",
-    "channel": "SMS",
-    "expires_in": 300
+  "data": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c90",
+      "author_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e00",
+      "title": "Privacy policy",
+      "language": "en",
+      "slug": "privacy-policy",
+      "body": "We collect only the data needed to run Amlak...",
+      "is_published": true,
+      "created_at": "2026-01-01T08:00:00Z",
+      "updated_at": "2026-01-01T08:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "page_size": 20,
+    "total": 1,
+    "total_pages": 1
   }
 }
 ```
 
-### Error Response
+## `POST /content`
 
-**HTTP 400 — Invalid request**
+Create a page. **Roles:** Admin
+
+| Body field | Type | Required | Rules |
+|---|---|---|---|
+| `title` | string | Yes | |
+| `language` | `Language` | Yes | |
+| `slug` | string | Yes | Lowercase letters, digits and `-`; unique per language |
+| `body` | string | Yes | |
+| `is_published` | boolean | No | Default `false` |
+
+**201** → `WebContent`
+
+Example response (`201 Created`):
 
 ```json
 {
-  "success": false,
-  "message": "Invalid receiver or channel"
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c90",
+  "author_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e00",
+  "title": "Privacy policy",
+  "language": "en",
+  "slug": "privacy-policy",
+  "body": "We collect only the data needed to run Amlak...",
+  "is_published": true,
+  "created_at": "2026-01-01T08:00:00Z",
+  "updated_at": "2026-01-01T08:00:00Z"
 }
 ```
 
-### Authentication
+**Errors:** `409 CONFLICT` — the slug is taken in this language
 
-The external API uses an API key:
+## `GET /content/{contentId}`
 
-```http
-Authorization: Bearer YOUR_API_KEY
+Get a page. **Public** for published pages; a draft needs an Admin token and returns `404` otherwise.
+
+**200** → `WebContent`
+
+Example response (`200 OK`):
+
+```json
+{
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c90",
+  "author_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e00",
+  "title": "Privacy policy",
+  "language": "en",
+  "slug": "privacy-policy",
+  "body": "We collect only the data needed to run Amlak...",
+  "is_published": true,
+  "created_at": "2026-01-01T08:00:00Z",
+  "updated_at": "2026-01-01T08:00:00Z"
+}
 ```
 
-The API key must be stored securely as a server-side environment variable and must not be exposed to the frontend.
+## `PUT /content/{contentId}`
+
+Edit, publish or unpublish a page. **Roles:** Admin
+
+Body: `title`, `slug`, `body` and `is_published`, all optional. `language` cannot change, because each translation is its own page.
+
+**200** → `WebContent`
+
+Example response (`200 OK`):
+
+```json
+{
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c90",
+  "author_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e00",
+  "title": "Privacy policy",
+  "language": "en",
+  "slug": "privacy-policy",
+  "body": "We collect only the data needed to run Amlak...",
+  "is_published": false,
+  "created_at": "2026-01-01T08:00:00Z",
+  "updated_at": "2026-10-12T16:00:00Z"
+}
+```
+
+**Errors:** `409 CONFLICT` — the slug is taken in this language
+
+## `DELETE /content/{contentId}`
+
+Delete a page. **Roles:** Admin
+
+**204**
+
+```http
+HTTP/1.1 204 No Content
+```
 
 ---
 
-## 2. Google Maps API
+# Background Jobs
 
-**Purpose:** Location services for Amlak properties, including converting property addresses into geographic coordinates and working with map locations.
+A daily scheduler changes data that the API returns. None of these jobs has an endpoint, and all of them skip deleted places and assets.
 
-**External Service:** Google Maps Platform
+| Job | Picks | Does |
+|---|---|---|
+| Preventive tickets | Active schedules where today ≥ `next_due_date` − `lead_days` | Creates a `PREVENTIVE` ticket with priority `MEDIUM`, due on `next_due_date`, then moves `next_due_date` forward by `interval_count` × `interval_unit`. Months and years are calendar months and years; when the day does not exist in the new month (31 January + 1 month), the date moves to that month's last day. If `default_assignee_id` still meets the assignee rule, the ticket starts `APPROVED` (asset `NEEDS_MAINTENANCE`) and the assignee gets `TICKET_ASSIGNED`. Otherwise it starts `PENDING_REVIEW` and the owner gets `TICKET_SUBMITTED` |
+| Maintenance reminders | `APPROVED` tickets due tomorrow with no `reminder_sent_at` | Emails the assignee, adds a `MAINTENANCE_REMINDER` notification and sets `reminder_sent_at` |
+| Overdue alerts | `APPROVED` tickets past their `due_date` with no `overdue_alert_sent_at` | Emails the place owner, adds a `MAINTENANCE_OVERDUE` notification and sets `overdue_alert_sent_at` |
 
-### Geocoding Request
+Emails go through the email provider (SendGrid or AWS SES) in the recipient's `preferred_language`. Failed sends are retried up to 3 times with backoff.
 
-```http
-GET https://maps.googleapis.com/maps/api/geocode/json
-  ?address=Riyadh, Saudi Arabia
-  &key=YOUR_GOOGLE_MAPS_API_KEY
-```
+---
 
-### Example Request
+# Data Models
 
-```http
-GET https://maps.googleapis.com/maps/api/geocode/json?address=Riyadh%2C%20Saudi%20Arabia&key=YOUR_GOOGLE_MAPS_API_KEY
-```
+## Enums
 
-### Example Response
+| Enum | Values |
+|---|---|
+| `RoleName` | `ADMIN`, `MANAGER`, `WORKER` |
+| `UserStatus` | `INVITED`, `PENDING_VERIFICATION`, `ACTIVE`, `DEACTIVATED` |
+| `Language` | `ar`, `en` |
+| `PlaceStatus` | `ACTIVE`, `INACTIVE`, `UNDER_MAINTENANCE` |
+| `AssetStatus` | `GOOD`, `NEEDS_MAINTENANCE`, `UNDER_MAINTENANCE`, `OUT_OF_SERVICE` |
+| `IntervalUnit` | `DAY`, `WEEK`, `MONTH`, `YEAR` |
+| `TicketType` | `CORRECTIVE`, `PREVENTIVE` |
+| `TicketPriority` | `LOW`, `MEDIUM`, `HIGH`, `URGENT` |
+| `TicketStatus` | `PENDING_REVIEW`, `APPROVED`, `REJECTED`, `COMPLETED` |
+| `AttachmentType` | `DAMAGE`, `AFTER_REPAIR` |
+| `BookingStatus` | `CONFIRMED`, `CHECKED_IN`, `CHECKED_OUT`, `CANCELLED` |
+| `ExpenseCategory` | `MAINTENANCE`, `UTILITIES`, `TAXES`, `CLEANING`, `SUPPLIES`, `OTHER` |
+| `NotificationType` | `TICKET_SUBMITTED`, `TICKET_ASSIGNED`, `TICKET_REJECTED`, `TICKET_COMPLETED`, `MAINTENANCE_REMINDER`, `MAINTENANCE_OVERDUE`, `SUPPORT_RESOLVED`, `ANNOUNCEMENT` |
+| `SupportTicketStatus` | `OPEN`, `RESOLVED` |
 
-**HTTP 200 — Location found**
+## Entities
+
+Every entity below also has `id` (uuid), `created_at` and `updated_at`, except `FinancialReport`. Image fields hold pre-signed URLs; the database stores S3 object keys. `ROLE`, `VERIFICATION_TOKEN`, `REFRESH_TOKEN` and `AUDIT_LOG` are never returned.
+
+### `User`
+
+| Field | Type | Notes |
+|---|---|---|
+| `email` | string | |
+| `fullname` | string | |
+| `phone` | string | |
+| `picture_url` | string or null | From `picture_path` |
+| `role` | `RoleName` | From `role_id` |
+| `status` | `UserStatus` | |
+| `preferred_language` | `Language` | |
+| `email_verified_at` | datetime or null | |
+| `manager_id` | uuid or null | Workers only |
+
+`password_hash` is never returned. Example: the `user` object in `POST /auth/login`.
+
+### `Worker`
+
+A `User` plus `assigned_places`: the places with an active assignment, as `{ "place_id", "place_name" }` objects.
+
+### `Place`
+
+| Field | Type | Notes |
+|---|---|---|
+| `owner_id` | uuid | |
+| `place_name` | string | |
+| `place_type` | string | |
+| `description` | string or null | |
+| `address` | string or null | |
+| `city` | string | |
+| `latitude` | number or null | |
+| `longitude` | number or null | |
+| `status` | `PlaceStatus` | |
+| `monthly_maintenance_budget` | number or null | Not sent to Workers |
+| `currency` | string | ISO 4217 |
+| `timezone` | string | IANA |
+
+### `PlaceWorker`
+
+| Field | Type | Notes |
+|---|---|---|
+| `place_id` | uuid | |
+| `worker` | object | `{ "id", "fullname", "phone", "status" }` |
+| `assigned_by` | uuid | |
+| `assigned_at` | datetime | |
+
+### `Asset`
+
+| Field | Type |
+|---|---|
+| `place_id` | uuid |
+| `name` | string |
+| `type` | string |
+| `status` | `AssetStatus` |
+| `purchase_date` | date or null |
+
+### `PeriodicMaintenance`
+
+| Field | Type |
+|---|---|
+| `asset_id` | uuid |
+| `description` | string |
+| `interval_count` | integer |
+| `interval_unit` | `IntervalUnit` |
+| `next_due_date` | date |
+| `lead_days` | integer |
+| `default_assignee_id` | uuid or null |
+
+### `MaintenanceTicket`
+
+| Field | Type | Notes |
+|---|---|---|
+| `place_id` | uuid | |
+| `asset_id` | uuid or null | |
+| `periodic_maintenance_id` | uuid or null | Set on preventive tickets |
+| `ticket_type` | `TicketType` | |
+| `priority` | `TicketPriority` | |
+| `status` | `TicketStatus` | |
+| `description` | string | |
+| `reporter_id` | uuid or null | Null on scheduler tickets |
+| `assignee_id` | uuid or null | Set on approval |
+| `due_date` | date or null | Set on approval or by the scheduler |
+| `is_overdue` | boolean | Computed |
+| `estimated_cost` | number or null | Set on approval; not sent to Workers |
+| `actual_cost` | number or null | Set on completion |
+| `reviewed_by` | uuid or null | |
+| `reviewed_at` | datetime or null | |
+| `rejection_reason` | string or null | |
+| `completed_at` | datetime or null | |
+| `completion_notes` | string or null | |
+| `attachments` | `TicketAttachment[]` | Single-ticket responses only |
+
+`reminder_sent_at` and `overdue_alert_sent_at` belong to the scheduler and are not returned.
 
 ```json
 {
-  "results": [
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "asset_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c20",
+  "periodic_maintenance_id": null,
+  "ticket_type": "CORRECTIVE",
+  "priority": "HIGH",
+  "status": "APPROVED",
+  "description": "Living-room AC blows warm air",
+  "reporter_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "assignee_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "due_date": "2026-10-14",
+  "is_overdue": false,
+  "estimated_cost": 350,
+  "actual_cost": null,
+  "reviewed_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "reviewed_at": "2026-10-11T12:00:00Z",
+  "rejection_reason": null,
+  "completed_at": null,
+  "completion_notes": null,
+  "attachments": [
     {
-      "formatted_address": "Riyadh, Saudi Arabia",
-      "geometry": {
-        "location": {
-          "lat": 24.7136,
-          "lng": 46.6753
-        },
-        "location_type": "APPROXIMATE"
-      },
-      "place_id": "ChIJ...",
-      "types": [
-        "locality",
-        "political"
-      ]
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c41",
+      "attachment_type": "DAMAGE",
+      "file_url": "https://amlak-uploads.s3.amazonaws.com/tickets/9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40/0b8e5d7a-2c1f-4e3b-9a6d-7c8b9a0f1e2d.jpg?X-Amz-Signature=...",
+      "uploaded_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "created_at": "2026-10-11T09:30:00Z",
+      "updated_at": "2026-10-11T09:30:00Z"
     }
   ],
-  "status": "OK"
+  "created_at": "2026-10-11T09:30:00Z",
+  "updated_at": "2026-10-11T12:00:00Z"
 }
 ```
 
-### Main Response Fields
+### `TicketAttachment`
 
-| Field                   | Type     | Description                  |
-| ----------------------- | -------- | ---------------------------- |
-| `formatted_address`     | `string` | Formatted location address   |
-| `geometry.location.lat` | `number` | Latitude                     |
-| `geometry.location.lng` | `number` | Longitude                    |
-| `place_id`              | `string` | Google Maps place identifier |
-| `status`                | `string` | Request result status        |
+| Field | Type | Notes |
+|---|---|---|
+| `attachment_type` | `AttachmentType` | |
+| `file_url` | string | Pre-signed URL |
+| `uploaded_by` | uuid | |
 
-### Possible Status Values
+### `Booking`
 
-| Status             | Description                            |
-| ------------------ | -------------------------------------- |
-| `OK`               | Request completed successfully         |
-| `ZERO_RESULTS`     | No location was found                  |
-| `INVALID_REQUEST`  | Invalid request parameters             |
-| `REQUEST_DENIED`   | API key or API permissions are invalid |
-| `OVER_QUERY_LIMIT` | API quota exceeded                     |
+| Field | Type | Notes |
+|---|---|---|
+| `place_id` | uuid | |
+| `created_by` | uuid | |
+| `guest_name` | string | |
+| `guest_phone` | string | |
+| `guest_email` | string or null | |
+| `guest_count` | integer | |
+| `check_in_date` | date | |
+| `check_out_date` | date | |
+| `total_price` | number | |
+| `currency` | string | The place's currency |
+| `status` | `BookingStatus` | |
+| `notes` | string or null | |
+| `ready_for_check_in` | boolean | Computed; `false` unless `CONFIRMED` |
+| `cancelled_at` | datetime or null | |
+| `cancelled_by` | uuid or null | |
+| `cancellation_reason` | string or null | |
+| `checked_in_at` | datetime or null | |
+| `checked_in_by` | uuid or null | |
+| `checked_out_at` | datetime or null | |
+| `checked_out_by` | uuid or null | |
 
-### Authentication
-
-Google Maps requests use an API key:
-
-```text
-YOUR_GOOGLE_MAPS_API_KEY
+```json
+{
+  "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c50",
+  "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+  "created_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+  "guest_name": "Fahad Alharbi",
+  "guest_phone": "+966555123456",
+  "guest_email": null,
+  "guest_count": 6,
+  "check_in_date": "2026-10-20",
+  "check_out_date": "2026-10-22",
+  "total_price": 1800,
+  "currency": "SAR",
+  "status": "CONFIRMED",
+  "notes": "Late arrival, around 10 pm",
+  "ready_for_check_in": false,
+  "cancelled_at": null,
+  "cancelled_by": null,
+  "cancellation_reason": null,
+  "checked_in_at": null,
+  "checked_in_by": null,
+  "checked_out_at": null,
+  "checked_out_by": null,
+  "created_at": "2026-10-11T10:00:00Z",
+  "updated_at": "2026-10-11T10:00:00Z"
+}
 ```
 
-The key should be stored securely in the backend environment configuration.
+### `Expense`
 
-Example:
+| Field | Type | Notes |
+|---|---|---|
+| `place_id` | uuid | |
+| `ticket_id` | uuid or null | |
+| `created_by` | uuid | |
+| `category` | `ExpenseCategory` | |
+| `description` | string or null | |
+| `amount` | number | |
+| `currency` | string | The place's currency |
+| `expense_date` | date | |
+| `receipt_url` | string or null | Pre-signed URL |
 
-```env
-OTP_API_KEY=your_otp_api_key
-GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-```
+### `FinancialReport`
 
-### Amlak Integration
+One entry of `places` in `GET /reports/financial`. It is computed, not stored, so it has no `id` or timestamps.
 
-The Google Maps API can be used when creating or updating a `Place`:
+| Field | Type | Notes |
+|---|---|---|
+| `place_id` | uuid | |
+| `place_name` | string | |
+| `currency` | string | |
+| `total_income` | number | |
+| `total_expenses` | number | |
+| `profit` | number | |
+| `expenses_by_category` | object | One key per `ExpenseCategory`, 0 when empty |
 
-```text
-Place Address
-     ↓
-Google Maps Geocoding API
-     ↓
-Latitude + Longitude
-     ↓
-PLACE
-     ├── address
-     ├── city
-     ├── latitude
-     └── longitude
-```
+### `Notification`
+
+| Field | Type | Notes |
+|---|---|---|
+| `type` | `NotificationType` | |
+| `title` | string | In the recipient's language |
+| `message` | string | In the recipient's language |
+| `is_read` | boolean | |
+| `sender_id` | uuid or null | Null for system notifications |
+
+### `SupportTicket`
+
+| Field | Type |
+|---|---|
+| `user_id` | uuid |
+| `subject` | string |
+| `description` | string |
+| `status` | `SupportTicketStatus` |
+| `admin_response` | string or null |
+| `resolved_by` | uuid or null |
+| `resolved_at` | datetime or null |
+
+### `WebContent`
+
+| Field | Type |
+|---|---|
+| `author_id` | uuid |
+| `title` | string |
+| `language` | `Language` |
+| `slug` | string |
+| `body` | string |
+| `is_published` | boolean |
+
+### `Pagination`
+
+| Field | Type |
+|---|---|
+| `page` | integer |
+| `page_size` | integer |
+| `total` | integer |
+| `total_pages` | integer |
+
+---
+
+# Story Coverage
+
+Every Must Have story in SRS §2 maps to at least one endpoint.
+
+| Must Have story | Covered by |
+|---|---|
+| Manager registers | `POST /auth/register` |
+| Log in | `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout` |
+| One-time code by email | `POST /auth/verify-email` |
+| Manage basic information | `GET /users/me`, `PUT /users/me` |
+| Request a new code | `POST /auth/verification-code` |
+| Reset password through an email link | `POST /auth/password/forgot`, `POST /auth/password/reset` |
+| Explanations for camera and location permissions | Web app only |
+| Add, edit and delete properties | `/places`, `/places/{placeId}` |
+| Add, edit and remove assets | `/places/{placeId}/assets`, `/assets/{assetId}` |
+| Create, edit, delete and deactivate worker accounts | `/workers`, `/workers/{workerId}`, `POST /auth/account-setup` |
+| Assign and unassign workers | `/places/{placeId}/workers` |
+| Report damaged assets | `POST /places/{placeId}/tickets` |
+| Unified dashboard | `GET /dashboard` |
+| Review maintenance tickets | `GET /tickets`, `POST /tickets/{ticketId}/approve`, `POST /tickets/{ticketId}/reject`, `POST /tickets/{ticketId}/reassign` |
+| Maintenance reports with photos | `POST /places/{placeId}/tickets`, `POST /tickets/{ticketId}/complete` |
+| Schedule periodic maintenance | `/assets/{assetId}/maintenance-schedules`, `DELETE /maintenance-schedules/{scheduleId}` |
+| Email reminders for upcoming maintenance | Background job |
+| Alerts for overdue maintenance | Background job, `GET /tickets?overdue=true` |
+| Manage bookings | `/places/{placeId}/bookings`, `POST /bookings/{bookingId}/cancel` |
+| Check guests in and out | `POST /bookings/{bookingId}/check-in`, `POST /bookings/{bookingId}/check-out` |
+| Log expenses | `/places/{placeId}/expenses`, `/expenses/{expenseId}` |
+| Financial reports | `GET /reports/financial` |
+| Manage web content | `/content`, `/content/{contentId}` |
+| View, edit and deactivate user accounts | `/users`, `/users/{userId}` |
+| View support requests | `/support-tickets`, `POST /support-tickets/{ticketId}/resolve` |
+| Send notifications | `POST /notifications`, `GET /notifications` |
+
+---
+
+# Not in the MVP
+
+**Later releases, following the SRS priorities**
+
+- Pre- and post-booking checklists (Should Have). They will add checklist tables and endpoints, and a checklist condition on check-in.
+- Plans and payments, and admin statistics with export (Should Have).
+- SSO, onboarding interests, the tutorial and tooltips (Could Have).
+- SMS alerts, online guest booking, booking-platform sync and more languages (Won't Have).
+
+**Cut to keep the MVP small.** The SRS mentions these, but no Must Have story needs them.
+
+- Admin access to managers' places, tickets, bookings and money
+- Restoring deleted places
+- The ticket Start step and before photos
+- Deleting ticket photos
+- Editing schedules: stop one and create a new one instead
+- Resending invitations: delete the unused worker and create them again
+- Assigning and reopening support tickets
+- Changing a user's role or a worker's manager: the first Admin comes from a seed script
