@@ -29,6 +29,9 @@
     },
     "packages/shared": {
       "name": "@amlak/shared",
+      "dependencies": {
+        "zod": "^4.6.7",
+      },
       "devDependencies": {
         "@biomejs/biome": "2.5.15",
         "typescript": "^7.0.2",
