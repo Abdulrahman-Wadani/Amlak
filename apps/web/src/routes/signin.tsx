@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useAuth } from "@/lib/auth"
 import { type SubmitEvent, useState } from "react"
 import { Alert, AlertTitle } from "@/components/ui/alert"
@@ -119,6 +119,12 @@ export default function SignIn() {
         >
           Forgot password?
         </a>
+        <p className='mt-4 text-center font-mono text-sm'>
+          No account?{" "}
+          <Link to="/signup" className='font-bold underline'>
+            Create one
+          </Link>
+        </p>
       </Card>
     </div>
   )

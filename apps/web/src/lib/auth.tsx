@@ -5,6 +5,7 @@ type User = { email: string; fullname: string }
 type Auth = {
   user: User | null
   login: (email: string, password: string) => Promise<void>
+  register: (email: string, fullname: string) => Promise<void>
   logout: () => void
 }
 
@@ -24,13 +25,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(u)
   }
 
+  async function register(email: string, fullname: string) {
+    await new Promise((resolve) => setTimeout(resolve, 1500))
+    const u = {email, fullname }
+    sessionStorage.setItem("mockUser", JSON.stringify(u))
+    setUser(u)
+  }
+
   function logout() {
     sessionStorage.removeItem("mockUser")
     setUser(null)
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   )
