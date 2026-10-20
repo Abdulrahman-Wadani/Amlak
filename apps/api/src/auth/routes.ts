@@ -1,11 +1,15 @@
 import {
+	type LoginResponse,
+	loginSchema,
 	registerSchema,
 	verificationCodeSchema,
 	verifyEmailSchema,
 } from "@amlak/shared";
-import { Router } from "express";
+import { type Response, Router } from "express";
 import { parse } from "../validation.ts";
 import * as auth from "./service.ts";
+import { REFRESH_TOKEN_MS } from "./sessions.ts";
+import { ACCESS_TOKEN_SECONDS } from "./tokens.ts";
 
 export const authRouter = Router();
 
@@ -25,3 +29,26 @@ authRouter.post("/auth/verification-code", async (req, res) => {
 	await auth.sendVerificationCode(input);
 	res.status(204).end();
 });
+
+authRouter.post("/auth/login", async (req, res) => {
+	const input = parse(loginSchema, req.body);
+	const { session, user } = await auth.login(input);
+	setRefreshCookie(res, session.refreshToken);
+	const body: LoginResponse = {
+		access_token: session.accessToken,
+		token_type: "Bearer",
+		expires_in: ACCESS_TOKEN_SECONDS,
+		user,
+	};
+	res.json(body);
+});
+
+function setRefreshCookie(res: Response, token: string) {
+	res.cookie("refresh_token", token, {
+		httpOnly: true,
+		secure: true,
+		sameSite: "strict",
+		path: "/api/v1/auth",
+		maxAge: REFRESH_TOKEN_MS,
+	});
+}

@@ -1,6 +1,9 @@
 import type {
+	LoginInput,
 	RegisterInput,
+	Role,
 	User,
+	UserStatus,
 	VerificationCodeInput,
 	VerifyEmailInput,
 } from "@amlak/shared";
@@ -9,7 +12,8 @@ import { sendEmail } from "../email.ts";
 import { AppError } from "../errors.ts";
 import { toUser } from "../users/present.ts";
 import { hashCode, newVerificationCode } from "./codes.ts";
-import { hashPassword } from "./passwords.ts";
+import { hashPassword, verifyPassword } from "./passwords.ts";
+import { type Session, startSession } from "./sessions.ts";
 
 const CODE_LIFETIME_MS = 10 * 60 * 1000;
 const MAX_CODE_ATTEMPTS = 5;
@@ -158,4 +162,40 @@ function rateLimited(allowedAt: number): AppError {
 	return new AppError("RATE_LIMITED", "Too many codes requested", {
 		retry_after_seconds: seconds,
 	});
+}
+
+export async function login(
+	input: LoginInput,
+): Promise<{ session: Session; user: User }> {
+	const user = await prisma.user.findUnique({
+		where: { email: input.email },
+		include: { role: true, manager: true },
+	});
+	if (
+		!user?.password_hash ||
+		!(await verifyPassword(input.password, user.password_hash))
+	) {
+		throw new AppError("INVALID_CREDENTIALS", "Wrong email or password");
+	}
+
+	const reason = inactiveReason(user.status, user.manager?.status);
+	if (reason) {
+		throw new AppError("ACCOUNT_NOT_ACTIVE", "This account cannot log in", {
+			reason,
+		});
+	}
+
+	const session = await startSession({
+		user_id: user.id,
+		role: user.role.name as Role,
+	});
+	return { session, user: toUser(user) };
+}
+
+function inactiveReason(status: UserStatus, managerStatus?: UserStatus) {
+	if (status === "PENDING_VERIFICATION") return "EMAIL_NOT_VERIFIED";
+	if (status === "INVITED") return "INVITATION_PENDING";
+	if (status === "DEACTIVATED") return "ACCOUNT_DEACTIVATED";
+	if (managerStatus === "DEACTIVATED") return "MANAGER_DEACTIVATED";
+	return null;
 }

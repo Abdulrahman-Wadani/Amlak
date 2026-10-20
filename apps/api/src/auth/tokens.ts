@@ -4,6 +4,7 @@ import { z } from "zod";
 import { config } from "../config.ts";
 
 const secret = new TextEncoder().encode(config.JWT_SECRET);
+export const ACCESS_TOKEN_SECONDS = 15 * 60;
 
 const accessTokenSchema = z.object({
 	user_id: z.uuid(),
@@ -16,7 +17,7 @@ export async function signAccessToken(user: AuthUser): Promise<string> {
 	return new SignJWT(user)
 		.setProtectedHeader({ alg: "HS256" })
 		.setIssuedAt()
-		.setExpirationTime("15m")
+		.setExpirationTime(`${ACCESS_TOKEN_SECONDS}s`)
 		.sign(secret);
 }
 
