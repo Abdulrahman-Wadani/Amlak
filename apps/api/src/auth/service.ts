@@ -210,6 +210,12 @@ export async function refresh(
 	return startSession({ user_id: user.id, role: user.role.name as Role });
 }
 
+export async function logout(refreshToken: string | undefined): Promise<void> {
+	if (refreshToken) {
+		await endSession(refreshToken);
+	}
+}
+
 function sessionExpired(): AppError {
 	return new AppError(
 		"UNAUTHENTICATED",

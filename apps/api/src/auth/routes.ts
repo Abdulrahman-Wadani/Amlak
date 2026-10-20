@@ -6,13 +6,20 @@ import {
 	verificationCodeSchema,
 	verifyEmailSchema,
 } from "@amlak/shared";
-import { type Response, Router } from "express";
+import { type CookieOptions, type Response, Router } from "express";
 import { parse } from "../validation.ts";
 import * as auth from "./service.ts";
 import { REFRESH_TOKEN_MS, type Session } from "./sessions.ts";
 import { ACCESS_TOKEN_SECONDS } from "./tokens.ts";
 
 export const authRouter = Router();
+
+const refreshCookie: CookieOptions = {
+	httpOnly: true,
+	secure: true,
+	sameSite: "strict",
+	path: "/api/v1/auth",
+};
 
 authRouter.post("/auth/register", async (req, res) => {
 	const input = parse(registerSchema, req.body);
@@ -45,6 +52,12 @@ authRouter.post("/auth/refresh", async (req, res) => {
 	res.json(accessTokenBody(session));
 });
 
+authRouter.post("/auth/logout", async (req, res) => {
+	await auth.logout(req.cookies.refresh_token);
+	res.clearCookie("refresh_token", refreshCookie);
+	res.status(204).end();
+});
+
 function accessTokenBody(session: Session): AccessToken {
 	return {
 		access_token: session.accessToken,
@@ -55,10 +68,7 @@ function accessTokenBody(session: Session): AccessToken {
 
 function setRefreshCookie(res: Response, token: string) {
 	res.cookie("refresh_token", token, {
-		httpOnly: true,
-		secure: true,
-		sameSite: "strict",
-		path: "/api/v1/auth",
+		...refreshCookie,
 		maxAge: REFRESH_TOKEN_MS,
 	});
 }
