@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LANGUAGES } from "./users.ts";
+import { LANGUAGES, type User } from "./users.ts";
 
 export const emailSchema = z.string().trim().toLowerCase().pipe(z.email());
 
@@ -41,3 +41,18 @@ export const verificationCodeSchema = z.object({
 });
 
 export type VerificationCodeInput = z.infer<typeof verificationCodeSchema>;
+
+export const loginSchema = z.object({
+	email: emailSchema,
+	password: z.string().min(1),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+
+export type AccessToken = {
+	access_token: string;
+	token_type: "Bearer";
+	expires_in: number;
+};
+
+export type LoginResponse = AccessToken & { user: User };
