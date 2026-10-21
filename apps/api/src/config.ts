@@ -9,7 +9,7 @@ const envSchema = z
 		PORT: z.coerce.number().int().positive().default(3001),
 		DATABASE_URL: z.url(),
 		JWT_SECRET: z.string().min(32),
-		RESEND_API_KEY: z.string().startsWith("re_").optional(),
+		RESEND_API_KEY: z.literal("").or(z.string().startsWith("re_")).optional(),
 		EMAIL_FROM: z.string().default("Amlak <onboarding@resend.dev>"),
 	})
 	.refine((env) => env.NODE_ENV !== "production" || env.RESEND_API_KEY, {
