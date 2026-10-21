@@ -1,7 +1,7 @@
 {
 	"name": "amlak",
 	"private": true,
-	"workspaces": ["apps/api", "packages/*"],
+	"workspaces": ["apps/api", "apps/web", "packages/*"],
 	"scripts": {
 		"check": "bun run --filter \"*\" check",
 		"typecheck": "bun run --filter \"*\" typecheck"
