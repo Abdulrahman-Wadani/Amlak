@@ -25,6 +25,7 @@ services:
       DATABASE_URL: postgresql://amlak:amlak@db:5432/amlak
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-Amlak <onboarding@resend.dev>}
     ports:
       - "3001:3001"
     depends_on:
