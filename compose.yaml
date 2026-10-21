@@ -20,7 +20,7 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
       PORT: 3001
       DATABASE_URL: postgresql://amlak:amlak@db:5432/amlak
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env}
@@ -29,6 +29,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    environment:
+      VITE_PROXY_TARGET: http://api:3001
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
 
 volumes:
   db-data:

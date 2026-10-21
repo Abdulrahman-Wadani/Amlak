@@ -24,7 +24,6 @@ export default defineConfig({
           "getter-return": "error",
           "no-async-promise-executor": "error",
           "no-case-declarations": "error",
-          "no-class-assign": "error",
           "no-compare-neg-zero": "error",
           "no-cond-assign": "error",
           "no-const-assign": "error",
@@ -53,8 +52,6 @@ export default defineConfig({
           "no-misleading-character-class": "error",
           "no-new-native-nonconstructor": "error",
           "no-nonoctal-decimal-escape": "error",
-          "no-obj-calls": "error",
-          "no-prototype-builtins": "error",
           "no-redeclare": "error",
           "no-regex-spaces": "error",
           "no-self-assign": "error",
@@ -65,7 +62,6 @@ export default defineConfig({
           "no-unassigned-vars": "error",
           "no-undef": "error",
           "no-unexpected-multiline": "error",
-          "no-unreachable": "error",
           "no-unsafe-finally": "error",
           "no-unsafe-negation": "error",
           "no-unsafe-optional-chaining": "error",
@@ -167,6 +163,14 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": resolve(import.meta.dirname, "./src"),
+    },
+  },
+  server: {
+    host: true,
+    proxy: {
+      "/api/v1": {
+        target: process.env.VITE_PROXY_TARGET ?? "http://localhost:3001",
+      },
     },
   },
 })

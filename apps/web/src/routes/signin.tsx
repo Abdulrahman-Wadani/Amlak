@@ -8,126 +8,136 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { signInInput } from "@/lib/validators"
 
-export default function SignIn() {
+export const Route = createFileRoute("/signin")({
+  component: SignIn,
+})
+
+type Fieldkey = "email" | "password"
+
+function SignIn() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [emailError, setEmailError] = useState("")
-  const [passwordError, setPasswordError] = useState("")
+  const [errors, setErrors] = useState<Partial<Record<Fieldkey, string>>>({})
+  const [formError, setFormError] = useState("")
   const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
+  const { login, logout } = useAuth()
   const navigate = useNavigate()
 
-  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
+  function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     const result = signInInput.safeParse({ email, password })
-    const issues = result.success ? [] : result.error.issues
-    setEmailError(issues.find((i) => i.path[0] === "email")?.message ?? "")
-    setPasswordError(
-      issues.find((i) => i.path[0] === "password")?.message ?? ""
-    )
-
-    if (issues.length > 0) {
-      setSuccess(false)
-    } else {
-      setLoading(true)
-      await login(email, password)
-      navigate({ to: "/home"})
+    if (!result.success) {
+      const map: Partial<Record<Fieldkey, string>> = {}
+      for (const issue of result.error.issues) {
+        const key = issue.path[0] as Fieldkey
+        if (!map[key]) map[key] = issue.message
+      }
+      setErrors(map)
+      return
     }
+    setErrors({})
+    setSuccess(false)
+    setFormError("")
+    setLoading(true)
+    login(email, password)
+      .then(() => {
+        navigate({ to: "/home"})
+      })
+      .catch((err: unknown) => {
+        setFormError(err instanceof Error ? err.message : "Sign in failed")
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-sm p-8">
-        <h1 className="mb-6 text-[28px] font-extrabold tracking-tight">
-          Sign in
-        </h1>
+      <Card className="w-full max-w-[420px] rounded-xl p-8">
+        <div className="mb-8">
+          <h1 className="font-display text-3xl font-extrabold">Sign in</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Enter your email and password to continue.
+          </p>
+        </div>
 
-        <form
-          onSubmit={handleSubmit}
-          noValidate
-          className="flex flex-col gap-5"
-        >
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="email" className="text-sm font-bold">
-              Email
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@amlak.com"
-              className={`h-[42px] ${emailError ? "border-crit-700 bg-crit-50" : ""} ${loading ? "opacity-60" : ""}`}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-            />
-            {emailError && (
-              <p className="flex items-center gap-1.5 text-xs text-crit-700">
-                <span className="size-[6px] bg-crit" />
-                {emailError}
-              </p>
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="flex flex-col gap-5">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="email" className="text-sm font-bold">
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                className="h-[42px]"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+              />
+              {errors.email && (
+                <Alert variant="destructive">
+                  <AlertTitle>{errors.email}</AlertTitle>
+                </Alert>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="password" className="text-sm font-bold">
+                Password
+              </Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                className="h-[42px]"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={loading}
+              />
+              {errors.password && (
+                <Alert variant="destructive">
+                  <AlertTitle>{errors.password}</AlertTitle>
+                </Alert>
+              )}
+            </div>
+
+            {formError && (
+              <Alert variant="destructive">
+                <AlertTitle>{formError}</AlertTitle>
+              </Alert>
+            )}
+
+            <Button type="submit" className="h-[42px] font-bold" disabled={loading}>
+              {loading ? "Signing in…" : "Sign in"}
+            </Button>
+
+            {success && (
+              <Alert>
+                <AlertTitle>Signed in</AlertTitle>
+              </Alert>
             )}
           </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="password" className="text-sm font-bold">
-              Password <span className="text-crit-700">*</span>
-            </Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              className={`h-[42px] ${passwordError ? "border-crit-700 bg-crit-50" : ""} ${loading ? "opacity-60" : ""}`}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-            />
-            {passwordError && (
-              <p className="flex items-center gap-1.5 text-xs text-crit-700">
-                <span className="size-[6px] bg-crit" />
-                {passwordError}
-              </p>
-            )}
-          </div>
-
-          <label className="flex cursor-pointer items-center gap-2 text-[12px]">
-            <input type="checkbox" className="size-4 accent-primary" />
-            Remember me
-          </label>
-
-          {success && (
-            <Alert>
-              <AlertTitle>Signed in (mock)</AlertTitle>
-            </Alert>
-          )}
-
-          <Button type="submit" disabled={loading} className="h-10 w-full">
-            {loading ? (
-              <>
-                <span className="size-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-                Signing in…
-              </>
-            ) : (
-              "Sign in"
-            )}
-          </Button>
         </form>
-        {/* biome-ignore lint/a11y/useValidAnchor: placeholder link until /forgot-password route exists */}
-        <a
-          href="#"
-          className="mt-4 inline-block text-sm text-info-700 hover:underline"
-        >
-          Forgot password?
-        </a>
-        <p className='mt-4 text-center font-mono text-sm'>
-          No account?{" "}
-          <Link to="/signup" className='font-bold underline'>
-            Create one
+
+        <div className="mt-6 flex items-center justify-between text-sm">
+          <Link to="/signup" className="text-info-700 hover:underline">
+            Create account
           </Link>
-        </p>
+          <button
+            type="button"
+            className="text-muted-foreground hover:underline"
+            onClick={() => {
+              logout()
+              setSuccess(true)
+            }}
+          >
+            Log out
+          </button>
+        </div>
       </Card>
     </div>
   )
 }
-
-export const Route = createFileRoute("/signin")({ component: SignIn })

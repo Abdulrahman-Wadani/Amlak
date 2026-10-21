@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { type SubmitEvent, useState } from "react"
 import { signUpInput } from '@/lib/validators'
 import { useAuth } from '@/lib/auth'
+import { Alert, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -19,8 +20,11 @@ function SignUp() {
   const [phone, setPhone] = useState("")
   const [password, setPassword] = useState("")
   const [errors, setErrors] = useState<Partial<Record<Fieldkey, string>>>({})
+  const [formError, setFormError] = useState("")
   const [loading, setLoading] = useState(false)
-  const { register } = useAuth()
+  const [step, setStep] = useState<"register" | "verify">("register")
+  const [code, setCode] = useState("")
+  const { register, verifyCode, resendCode, login } = useAuth()
   const navigate = useNavigate()
 
   async function handleSubmit(e: SubmitEvent<HTMLFormElement>){
@@ -36,120 +40,189 @@ function SignUp() {
       return
     }
     setErrors({})
+    setFormError("")
     setLoading(true)
-    await register(email, fullname)
-    navigate({ to: "/home" })
+    register(email, fullname, phone, password)
+      .then(() => {
+        setStep("verify")
+      })
+      .catch((err: unknown) => {
+        setFormError(err instanceof Error ? err.message : "Registration faild")
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }
 
+  function handleVerify(e: SubmitEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setFormError("")
+    setLoading(true)
+    verifyCode(email, code)
+      .then(() => login(email, password))
+      .then(() => {
+        navigate({ to: "/home" })
+      })
+      .catch((err: unknown) => {
+        setFormError(err instanceof Error ? err.message : "Verification failed")
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }
+
+
   return (
-    <div className='flex min-h-screan items-center justify-center bg-background p-4'>
-      <Card className="w-full max-w-sm p-8">
-        <h1 className='mb-6 text-[28px] font-extrabold tracking-tight'>
-          Create account
-        </h1>
-        <form
-          onSubmit={handleSubmit}
-          noValidate
-          className='flex flex-col gap-5'
-        >
-          <div className='flex flex-col gap-2'>
-            <Label htmlFor="fullname" className="text-sm font-bold">
-              Full name <span className='text-crit-700'>*</span>
-            </Label>
-            <Input
-              id="fullname"
-              placeholder='Full name'
-              className={`h-[42px] ${errors.fullname ? "border-crit-700 bg-crit-50" : ""} ${loading ? "opacity-60" : ""}`}
-              value={fullname}
-              onChange={(e) => setFullname(e.target.value)}
-              disabled={loading}
-            />
-            {errors.fullname && (
-              <p className="flex items-center gap-1.5 text-xs text-crit-700">
-                <span className="size-[6px] bg-crit" />
-                {errors.fullname}
-              </p>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="email" className="text-sm font-bold">
-              Eamil <span className="text-crit-700">*</span>
-            </Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="you@amlak.com"
-              className={`h-[42px] ${errors.email ? "border-crit-700 bg-crit-50" : ""} ${loading ? "opacity-60" : ""}`}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={loading}
-            />
-            {errors.email && (
-              <p className='flex items-center gap-1.5 text-xs text-crit-700'>
-                <span className='size-[6px] bg-crit' />
-                {errors.email}
-              </p>
-            )}
-          </div>
-
-          <div className='flex flex-col gap-2'>
-            <Label htmlFor="phone" className="text-sm font-bold">
-              Phone <span className='text-crit-700'>*</span>
-            </Label>
-            <Input
-              id="phone"
-              type='tel'
-              placeholder='05xxxxxxxx'
-              className={`h-[42px] ${errors.phone ? "border-crit-700 bg-crit-50" : ""} ${loading ? "opacity-60" : ""}`}
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              disabled={loading}
-            />
-            {errors.phone && (
-              <p className='flex items-center gap-1.5 text-xs text-crit-700'>
-                <span className='size-[6px] bg-crit' />
-                {errors.phone}
-              </p>
-            )}
-          </div>
-
-          <div className='flex flex-col gap-2'>
-            <label htmlFor='password' className='text-sm font-bold'>
-              password <span className='text-crit-700'>*</span>
-            </label>
-            <Input
-              id='password'
-              type='password'
-              placeholder='at least 8 characters'
-              className={`h-[42px] ${errors.password ? "border-crit-700 bg-crit-50" : ""} ${loading ? "opacity-60" : ""}`}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-            />
-            {errors.password && (
-              <p className='flex items-center gap-1.5 text-xs text-crit-700'>
-                <span className='size-[6px] bg-crit' />
-                {errors.password}
-              </p>
-            )}
-          </div>
-
-          <Button
-            type='submit'
-            className="h-[42px] font-bold"
-            disabled={loading}
-          >
-            {loading ? "Creating account…" : "Create account"}
-            </Button>
-          </form>
-
-          <p className='mt-4 text-center font-mono text-sm'>
-            Already have an account?{" "}
-            <Link to="/signin" className='font-bold underline'>
-              Sign in
-            </Link>
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-[420px] rounded-xl p-8">
+        <div className="mb-8">
+          <h1 className="font-display text-3xl font-extrabold">Create account</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Enter your details to create your account.
           </p>
+        </div>
+
+        {step === "verify" ? (
+          <form onSubmit={handleVerify} noValidate>
+            <div className="flex flex-col gap-5">
+              <p className="text-sm">
+                We sent a 6-digit code to <span className="font-bold">{email}</span>.
+              </p>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="code" className="text-sm font-bold">
+                  Verification code
+                </Label>
+                <Input
+                  id="code"
+                  inputMode="numeric"
+                  placeholder="123456"
+                  className="h-[42px]"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  disabled={loading}
+                />
+              </div>
+
+              {formError && (
+                <Alert variant="destructive">
+                  <AlertTitle>{formError}</AlertTitle>
+                </Alert>
+              )}
+
+              <Button type="submit" className="h-[42px] font-bold" disabled={loading}>
+                {loading ? "Verifying…" : "Verify and sign in"}
+              </Button>
+
+              <button
+                type="button"
+                className="text-sm text-info-700 hover:underline"
+                onClick={() => void resendCode(email)}
+              >
+                Resend code
+              </button>
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit} noValidate>
+            <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="fullname" className="text-sm font-bold">
+                  Full name
+                </Label>
+                <Input
+                  id="fullname"
+                  placeholder="Ahmed Hamad"
+                  className="h-[42px]"
+                  value={fullname}
+                  onChange={(e) => setFullname(e.target.value)}
+                  disabled={loading}
+                />
+                {errors.fullname && (
+                  <Alert variant="destructive">
+                    <AlertTitle>{errors.fullname}</AlertTitle>
+                  </Alert>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="email" className="text-sm font-bold">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  className="h-[42px]"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={loading}
+                />
+                {errors.email && (
+                  <Alert variant="destructive">
+                    <AlertTitle>{errors.email}</AlertTitle>
+                  </Alert>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="phone" className="text-sm font-bold">
+                  Phone
+                </Label>
+                <Input
+                  id="phone"
+                  placeholder="+966512345678"
+                  className="h-[42px]"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  disabled={loading}
+                />
+                {errors.phone && (
+                  <Alert variant="destructive">
+                    <AlertTitle>{errors.phone}</AlertTitle>
+                  </Alert>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="password" className="text-sm font-bold">
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  className="h-[42px]"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                />
+                {errors.password && (
+                  <Alert variant="destructive">
+                    <AlertTitle>{errors.password}</AlertTitle>
+                  </Alert>
+                )}
+              </div>
+
+              {formError && (
+                <Alert variant="destructive">
+                  <AlertTitle>{formError}</AlertTitle>
+                </Alert>
+              )}
+
+              <Button type="submit" className="h-[42px] font-bold" disabled={loading}>
+                {loading ? "Creating account…" : "Create account"}
+              </Button>
+            </div>
+          </form>
+        )}
+
+        <div className="mt-6 text-sm text-muted-foreground">
+          Already have an account?{" "}
+          <Link to="/signin" className="text-info-700 hover:underline">
+            Sign in
+          </Link>
+        </div>
       </Card>
     </div>
   )
