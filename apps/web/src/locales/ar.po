@@ -6,3 +6,79 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: ar\n"
+
+#. Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ
+#: src/components/auth-brand-panel.tsx:8
+msgid "A"
+msgstr "أ"
+
+#: src/components/auth-brand-panel.tsx:20
+msgid "All your places, their\n"
+"maintenance and bookings,\n"
+"in one place."
+msgstr "كل عقاراتك وصيانتها\n"
+"وحجوزاتها في مكان\n"
+"واحد."
+
+#. Brand wordmark, Latin letters only in English
+#: src/components/auth-brand-panel.tsx:13
+msgid "Amlak"
+msgstr "أملاك"
+
+#: src/routes/signin.tsx:55
+msgid "Could not sign in"
+msgstr "تعذر الدخول"
+
+#: src/routes/signin.tsx:154
+msgid "Don't have an account? <0>Create manager account</0>"
+msgstr "ليس لديك حساب؟ <0>إنشاء حساب مدير</0>"
+
+#: src/routes/signin.tsx:78
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+#: src/routes/signin.tsx:40
+msgid "Enter a valid email"
+msgstr "أدخل بريدًا إلكترونيًا صحيحًا"
+
+#: src/routes/signin.tsx:72
+msgid "Enter your email and password to continue."
+msgstr "أدخل بريدك وكلمة المرور للمتابعة."
+
+#: src/components/auth-brand-panel.tsx:23
+msgid "For managers and workers. On mobile and desktop."
+msgstr "للمدراء والعاملين، على الجوال وسطح المكتب."
+
+#: src/routes/signin.tsx:105
+msgid "Forgot password?"
+msgstr "نسيت كلمة المرور؟"
+
+#: src/routes/signin.tsx:121
+msgid "Hide password"
+msgstr "إخفاء كلمة المرور"
+
+#: src/routes/signin.tsx:101
+msgid "Password"
+msgstr "كلمة المرور"
+
+#: src/routes/signin.tsx:41
+msgid "Password does not meet the requirements"
+msgstr "كلمة المرور لا تحقق الشروط"
+
+#: src/routes/signin.tsx:121
+msgid "Show password"
+msgstr "إظهار كلمة المرور"
+
+#. Page title
+#: src/routes/signin.tsx:69
+#: src/routes/signin.tsx:148
+msgid "Sign in"
+msgstr "دخول"
+
+#: src/routes/signin.tsx:148
+msgid "Signing in…"
+msgstr "جارٍ الدخول…"
+
+#: src/routes/signin.tsx:162
+msgid "Workers sign in with the invite sent by their manager."
+msgstr "العامل يدخل بالدعوة التي تصله من مديره."
