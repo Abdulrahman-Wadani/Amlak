@@ -1,51 +1,55 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useAuth } from "@/lib/auth"
 import { type SubmitEvent, useState } from "react"
-import { Alert, AlertTitle } from "@/components/ui/alert"
+import { CircleAlert, Eye, EyeOff } from "lucide-react"
+import { t } from "@lingui/core/macro"
+import { Trans } from "@lingui/react/macro"
+import { signInInput } from "@/lib/validators"
+import { useAuth } from "@/lib/auth"
+import { AuthBrandPanel } from "@/components/auth-brand-panel"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { signInInput } from "@/lib/validators"
 
 export const Route = createFileRoute("/signin")({
   component: SignIn,
 })
 
-type Fieldkey = "email" | "password"
-
 function SignIn() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [errors, setErrors] = useState<Partial<Record<Fieldkey, string>>>({})
+  const [showPassword, setShowPassword] = useState(false)
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
   const [formError, setFormError] = useState("")
-  const [success, setSuccess] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { login, logout } = useAuth()
+  const { login } = useAuth()
   const navigate = useNavigate()
 
   function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     const result = signInInput.safeParse({ email, password })
     if (!result.success) {
-      const map: Partial<Record<Fieldkey, string>> = {}
+      const map: { email?: string; password?: string } = {}
       for (const issue of result.error.issues) {
-        const key = issue.path[0] as Fieldkey
-        if (!map[key]) map[key] = issue.message
+        const key = issue.path[0] as "email" | "password"
+        if (!map[key]) {
+          map[key] =
+            key === "email"
+              ? t`Enter a valid email`
+              : t`Password does not meet the requirements`
+        }
       }
       setErrors(map)
       return
     }
     setErrors({})
-    setSuccess(false)
     setFormError("")
     setLoading(true)
     login(email, password)
       .then(() => {
-        navigate({ to: "/home"})
+        navigate({ to: "/home" })
       })
       .catch((err: unknown) => {
-        setFormError(err instanceof Error ? err.message : "Sign in failed")
+        setFormError(err instanceof Error ? err.message : t`Could not sign in`)
       })
       .finally(() => {
         setLoading(false)
@@ -53,91 +57,108 @@ function SignIn() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-[420px] rounded-xl p-8">
-        <div className="mb-8">
-          <h1 className="font-display text-3xl font-extrabold">Sign in</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Enter your email and password to continue.
-          </p>
-        </div>
+    <div className="grid min-h-screen bg-background lg:grid-cols-2">
+      <AuthBrandPanel />
 
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="flex flex-col gap-5">
+      <main className="flex items-center justify-center px-6 py-10">
+        <form onSubmit={handleSubmit} noValidate className="w-full max-w-[340px]">
+          <h1 className="text-[28px] font-bold leading-9">
+            <Trans comment="Page title">Sign in</Trans>
+          </h1>
+          <p className="mt-1 text-[15px] leading-6 text-muted-foreground">
+            <Trans>Enter your email and password to continue.</Trans>
+          </p>
+
+          <div className="mt-8 flex flex-col gap-5">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="email" className="text-sm font-bold">
-                Email
+              <Label htmlFor="email" className="text-sm font-semibold">
+                <Trans>Email</Trans>
               </Label>
               <Input
                 id="email"
+                dir="ltr"
                 type="email"
-                placeholder="you@example.com"
-                className="h-[42px]"
+                placeholder="name@example.com"
+                className="h-11 rounded-none bg-card"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
               />
               {errors.email && (
-                <Alert variant="destructive">
-                  <AlertTitle>{errors.email}</AlertTitle>
-                </Alert>
+                <p className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
+                  <CircleAlert size={14} />
+                  {errors.email}
+                </p>
               )}
             </div>
 
             <div className="flex flex-col gap-2">
-              <Label htmlFor="password" className="text-sm font-bold">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                className="h-[42px]"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-              />
+              <div className="flex items-baseline justify-between">
+                <Label htmlFor="password" className="text-sm font-semibold">
+                  <Trans>Password</Trans>
+                </Label>
+                <span className="text-[13px] text-muted-foreground underline">
+                  <Trans>Forgot password?</Trans>
+                </span>
+              </div>
+              <div className="relative">
+                <Input
+                  id="password"
+                  dir="ltr"
+                  type={showPassword ? "text" : "password"}
+                  className="h-11 rounded-none bg-card ps-11"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  aria-label={
+                    showPassword ? t`Hide password` : t`Show password`
+                  }
+                  onClick={() => setShowPassword((s) => !s)}
+                  className="absolute top-1/2 end-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
               {errors.password && (
-                <Alert variant="destructive">
-                  <AlertTitle>{errors.password}</AlertTitle>
-                </Alert>
+                <p className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
+                  <CircleAlert size={14} />
+                  {errors.password}
+                </p>
               )}
             </div>
 
             {formError && (
-              <Alert variant="destructive">
-                <AlertTitle>{formError}</AlertTitle>
-              </Alert>
+              <p className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
+                <CircleAlert size={14} />
+                {formError}
+              </p>
             )}
 
-            <Button type="submit" className="h-[42px] font-bold" disabled={loading}>
-              {loading ? "Signing in…" : "Sign in"}
+            <Button
+              type="submit"
+              className="h-11 rounded-none bg-info-700 font-bold text-white hover:bg-info-900"
+              disabled={loading}
+            >
+              {loading ? <Trans>Signing in…</Trans> : <Trans>Sign in</Trans>}
             </Button>
 
-            {success && (
-              <Alert>
-                <AlertTitle>Signed in</AlertTitle>
-              </Alert>
-            )}
+            <p className="text-[13px] text-muted-foreground">
+              <Trans>
+                Don't have an account?{" "}
+                <Link to="/signup" className="font-bold text-foreground underline">
+                  Create manager account
+                </Link>
+              </Trans>
+            </p>
+            <p className="text-[13px] leading-5 text-muted-foreground">
+              <Trans>Workers sign in with the invite sent by their manager.</Trans>
+            </p>
           </div>
         </form>
-
-        <div className="mt-6 flex items-center justify-between text-sm">
-          <Link to="/signup" className="text-info-700 hover:underline">
-            Create account
-          </Link>
-          <button
-            type="button"
-            className="text-muted-foreground hover:underline"
-            onClick={() => {
-              logout()
-              setSuccess(true)
-            }}
-          >
-            Log out
-          </button>
-        </div>
-      </Card>
+      </main>
     </div>
   )
 }

@@ -5,7 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react"
-import type { User } from "@amlak/shared"
+import type { Language, User } from "@amlak/shared"
 
 type Auth = {
   user: User | null
@@ -15,7 +15,8 @@ type Auth = {
     email: string,
     fullname: string,
     phone: string,
-    password: string
+    password: string,
+    preferredLanguage: Language
   ) => Promise<void>
   verifyCode: (email: string, code: string) => Promise<void>
   resendCode: (email: string) => Promise<void>
@@ -89,9 +90,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     fullname: string,
     phone: string,
-    password: string
+    password: string,
+    preferredLanguage: Language
   ) {
-    await call("/auth/register", { email, fullname, phone, password })
+    await call("/auth/register", {
+      email,
+      fullname,
+      phone,
+      password,
+      preferred_language: preferredLanguage,
+    })
   }
 
   async function verifyCode(email: string, code: string) {

@@ -1,0 +1,212 @@
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2026-10-23 17:10+0300\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: @lingui/cli\n"
+"Language: ar\n"
+
+#: src/components/auth-brand-panel.tsx:8
+msgid "A"
+msgstr "أ"
+
+#: src/routes/signup.tsx:247
+msgid "Account language"
+msgstr "لغة الحساب"
+
+#: src/routes/signup.tsx:148
+msgid "Ahmed Hamad"
+msgstr "أحمد حمد"
+
+#: src/components/auth-brand-panel.tsx:20
+msgid "All your places, their\n"
+"maintenance and bookings,\n"
+"in one place."
+msgstr "كل عقاراتك وصيانتها\n"
+"وحجوزاتها في مكان\n"
+"واحد."
+
+#: src/routes/signup.tsx:300
+msgid "Already have an account? <0>Sign in</0>"
+msgstr "لديك حساب بالفعل؟ <0>دخول</0>"
+
+#. Brand wordmark, Latin letters only in English
+
+#: src/components/auth-brand-panel.tsx:13
+msgid "Amlak"
+msgstr "أملاك"
+
+#: src/routes/signup.tsx:222
+msgid "At least 8 characters"
+msgstr "8 أحرف على الأقل"
+
+#: src/components/email-verify-panel.tsx:112
+msgid "Change email"
+msgstr "تغيير البريد الإلكتروني"
+
+#: src/components/email-verify-panel.tsx:85
+msgid "Confirm email"
+msgstr "تأكيد البريد"
+
+#: src/components/email-verify-panel.tsx:85
+msgid "Confirming…"
+msgstr "جارٍ التأكيد…"
+
+#: src/routes/signup.tsx:98
+msgid "Could not confirm the email"
+msgstr "تعذر تأكيد البريد"
+
+#: src/routes/signup.tsx:81
+msgid "Could not create the account"
+msgstr "تعذر إنشاء الحساب"
+
+#: src/routes/signup.tsx:110
+msgid "Could not resend the code"
+msgstr "تعذر إعادة إرسال الرمز"
+
+#: src/routes/signin.tsx:52
+msgid "Could not sign in"
+msgstr "تعذر الدخول"
+
+#: src/routes/signup.tsx:293
+msgid "Create account"
+msgstr "إنشاء الحساب"
+
+#: src/routes/signup.tsx:135
+msgid "Create manager account"
+msgstr "إنشاء حساب مدير"
+
+#: src/routes/signup.tsx:293
+msgid "Creating account…"
+msgstr "جارٍ إنشاء الحساب…"
+
+#: src/components/email-verify-panel.tsx:89
+msgid "Didn't get the code?"
+msgstr "لم يصلك الرمز؟"
+
+#: src/routes/signin.tsx:149
+msgid "Don't have an account? <0>Create manager account</0>"
+msgstr "ليس لديك حساب؟ <0>إنشاء حساب مدير</0>"
+
+#: src/routes/signin.tsx:75
+#: src/routes/signup.tsx:164
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+#: src/routes/signin.tsx:37
+#: src/routes/signup.tsx:29
+msgid "Enter a valid email"
+msgstr "أدخل بريدًا إلكترونيًا صحيحًا"
+
+#: src/routes/signup.tsx:31
+msgid "Enter a valid phone number"
+msgstr "أدخل رقم جوال صحيحًا"
+
+#: src/routes/signup.tsx:138
+msgid "Enter your details to create your account."
+msgstr "أدخل بياناتك لإنشاء حسابك."
+
+#: src/routes/signin.tsx:69
+msgid "Enter your email and password to continue."
+msgstr "أدخل بريدك وكلمة المرور للمتابعة."
+
+#: src/routes/signup.tsx:27
+msgid "Enter your full name"
+msgstr "أدخل اسمك الكامل"
+
+#: src/components/auth-brand-panel.tsx:23
+msgid "For managers and workers. On mobile and desktop."
+msgstr "للمدراء والعاملين، على الجوال وسطح المكتب."
+
+#: src/routes/signin.tsx:101
+msgid "Forgot password?"
+msgstr "نسيت كلمة المرور؟"
+
+#: src/routes/signup.tsx:144
+msgid "Full name"
+msgstr "الاسم الكامل"
+
+#: src/routes/signin.tsx:117
+msgid "Hide password"
+msgstr "إخفاء كلمة المرور"
+
+#: src/routes/signup.tsx:230
+msgid "One lowercase letter (a-z)"
+msgstr "حرف إنجليزي صغير (a-z)"
+
+#: src/routes/signup.tsx:234
+msgid "One symbol (like ! or @)"
+msgstr "رمز مثل ! أو @"
+
+#: src/routes/signup.tsx:226
+msgid "One uppercase letter (A-Z)"
+msgstr "حرف إنجليزي كبير (A-Z)"
+
+#: src/components/email-verify-panel.tsx:38
+msgid "Open your email"
+msgstr "افتح بريدك الإلكتروني"
+
+#: src/routes/signin.tsx:98
+#: src/routes/signup.tsx:208
+msgid "Password"
+msgstr "كلمة المرور"
+
+#: src/routes/signin.tsx:38
+#: src/routes/signup.tsx:33
+msgid "Password does not meet the requirements"
+msgstr "كلمة المرور لا تحقق الشروط"
+
+#: src/routes/signup.tsx:186
+msgid "Phone number"
+msgstr "رقم الجوال"
+
+#: src/components/email-verify-panel.tsx:103
+msgid "Resend code"
+msgstr "إعادة إرسال الرمز"
+
+#: src/routes/signin.tsx:117
+msgid "Show password"
+msgstr "إظهار كلمة المرور"
+
+#: src/routes/signin.tsx:66
+#: src/routes/signin.tsx:145
+msgid "Sign in"
+msgstr "دخول"
+
+#: src/routes/signin.tsx:145
+
+msgid "Signing in…"
+msgstr "جارٍ الدخول…"
+
+#: src/components/email-verify-panel.tsx:69
+msgid "The code is valid for 10 minutes."
+msgstr "الرمز صالح لمدة 10 دقائق."
+
+#: src/components/email-verify-panel.tsx:55
+msgid "Verification code"
+msgstr "رمز التحقق"
+
+#: src/components/email-verify-panel.tsx:43
+msgid "We sent a 6-digit code to <0>{email}</0>."
+msgstr "أرسلنا رمزًا مكوّنًا من 6 أرقام إلى <0>{email}</0>."
+
+#: src/routes/signin.tsx:157
+msgid "Workers sign in with the invite sent by their manager."
+msgstr "العامل يدخل بالدعوة التي تصله من مديره."
+
+#: src/components/email-verify-panel.tsx:92
+msgid "You can request a new code in"
+msgstr "يمكنك طلب رمز جديد خلال"
+
+#: src/routes/signin.tsx:162
+msgid "Workers sign in with the invite sent by their manager."
+msgstr "العامل يدخل بالدعوة التي تصله من مديره."
+
+#: src/components/email-verify-panel.tsx:91
+msgid "You can request a new code in"
+msgstr "يمكنك طلب رمز جديد خلال"
+
+#: src/routes/signin.tsx:162
+msgid "Workers sign in with the invite sent by their manager."
+msgstr "العامل يدخل بالدعوة التي تصله من مديره."
