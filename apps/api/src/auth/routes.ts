@@ -5,10 +5,15 @@ import {
 	registerSchema,
 	verificationCodeSchema,
 	verifyEmailSchema,
+	createPlaceSchema,
+	getPlaceSchema,
+	updateWorkerSchema,getWorkerSchema,PutWorkerSchema
 } from "@amlak/shared";
 import { type CookieOptions, type Response, Router } from "express";
 import { parse } from "../validation.ts";
 import * as auth from "./service.ts";
+import * as place from "./places.ts";
+import * as worker from "./worker.ts"
 import { REFRESH_TOKEN_MS, type Session } from "./sessions.ts";
 import { ACCESS_TOKEN_SECONDS } from "./tokens.ts";
 
@@ -25,6 +30,12 @@ authRouter.post("/auth/register", async (req, res) => {
 	const input = parse(registerSchema, req.body);
 	res.status(201).json(await auth.register(input));
 });
+
+
+authRouter.get("/auth/register", async (req, res) => {
+	res.status(201).json("Hello!");
+});
+
 
 authRouter.post("/auth/verify-email", async (req, res) => {
 	const input = parse(verifyEmailSchema, req.body);
@@ -72,3 +83,55 @@ function setRefreshCookie(res: Response, token: string) {
 		maxAge: REFRESH_TOKEN_MS,
 	});
 }
+
+
+// place endpoints
+
+authRouter.post("/place", async (req, res) => {
+	const input = parse(createPlaceSchema, req.body);
+	res.status(201).json(await place.createPlace(input, req.headers.authorization?.split(" ")[1] || ""));
+})
+
+
+authRouter.get("/place/:place_id", async (req, res) => {
+	const input = parse(getPlaceSchema, req.params);
+	res.status(201).json(await place.getPlacesById(input, req.headers.authorization?.split(" ")[1] || ""));
+})
+
+authRouter.get("/places", async (req, res) => {
+	res.status(201).json(await place.getPlaces(req.headers.authorization?.split(" ")[1] || ""));
+})
+
+authRouter.delete("/place/:place_id", async (req, res) => {
+	const input = parse(getPlaceSchema, req.params);
+	res.status(201).json(await place.deletePlace(input,req.headers.authorization?.split(" ")[1] || ""));
+})
+
+authRouter.put("/place/:place_id", async (req, res) => {
+	const input = parse(createPlaceSchema, req.body);
+	const place_id = parse(getPlaceSchema, req.params);
+	res.status(201).json(await place.editPlace(input,req.headers.authorization?.split(" ")[1] || "",place_id));
+})
+
+
+// worker endpoint start here
+authRouter.post("/worker", async (req, res) => {
+	const input = parse(updateWorkerSchema, req.body);
+	res.status(201).json(await worker.createWorker(input,req.headers.authorization?.split(" ")[1] || ""));
+})
+
+authRouter.get("/worker/:worker_id", async (req, res) => {
+	const input = parse(getWorkerSchema, req.params);
+	res.status(201).json(await worker.getWorkerById(req.headers.authorization?.split(" ")[1] || "",input));
+})
+
+authRouter.delete("/worker/:worker_id", async (req, res) => {
+	const input = parse(getWorkerSchema, req.params);
+	res.status(201).json(await worker.deleteWorkerById(req.headers.authorization?.split(" ")[1] || "",input));
+})
+
+authRouter.put("/worker/:worker_id", async (req, res) => {
+	const input = parse(getWorkerSchema, req.params);
+	const update = parse(PutWorkerSchema, req.body);
+	res.status(201).json(await worker.updateWorkerById(req.headers.authorization?.split(" ")[1] || "",input,update));
+})
