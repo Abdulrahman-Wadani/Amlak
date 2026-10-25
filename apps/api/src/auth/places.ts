@@ -1,4 +1,4 @@
-import type { CreatePlaceInput, Place, GetPlaceInput } from "@amlak/shared";
+import type { CreatePlaceInput, Place, GetPlaceInput,getWorkerSchema,removeWorkerSchema } from "@amlak/shared";
 import { prisma } from "../db.ts";
 import { sendEmail } from "../email.ts";
 import { AppError } from "../errors.ts";
@@ -85,4 +85,114 @@ export async function editPlace(input: CreatePlaceInput,jwt_token: string,place_
     data:input
   })
   return place as Place
+}
+
+export async function assignedPlace(jwt_token:string,place:GetPlaceInput){
+  const ownerId = await userIdFromToken(jwt_token);
+  const placeId = place.place_id;
+  const isManager = await prisma.place.findFirst({
+    where:{
+      owner_id: ownerId,
+      id: placeId
+  }
+  });
+  if (!isManager){
+    return {"message":"you don't authorized or worker not exist"};
+  }
+  const assigned = await prisma.placeWorker.findMany({
+    where:{
+      place_id:placeId
+    },
+    select:{
+      id:true,
+      place_id:true,
+      worker:{
+        select:{
+          id:true,
+          fullname:true,
+          phone:true,
+          status:true
+        }
+      },
+      assigned_by:true,
+      assigned_at:true,
+      created_at:true,
+      updated_at:true
+    }
+  });
+  return assigned;
+
+}
+
+
+export async function assignWorker(jwt_token:string,place:GetPlaceInput,worker:getWorkerSchema){
+  const ownerId = await userIdFromToken(jwt_token);
+  const place_id = place.place_id;
+  const worker_id = worker.worker_id;
+  const isowner = await prisma.place.findFirst({
+    where:{
+      owner_id:ownerId
+    }
+  });
+  if (!isowner){
+    return {"message":"You don't have authorized"};
+  }
+  const assign = await prisma.placeWorker.create({
+    data:{
+      id:crypto.randomUUID(),
+      place_id:place_id,
+      worker_id:worker_id,
+      assigned_by:ownerId,
+      is_active:true
+    },
+    include:{
+      worker:{
+        select:{
+        id:true,
+        fullname:true,
+        phone:true,
+        status:true
+      }
+      }
+    }
+  });
+  return assign;
+
+
+}
+
+export async function unassign(jwt_token:string,place:removeWorkerSchema){
+  const ownerId = await userIdFromToken(jwt_token);
+  const place_id = place.place_id;
+  const worker_id = place.worker_id;
+  const isowner = await prisma.place.findFirst({
+    where:{
+      owner_id:ownerId,
+      id:place_id
+    }
+  });
+  if (!isowner){
+    return {"message":"You don't have authorized"};
+  }
+  const assign = await prisma.placeWorker.findFirst({
+    where:{
+      place_id:place_id,
+      worker_id:worker_id
+    },
+    select:{
+      id:true
+    }
+  });
+  if (!assign){
+    return {"message":"you don't have authorized."};
+  }
+  const unassign = await prisma.placeWorker.delete({
+    where:{
+      id:assign.id
+    }
+  });
+
+  return unassign;
+
+
 }
