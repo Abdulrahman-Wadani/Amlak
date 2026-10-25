@@ -6,3 +6,79 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: @lingui/cli\n"
 "Language: en\n"
+
+#. Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ
+#: src/components/auth-brand-panel.tsx:8
+msgid "A"
+msgstr "A"
+
+#: src/components/auth-brand-panel.tsx:20
+msgid "All your places, their\n"
+"maintenance and bookings,\n"
+"in one place."
+msgstr "All your places, their\n"
+"maintenance and bookings,\n"
+"in one place."
+
+#. Brand wordmark, Latin letters only in English
+#: src/components/auth-brand-panel.tsx:13
+msgid "Amlak"
+msgstr "Amlak"
+
+#: src/routes/signin.tsx:55
+msgid "Could not sign in"
+msgstr "Could not sign in"
+
+#: src/routes/signin.tsx:154
+msgid "Don't have an account? <0>Create manager account</0>"
+msgstr "Don't have an account? <0>Create manager account</0>"
+
+#: src/routes/signin.tsx:78
+msgid "Email"
+msgstr "Email"
+
+#: src/routes/signin.tsx:40
+msgid "Enter a valid email"
+msgstr "Enter a valid email"
+
+#: src/routes/signin.tsx:72
+msgid "Enter your email and password to continue."
+msgstr "Enter your email and password to continue."
+
+#: src/components/auth-brand-panel.tsx:23
+msgid "For managers and workers. On mobile and desktop."
+msgstr "For managers and workers. On mobile and desktop."
+
+#: src/routes/signin.tsx:105
+msgid "Forgot password?"
+msgstr "Forgot password?"
+
+#: src/routes/signin.tsx:121
+msgid "Hide password"
+msgstr "Hide password"
+
+#: src/routes/signin.tsx:101
+msgid "Password"
+msgstr "Password"
+
+#: src/routes/signin.tsx:41
+msgid "Password does not meet the requirements"
+msgstr "Password does not meet the requirements"
+
+#: src/routes/signin.tsx:121
+msgid "Show password"
+msgstr "Show password"
+
+#. Page title
+#: src/routes/signin.tsx:69
+#: src/routes/signin.tsx:148
+msgid "Sign in"
+msgstr "Sign in"
+
+#: src/routes/signin.tsx:148
+msgid "Signing in…"
+msgstr "Signing in…"
+
+#: src/routes/signin.tsx:162
+msgid "Workers sign in with the invite sent by their manager."
+msgstr "Workers sign in with the invite sent by their manager."
