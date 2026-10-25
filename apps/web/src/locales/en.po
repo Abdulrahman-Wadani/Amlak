@@ -122,3 +122,7 @@ msgstr "Workers sign in with the invite sent by their manager."
 #: src/components/email-verify-panel.tsx:91
 msgid "You can request a new code in"
 msgstr "You can request a new code in"
+
+#: src/routes/signin.tsx:162
+msgid "Workers sign in with the invite sent by their manager."
+msgstr "Workers sign in with the invite sent by their manager."
