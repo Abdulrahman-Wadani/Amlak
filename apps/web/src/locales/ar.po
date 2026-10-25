@@ -25,9 +25,25 @@ msgstr "كل عقاراتك وصيانتها\n"
 msgid "Amlak"
 msgstr "أملاك"
 
+#: src/components/email-verify-panel.tsx:111
+msgid "Change email"
+msgstr "تغيير البريد الإلكتروني"
+
+#: src/components/email-verify-panel.tsx:84
+msgid "Confirm email"
+msgstr "تأكيد البريد"
+
+#: src/components/email-verify-panel.tsx:84
+msgid "Confirming…"
+msgstr "…جارٍ التأكيد"
+
 #: src/routes/signin.tsx:55
 msgid "Could not sign in"
 msgstr "تعذر الدخول"
+
+#: src/components/email-verify-panel.tsx:88
+msgid "Didn't get the code?"
+msgstr "لم يصلك الرمز؟"
 
 #: src/routes/signin.tsx:154
 msgid "Don't have an account? <0>Create manager account</0>"
@@ -57,6 +73,10 @@ msgstr "نسيت كلمة المرور؟"
 msgid "Hide password"
 msgstr "إخفاء كلمة المرور"
 
+#: src/components/email-verify-panel.tsx:38
+msgid "Open your email"
+msgstr "افتح بريدك الإلكتروني"
+
 #: src/routes/signin.tsx:101
 msgid "Password"
 msgstr "كلمة المرور"
@@ -64,6 +84,10 @@ msgstr "كلمة المرور"
 #: src/routes/signin.tsx:41
 msgid "Password does not meet the requirements"
 msgstr "كلمة المرور لا تحقق الشروط"
+
+#: src/components/email-verify-panel.tsx:102
+msgid "Resend code"
+msgstr "إعادة إرسال الرمز"
 
 #: src/routes/signin.tsx:121
 msgid "Show password"
@@ -78,6 +102,26 @@ msgstr "دخول"
 #: src/routes/signin.tsx:148
 msgid "Signing in…"
 msgstr "جارٍ الدخول…"
+
+#: src/components/email-verify-panel.tsx:69
+msgid "The code is valid for 10 minutes."
+msgstr "الرمز صالح لمدة 10 دقائق."
+
+#: src/components/email-verify-panel.tsx:55
+msgid "Verification code"
+msgstr "رمز التحقق"
+
+#: src/components/email-verify-panel.tsx:43
+msgid "We sent a 6-digit code to <0>{email}</0>."
+msgstr "أرسلنا رمزًا مكوّنًا من 6 أرقام إلى <0>{email}</0>."
+
+#: src/routes/signin.tsx:162
+msgid "Workers sign in with the invite sent by their manager."
+msgstr "العامل يدخل بالدعوة التي تصله من مديره."
+
+#: src/components/email-verify-panel.tsx:91
+msgid "You can request a new code in"
+msgstr "يمكنك طلب رمز جديد خلال"
 
 #: src/routes/signin.tsx:162
 msgid "Workers sign in with the invite sent by their manager."

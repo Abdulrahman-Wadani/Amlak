@@ -25,9 +25,25 @@ msgstr "All your places, their\n"
 msgid "Amlak"
 msgstr "Amlak"
 
+#: src/components/email-verify-panel.tsx:111
+msgid "Change email"
+msgstr "Change email"
+
+#: src/components/email-verify-panel.tsx:84
+msgid "Confirm email"
+msgstr "Confirm email"
+
+#: src/components/email-verify-panel.tsx:84
+msgid "Confirming…"
+msgstr "Confirming…"
+
 #: src/routes/signin.tsx:55
 msgid "Could not sign in"
 msgstr "Could not sign in"
+
+#: src/components/email-verify-panel.tsx:88
+msgid "Didn't get the code?"
+msgstr "Didn't get the code?"
 
 #: src/routes/signin.tsx:154
 msgid "Don't have an account? <0>Create manager account</0>"
@@ -57,6 +73,10 @@ msgstr "Forgot password?"
 msgid "Hide password"
 msgstr "Hide password"
 
+#: src/components/email-verify-panel.tsx:38
+msgid "Open your email"
+msgstr "Open your email"
+
 #: src/routes/signin.tsx:101
 msgid "Password"
 msgstr "Password"
@@ -64,6 +84,10 @@ msgstr "Password"
 #: src/routes/signin.tsx:41
 msgid "Password does not meet the requirements"
 msgstr "Password does not meet the requirements"
+
+#: src/components/email-verify-panel.tsx:102
+msgid "Resend code"
+msgstr "Resend code"
 
 #: src/routes/signin.tsx:121
 msgid "Show password"
@@ -78,6 +102,26 @@ msgstr "Sign in"
 #: src/routes/signin.tsx:148
 msgid "Signing in…"
 msgstr "Signing in…"
+
+#: src/components/email-verify-panel.tsx:69
+msgid "The code is valid for 10 minutes."
+msgstr "The code is valid for 10 minutes."
+
+#: src/components/email-verify-panel.tsx:55
+msgid "Verification code"
+msgstr "Verification code"
+
+#: src/components/email-verify-panel.tsx:43
+msgid "We sent a 6-digit code to <0>{email}</0>."
+msgstr "We sent a 6-digit code to <0>{email}</0>."
+
+#: src/routes/signin.tsx:162
+msgid "Workers sign in with the invite sent by their manager."
+msgstr "Workers sign in with the invite sent by their manager."
+
+#: src/components/email-verify-panel.tsx:91
+msgid "You can request a new code in"
+msgstr "You can request a new code in"
 
 #: src/routes/signin.tsx:162
 msgid "Workers sign in with the invite sent by their manager."
