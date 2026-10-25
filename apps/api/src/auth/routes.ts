@@ -32,11 +32,6 @@ authRouter.post("/auth/register", async (req, res) => {
 });
 
 
-authRouter.get("/auth/register", async (req, res) => {
-	res.status(201).json("Hello!");
-});
-
-
 authRouter.post("/auth/verify-email", async (req, res) => {
 	const input = parse(verifyEmailSchema, req.body);
 	await auth.verifyEmail(input);
