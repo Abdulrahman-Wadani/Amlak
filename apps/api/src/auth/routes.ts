@@ -7,7 +7,7 @@ import {
 	verifyEmailSchema,
 	createPlaceSchema,
 	getPlaceSchema,
-	updateWorkerSchema,getWorkerSchema,PutWorkerSchema
+	updateWorkerSchema,getWorkerSchema,PutWorkerSchema,removeWorkerSchema
 } from "@amlak/shared";
 import { type CookieOptions, type Response, Router } from "express";
 import { parse } from "../validation.ts";
@@ -129,4 +129,20 @@ authRouter.put("/worker/:worker_id", async (req, res) => {
 	const input = parse(getWorkerSchema, req.params);
 	const update = parse(PutWorkerSchema, req.body);
 	res.status(201).json(await worker.updateWorkerById(req.headers.authorization?.split(" ")[1] || "",input,update));
+})
+// assign worker in place
+authRouter.get("/place/:place_id/workers", async (req, res) => {
+	const input = parse(getPlaceSchema, req.params);
+	res.status(201).json(await place.assignedPlace(req.headers.authorization?.split(" ")[1] || "",input));
+})
+
+authRouter.post("/place/:place_id/workers", async (req, res) => {
+	const input = parse(getPlaceSchema, req.params);
+	const worker = parse(getWorkerSchema,req.body)
+	res.status(201).json(await place.assignWorker(req.headers.authorization?.split(" ")[1] || "",input,worker));
+})
+
+authRouter.delete("/place/:place_id/workers/:worker_id", async (req, res) => {
+	const input = parse(getPlaceSchema, req.params);
+	res.status(201).json(await place.unassign(req.headers.authorization?.split(" ")[1] || "",input));
 })
