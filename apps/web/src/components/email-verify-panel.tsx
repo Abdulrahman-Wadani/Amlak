@@ -5,12 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-/**
- * The email-confirmation step of sign-up, split out from /signup so the
- * route stays a single concern. Purely presentational: the route owns
- * state and the API calls; every string is a Lingui message so the whole
- * panel flips with the UI language.
- */
 export function EmailVerifyPanel({
   email,
   code,
@@ -37,8 +31,6 @@ export function EmailVerifyPanel({
       <h1 className="text-[28px] font-bold leading-9">
         <Trans>Open your email</Trans>
       </h1>
-      {/* Rich text: the styled {email} span lives INSIDE the message,
-          so the translator positions it for their language. */}
       <p className="mt-1 text-[15px] leading-6 text-muted-foreground">
         <Trans>
           We sent a 6-digit code to{" "}

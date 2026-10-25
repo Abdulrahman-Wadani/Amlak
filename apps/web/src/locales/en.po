@@ -7,19 +7,53 @@ msgstr ""
 "X-Generator: @lingui/cli\n"
 "Language: en\n"
 
+#. Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ
 #: src/components/auth-brand-panel.tsx:8
 msgid "A"
 msgstr "A"
 
-#: src/routes/signup.tsx:247
+#: src/components/app-shell.tsx:138
+msgid "Account"
+msgstr "Account"
+
+#: src/routes/signup.tsx:245
 msgid "Account language"
 msgstr "Account language"
 
-#: src/routes/signup.tsx:148
+#: src/components/place-shared.tsx:11
+#: src/routes/_authenticated/place/$place_id.tsx:156
+#: src/routes/_authenticated/places.tsx:30
+msgid "Active"
+msgstr "Active"
+
+#: src/routes/_authenticated/home.tsx:239
+msgid "Add property"
+msgstr "Add property"
+
+#: src/routes/_authenticated/home.tsx:230
+msgid "Add your first property to see it here."
+msgstr "Add your first property to see it here."
+
+#: src/routes/_authenticated/place/$place_id.tsx:117
+msgid "Address"
+msgstr "Address"
+
+#: src/routes/signup.tsx:146
 msgid "Ahmed Hamad"
 msgstr "Ahmed Hamad"
 
-#: src/components/auth-brand-panel.tsx:20
+#: src/routes/_authenticated/finance.tsx:52
+#: src/routes/_authenticated/places.tsx:29
+msgid "All"
+msgstr "All"
+
+#: src/routes/_authenticated/finance.tsx:125
+#: src/routes/_authenticated/finance.tsx:128
+#: src/routes/_authenticated/finance.tsx:137
+msgid "All places"
+msgstr "All places"
+
+#: src/components/auth-brand-panel.tsx:18
 msgid "All your places, their\n"
 "maintenance and bookings,\n"
 "in one place."
@@ -27,39 +61,79 @@ msgstr "All your places, their\n"
 "maintenance and bookings,\n"
 "in one place."
 
-#: src/routes/signup.tsx:300
+#: src/routes/signup.tsx:294
 msgid "Already have an account? <0>Sign in</0>"
 msgstr "Already have an account? <0>Sign in</0>"
 
+#. Brand wordmark, Latin letters only in English
 #: src/components/auth-brand-panel.tsx:13
 msgid "Amlak"
 msgstr "Amlak"
 
-#: src/routes/signup.tsx:222
+#: src/components/place-shared.tsx:32
+#: src/routes/_authenticated/place/$place_id.tsx:177
+msgid "Apartment"
+msgstr "Apartment"
+
+#: src/routes/signup.tsx:220
 msgid "At least 8 characters"
 msgstr "At least 8 characters"
 
-#: src/components/email-verify-panel.tsx:112
+#: src/routes/_authenticated/finance.tsx:54
+msgid "Bills"
+msgstr "Bills"
+
+#: src/routes/_authenticated/home.tsx:161
+msgid "Booking data appears here once the bookings service is wired up."
+msgstr "Booking data appears here once the bookings service is wired up."
+
+#: src/components/app-shell.tsx:30
+#: src/routes/_authenticated/home.tsx:132
+msgid "Bookings"
+msgstr "Bookings"
+
+#: src/routes/_authenticated/home.tsx:158
+msgid "Bookings today"
+msgstr "Bookings today"
+
+#: src/components/place-shared.tsx:40
+#: src/routes/_authenticated/place/$place_id.tsx:185
+msgid "Chalet"
+msgstr "Chalet"
+
+#: src/components/email-verify-panel.tsx:104
 msgid "Change email"
 msgstr "Change email"
 
-#: src/components/email-verify-panel.tsx:85
+#: src/routes/_authenticated/place/$place_id.tsx:115
+msgid "City"
+msgstr "City"
+
+#: src/routes/_authenticated/finance.tsx:56
+msgid "Cleaning"
+msgstr "Cleaning"
+
+#: src/routes/_authenticated/places.tsx:155
+msgid "Clear filters"
+msgstr "Clear filters"
+
+#: src/components/email-verify-panel.tsx:77
 msgid "Confirm email"
 msgstr "Confirm email"
 
-#: src/components/email-verify-panel.tsx:85
+#: src/components/email-verify-panel.tsx:77
 msgid "Confirming…"
 msgstr "Confirming…"
 
-#: src/routes/signup.tsx:98
+#: src/routes/signup.tsx:96
 msgid "Could not confirm the email"
 msgstr "Could not confirm the email"
 
-#: src/routes/signup.tsx:81
+#: src/routes/signup.tsx:79
 msgid "Could not create the account"
 msgstr "Could not create the account"
 
-#: src/routes/signup.tsx:110
+#: src/routes/signup.tsx:108
 msgid "Could not resend the code"
 msgstr "Could not resend the code"
 
@@ -67,19 +141,24 @@ msgstr "Could not resend the code"
 msgid "Could not sign in"
 msgstr "Could not sign in"
 
-#: src/routes/signup.tsx:293
+#: src/routes/signup.tsx:287
 msgid "Create account"
 msgstr "Create account"
 
-#: src/routes/signup.tsx:135
+#: src/routes/signup.tsx:133
 msgid "Create manager account"
 msgstr "Create manager account"
 
-#: src/routes/signup.tsx:293
+#: src/routes/signup.tsx:287
 msgid "Creating account…"
 msgstr "Creating account…"
 
-#: src/components/email-verify-panel.tsx:89
+#: src/routes/_authenticated/home.tsx:368
+#: src/routes/_authenticated/place/$place_id.tsx:86
+msgid "Details"
+msgstr "Details"
+
+#: src/components/email-verify-panel.tsx:81
 msgid "Didn't get the code?"
 msgstr "Didn't get the code?"
 
@@ -88,20 +167,20 @@ msgid "Don't have an account? <0>Create manager account</0>"
 msgstr "Don't have an account? <0>Create manager account</0>"
 
 #: src/routes/signin.tsx:75
-#: src/routes/signup.tsx:164
+#: src/routes/signup.tsx:162
 msgid "Email"
 msgstr "Email"
 
 #: src/routes/signin.tsx:37
-#: src/routes/signup.tsx:29
+#: src/routes/signup.tsx:27
 msgid "Enter a valid email"
 msgstr "Enter a valid email"
 
-#: src/routes/signup.tsx:31
+#: src/routes/signup.tsx:29
 msgid "Enter a valid phone number"
 msgstr "Enter a valid phone number"
 
-#: src/routes/signup.tsx:138
+#: src/routes/signup.tsx:136
 msgid "Enter your details to create your account."
 msgstr "Enter your details to create your account."
 
@@ -109,12 +188,27 @@ msgstr "Enter your details to create your account."
 msgid "Enter your email and password to continue."
 msgstr "Enter your email and password to continue."
 
-#: src/routes/signup.tsx:27
+#: src/routes/signup.tsx:25
 msgid "Enter your full name"
 msgstr "Enter your full name"
 
+#: src/routes/_authenticated/finance.tsx:198
+msgid "Expense data appears here once the expenses service is wired up."
+msgstr "Expense data appears here once the expenses service is wired up."
 
-#: src/components/auth-brand-panel.tsx:23
+#: src/routes/_authenticated/finance.tsx:117
+msgid "Expenses"
+msgstr "Expenses"
+
+#: src/routes/_authenticated/place/$place_id.tsx:103
+msgid "Field"
+msgstr "Field"
+
+#: src/components/app-shell.tsx:35
+msgid "Finance"
+msgstr "Finance"
+
+#: src/components/auth-brand-panel.tsx:21
 msgid "For managers and workers. On mobile and desktop."
 msgstr "For managers and workers. On mobile and desktop."
 
@@ -122,77 +216,260 @@ msgstr "For managers and workers. On mobile and desktop."
 msgid "Forgot password?"
 msgstr "Forgot password?"
 
-#: src/routes/signup.tsx:144
+#: src/routes/signup.tsx:142
 msgid "Full name"
 msgstr "Full name"
+
+#: src/routes/_authenticated/home.tsx:42
+msgid "Good afternoon"
+msgstr "Good afternoon"
+
+#: src/routes/_authenticated/home.tsx:43
+msgid "Good evening"
+msgstr "Good evening"
+
+#: src/routes/_authenticated/home.tsx:41
+msgid "Good morning"
+msgstr "Good morning"
+
+#: src/routes/_authenticated/home.tsx:368
+msgid "Hide details"
+msgstr "Hide details"
 
 #: src/routes/signin.tsx:117
 msgid "Hide password"
 msgstr "Hide password"
 
-#: src/routes/signup.tsx:230
+#: src/components/app-shell.tsx:15
+msgid "Home"
+msgstr "Home"
+
+#: src/components/place-shared.tsx:24
+#: src/routes/_authenticated/place/$place_id.tsx:169
+#: src/routes/_authenticated/places.tsx:32
+msgid "Inactive"
+msgstr "Inactive"
+
+#: src/components/app-shell.tsx:59
+msgid "Main menu"
+msgstr "Main menu"
+
+#: src/components/app-shell.tsx:25
+#: src/routes/_authenticated/finance.tsx:53
+msgid "Maintenance"
+msgstr "Maintenance"
+
+#: src/routes/_authenticated/place/$place_id.tsx:121
+msgid "Monthly budget"
+msgstr "Monthly budget"
+
+#: src/routes/_authenticated/finance.tsx:152
+#: src/routes/_authenticated/home.tsx:170
+msgid "Monthly maintenance budget"
+msgstr "Monthly maintenance budget"
+
+#: src/routes/_authenticated/finance.tsx:195
+msgid "No expenses recorded for {monthLabel} yet"
+msgstr "No expenses recorded for {monthLabel} yet"
+
+#: src/routes/_authenticated/home.tsx:227
+#: src/routes/_authenticated/places.tsx:140
+msgid "No properties yet"
+msgstr "No properties yet"
+
+#: src/routes/_authenticated/place/$place_id.tsx:118
+msgid "Not set"
+msgstr "Not set"
+
+#: src/routes/_authenticated/places.tsx:143
+msgid "Nothing matches this search. Clear it to see all properties."
+msgstr "Nothing matches this search. Clear it to see all properties."
+
+#: src/routes/signup.tsx:228
 msgid "One lowercase letter (a-z)"
 msgstr "One lowercase letter (a-z)"
 
-#: src/routes/signup.tsx:234
+#: src/routes/signup.tsx:232
 msgid "One symbol (like ! or @)"
 msgstr "One symbol (like ! or @)"
 
-#: src/routes/signup.tsx:226
+#: src/routes/signup.tsx:224
 msgid "One uppercase letter (A-Z)"
 msgstr "One uppercase letter (A-Z)"
 
-#: src/components/email-verify-panel.tsx:38
+#: src/components/email-verify-panel.tsx:32
 msgid "Open your email"
 msgstr "Open your email"
 
+#: src/routes/_authenticated/finance.tsx:58
+msgid "Other"
+msgstr "Other"
+
 #: src/routes/signin.tsx:98
-#: src/routes/signup.tsx:208
+#: src/routes/signup.tsx:206
 msgid "Password"
 msgstr "Password"
 
 #: src/routes/signin.tsx:38
-#: src/routes/signup.tsx:33
+#: src/routes/signup.tsx:31
 msgid "Password does not meet the requirements"
 msgstr "Password does not meet the requirements"
 
-#: src/routes/signup.tsx:186
+#: src/routes/signup.tsx:184
 msgid "Phone number"
 msgstr "Phone number"
 
-#: src/components/email-verify-panel.tsx:103
+#: src/routes/_authenticated/finance.tsx:121
+msgid "Place"
+msgstr "Place"
+
+#: src/routes/_authenticated/place/$place_id.tsx:60
+msgid "Place not found"
+msgstr "Place not found"
+
+#: src/components/app-shell.tsx:20
+#: src/routes/_authenticated/places.tsx:78
+msgid "Places"
+msgstr "Places"
+
+#: src/routes/_authenticated/place/$place_id.tsx:112
+msgid "Property type"
+msgstr "Property type"
+
+#: src/components/email-verify-panel.tsx:95
 msgid "Resend code"
 msgstr "Resend code"
+
+#: src/components/place-shared.tsx:36
+#: src/routes/_authenticated/place/$place_id.tsx:181
+msgid "Rest house"
+msgstr "Rest house"
+
+#: src/routes/_authenticated/home.tsx:120
+msgid "Review tickets"
+msgstr "Review tickets"
+
+#: src/components/place-shared.tsx:38
+#: src/routes/_authenticated/place/$place_id.tsx:183
+msgid "Room"
+msgstr "Room"
+
+#: src/routes/_authenticated/places.tsx:84
+msgid "Search"
+msgstr "Search"
+
+#: src/routes/_authenticated/places.tsx:98
+msgid "Search by place name or city"
+msgstr "Search by place name or city"
+
+#: src/routes/_authenticated/home.tsx:206
+msgid "See all"
+msgstr "See all"
 
 #: src/routes/signin.tsx:117
 msgid "Show password"
 msgstr "Show password"
 
+#. Page title
 #: src/routes/signin.tsx:66
 #: src/routes/signin.tsx:145
 msgid "Sign in"
 msgstr "Sign in"
 
+#: src/components/app-shell.tsx:156
+msgid "Sign out"
+msgstr "Sign out"
+
 #: src/routes/signin.tsx:145
 msgid "Signing in…"
 msgstr "Signing in…"
 
-#: src/components/email-verify-panel.tsx:69
+#: src/routes/_authenticated/place/$place_id.tsx:129
+msgid "Status"
+msgstr "Status"
+
+#: src/routes/_authenticated/home.tsx:179
+msgid "Summed from your places' monthly budgets."
+msgstr "Summed from your places' monthly budgets."
+
+#: src/routes/_authenticated/finance.tsx:57
+msgid "Supplies"
+msgstr "Supplies"
+
+#: src/routes/_authenticated/finance.tsx:55
+msgid "Taxes"
+msgstr "Taxes"
+
+#: src/components/email-verify-panel.tsx:61
 msgid "The code is valid for 10 minutes."
 msgstr "The code is valid for 10 minutes."
 
-#: src/components/email-verify-panel.tsx:55
+#: src/routes/_authenticated/home.tsx:103
+msgid "Ticket and booking activity appears here once those services are wired up."
+msgstr "Ticket and booking activity appears here once those services are wired up."
+
+#: src/routes/_authenticated/home.tsx:149
+msgid "Ticket data appears here once the maintenance service is wired up."
+msgstr "Ticket data appears here once the maintenance service is wired up."
+
+#: src/routes/_authenticated/home.tsx:146
+msgid "Tickets waiting for your review"
+msgstr "Tickets waiting for your review"
+
+#: src/routes/_authenticated/place/$place_id.tsx:125
+msgid "Timezone"
+msgstr "Timezone"
+
+#: src/routes/_authenticated/home.tsx:97
+msgid "Today"
+msgstr "Today"
+
+#: src/components/place-shared.tsx:18
+#: src/routes/_authenticated/place/$place_id.tsx:163
+#: src/routes/_authenticated/places.tsx:31
+msgid "Under maintenance"
+msgstr "Under maintenance"
+
+#: src/routes/_authenticated/place/$place_id.tsx:106
+msgid "Value"
+msgstr "Value"
+
+#: src/components/email-verify-panel.tsx:47
 msgid "Verification code"
 msgstr "Verification code"
 
-#: src/components/email-verify-panel.tsx:43
+#: src/components/place-shared.tsx:34
+#: src/routes/_authenticated/place/$place_id.tsx:179
+msgid "Villa"
+msgstr "Villa"
+
+#: src/routes/_authenticated/place/$place_id.tsx:78
+msgid "We could not load this property."
+msgstr "We could not load this property."
+
+#: src/routes/_authenticated/finance.tsx:188
+#: src/routes/_authenticated/home.tsx:219
+#: src/routes/_authenticated/places.tsx:132
+msgid "We could not load your places."
+msgstr "We could not load your places."
+
+#: src/components/email-verify-panel.tsx:35
 msgid "We sent a 6-digit code to <0>{email}</0>."
 msgstr "We sent a 6-digit code to <0>{email}</0>."
+
+#: src/components/app-shell.tsx:40
+msgid "Workers"
+msgstr "Workers"
 
 #: src/routes/signin.tsx:157
 msgid "Workers sign in with the invite sent by their manager."
 msgstr "Workers sign in with the invite sent by their manager."
 
-#: src/components/email-verify-panel.tsx:92
+#: src/components/email-verify-panel.tsx:84
 msgid "You can request a new code in"
 msgstr "You can request a new code in"
+
+#: src/routes/_authenticated/home.tsx:197
+#: src/routes/_authenticated/place/$place_id.tsx:72
+msgid "Your places"
+msgstr "Your places"

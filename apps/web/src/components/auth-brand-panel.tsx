@@ -14,8 +14,6 @@ export function AuthBrandPanel() {
         </span>
       </div>
       <div className="mt-auto pb-8">
-        {/* whitespace-pre-line: the newlines are part of the message, so the
-            translator chooses where the headline breaks in their language. */}
         <h2 className="whitespace-pre-line text-[28px] font-bold leading-10">
           <Trans>{"All your places, their\nmaintenance and bookings,\nin one place."}</Trans>
         </h2>

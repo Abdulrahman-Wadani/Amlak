@@ -46,7 +46,7 @@ function SignIn() {
     setLoading(true)
     login(email, password)
       .then(() => {
-        navigate({ to: "/home" })
+        void navigate({ to: "/home" })
       })
       .catch((err: unknown) => {
         setFormError(err instanceof Error ? err.message : t`Could not sign in`)

@@ -13,7 +13,15 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as AuthenticatedBookingsRouteImport } from './routes/_authenticated/bookings'
+import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
+import { Route as AuthenticatedPlacesRouteImport } from './routes/_authenticated/places'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedTicketsRouteImport } from './routes/_authenticated/tickets'
+import { Route as AuthenticatedWorkersRouteImport } from './routes/_authenticated/workers'
+import { Route as AuthenticatedPlacePlace_idRouteImport } from './routes/_authenticated/place/$place_id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,23 +42,81 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedBookingsRoute = AuthenticatedBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedFinanceRoute = AuthenticatedFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   id: '/home',
   path: '/home',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedPlacesRoute = AuthenticatedPlacesRouteImport.update({
+  id: '/places',
+  path: '/places',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTicketsRoute = AuthenticatedTicketsRouteImport.update({
+  id: '/tickets',
+  path: '/tickets',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedWorkersRoute = AuthenticatedWorkersRouteImport.update({
+  id: '/workers',
+  path: '/workers',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPlacePlace_idRoute =
+  AuthenticatedPlacePlace_idRouteImport.update({
+    id: '/place/$place_id',
+    path: '/place/$place_id',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/bookings': typeof AuthenticatedBookingsRoute
+  '/finance': typeof AuthenticatedFinanceRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/places': typeof AuthenticatedPlacesRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/tickets': typeof AuthenticatedTicketsRoute
+  '/workers': typeof AuthenticatedWorkersRoute
+  '/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/bookings': typeof AuthenticatedBookingsRoute
+  '/finance': typeof AuthenticatedFinanceRoute
   '/home': typeof AuthenticatedHomeRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/places': typeof AuthenticatedPlacesRoute
+  '/profile': typeof AuthenticatedProfileRoute
+  '/tickets': typeof AuthenticatedTicketsRoute
+  '/workers': typeof AuthenticatedWorkersRoute
+  '/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -58,20 +124,60 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/_authenticated/bookings': typeof AuthenticatedBookingsRoute
+  '/_authenticated/finance': typeof AuthenticatedFinanceRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/places': typeof AuthenticatedPlacesRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/tickets': typeof AuthenticatedTicketsRoute
+  '/_authenticated/workers': typeof AuthenticatedWorkersRoute
+  '/_authenticated/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/signin' | '/signup' | '/home'
+  fullPaths:
+    | '/'
+    | '/signin'
+    | '/signup'
+    | '/bookings'
+    | '/finance'
+    | '/home'
+    | '/notifications'
+    | '/places'
+    | '/profile'
+    | '/tickets'
+    | '/workers'
+    | '/place/$place_id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/signin' | '/signup' | '/home'
+  to:
+    | '/'
+    | '/signin'
+    | '/signup'
+    | '/bookings'
+    | '/finance'
+    | '/home'
+    | '/notifications'
+    | '/places'
+    | '/profile'
+    | '/tickets'
+    | '/workers'
+    | '/place/$place_id'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/signin'
     | '/signup'
+    | '/_authenticated/bookings'
+    | '/_authenticated/finance'
     | '/_authenticated/home'
+    | '/_authenticated/notifications'
+    | '/_authenticated/places'
+    | '/_authenticated/profile'
+    | '/_authenticated/tickets'
+    | '/_authenticated/workers'
+    | '/_authenticated/place/$place_id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -111,6 +217,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/bookings': {
+      id: '/_authenticated/bookings'
+      path: '/bookings'
+      fullPath: '/bookings'
+      preLoaderRoute: typeof AuthenticatedBookingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/finance': {
+      id: '/_authenticated/finance'
+      path: '/finance'
+      fullPath: '/finance'
+      preLoaderRoute: typeof AuthenticatedFinanceRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/home': {
       id: '/_authenticated/home'
       path: '/home'
@@ -118,15 +238,73 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/places': {
+      id: '/_authenticated/places'
+      path: '/places'
+      fullPath: '/places'
+      preLoaderRoute: typeof AuthenticatedPlacesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/tickets': {
+      id: '/_authenticated/tickets'
+      path: '/tickets'
+      fullPath: '/tickets'
+      preLoaderRoute: typeof AuthenticatedTicketsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/workers': {
+      id: '/_authenticated/workers'
+      path: '/workers'
+      fullPath: '/workers'
+      preLoaderRoute: typeof AuthenticatedWorkersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/place/$place_id': {
+      id: '/_authenticated/place/$place_id'
+      path: '/place/$place_id'
+      fullPath: '/place/$place_id'
+      preLoaderRoute: typeof AuthenticatedPlacePlace_idRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedBookingsRoute: typeof AuthenticatedBookingsRoute
+  AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedPlacesRoute: typeof AuthenticatedPlacesRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedTicketsRoute: typeof AuthenticatedTicketsRoute
+  AuthenticatedWorkersRoute: typeof AuthenticatedWorkersRoute
+  AuthenticatedPlacePlace_idRoute: typeof AuthenticatedPlacePlace_idRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedBookingsRoute: AuthenticatedBookingsRoute,
+  AuthenticatedFinanceRoute: AuthenticatedFinanceRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedPlacesRoute: AuthenticatedPlacesRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedTicketsRoute: AuthenticatedTicketsRoute,
+  AuthenticatedWorkersRoute: AuthenticatedWorkersRoute,
+  AuthenticatedPlacePlace_idRoute: AuthenticatedPlacePlace_idRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
