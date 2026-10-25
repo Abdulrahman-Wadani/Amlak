@@ -113,6 +113,7 @@ msgstr "Enter your email and password to continue."
 msgid "Enter your full name"
 msgstr "Enter your full name"
 
+
 #: src/components/auth-brand-panel.tsx:23
 msgid "For managers and workers. On mobile and desktop."
 msgstr "For managers and workers. On mobile and desktop."

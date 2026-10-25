@@ -31,6 +31,8 @@ msgstr "كل عقاراتك وصيانتها\n"
 msgid "Already have an account? <0>Sign in</0>"
 msgstr "لديك حساب بالفعل؟ <0>دخول</0>"
 
+#. Brand wordmark, Latin letters only in English
+
 #: src/components/auth-brand-panel.tsx:13
 msgid "Amlak"
 msgstr "أملاك"
@@ -173,6 +175,7 @@ msgid "Sign in"
 msgstr "دخول"
 
 #: src/routes/signin.tsx:145
+
 msgid "Signing in…"
 msgstr "جارٍ الدخول…"
 
@@ -195,3 +198,15 @@ msgstr "العامل يدخل بالدعوة التي تصله من مديره."
 #: src/components/email-verify-panel.tsx:92
 msgid "You can request a new code in"
 msgstr "يمكنك طلب رمز جديد خلال"
+
+#: src/routes/signin.tsx:162
+msgid "Workers sign in with the invite sent by their manager."
+msgstr "العامل يدخل بالدعوة التي تصله من مديره."
+
+#: src/components/email-verify-panel.tsx:91
+msgid "You can request a new code in"
+msgstr "يمكنك طلب رمز جديد خلال"
+
+#: src/routes/signin.tsx:162
+msgid "Workers sign in with the invite sent by their manager."
+msgstr "العامل يدخل بالدعوة التي تصله من مديره."
