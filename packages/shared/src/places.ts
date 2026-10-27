@@ -42,3 +42,11 @@ export const getPlaceSchema = z.object({
 });
 
 export type GetPlaceInput = z.infer<typeof getPlaceSchema>;
+
+
+export const removeWorkerSchema = z.object({
+  place_id: z.string().uuid(),
+  worker_id: z.string().uuid(),
+});
+
+export type RemoveWorkerInput = z.infer<typeof removeWorkerSchema>;

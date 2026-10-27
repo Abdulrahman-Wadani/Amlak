@@ -3,10 +3,12 @@ import { prisma } from "../db.ts";
 import { sendEmail } from "../email.ts";
 import { AppError } from "../errors.ts";
 import { toUser } from "../users/present.ts";
-import { hashCode, newVerificationCode } from "./codes.ts";
-import { hashPassword, verifyPassword } from "./passwords.ts";
-import { endSession, type Session, startSession } from "./sessions.ts";
-import * as tokens from "./tokens.ts";
+import { hashCode, newVerificationCode } from "../auth/codes.ts";
+import { hashPassword, verifyPassword } from "../auth/passwords.ts";
+import { endSession, type Session, startSession } from "../auth/sessions.ts";
+import * as tokens from "../auth/tokens.ts";
+import { auditLog } from "../../scripts/audit_log.ts";
+
 
 async function userIdFromToken(token: string): Promise<string> {
   const payload = await tokens.verifyAccessToken(token);
@@ -36,6 +38,12 @@ export async function createWorker(input: UpdateWorkerInput,jwt_token: string): 
       manager_id: ownerId,
       id: crypto.randomUUID()
     }
+  });
+
+  await auditLog({user_id: ownerId,
+    action: "CREATE",
+    entity_type: "WORKER",
+    entity_id: worker.id,
   });
   return {
     ...worker,
@@ -68,7 +76,12 @@ export async function getWorkerById(jwt_token:string, input: getWorkerSchema): P
       }
     }
   });
-    return {
+  await auditLog({user_id: ownerId,
+    action: "GET",
+    entity_type: "WORKER",
+    entity_id: worker.id,
+  });
+  return {
     ...worker,
     assigned_places: assaign_places.map((assignment) => assignment.place),
   } as WorkerResponse;
@@ -103,7 +116,11 @@ export async function deleteWorkerById(jwt_token:string,wkId: getWorkerSchema){
     }
   })
   
-  
+  await auditLog({user_id: ownerId,
+    action: "DELETE",
+    entity_type: "WORKER",
+    entity_id: wkId.worker_id,
+  });
   return {"message":"Worker deleted successfully"};
   }
   catch(error){
@@ -136,6 +153,12 @@ export async function updateWorkerById(jwt_token:string,wkId:getWorkerSchema,inp
       password_hash:true
     }
   })
+await auditLog({user_id: ownerId,
+    action: "UPDATE",
+    entity_type: "WORKER",
+    entity_id: workerId,
+  });
+
   return update as WorkerResponse;
 
 }
