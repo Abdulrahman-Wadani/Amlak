@@ -12,6 +12,10 @@ msgstr ""
 msgid "A"
 msgstr "A"
 
+#: src/routes/_authenticated/place/new.tsx:206
+msgid "A three-bedroom chalet with a private pool."
+msgstr "A three-bedroom chalet with a private pool."
+
 #: src/components/app-shell.tsx:138
 msgid "Account"
 msgstr "Account"
@@ -20,11 +24,15 @@ msgstr "Account"
 msgid "Account language"
 msgstr "Account language"
 
-#: src/components/place-shared.tsx:11
-#: src/routes/_authenticated/place/$place_id.tsx:156
+#: src/components/place-shared.tsx:42
 #: src/routes/_authenticated/places.tsx:30
 msgid "Active"
 msgstr "Active"
+
+#: src/routes/_authenticated/place/new.tsx:142
+#: src/routes/_authenticated/places.tsx:102
+msgid "Add place"
+msgstr "Add place"
 
 #: src/routes/_authenticated/home.tsx:239
 msgid "Add property"
@@ -35,6 +43,7 @@ msgid "Add your first property to see it here."
 msgstr "Add your first property to see it here."
 
 #: src/routes/_authenticated/place/$place_id.tsx:117
+#: src/routes/_authenticated/place/new.tsx:231
 msgid "Address"
 msgstr "Address"
 
@@ -70,14 +79,30 @@ msgstr "Already have an account? <0>Sign in</0>"
 msgid "Amlak"
 msgstr "Amlak"
 
-#: src/components/place-shared.tsx:32
-#: src/routes/_authenticated/place/$place_id.tsx:177
+#: src/components/place-shared.tsx:68
 msgid "Apartment"
 msgstr "Apartment"
+
+#: src/routes/_authenticated/places.tsx:198
+msgid "Asset, ticket and worker counts appear once those services are wired up."
+msgstr "Asset, ticket and worker counts appear once those services are wired up."
+
+#: src/routes/_authenticated/place/new.tsx:57
+#: src/routes/_authenticated/places.tsx:38
+msgid "Assets"
+msgstr "Assets"
 
 #: src/routes/signup.tsx:220
 msgid "At least 8 characters"
 msgstr "At least 8 characters"
+
+#: src/routes/_authenticated/place/new.tsx:33
+#~ msgid "Back to places"
+#~ msgstr "Back to places"
+
+#: src/routes/_authenticated/place/new.tsx:421
+msgid "Before saving"
+msgstr "Before saving"
 
 #: src/routes/_authenticated/finance.tsx:54
 msgid "Bills"
@@ -96,8 +121,11 @@ msgstr "Bookings"
 msgid "Bookings today"
 msgstr "Bookings today"
 
-#: src/components/place-shared.tsx:40
-#: src/routes/_authenticated/place/$place_id.tsx:185
+#: src/routes/_authenticated/place/new.tsx:354
+msgid "Cancel"
+msgstr "Cancel"
+
+#: src/components/place-shared.tsx:76
 msgid "Chalet"
 msgstr "Chalet"
 
@@ -105,7 +133,12 @@ msgstr "Chalet"
 msgid "Change email"
 msgstr "Change email"
 
+#: src/routes/_authenticated/place/new.tsx:41
+msgid "Choose a place type"
+msgstr "Choose a place type"
+
 #: src/routes/_authenticated/place/$place_id.tsx:115
+#: src/routes/_authenticated/place/new.tsx:213
 msgid "City"
 msgstr "City"
 
@@ -113,7 +146,7 @@ msgstr "City"
 msgid "Cleaning"
 msgstr "Cleaning"
 
-#: src/routes/_authenticated/places.tsx:155
+#: src/routes/_authenticated/places.tsx:190
 msgid "Clear filters"
 msgstr "Clear filters"
 
@@ -133,9 +166,19 @@ msgstr "Could not confirm the email"
 msgid "Could not create the account"
 msgstr "Could not create the account"
 
+#: src/routes/_authenticated/place/new.tsx:82
+#: src/routes/_authenticated/place/new.tsx:87
+msgid "Could not get your location."
+msgstr "Could not get your location."
+
 #: src/routes/signup.tsx:108
 msgid "Could not resend the code"
 msgstr "Could not resend the code"
+
+#: src/routes/_authenticated/place/new.tsx:113
+#: src/routes/_authenticated/place/new.tsx:126
+msgid "Could not save the place."
+msgstr "Could not save the place."
 
 #: src/routes/signin.tsx:52
 msgid "Could not sign in"
@@ -152,6 +195,18 @@ msgstr "Create manager account"
 #: src/routes/signup.tsx:287
 msgid "Creating account…"
 msgstr "Creating account…"
+
+#: src/routes/_authenticated/place/new.tsx:300
+msgid "Currency"
+msgstr "Currency"
+
+#: src/routes/_authenticated/place/new.tsx:429
+msgid "Currency and time zone are set when the place is created and do not change after."
+msgstr "Currency and time zone are set when the place is created and do not change after."
+
+#: src/routes/_authenticated/place/new.tsx:200
+msgid "Description"
+msgstr "Description"
 
 #: src/routes/_authenticated/home.tsx:368
 #: src/routes/_authenticated/place/$place_id.tsx:86
@@ -171,6 +226,14 @@ msgstr "Don't have an account? <0>Create manager account</0>"
 msgid "Email"
 msgstr "Email"
 
+#: src/routes/_authenticated/place/new.tsx:43
+msgid "Enter a city"
+msgstr "Enter a city"
+
+#: src/routes/_authenticated/place/new.tsx:39
+msgid "Enter a place name"
+msgstr "Enter a place name"
+
 #: src/routes/signin.tsx:37
 #: src/routes/signup.tsx:27
 msgid "Enter a valid email"
@@ -179,6 +242,10 @@ msgstr "Enter a valid email"
 #: src/routes/signup.tsx:29
 msgid "Enter a valid phone number"
 msgstr "Enter a valid phone number"
+
+#: src/routes/_authenticated/place/new.tsx:45
+msgid "Enter an amount"
+msgstr "Enter an amount"
 
 #: src/routes/signup.tsx:136
 msgid "Enter your details to create your account."
@@ -203,6 +270,10 @@ msgstr "Expenses"
 #: src/routes/_authenticated/place/$place_id.tsx:103
 msgid "Field"
 msgstr "Field"
+
+#: src/routes/_authenticated/places.tsx:139
+msgid "Filter by status"
+msgstr "Filter by status"
 
 #: src/components/app-shell.tsx:35
 msgid "Finance"
@@ -244,11 +315,18 @@ msgstr "Hide password"
 msgid "Home"
 msgstr "Home"
 
-#: src/components/place-shared.tsx:24
-#: src/routes/_authenticated/place/$place_id.tsx:169
+#: src/routes/_authenticated/place/new.tsx:373
+msgid "How it will look in your list"
+msgstr "How it will look in your list"
+
+#: src/components/place-shared.tsx:60
 #: src/routes/_authenticated/places.tsx:32
 msgid "Inactive"
 msgstr "Inactive"
+
+#: src/routes/_authenticated/place/new.tsx:243
+msgid "Location on the map"
+msgstr "Location on the map"
 
 #: src/components/app-shell.tsx:59
 msgid "Main menu"
@@ -259,12 +337,17 @@ msgstr "Main menu"
 msgid "Maintenance"
 msgstr "Maintenance"
 
+#: src/routes/_authenticated/place/new.tsx:256
+msgid "Map to pick the location"
+msgstr "Map to pick the location"
+
 #: src/routes/_authenticated/place/$place_id.tsx:121
 msgid "Monthly budget"
 msgstr "Monthly budget"
 
 #: src/routes/_authenticated/finance.tsx:152
 #: src/routes/_authenticated/home.tsx:170
+#: src/routes/_authenticated/place/new.tsx:321
 msgid "Monthly maintenance budget"
 msgstr "Monthly maintenance budget"
 
@@ -273,7 +356,7 @@ msgid "No expenses recorded for {monthLabel} yet"
 msgstr "No expenses recorded for {monthLabel} yet"
 
 #: src/routes/_authenticated/home.tsx:227
-#: src/routes/_authenticated/places.tsx:140
+#: src/routes/_authenticated/places.tsx:175
 msgid "No properties yet"
 msgstr "No properties yet"
 
@@ -281,7 +364,7 @@ msgstr "No properties yet"
 msgid "Not set"
 msgstr "Not set"
 
-#: src/routes/_authenticated/places.tsx:143
+#: src/routes/_authenticated/places.tsx:178
 msgid "Nothing matches this search. Clear it to see all properties."
 msgstr "Nothing matches this search. Clear it to see all properties."
 
@@ -297,9 +380,18 @@ msgstr "One symbol (like ! or @)"
 msgid "One uppercase letter (A-Z)"
 msgstr "One uppercase letter (A-Z)"
 
+#: src/routes/_authenticated/place/new.tsx:58
+#: src/routes/_authenticated/places.tsx:39
+msgid "Open tickets"
+msgstr "Open tickets"
+
 #: src/components/email-verify-panel.tsx:32
 msgid "Open your email"
 msgstr "Open your email"
+
+#: src/routes/_authenticated/place/new.tsx:337
+msgid "Optional. In Saudi riyals."
+msgstr "Optional. In Saudi riyals."
 
 #: src/routes/_authenticated/finance.tsx:58
 msgid "Other"
@@ -323,12 +415,20 @@ msgstr "Phone number"
 msgid "Place"
 msgstr "Place"
 
+#: src/routes/_authenticated/place/new.tsx:155
+msgid "Place name"
+msgstr "Place name"
+
 #: src/routes/_authenticated/place/$place_id.tsx:60
 msgid "Place not found"
 msgstr "Place not found"
 
+#: src/routes/_authenticated/place/new.tsx:173
+msgid "Place type"
+msgstr "Place type"
+
 #: src/components/app-shell.tsx:20
-#: src/routes/_authenticated/places.tsx:78
+#: src/routes/_authenticated/places.tsx:89
 msgid "Places"
 msgstr "Places"
 
@@ -336,12 +436,15 @@ msgstr "Places"
 msgid "Property type"
 msgstr "Property type"
 
+#: src/routes/_authenticated/place/new.tsx:267
+msgid "Remove location"
+msgstr "Remove location"
+
 #: src/components/email-verify-panel.tsx:95
 msgid "Resend code"
 msgstr "Resend code"
 
-#: src/components/place-shared.tsx:36
-#: src/routes/_authenticated/place/$place_id.tsx:181
+#: src/components/place-shared.tsx:72
 msgid "Rest house"
 msgstr "Rest house"
 
@@ -349,22 +452,34 @@ msgstr "Rest house"
 msgid "Review tickets"
 msgstr "Review tickets"
 
-#: src/components/place-shared.tsx:38
-#: src/routes/_authenticated/place/$place_id.tsx:183
+#: src/components/place-shared.tsx:74
 msgid "Room"
 msgstr "Room"
 
-#: src/routes/_authenticated/places.tsx:84
+#: src/routes/_authenticated/place/new.tsx:302
+msgid "Saudi riyal (SAR)"
+msgstr "Saudi riyal (SAR)"
+
+#: src/routes/_authenticated/place/new.tsx:357
+msgid "Save place"
+msgstr "Save place"
+
+#: src/routes/_authenticated/places.tsx:118
 msgid "Search"
 msgstr "Search"
 
-#: src/routes/_authenticated/places.tsx:98
+#: src/routes/_authenticated/places.tsx:131
 msgid "Search by place name or city"
 msgstr "Search by place name or city"
 
 #: src/routes/_authenticated/home.tsx:206
 msgid "See all"
 msgstr "See all"
+
+#: src/routes/_authenticated/place/new.tsx:304
+#: src/routes/_authenticated/place/new.tsx:314
+msgid "Set when the place is created and cannot change."
+msgstr "Set when the place is created and cannot change."
 
 #: src/routes/signin.tsx:117
 msgid "Show password"
@@ -400,9 +515,21 @@ msgstr "Supplies"
 msgid "Taxes"
 msgstr "Taxes"
 
+#: src/routes/_authenticated/place/new.tsx:124
+msgid "That place name is already taken."
+msgstr "That place name is already taken."
+
 #: src/components/email-verify-panel.tsx:61
 msgid "The code is valid for 10 minutes."
 msgstr "The code is valid for 10 minutes."
+
+#: src/routes/_authenticated/place/new.tsx:23
+#~ msgid "The form for creating a place is not built yet."
+#~ msgstr "The form for creating a place is not built yet."
+
+#: src/routes/_authenticated/place/new.tsx:438
+msgid "The monthly budget is visible to you only; workers never see it."
+msgstr "The monthly budget is visible to you only; workers never see it."
 
 #: src/routes/_authenticated/home.tsx:103
 msgid "Ticket and booking activity appears here once those services are wired up."
@@ -416,6 +543,10 @@ msgstr "Ticket data appears here once the maintenance service is wired up."
 msgid "Tickets waiting for your review"
 msgstr "Tickets waiting for your review"
 
+#: src/routes/_authenticated/place/new.tsx:310
+msgid "Time zone"
+msgstr "Time zone"
+
 #: src/routes/_authenticated/place/$place_id.tsx:125
 msgid "Timezone"
 msgstr "Timezone"
@@ -424,11 +555,14 @@ msgstr "Timezone"
 msgid "Today"
 msgstr "Today"
 
-#: src/components/place-shared.tsx:18
-#: src/routes/_authenticated/place/$place_id.tsx:163
+#: src/components/place-shared.tsx:54
 #: src/routes/_authenticated/places.tsx:31
 msgid "Under maintenance"
 msgstr "Under maintenance"
+
+#: src/routes/_authenticated/place/new.tsx:279
+msgid "Use my current location"
+msgstr "Use my current location"
 
 #: src/routes/_authenticated/place/$place_id.tsx:106
 msgid "Value"
@@ -438,10 +572,13 @@ msgstr "Value"
 msgid "Verification code"
 msgstr "Verification code"
 
-#: src/components/place-shared.tsx:34
-#: src/routes/_authenticated/place/$place_id.tsx:179
+#: src/components/place-shared.tsx:70
 msgid "Villa"
 msgstr "Villa"
+
+#: src/routes/_authenticated/place/new.tsx:290
+msgid "We ask for location only when you tap the button, and we never track workers."
+msgstr "We ask for location only when you tap the button, and we never track workers."
 
 #: src/routes/_authenticated/place/$place_id.tsx:78
 msgid "We could not load this property."
@@ -449,7 +586,7 @@ msgstr "We could not load this property."
 
 #: src/routes/_authenticated/finance.tsx:188
 #: src/routes/_authenticated/home.tsx:219
-#: src/routes/_authenticated/places.tsx:132
+#: src/routes/_authenticated/places.tsx:167
 msgid "We could not load your places."
 msgstr "We could not load your places."
 
@@ -458,12 +595,18 @@ msgid "We sent a 6-digit code to <0>{email}</0>."
 msgstr "We sent a 6-digit code to <0>{email}</0>."
 
 #: src/components/app-shell.tsx:40
+#: src/routes/_authenticated/place/new.tsx:59
+#: src/routes/_authenticated/places.tsx:40
 msgid "Workers"
 msgstr "Workers"
 
 #: src/routes/signin.tsx:157
 msgid "Workers sign in with the invite sent by their manager."
 msgstr "Workers sign in with the invite sent by their manager."
+
+#: src/routes/_authenticated/place/new.tsx:435
+msgid "You add assets and assign workers from the place page once it is saved."
+msgstr "You add assets and assign workers from the place page once it is saved."
 
 #: src/components/email-verify-panel.tsx:84
 msgid "You can request a new code in"

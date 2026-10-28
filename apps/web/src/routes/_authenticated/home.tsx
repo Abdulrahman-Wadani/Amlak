@@ -85,7 +85,7 @@ function HomePage() {
         aria-label="today"
         className="am-rise"
         style={S(
-          "background: var(--primary); color: #fff; padding: 32px; box-shadow: 4px 4px 0 var(--warn); display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: flex-end; justify-content: space-between; box-sizing: border-box"
+          "background: var(--foreground); color: #fff; padding: 32px; box-shadow: 4px 4px 0 var(--warn); display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: flex-end; justify-content: space-between; box-sizing: border-box"
         )}
       >
         <div
@@ -114,7 +114,7 @@ function HomePage() {
               "am-btn"
             )}
             style={S(
-              "height: 44px; padding: 0 16px; background: #fff; color: var(--primary); border: 1px solid #fff; font-size: 15px; font-weight: 600"
+              "height: 44px; padding: 0 16px; background: #fff; color: var(--foreground); border: 1px solid #fff; font-size: 15px; font-weight: 600"
             )}
           >
             <Trans>Review tickets</Trans>

@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link, createFileRoute } from "@tanstack/react-router"
-import { Search, MapPin } from "lucide-react"
+import { CircleAlert, MapPin, Plus, Search } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import type { Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { getPlaces } from "@/lib/api"
 import { S } from "@/lib/dom-style"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -18,8 +18,8 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { StatusBadge, TypeLabel } from "@/components/place-shared"
+import { cn } from "cn"
 import "@/styles/motion.css"
-
 
 export const Route = createFileRoute("/_authenticated/places")({
   component: PlacesPage,
@@ -33,6 +33,12 @@ const TABS = [
 ] as const
 
 type TabKey = (typeof TABS)[number]["key"]
+
+const STATS = [
+  { key: "assets", label: <Trans>Assets</Trans> },
+  { key: "openTickets", label: <Trans>Open tickets</Trans> },
+  { key: "workers", label: <Trans>Workers</Trans> },
+] as const
 
 function PlacesPage() {
   const { accessToken } = useAuth()
@@ -71,38 +77,68 @@ function PlacesPage() {
   return (
     <div
       style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 20px"
+        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px"
       )}
     >
-      <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-        <Trans>Places</Trans>
-      </h1>
+      <div
+        style={S(
+          "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px"
+        )}
+      >
+        <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
+          <Trans>Places</Trans>
+        </h1>
+        <Link
+          to="/place/new"
+          className={cn(buttonVariants(), "am-btn am-solid")}
+          style={S(
+            "height: 44px; min-width: 44px; padding: 0 16px; font-size: 15px; font-weight: 600; box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1)"
+          )}
+        >
+          <Plus
+            aria-hidden="true"
+            style={S("width: 18px; height: 18px; display: block; flex: none")}
+          />
+          <Trans>Add place</Trans>
+        </Link>
+      </div>
 
-      <div style={S("display: flex; flex-direction: column; gap: 14px")}>
-        <div style={S("max-width: 360px")}>
-          <Label htmlFor="q">
+      <div
+        style={S(
+          "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px"
+        )}
+      >
+        <div style={S("position: relative; flex: 1 1 320px; max-width: 320px")}>
+          <Label
+            htmlFor="q"
+            style={S(
+              "position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)"
+            )}
+          >
             <Trans>Search</Trans>
           </Label>
-          <div style={S("position: relative; margin-top: 4px")}>
-            <Search
-              aria-hidden="true"
-              style={S(
-                "position: absolute; inset-inline-start: 10px; top: 50%; translate: 0 -50%; width: 16px; height: 16px; color: var(--muted-foreground)"
-              )}
-            />
-            <Input
-              id="q"
-              type="search"
-              className="am-input"
-              style={S("padding-inline-start: 32px; height: 36px")}
-              placeholder={t`Search by place name or city`}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-          </div>
+          <Search
+            aria-hidden="true"
+            style={S(
+              "position: absolute; top: 12px; inset-inline-start: 14px; width: 20px; height: 20px; color: var(--muted-foreground); pointer-events: none"
+            )}
+          />
+          <Input
+            id="q"
+            type="search"
+            className="am-input"
+            style={S("padding-inline-start: 44px")}
+            placeholder={t`Search by place name or city`}
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+          />
         </div>
 
-        <div role="group" aria-label="Filter" style={S("display: flex; gap: 6px; flex-wrap: wrap")}>
+        <div
+          role="group"
+          aria-label={t`Filter by status`}
+          style={S("display: flex; gap: 8px; flex-wrap: wrap")}
+        >
           {TABS.map((t) => (
             <button
               key={t.key}
@@ -112,23 +148,22 @@ function PlacesPage() {
               onClick={() => setTab(t.key)}
             >
               {t.label}
-              <span style={S("color: var(--muted-foreground); font-size: 12px")}>
-                {countFor(t.key)}
-              </span>
+              <span className="am-tab-count">{countFor(t.key)}</span>
             </button>
           ))}
         </div>
       </div>
 
       {places === null && !error && (
-        <div style={S("display: flex; flex-direction: column; gap: 10px")}>
-          <Skeleton style={S("height: 96px")} />
-          <Skeleton style={S("height: 96px")} />
+        <div style={S("display: flex; flex-direction: column; gap: 12px")}>
+          <Skeleton style={S("height: 122px")} />
+          <Skeleton style={S("height: 122px")} />
         </div>
       )}
 
       {error && (
-        <p style={S("color: var(--muted-foreground)")}>
+        <p className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
+          <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
           <Trans>We could not load your places.</Trans>
         </p>
       )}
@@ -158,7 +193,16 @@ function PlacesPage() {
         </Empty>
       )}
 
-      <div style={S("display: flex; flex-direction: column; gap: 10px")}>
+      {visible.length > 0 && (
+        <p style={S("color: var(--muted-foreground); font-size: 13px")}>
+          <Trans>
+            Asset, ticket and worker counts appear once those services are
+            wired up.
+          </Trans>
+        </p>
+      )}
+
+      <div style={S("display: flex; flex-direction: column; gap: 12px")}>
         {visible.map((p) => (
           <Link
             key={p.id}
@@ -166,28 +210,58 @@ function PlacesPage() {
             params={{ place_id: p.id }}
             className="am-lift"
             style={S(
-              "display: block; text-decoration: none; color: inherit; border: 1px solid var(--border); padding: 16px 18px"
+              "display: flex; flex-direction: column; gap: 16px; text-decoration: none; color: inherit; background: #fff; border: 1px solid var(--border); padding: 20px; box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1)"
             )}
           >
             <div
               style={S(
-                "display: flex; justify-content: space-between; align-items: flex-start; gap: 12px"
+                "display: flex; align-items: flex-start; justify-content: space-between; gap: 12px"
               )}
             >
-              <div style={S("display: flex; flex-direction: column; gap: 6px")}>
-                <span style={S("font-size: 17px; font-weight: 700")}>
+              <div
+                style={S(
+                  "display: flex; flex-direction: column; gap: 4px; min-width: 0"
+                )}
+              >
+                <span style={S("font-size: 18px; font-weight: 700")}>
                   {p.place_name}
                 </span>
                 <span
                   style={S(
-                    "display: flex; align-items: center; gap: 6px; color: var(--muted-foreground); font-size: 13px"
+                    "display: flex; align-items: center; gap: 4px; color: var(--muted-foreground); font-size: 14px"
                   )}
                 >
-                  <MapPin aria-hidden="true" style={S("width: 14px; height: 14px")} />
+                  <MapPin
+                    aria-hidden="true"
+                    style={S("width: 16px; height: 16px; display: block; flex: none")}
+                  />
                   <TypeLabel type={p.place_type} />, {p.city}
                 </span>
               </div>
               <StatusBadge status={String(p.status)} />
+            </div>
+
+            <div
+              style={S(
+                "display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; border-top: 1px solid var(--border); padding-top: 14px"
+              )}
+            >
+              {STATS.map((s) => (
+                <div
+                  key={s.key}
+                  style={S("display: flex; flex-direction: column; line-height: 1.4")}
+                >
+                  <span style={S("font-size: 13px; color: var(--muted-foreground)")}>
+                    {s.label}
+                  </span>
+                  <span
+                    className="font-mono tabular-nums"
+                    style={S("font-weight: 600")}
+                  >
+                    {"\u2014"}
+                  </span>
+                </div>
+              ))}
             </div>
           </Link>
         ))}

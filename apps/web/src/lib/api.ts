@@ -1,4 +1,4 @@
-import type { Place } from "@amlak/shared"
+import type { CreatePlaceInput, Place } from "@amlak/shared"
 
 function normalizePlace(p: Place): Place {
   return {
@@ -29,4 +29,27 @@ export function getPlace(token: string, placeId: string): Promise<Place> {
     if (!data || typeof data.id !== "string") throw new Error("place not found")
     return normalizePlace(data)
   })
+}
+
+export class PlaceNameTakenError extends Error {}
+
+export async function createPlace(
+  token: string,
+  input: CreatePlaceInput,
+): Promise<Place> {
+  const res = await fetch("/api/v1/place", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    credentials: "same-origin",
+    body: JSON.stringify(input),
+  })
+  const data: unknown = await res.json().catch(() => null)
+  if (typeof data === "string") throw new PlaceNameTakenError(data)
+  if (!res.ok || !data || typeof data !== "object" || typeof (data as Place).id !== "string") {
+    throw new Error("place not created")
+  }
+  return normalizePlace(data as Place)
 }
