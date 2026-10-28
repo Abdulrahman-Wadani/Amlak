@@ -1,34 +1,28 @@
-import { createFileRoute, Outlet, redirect, useNavigate } from '@tanstack/react-router'
-import { Button } from "@/components/ui/button"
-import { useAuth } from '@/lib/auth'
+import {
+  createFileRoute,
+  redirect,
+  useNavigate,
+} from "@tanstack/react-router"
+import { useEffect } from "react"
+import { useAuth } from "@/lib/auth"
+import { AppShell } from "@/components/app-shell"
 
-export const Route = createFileRoute('/_authenticated')({
+export const Route = createFileRoute("/_authenticated")({
   beforeLoad: () => {
-    // mock for auth/me
-    if (!sessionStorage.getItem("mockUser")) {
+    if (!sessionStorage.getItem("authUser")) {
       throw redirect({ to: "/signin" })
     }
   },
-  component: AuthenticatedLayout,
+  component: ManagerLayout,
 })
 
-function AuthenticatedLayout() {
-  const { user, logout } = useAuth()
+function ManagerLayout() {
+  const { user } = useAuth()
   const navigate = useNavigate()
-  return (
-    <div className="min-h-screen">
-      <header className="flex items-center justify-between border-b-2 border-foreground px-6 py-3">
-        <span className='font-display text-lg font-extrabold'>Amlak</span>
-        <div className='flex items-center gap-4'>
-          <span className='font-mono text-sm'>{user?.fullname}</span>
-          <Button variant="outline" onClick={() => { logout(); navigate({ to: "/signin"}) }}>
-            Logout
-          </Button>
-        </div>
-      </header>
-    <main className='mx-auto max-w-5xl p-6'>
-      <Outlet />
-    </main>
-    </div >
-  )
+  useEffect(() => {
+    if (!user) void navigate({ to: "/signin" })
+  }, [user, navigate])
+  if (!user) return null
+  // For roles will be fixed later
+  return <AppShell role="manager" />
 }

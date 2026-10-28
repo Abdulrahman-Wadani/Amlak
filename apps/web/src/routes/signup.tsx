@@ -49,7 +49,6 @@ function SignUp() {
 
   useEffect(() => {
     if (step !== "verify") return
-    setCooldown(60)
     const timer = setInterval(() => {
       setCooldown((s) => (s > 0 ? s - 1 : 0))
     }, 1000)
@@ -74,6 +73,7 @@ function SignUp() {
     register(email, fullname, phone, password, lang)
       .then(() => {
         setStep("verify")
+        setCooldown(60)
       })
       .catch((err: unknown) => {
         setFormError(err instanceof Error ? err.message : t`Could not create the account`)
@@ -90,7 +90,7 @@ function SignUp() {
     verifyCode(email, code)
       .then(() => login(email, password))
       .then(() => {
-        navigate({ to: "/home" })
+        void navigate({ to: "/home" })
       })
       .catch((err: unknown) => {
         setFormError(err instanceof Error ? err.message : t`Could not confirm the email`)

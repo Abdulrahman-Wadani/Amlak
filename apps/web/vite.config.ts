@@ -118,6 +118,12 @@ export default defineConfig({
           browser: true,
         },
       },
+      {
+        files: ["*.config.ts"],
+        env: {
+          node: true,
+        },
+      },
     ],
     options: {
       typeAware: true,
