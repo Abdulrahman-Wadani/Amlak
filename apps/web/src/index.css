@@ -39,6 +39,7 @@
   --color-secondary: var(--secondary);
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
@@ -94,7 +95,8 @@
   --card-foreground: #1b2430; /* ink */
   --popover: #ffffff; /* surface */
   --popover-foreground: #1b2430; /* ink */
-  --primary: #1b2430; /* ink */
+  --primary: #4d7296; /* mineral.700 */
+  --primary-hover: #375674; /* mineral.900 */
   --primary-foreground: #ffffff; /* surface */
   --secondary: #edf1f6; /* surfaceAlt */
   --secondary-foreground: #1b2430; /* core.muted */
