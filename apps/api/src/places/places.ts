@@ -10,23 +10,30 @@ import * as tokens from "../auth/tokens.ts";
 import { auditLog } from "../../scripts/audit_log.ts";
 
 
-async function userIdFromToken(token: string): Promise<string> {
+async function userIdFromToken(token: string) {
   const payload = await tokens.verifyAccessToken(token);
-  return payload.user_id;
+  return {user_id:payload.user_id,role:payload.role};
+}
+async function worker(token:string){
+  const role = (await userIdFromToken(token)).role
+  if (role == "WORKER"){
+    throw new AppError("FORBIDDEN","YOU DON'T HAVE ACCESS");
+  }
 }
 
 export async function createPlace(
   input: CreatePlaceInput,
   token: string
 ): Promise<Place> {
+  worker(token);
   const existing = await prisma.place.findFirst({
     where: { place_name: input.place_name,owner_id: input.owner_id },
   });
 
   if (existing) {
-    return "This place name is already registered for this owner";
+    throw new AppError("FORBIDDEN","This place name is already registered for this owner");
   }
-  const ownerId = await userIdFromToken(token);
+  const ownerId = (await userIdFromToken(token)).user_id;
   const place = await prisma.place.create({
     data: {
       ...input,
@@ -51,12 +58,12 @@ export async function createPlace(
 
 
 export async function getPlacesById(input : GetPlaceInput,jwt_token: string): Promise<Place> {
-  const ownerId = await userIdFromToken(jwt_token);
+  const ownerId = (await userIdFromToken(jwt_token)).user_id;
   const place = await prisma.place.findFirst({
     where: { id: input.place_id, owner_id: ownerId },
   });
   if (!place) {
-    return {"message":"place not found"};
+    throw new AppError("NOT_FOUND","place not found");
   }
   await auditLog({user_id: ownerId,
     action: "GET",
@@ -67,7 +74,7 @@ export async function getPlacesById(input : GetPlaceInput,jwt_token: string): Pr
 }
 
 export async function getPlaces(jwt_token: string): Promise<Place>{
-    const ownerId = await userIdFromToken(jwt_token);
+    const ownerId = (await userIdFromToken(jwt_token)).user_id;
     const place = await prisma.place.findMany({
       where: { owner_id: ownerId },
     });
@@ -81,7 +88,8 @@ export async function getPlaces(jwt_token: string): Promise<Place>{
 }
 
 export async function deletePlace(input: GetPlaceInput, jwt_token: string): Promise<Place>{
-  const ownerId = await userIdFromToken(jwt_token);
+  const ownerId = (await userIdFromToken(jwt_token)).user_id;
+  worker(jwt_token);
   try{
     const place = await prisma.place.delete({
     where: {id: input.place_id, owner_id: ownerId}
@@ -94,16 +102,20 @@ export async function deletePlace(input: GetPlaceInput, jwt_token: string): Prom
   return "Place removed Successfully"
   }
   catch(error){
-    return "Place by this Id not exist"
+    throw new AppError("FORBIDDEN","YOU NOT ALLOWED OR ID NOT EXIST");
   }
 }
 
 export async function editPlace(input: CreatePlaceInput,jwt_token: string,place_id: GetPlaceInput): Promise<Place>{
-  const ownerId = await userIdFromToken(jwt_token);
+  const ownerId = (await userIdFromToken(jwt_token)).user_id;
+  worker(jwt_token);
   const place = await prisma.place.update({
     where: {id:place_id.place_id, owner_id:ownerId},
     data:input
   })
+  if (!place){
+    throw new AppError("FORBIDDEN","YOU DON'T ALLOWED");
+  }
   await auditLog({user_id: ownerId,
     action: "UPDATE",
     entity_type: "PLACE",
@@ -113,7 +125,7 @@ export async function editPlace(input: CreatePlaceInput,jwt_token: string,place_
 }
 
 export async function assignedPlace(jwt_token:string,place:GetPlaceInput){
-  const ownerId = await userIdFromToken(jwt_token);
+  const ownerId = (await userIdFromToken(jwt_token)).user_id;
   const placeId = place.place_id;
   const isManager = await prisma.place.findFirst({
     where:{
@@ -122,7 +134,7 @@ export async function assignedPlace(jwt_token:string,place:GetPlaceInput){
   }
   });
   if (!isManager){
-    return {"message":"you don't authorized or worker not exist"};
+    throw new AppError("FORBIDDEN","YOU DON'T ALLOWED");
   }
   const assigned = await prisma.placeWorker.findMany({
     where:{
@@ -156,7 +168,8 @@ export async function assignedPlace(jwt_token:string,place:GetPlaceInput){
 
 
 export async function assignWorker(jwt_token:string,place:GetPlaceInput,worker:getWorkerSchema){
-  const ownerId = await userIdFromToken(jwt_token);
+  const ownerId = (await userIdFromToken(jwt_token)).user_id;
+  worker(jwt_token);
   const place_id = place.place_id;
   const worker_id = worker.worker_id;
   const isowner = await prisma.place.findFirst({
@@ -165,7 +178,7 @@ export async function assignWorker(jwt_token:string,place:GetPlaceInput,worker:g
     }
   });
   if (!isowner){
-    return {"message":"You don't have authorized"};
+    throw new AppError("FORBIDDEN","YOU DON'T ALLOWED");
   }
   const assign = await prisma.placeWorker.create({
     data:{
@@ -194,11 +207,11 @@ export async function assignWorker(jwt_token:string,place:GetPlaceInput,worker:g
   });
   return assign;
 
-
 }
 
 export async function unassign(jwt_token:string,place:removeWorkerSchema){
-  const ownerId = await userIdFromToken(jwt_token);
+  const ownerId = (await userIdFromToken(jwt_token)).user_id;
+  worker(jwt_token);
   const place_id = place.place_id;
   const worker_id = place.worker_id;
   const isowner = await prisma.place.findFirst({
@@ -208,7 +221,7 @@ export async function unassign(jwt_token:string,place:removeWorkerSchema){
     }
   });
   if (!isowner){
-    return {"message":"You don't have authorized"};
+    throw new AppError("FORBIDDEN","YOU DON'T ALLOWED");
   }
   const assign = await prisma.placeWorker.findFirst({
     where:{
@@ -220,7 +233,7 @@ export async function unassign(jwt_token:string,place:removeWorkerSchema){
     }
   });
   if (!assign){
-    return {"message":"you don't have authorized."};
+    throw new AppError("FORBIDDEN","YOU DON'T ALLOWED");
   }
   const unassign = await prisma.placeWorker.delete({
     where:{

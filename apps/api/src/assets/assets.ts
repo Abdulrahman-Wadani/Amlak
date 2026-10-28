@@ -21,10 +21,6 @@ export async function getPlaceAssets(placeId: string,jwt_token:string) {
   if (!place) {
     throw new AppError("NOT_FOUND", "Place not found");
   }
-  if (place.owner_id != ownerId){
-    throw new AppError("FORBIDDEN","you don't have authorization");
-  }
-
 
   return prisma.asset.findMany({
     where: {
@@ -72,6 +68,7 @@ export async function getAsset(assetId: string) {
   if (!asset) {
     throw new AppError("NOT_FOUND", "Asset not found");
   }
+
 
   return asset;
 }

@@ -23,6 +23,8 @@ import { AppError } from "../errors.ts";
 
 export const authRouter = Router();
 
+
+
 const refreshCookie: CookieOptions = {
 	httpOnly: true,
 	secure: true,
@@ -118,6 +120,11 @@ authRouter.post("/worker", async (req, res) => {
 	const input = parse(updateWorkerSchema, req.body);
 	res.status(201).json(await worker.createWorker(input,req.headers.authorization?.split(" ")[1] || ""));
 })
+
+authRouter.get("/workers", async (req, res) => {
+	res.status(201).json(await worker.getWorker(req.headers.authorization?.split(" ")[1] || ""));
+})
+
 
 authRouter.get("/worker/:worker_id", async (req, res) => {
 	const input = parse(getWorkerSchema, req.params);

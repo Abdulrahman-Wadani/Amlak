@@ -10,13 +10,22 @@ import * as tokens from "../auth/tokens.ts";
 import { auditLog } from "../../scripts/audit_log.ts";
 
 
-async function userIdFromToken(token: string): Promise<string> {
+async function userIdFromToken(token: string) {
   const payload = await tokens.verifyAccessToken(token);
-  return payload.user_id;
+  return {user_id:payload.user_id,role:payload.role};
+}
+async function workers(token:string){
+  const role = (await userIdFromToken(token)).role
+  if (role == "WORKER"){
+    throw new AppError("FORBIDDEN","YOU DON'T HAVE ACCESS");
+  }
 }
 
+
+
 export async function createWorker(input: UpdateWorkerInput,jwt_token: string): Promise<WorkerResponse> {
-  const ownerId = await userIdFromToken(jwt_token);
+  const ownerId = (await userIdFromToken(jwt_token)).user_id;
+  workers(jwt_token);
   const managerRole = await prisma.role.findUniqueOrThrow({
 		where: { name: "WORKER" },
 	});
@@ -52,7 +61,8 @@ export async function createWorker(input: UpdateWorkerInput,jwt_token: string): 
 }
 
 export async function getWorkerById(jwt_token:string, input: getWorkerSchema): Promise<WorkerResponse>{
-  const ownerId = await userIdFromToken(jwt_token);
+  const ownerId = (await userIdFromToken(jwt_token)).user_id;
+  workers(jwt_token);
   const worker = await prisma.user.findFirst({
     where: {
       id:input.worker_id,
@@ -89,7 +99,8 @@ export async function getWorkerById(jwt_token:string, input: getWorkerSchema): P
 }
 
 export async function deleteWorkerById(jwt_token:string,wkId: getWorkerSchema){
-  const ownerId = await userIdFromToken(jwt_token);
+  const ownerId = (await userIdFromToken(jwt_token)).user_id;
+  workers(jwt_token);
   const managerRole = await prisma.role.findUniqueOrThrow({
 		where: { name: "WORKER" },
 	});
@@ -131,7 +142,8 @@ export async function deleteWorkerById(jwt_token:string,wkId: getWorkerSchema){
 }
 
 export async function updateWorkerById(jwt_token:string,wkId:getWorkerSchema,input:PutWorkerSchema):Promise<WorkerResponse>{
-  const ownerId = await userIdFromToken(jwt_token);
+  const ownerId = (await userIdFromToken(jwt_token)).user_id;
+  workers(jwt_token);
   const workerId = wkId.worker_id;
   const worker = await prisma.user.findFirst({
     where:{
@@ -160,5 +172,52 @@ await auditLog({user_id: ownerId,
   });
 
   return update as WorkerResponse;
+
+}
+
+export async function getWorker(jwt_token:string): Promise<WorkerResponse>{
+  const ownerId = (await userIdFromToken(jwt_token)).user_id;
+  workers(jwt_token);
+  const worker = await prisma.user.findMany({
+    where: {
+      manager_id: ownerId
+    },
+    omit:{
+      password_hash: true
+    }
+  });
+  const result = await Promise.all(
+    worker.map(async (worker) => {
+      const assignments = await prisma.placeWorker.findMany({
+        where: {
+          worker_id: worker.id,
+          is_active: true,
+        },
+        select: {
+          place: {
+            select: {
+              id: true,
+              place_name: true,
+            },
+          },
+        },
+      });
+
+      return {
+        ...worker,
+        assigned_places: assignments.map((assignment) => assignment.place),
+      };
+    })
+  );
+
+  await auditLog({
+    user_id: ownerId,
+    action: "GET",
+    entity_type: "WORKER",
+    entity_id: ownerId,
+  });
+
+  return result as WorkerResponse[];
+
 
 }
