@@ -22,6 +22,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedTicketsRouteImport } from './routes/_authenticated/tickets'
 import { Route as AuthenticatedWorkersRouteImport } from './routes/_authenticated/workers'
 import { Route as AuthenticatedPlacePlace_idRouteImport } from './routes/_authenticated/place/$place_id'
+import { Route as AuthenticatedPlaceNewRouteImport } from './routes/_authenticated/place/new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -89,6 +90,11 @@ const AuthenticatedPlacePlace_idRoute =
     path: '/place/$place_id',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedPlaceNewRoute = AuthenticatedPlaceNewRouteImport.update({
+  id: '/place/new',
+  path: '/place/new',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/tickets': typeof AuthenticatedTicketsRoute
   '/workers': typeof AuthenticatedWorkersRoute
   '/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
+  '/place/new': typeof AuthenticatedPlaceNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/tickets': typeof AuthenticatedTicketsRoute
   '/workers': typeof AuthenticatedWorkersRoute
   '/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
+  '/place/new': typeof AuthenticatedPlaceNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/_authenticated/tickets': typeof AuthenticatedTicketsRoute
   '/_authenticated/workers': typeof AuthenticatedWorkersRoute
   '/_authenticated/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
+  '/_authenticated/place/new': typeof AuthenticatedPlaceNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -149,6 +158,7 @@ export interface FileRouteTypes {
     | '/tickets'
     | '/workers'
     | '/place/$place_id'
+    | '/place/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -163,6 +173,7 @@ export interface FileRouteTypes {
     | '/tickets'
     | '/workers'
     | '/place/$place_id'
+    | '/place/new'
   id:
     | '__root__'
     | '/'
@@ -178,6 +189,7 @@ export interface FileRouteTypes {
     | '/_authenticated/tickets'
     | '/_authenticated/workers'
     | '/_authenticated/place/$place_id'
+    | '/_authenticated/place/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -280,6 +292,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlacePlace_idRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/place/new': {
+      id: '/_authenticated/place/new'
+      path: '/place/new'
+      fullPath: '/place/new'
+      preLoaderRoute: typeof AuthenticatedPlaceNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
@@ -293,6 +312,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedTicketsRoute: typeof AuthenticatedTicketsRoute
   AuthenticatedWorkersRoute: typeof AuthenticatedWorkersRoute
   AuthenticatedPlacePlace_idRoute: typeof AuthenticatedPlacePlace_idRoute
+  AuthenticatedPlaceNewRoute: typeof AuthenticatedPlaceNewRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -305,6 +325,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedTicketsRoute: AuthenticatedTicketsRoute,
   AuthenticatedWorkersRoute: AuthenticatedWorkersRoute,
   AuthenticatedPlacePlace_idRoute: AuthenticatedPlacePlace_idRoute,
+  AuthenticatedPlaceNewRoute: AuthenticatedPlaceNewRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

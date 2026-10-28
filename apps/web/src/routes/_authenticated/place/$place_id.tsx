@@ -6,11 +6,11 @@ import type { Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { getPlace } from "@/lib/api"
 import { S } from "@/lib/dom-style"
-import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "cn"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { StatusBadge, TypeLabel } from "@/components/place-shared"
 import {
   Table,
   TableBody,
@@ -148,42 +148,3 @@ function DetailRow({ label, value }: { label: ReactNode; value: ReactNode }) {
   )
 }
 
-function StatusBadge({ status }: { status: Place["status"] }) {
-  const s = String(status)
-  if (s === "ACTIVE") {
-    return (
-      <Badge>
-        <Trans>Active</Trans>
-      </Badge>
-    )
-  }
-  if (s === "UNDER_MAINTENANCE") {
-    return (
-      <Badge variant="secondary">
-        <Trans>Under maintenance</Trans>
-      </Badge>
-    )
-  }
-  return (
-    <Badge variant="outline">
-      <Trans>Inactive</Trans>
-    </Badge>
-  )
-}
-
-function TypeLabel({ type }: { type: string }) {
-  switch (type.toUpperCase()) {
-    case "APARTMENT":
-      return <Trans>Apartment</Trans>
-    case "VILLA":
-      return <Trans>Villa</Trans>
-    case "REST_HOUSE":
-      return <Trans>Rest house</Trans>
-    case "ROOM":
-      return <Trans>Room</Trans>
-    case "CHALET":
-      return <Trans>Chalet</Trans>
-    default:
-      return <>{type}</>
-  }
-}

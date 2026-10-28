@@ -1,28 +1,64 @@
 import type { ReactNode } from "react"
 import { Trans } from "@lingui/react/macro"
-import { Badge } from "@/components/ui/badge"
 import { S } from "@/lib/dom-style"
 
+function Chip({
+  border,
+  bg,
+  text,
+  dot,
+  children,
+}: {
+  border: string
+  bg: string
+  text: string
+  dot: string
+  children: ReactNode
+}) {
+  return (
+    <span
+      style={S(
+        `display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; box-sizing: border-box; border: 1px solid ${border}; background: ${bg}; color: ${text}; font-size: 13px; font-weight: 600; white-space: nowrap; flex: none`
+      )}
+    >
+      <span
+        aria-hidden="true"
+        style={S(`width: 7px; height: 7px; flex: none; background: ${dot}`)}
+      />
+      {children}
+    </span>
+  )
+}
 
 export function StatusBadge({ status }: { status: string }) {
   if (status === "ACTIVE") {
     return (
-      <Badge style={S("height: auto; padding: 4px 10px")}>
+      <Chip
+        bg="var(--good-50)"
+        border="var(--good-200)"
+        text="var(--good-700)"
+        dot="var(--good)"
+      >
         <Trans>Active</Trans>
-      </Badge>
+      </Chip>
     )
   }
   if (status === "UNDER_MAINTENANCE") {
     return (
-      <Badge variant="secondary" style={S("height: auto; padding: 4px 10px")}>
+      <Chip
+        bg="var(--warn-50)"
+        border="var(--warn-200)"
+        text="var(--warn-700)"
+        dot="var(--warn)"
+      >
         <Trans>Under maintenance</Trans>
-      </Badge>
+      </Chip>
     )
   }
   return (
-    <Badge variant="outline" style={S("height: auto; padding: 4px 10px")}>
+    <Chip bg="#ffffff" border="var(--border)" text="var(--ink)" dot="#5b636e">
       <Trans>Inactive</Trans>
-    </Badge>
+    </Chip>
   )
 }
 

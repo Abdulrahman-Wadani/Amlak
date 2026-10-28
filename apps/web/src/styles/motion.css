@@ -132,3 +132,45 @@ textarea:focus-visible,
 .am-nav[aria-current="page"] {
   background-color: #edf1f6;
 }
+
+.am-input {
+  height: 44px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1px solid #d3d9e2;
+  background: #ffffff;
+  color: #1b2430;
+  font: inherit;
+  font-size: 15px;
+}
+.am-tab {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #d3d9e2;
+  background: #ffffff;
+  color: #1b2430;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.am-tab[aria-pressed="true"] {
+  border-color: #4d7296;
+  background-color: #4d7296;
+  color: #ffffff;
+  font-weight: 600;
+}
+.am-tab-count {
+  font-family: "IBM Plex Mono", "Noto Kufi Arabic", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+.am-tab[aria-pressed="true"] .am-tab-count {
+  color: #ffffff;
+}
