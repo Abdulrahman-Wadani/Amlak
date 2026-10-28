@@ -3,3 +3,4 @@ export * from "./roles.ts";
 export * from "./users.ts";
 export * from "./places.ts";
 export * from "./workers.ts";
+export * from "./assets.ts";

@@ -1,7 +1,8 @@
 import { ROLES } from "@amlak/shared";
-import { jwtVerify, SignJWT } from "jose";
+import { jwtVerify, SignJWT, errors } from "jose";
 import { z } from "zod";
 import { config } from "../config.ts";
+import { AppError } from "../errors.ts";
 
 const secret = new TextEncoder().encode(config.JWT_SECRET);
 export const ACCESS_TOKEN_SECONDS = 15 * 60;
@@ -22,6 +23,19 @@ export async function signAccessToken(user: AuthUser): Promise<string> {
 }
 
 export async function verifyAccessToken(token: string): Promise<AuthUser> {
+	try{
 	const { payload } = await jwtVerify(token, secret);
 	return accessTokenSchema.parse(payload);
+	}
+	catch(error){
+		if (error instanceof errors.JWTExpired) {
+    		throw new AppError("UNAUTHENTICATED", "Access token expired");
+    }
+
+    if (error instanceof errors.JWTClaimValidationFailed) {
+      throw new AppError("UNAUTHENTICATED", "Invalid access token");
+    }
+
+    throw new AppError("UNAUTHENTICATED", "Invalid or expired access token");
+	}	
 }
