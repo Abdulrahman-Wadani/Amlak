@@ -1,0 +1,134 @@
+body {
+  margin: 0;
+}
+a:not(.am-btn) {
+  color: #1b2430;
+}
+a:not(.am-btn):hover {
+  color: #33404f;
+}
+.am-btn,
+.am-tab,
+.am-seg,
+.am-lift,
+.am-nav,
+.am-icon,
+.am-disclose {
+  transition:
+    transform 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    background-color 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    filter 150ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.am-solid:hover {
+  filter: brightness(0.9);
+}
+.am-line:hover,
+.am-ghost:hover,
+.am-disclose:hover,
+.am-icon:hover {
+  background-color: #edf1f6 !important;
+}
+.am-btn:active,
+.am-tab:active,
+.am-seg:active {
+  transform: translate(1px, 1px);
+  box-shadow: none !important;
+}
+.am-tab:hover {
+  border-color: #4d7296 !important;
+}
+.am-seg:hover {
+  border-color: #4d7296 !important;
+}
+.am-lift:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 rgba(27, 36, 48, 0.12) !important;
+}
+.am-lift:active {
+  transform: none;
+  box-shadow: none !important;
+}
+.am-nav:hover {
+  background-color: #edf1f6 !important;
+}
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #4d7296;
+  outline-offset: 2px;
+}
+[role="region"] {
+  scroll-behavior: smooth;
+}
+@keyframes am-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.am-rise {
+  animation: am-rise 420ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+@keyframes am-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.am-reveal {
+  animation: am-open 220ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+@keyframes am-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.am-fill {
+  transform-origin: right;
+  animation: am-fill 700ms cubic-bezier(0.23, 1, 0.32, 1) 250ms both;
+}
+[dir="ltr"] .am-fill {
+  transform-origin: left;
+}
+@keyframes am-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+.am-bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: am-grow 600ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.am-nav[aria-current="page"] {
+  background-color: #edf1f6;
+}

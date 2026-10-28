@@ -5,7 +5,7 @@ import {
   useState,
   type ReactNode,
 } from "react"
-import type { User } from "@amlak/shared"
+import type { Language, User } from "@amlak/shared"
 
 type Auth = {
   user: User | null
@@ -15,7 +15,8 @@ type Auth = {
     email: string,
     fullname: string,
     phone: string,
-    password: string
+    password: string,
+    preferredLanguage: Language
   ) => Promise<void>
   verifyCode: (email: string, code: string) => Promise<void>
   resendCode: (email: string) => Promise<void>
@@ -25,6 +26,22 @@ type Auth = {
 const AuthContext = createContext<Auth | null>(null)
 
 const USER_KEY = "authUser"
+
+let refreshInFlight: Promise<unknown> | null = null
+
+function refreshOnce(): Promise<unknown> {
+  if (!refreshInFlight) {
+    refreshInFlight = call("/auth/refresh")
+      .catch(async (err) => {
+        await new Promise((r) => setTimeout(r, 200))
+        return call("/auth/refresh").catch(() => Promise.reject(err))
+      })
+      .finally(() => {
+        refreshInFlight = null
+      })
+  }
+  return refreshInFlight
+}
 
 async function api(path: string, body?: unknown): Promise<Response> {
   return fetch(`/api/v1${path}`, {
@@ -41,7 +58,10 @@ function failureMessage(data: unknown): string {
     message?: string
     details?: { reason?: string }
   }
-  if (d.code === "ACCOUNT_NOT_ACTIVE" && d.details?.reason === "EMAIL_NOT_VERIFIED") {
+  if (
+    d.code === "ACCOUNT_NOT_ACTIVE" &&
+    d.details?.reason === "EMAIL_NOT_VERIFIED"
+  ) {
     return "Verify your email first — we sent a 6-digit code."
   }
   return d.message ?? "Something went wrong. Try again."
@@ -66,8 +86,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!saved) return
-    call("/auth/refresh")
-      .then((data) => setAccessToken((data as { access_token: string }).access_token))
+    refreshOnce()
+      .then((data) =>
+        setAccessToken((data as { access_token: string }).access_token)
+      )
       .catch(() => {
         sessionStorage.removeItem(USER_KEY)
         setUser(null)
@@ -89,9 +111,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     email: string,
     fullname: string,
     phone: string,
-    password: string
+    password: string,
+    preferredLanguage: Language
   ) {
-    await call("/auth/register", { email, fullname, phone, password })
+    await call("/auth/register", {
+      email,
+      fullname,
+      phone,
+      password,
+      preferred_language: preferredLanguage,
+    })
   }
 
   async function verifyCode(email: string, code: string) {
@@ -111,7 +140,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, accessToken, login, register, verifyCode, resendCode, logout }}
+      value={{
+        user,
+        accessToken,
+        login,
+        register,
+        verifyCode,
+        resendCode,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>

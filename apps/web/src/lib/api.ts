@@ -1,39 +1,32 @@
-export type Place = {
-  id: string
-  place_name: string
-  place_type: string
-  address: string
-  city: string
-  status: "ACTIVE" | "INACTIVE" | "UNDER_MAINTENANCE"
+import type { Place } from "@amlak/shared"
+
+function normalizePlace(p: Place): Place {
+  return {
+    ...p,
+    monthly_maintenance_budget: Number(p.monthly_maintenance_budget),
+  }
 }
 
-export type Ticket = {
-  id: string
-  description: string
-  priority: "LOW" | "MEDIUM" | "HIGH" | "URGENT"
-  status: "PENDING_REVIEW" | "APPROVED" | "REJECTED" | "COMPLETED"
-  due_date: string | null
-  place: { place_name: string }
-  assignee: { fullname: string } | null
+async function request<T>(path: string, token: string): Promise<T> {
+  const res = await fetch(`/api/v1${path}`, {
+    headers: { Authorization: `Bearer ${token}` },
+    credentials: "same-origin",
+  })
+  if (!res.ok) throw new Error(`${path} failed with ${res.status}`)
+  return (await res.json()) as T
 }
 
-const places: Place[] = [
-  { id: "p1", place_name: "Villa 12", place_type: "Villa", address: "Al Zahra District", city: "Riyadh", status: "UNDER_MAINTENANCE" },
-  { id: "p2", place_name: "Warehouse 2", place_type: "Warehouse", address: "Second Industrial City", city: "Dammam", status: "ACTIVE" },
-  { id: "p3", place_name: "Store C", place_type: "Store", address: "Olaya Street", city: "Riyadh", status: "INACTIVE" },
-]
-
-const tickets: Ticket[] = [
-  { id: "t1", description: "AC unit not cooling", priority: "URGENT", status: "APPROVED", due_date: "2026-10-22", place: { place_name: "Villa 12" }, assignee: { fullname: "Ahmed" } },
-  { id: "t2", description: "Roof leak after rain", priority: "HIGH", status: "PENDING_REVIEW", due_date: "2026-10-25", place: { place_name: "Villa 12" }, assignee: null },
-  { id: "t3", description: "Dock door sensor faulty", priority: "MEDIUM", status: "COMPLETED", due_date: "2026-10-18", place: { place_name: "Warehouse 2" }, assignee: { fullname: "Omar" } },
-  { id: "t4", description: "Elevator monthly service", priority: "LOW", status: "APPROVED", due_date: "2026-10-30", place: { place_name: "Store C" }, assignee: { fullname: "Fahd" } },
-]
-
-export async function getPlaces(): Promise<Place[]> {
-  return places
+export function getPlaces(token: string): Promise<Place[]> {
+  return request<Place[]>("/places", token).then((data) => {
+    if (!Array.isArray(data)) throw new Error("/places returned no list")
+    return data.map(normalizePlace)
+  })
 }
 
-export async function getTickets(): Promise<Ticket[]> {
-  return tickets
+export function getPlace(token: string, placeId: string): Promise<Place> {
+  return request<Place>(`/place/${placeId}`, token).then((data) => {
+    // The API answers 201 with {"message":"place not found"} for bad ids.
+    if (!data || typeof data.id !== "string") throw new Error("place not found")
+    return normalizePlace(data)
+  })
 }

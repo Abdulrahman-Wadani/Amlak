@@ -1,5 +1,6 @@
 import { resolve } from "node:path"
 import tailwindcss from "@tailwindcss/vite"
+import { lingui } from "@lingui/vite-plugin"
 import { tanstackRouter } from "@tanstack/router-plugin/vite"
 import react from "@vitejs/plugin-react"
 import { defineConfig, lazyPlugins } from "vite-plus"
@@ -117,6 +118,12 @@ export default defineConfig({
           browser: true,
         },
       },
+      {
+        files: ["*.config.ts"],
+        env: {
+          node: true,
+        },
+      },
     ],
     options: {
       typeAware: true,
@@ -156,6 +163,7 @@ export default defineConfig({
     ],
   },
   plugins: lazyPlugins(() => [
+    lingui({ macroTransform: true }),
     tailwindcss(),
     tanstackRouter({ target: "react", autoCodeSplitting: true }),
     react(),
