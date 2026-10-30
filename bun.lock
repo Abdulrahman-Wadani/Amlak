@@ -4,6 +4,9 @@
   "workspaces": {
     "": {
       "name": "amlak",
+      "devDependencies": {
+        "@biomejs/biome": "2.5.15",
+      },
     },
     "apps/api": {
       "name": "api",
@@ -21,7 +24,6 @@
         "zod": "^4.6.7",
       },
       "devDependencies": {
-        "@biomejs/biome": "2.5.15",
         "@types/bun": "^1.4.3",
         "@types/cookie-parser": "^1.4.10",
         "@types/express": "^5.0.6",
@@ -75,7 +77,6 @@
         "zod": "^4.6.7",
       },
       "devDependencies": {
-        "@biomejs/biome": "2.5.15",
         "typescript": "^7.0.2",
       },
     },
@@ -229,13 +230,13 @@
 
     "@lingui/native-tools-darwin-x64": ["@lingui/native-tools-darwin-x64@0.1.6", "", { "os": "darwin", "cpu": "x64" }, "sha512-e7liIjkzbJ8w3F9PHzZPmpYpeiv7XO4Np9J1tEpUamKYEdYBNt4AKr/UmWAQ7AjxbZSV9N8lj1ulUl3pdFUuaQ=="],
 
-    "@lingui/native-tools-linux-arm64-gnu": ["@lingui/native-tools-linux-arm64-gnu@0.1.6", "", { "os": "linux", "cpu": "arm64", "libc": "glibc" }, "sha512-JKu/8CvLsYUiRbRSnuzmrQk24tfuizgnDYlMxE5/awUUrRE+GlpaMP76PhJpkl+tV0v7t6zVe3+I5lbq7LaqVw=="],
+    "@lingui/native-tools-linux-arm64-gnu": ["@lingui/native-tools-linux-arm64-gnu@0.1.6", "", { "os": "linux", "cpu": "arm64" }, "sha512-JKu/8CvLsYUiRbRSnuzmrQk24tfuizgnDYlMxE5/awUUrRE+GlpaMP76PhJpkl+tV0v7t6zVe3+I5lbq7LaqVw=="],
 
-    "@lingui/native-tools-linux-arm64-musl": ["@lingui/native-tools-linux-arm64-musl@0.1.6", "", { "os": "linux", "cpu": "arm64", "libc": "musl" }, "sha512-Aeexf/Ta0nZDZz3cDMAZ95GmFZ2lOxMwf1FK/ShK+U4WcNVSn3aI2KeuOeaLUfot9ZT8AiIIELPV4gO6b/GJgg=="],
+    "@lingui/native-tools-linux-arm64-musl": ["@lingui/native-tools-linux-arm64-musl@0.1.6", "", { "os": "linux", "cpu": "arm64" }, "sha512-Aeexf/Ta0nZDZz3cDMAZ95GmFZ2lOxMwf1FK/ShK+U4WcNVSn3aI2KeuOeaLUfot9ZT8AiIIELPV4gO6b/GJgg=="],
 
-    "@lingui/native-tools-linux-x64-gnu": ["@lingui/native-tools-linux-x64-gnu@0.1.6", "", { "os": "linux", "cpu": "x64", "libc": "glibc" }, "sha512-SwX1dLcQE9pVcXwIxSGTE2+zBmaO6NbjD9XPqCiyoO8RFTkUTLjdnRDGHxFlFpIGMlVArQz5mMQ6coyUFl+AiA=="],
+    "@lingui/native-tools-linux-x64-gnu": ["@lingui/native-tools-linux-x64-gnu@0.1.6", "", { "os": "linux", "cpu": "x64" }, "sha512-SwX1dLcQE9pVcXwIxSGTE2+zBmaO6NbjD9XPqCiyoO8RFTkUTLjdnRDGHxFlFpIGMlVArQz5mMQ6coyUFl+AiA=="],
 
-    "@lingui/native-tools-linux-x64-musl": ["@lingui/native-tools-linux-x64-musl@0.1.6", "", { "os": "linux", "cpu": "x64", "libc": "musl" }, "sha512-aWI8e10I6i7K9BG77LJDHREozx/VT8j8onf0wxd43ACor2S1VwS0ZNlIfpNWQTWovmU/CUliGO/VWQq2jGa+Sg=="],
+    "@lingui/native-tools-linux-x64-musl": ["@lingui/native-tools-linux-x64-musl@0.1.6", "", { "os": "linux", "cpu": "x64" }, "sha512-aWI8e10I6i7K9BG77LJDHREozx/VT8j8onf0wxd43ACor2S1VwS0ZNlIfpNWQTWovmU/CUliGO/VWQq2jGa+Sg=="],
 
     "@lingui/native-tools-win32-arm64-msvc": ["@lingui/native-tools-win32-arm64-msvc@0.1.6", "", { "os": "win32", "cpu": "arm64" }, "sha512-M2TZP4gKgLaLbiboXIrY5+8GsaQLHvZ8E6cUFgAuSaBa8AMa73+pZO1eay/St9t8yDh6EL6hOlqN0HedUHMwyQ=="],
 
@@ -1371,9 +1372,9 @@
 
     "socks": ["socks@2.8.10", "", { "dependencies": { "ip-address": "^10.1.1", "smart-buffer": "^4.2.0" } }, "sha512-e0VyvkVTwVYViNovRkZ9aodhxVlyoMn7eJhVUPxZ+eK9P/7CBkxvvsBOHqFPEH416726W8tLXXXjKwqgTErrCQ=="],
 
-    "source-map": ["source-map@0.7.6", "", {}, "sha512-i5uvt8C3ikiWeNZSVZNWcfZPItFQOsYTUAOkcUPGd8DqDy1uOUikjt5dG+uRlwyvR108Fb9DOd4GvXfT0N2/uQ=="],
-
     "sonner": ["sonner@2.0.8", "", { "peerDependencies": { "@types/react": "^18.0.0 || ^19.0.0", "react": "^18.0.0 || ^19.0.0 || ^19.0.0-rc", "react-dom": "^18.0.0 || ^19.0.0 || ^19.0.0-rc" }, "optionalPeers": ["@types/react"] }, "sha512-UM/ByIoFra8yzV75n1o0Puu0bw5U/9UNnDacrJNspekBewIfsQ3D6ez1nvlWpt7aTsO6rujQtifBpycwIivqlg=="],
+
+    "source-map": ["source-map@0.7.6", "", {}, "sha512-i5uvt8C3ikiWeNZSVZNWcfZPItFQOsYTUAOkcUPGd8DqDy1uOUikjt5dG+uRlwyvR108Fb9DOd4GvXfT0N2/uQ=="],
 
     "source-map-js": ["source-map-js@1.2.2", "", {}, "sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw=="],
 
