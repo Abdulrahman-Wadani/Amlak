@@ -7,6 +7,7 @@ import type {
 	VerificationCodeInput,
 	VerifyEmailInput,
 } from "@amlak/shared";
+import { auditLog } from "../audit.ts";
 import { prisma } from "../db.ts";
 import { sendEmail } from "../email.ts";
 import { AppError } from "../errors.ts";
@@ -166,6 +167,7 @@ function rateLimited(allowedAt: number): AppError {
 
 export async function login(
 	input: LoginInput,
+	ipAddress: string | undefined,
 ): Promise<{ session: Session; user: User }> {
 	const user = await prisma.user.findUnique({
 		where: { email: input.email },
@@ -188,6 +190,12 @@ export async function login(
 	const session = await startSession({
 		user_id: user.id,
 		role: user.role.name as Role,
+	});
+	await auditLog(prisma, user.id, {
+		action: "LOGIN",
+		entityType: "User",
+		entityId: user.id,
+		ipAddress,
 	});
 	return { session, user: toUser(user) };
 }
