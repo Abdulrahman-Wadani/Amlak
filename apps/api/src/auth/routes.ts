@@ -52,7 +52,7 @@ authRouter.post("/auth/verification-code", async (req, res) => {
 
 authRouter.post("/auth/login", async (req, res) => {
 	const input = parse(loginSchema, req.body);
-	const { session, user } = await auth.login(input);
+	const { session, user } = await auth.login(input, req.ip);
 	setRefreshCookie(res, session.refreshToken);
 	const body: LoginResponse = { ...accessTokenBody(session), user };
 	res.json(body);
