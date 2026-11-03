@@ -6,6 +6,7 @@ import { authRouter } from "./auth/routes.ts";
 import { errorHandler } from "./middleware/error-handler.ts";
 import { notFound } from "./middleware/not-found.ts";
 import { openApiDocument } from "./openapi.ts";
+import { placeWorkersRouter } from "./place-workers/routes.ts";
 import { placesRouter } from "./places/routes.ts";
 import { workersRouter } from "./workers/routes.ts";
 
@@ -18,6 +19,7 @@ app.use("/api/v1", authRouter);
 app.use("/api/v1", placesRouter);
 app.use("/api/v1", assetsRouter);
 app.use("/api/v1", workersRouter);
+app.use("/api/v1", placeWorkersRouter);
 
 app.use(
 	"/api/docs",

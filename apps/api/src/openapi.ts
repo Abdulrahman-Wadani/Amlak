@@ -2,6 +2,7 @@ import {
 	accessTokenSchema,
 	accountSetupSchema,
 	assetSchema,
+	assignWorkerSchema,
 	createAssetSchema,
 	createPlaceSchema,
 	createWorkerSchema,
@@ -12,6 +13,7 @@ import {
 	loginSchema,
 	paginatedSchema,
 	placeSchema,
+	placeWorkerSchema,
 	registerSchema,
 	updateAssetSchema,
 	updatePlaceSchema,
@@ -25,6 +27,7 @@ import { z } from "zod";
 import { createDocument } from "zod-openapi";
 import { assetParams } from "./assets/routes.ts";
 import { pageQuerySchema } from "./pagination.ts";
+import { placeWorkerParams } from "./place-workers/routes.ts";
 import { placeParams } from "./places/routes.ts";
 import { workerParams } from "./workers/routes.ts";
 
@@ -236,6 +239,53 @@ export const openApiDocument = createDocument({
 					"404": fail("Place not found"),
 					"422": fail(
 						"Some fields are invalid, or purchase_date is in the future",
+					),
+					...guarded,
+				},
+			},
+		},
+		"/places/{placeId}/workers": {
+			get: {
+				tags: ["Place workers"],
+				summary: "List the workers assigned to a place (Manager)",
+				security: loggedIn,
+				requestParams: { path: placeParams, query: pageQuerySchema },
+				responses: {
+					"200": ok(
+						"One page of assignments",
+						paginatedSchema(placeWorkerSchema),
+					),
+					"404": fail("Place not found"),
+					...guarded,
+				},
+			},
+			post: {
+				tags: ["Place workers"],
+				summary: "Assign one of your workers to a place (Manager)",
+				security: loggedIn,
+				requestParams: { path: placeParams },
+				requestBody: json(assignWorkerSchema),
+				responses: {
+					"201": ok("The assignment", placeWorkerSchema),
+					"404": fail("Place not found"),
+					"409": fail("The worker is already assigned"),
+					"422": fail("Not one of your workers, or deactivated"),
+					...guarded,
+				},
+			},
+		},
+		"/places/{placeId}/workers/{workerId}": {
+			delete: {
+				tags: ["Place workers"],
+				summary:
+					"Unassign a worker; the assignment is kept as history (Manager)",
+				security: loggedIn,
+				requestParams: { path: placeWorkerParams },
+				responses: {
+					"204": { description: "Unassigned" },
+					"404": fail("Place not found, or the worker is not assigned"),
+					"409": fail(
+						"The worker has approved tickets here; see details.ticket_ids",
 					),
 					...guarded,
 				},

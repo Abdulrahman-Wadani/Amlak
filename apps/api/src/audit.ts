@@ -7,8 +7,11 @@ export type AuditAction =
 	| "WORKER_CREATE"
 	| "WORKER_DELETE"
 	| "WORKER_DEACTIVATE"
-	| "WORKER_REACTIVATE";
-export type AuditEntity = "User" | "Place" | "Asset";
+	| "WORKER_REACTIVATE"
+	| "WORKER_REACTIVATE"
+	| "WORKER_ASSIGN"
+	| "WORKER_UNASSIGN";
+export type AuditEntity = "User" | "Place" | "Asset" | "PlaceWorker";
 
 export type AuditEntry = {
 	action: AuditAction;
