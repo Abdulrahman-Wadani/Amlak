@@ -7,6 +7,7 @@ import { errorHandler } from "./middleware/error-handler.ts";
 import { notFound } from "./middleware/not-found.ts";
 import { openApiDocument } from "./openapi.ts";
 import { placesRouter } from "./places/routes.ts";
+import { workersRouter } from "./workers/routes.ts";
 
 export const app = express();
 
@@ -16,6 +17,7 @@ app.use(cookieParser());
 app.use("/api/v1", authRouter);
 app.use("/api/v1", placesRouter);
 app.use("/api/v1", assetsRouter);
+app.use("/api/v1", workersRouter);
 
 app.use(
 	"/api/docs",

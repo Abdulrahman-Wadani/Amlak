@@ -1,10 +1,13 @@
 import {
 	accessTokenSchema,
+	accountSetupSchema,
 	assetSchema,
 	createAssetSchema,
 	createPlaceSchema,
+	createWorkerSchema,
 	listAssetsQuerySchema,
 	listPlacesQuerySchema,
+	listWorkersQuerySchema,
 	loginResponseSchema,
 	loginSchema,
 	paginatedSchema,
@@ -12,15 +15,18 @@ import {
 	registerSchema,
 	updateAssetSchema,
 	updatePlaceSchema,
+	updateWorkerSchema,
 	userSchema,
 	verificationCodeSchema,
 	verifyEmailSchema,
+	workerSchema,
 } from "@amlak/shared";
 import { z } from "zod";
 import { createDocument } from "zod-openapi";
 import { assetParams } from "./assets/routes.ts";
 import { pageQuerySchema } from "./pagination.ts";
 import { placeParams } from "./places/routes.ts";
+import { workerParams } from "./workers/routes.ts";
 
 const errorSchema = z
 	.object({
@@ -88,6 +94,21 @@ export const openApiDocument = createDocument({
 				responses: {
 					"204": { description: "Sent, if the account is pending" },
 					"429": fail("Wait before asking for another code"),
+				},
+			},
+		},
+		"/auth/account-setup": {
+			post: {
+				tags: ["Auth"],
+				summary: "A worker sets their password from the invitation link",
+				requestBody: json(accountSetupSchema),
+				responses: {
+					"204": {
+						description: "The account is ACTIVE; the worker can log in",
+					},
+					"422": fail(
+						"The link is wrong, expired or used, or the password is weak",
+					),
 				},
 			},
 		},
@@ -256,6 +277,76 @@ export const openApiDocument = createDocument({
 					"204": { description: "Removed" },
 					"404": fail("Asset not found"),
 					"409": fail("The asset has open tickets; see details.ticket_ids"),
+					...guarded,
+				},
+			},
+		},
+		"/workers": {
+			get: {
+				tags: ["Workers"],
+				summary: "List my workers (Manager)",
+				security: loggedIn,
+				requestParams: {
+					query: listWorkersQuerySchema.extend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok("One page of workers", paginatedSchema(workerSchema)),
+					"422": fail("Invalid filter or page"),
+					...guarded,
+				},
+			},
+			post: {
+				tags: ["Workers"],
+				summary: "Create a worker and email the setup link (Manager)",
+				security: loggedIn,
+				requestBody: json(createWorkerSchema),
+				responses: {
+					"201": ok("The new worker, INVITED", workerSchema),
+					"409": fail("The email is already registered"),
+					"422": fail("Some fields are invalid"),
+					...guarded,
+				},
+			},
+		},
+		"/workers/{workerId}": {
+			get: {
+				tags: ["Workers"],
+				summary: "Get a worker (Manager)",
+				security: loggedIn,
+				requestParams: { path: workerParams },
+				responses: {
+					"200": ok("The worker", workerSchema),
+					"404": fail("Worker not found"),
+					...guarded,
+				},
+			},
+			put: {
+				tags: ["Workers"],
+				summary: "Edit, deactivate or reactivate a worker (Manager)",
+				security: loggedIn,
+				requestParams: { path: workerParams },
+				requestBody: json(updateWorkerSchema),
+				responses: {
+					"200": ok("The updated worker", workerSchema),
+					"404": fail("Worker not found"),
+					"409": fail(
+						"Only a deactivated worker who set up their account can be reactivated",
+					),
+					"422": fail("Some fields are invalid"),
+					...guarded,
+				},
+			},
+			delete: {
+				tags: ["Workers"],
+				summary: "Delete a worker who never set up their account (Manager)",
+				security: loggedIn,
+				requestParams: { path: workerParams },
+				responses: {
+					"204": { description: "Deleted, with their assignments" },
+					"404": fail("Worker not found"),
+					"409": fail(
+						"The worker has set up their account; deactivate them instead",
+					),
 					...guarded,
 				},
 			},

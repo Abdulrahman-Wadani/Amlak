@@ -1,5 +1,6 @@
 import {
 	type AccessToken,
+	accountSetupSchema,
 	type LoginResponse,
 	loginSchema,
 	registerSchema,
@@ -72,3 +73,9 @@ function setRefreshCookie(res: Response, token: string) {
 		maxAge: REFRESH_TOKEN_MS,
 	});
 }
+
+authRouter.post("/auth/account-setup", async (req, res) => {
+	const input = parse(accountSetupSchema, req.body);
+	await auth.setUpAccount(input);
+	res.status(204).end();
+});
