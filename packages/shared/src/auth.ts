@@ -65,3 +65,10 @@ export const loginResponseSchema = accessTokenFields
 	.extend({ user: userSchema })
 	.meta({ id: "LoginResponse" });
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
+
+export const accountSetupSchema = z.object({
+	email: emailSchema,
+	token: z.string().min(1),
+	password: passwordSchema,
+});
+export type AccountSetupInput = z.infer<typeof accountSetupSchema>;

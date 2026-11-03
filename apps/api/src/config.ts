@@ -11,6 +11,7 @@ const envSchema = z
 		JWT_SECRET: z.string().min(32),
 		RESEND_API_KEY: z.literal("").or(z.string().startsWith("re_")).optional(),
 		EMAIL_FROM: z.string().default("Amlak <onboarding@resend.dev>"),
+		APP_URL: z.url().default("http://localhost:5173"),
 	})
 	.refine((env) => env.NODE_ENV !== "production" || env.RESEND_API_KEY, {
 		message: "RESEND_API_KEY is required in production",

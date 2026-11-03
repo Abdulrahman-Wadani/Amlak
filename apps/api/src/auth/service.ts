@@ -1,4 +1,5 @@
 import type {
+	AccountSetupInput,
 	LoginInput,
 	RegisterInput,
 	Role,
@@ -237,4 +238,45 @@ function inactiveReason(status: UserStatus, managerStatus?: UserStatus) {
 	if (status === "DEACTIVATED") return "ACCOUNT_DEACTIVATED";
 	if (managerStatus === "DEACTIVATED") return "MANAGER_DEACTIVATED";
 	return null;
+}
+
+/** A worker sets their password from the invitation link and becomes ACTIVE. */
+export async function setUpAccount(input: AccountSetupInput): Promise<void> {
+	const user = await prisma.user.findUnique({
+		where: { email: input.email },
+	});
+	if (user?.status !== "INVITED") {
+		throw invalidLink();
+	}
+
+	const token = await prisma.verificationToken.findFirst({
+		where: {
+			user_id: user.id,
+			token_type: "ACCOUNT_SETUP",
+			token_hash: hashCode(input.token),
+			is_used: false,
+			expires_at: { gt: new Date() },
+		},
+	});
+	if (!token) {
+		throw invalidLink();
+	}
+
+	await prisma.user.update({
+		where: { id: user.id },
+		data: {
+			password_hash: await hashPassword(input.password),
+			status: "ACTIVE",
+			email_verified_at: new Date(),
+			verification_tokens: {
+				update: { where: { id: token.id }, data: { is_used: true } },
+			},
+		},
+	});
+}
+
+function invalidLink(): AppError {
+	return new AppError("VALIDATION_ERROR", "Some fields are invalid", {
+		fields: { token: "The link is wrong, expired or already used" },
+	});
 }

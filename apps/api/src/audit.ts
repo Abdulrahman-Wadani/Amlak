@@ -1,6 +1,13 @@
 import type { Prisma, PrismaClient } from "./generated/prisma/client.ts";
 
-export type AuditAction = "LOGIN" | "PLACE_DELETE" | "ASSET_DELETE";
+export type AuditAction =
+	| "LOGIN"
+	| "PLACE_DELETE"
+	| "ASSET_DELETE"
+	| "WORKER_CREATE"
+	| "WORKER_DELETE"
+	| "WORKER_DEACTIVATE"
+	| "WORKER_REACTIVATE";
 export type AuditEntity = "User" | "Place" | "Asset";
 
 export type AuditEntry = {
