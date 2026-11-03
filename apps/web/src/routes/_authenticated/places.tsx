@@ -5,7 +5,7 @@ import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import type { Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
-import { getPlaces } from "@/lib/api"
+import { getPlaceAssets, getPlaces } from "@/lib/api"
 import { S } from "@/lib/dom-style"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -43,6 +43,7 @@ const STATS = [
 function PlacesPage() {
   const { accessToken } = useAuth()
   const [places, setPlaces] = useState<Place[] | null>(null)
+  const [assetCounts, setAssetCounts] = useState<Record<string, number>>({})
   const [error, setError] = useState(false)
   const [query, setQuery] = useState("")
   const [tab, setTab] = useState<TabKey>("ALL")
@@ -70,6 +71,26 @@ function PlacesPage() {
       return matchesTab && matchesQuery
     })
   }, [places, tab, q])
+
+  useEffect(() => {
+    if (!accessToken || !places) return
+    let alive = true
+    void Promise.all(
+      places.map((p) =>
+        getPlaceAssets(accessToken, p.id)
+          .then((list) => [p.id, list.length] as const)
+          .catch(() => null),
+      ),
+    ).then((counts) => {
+      if (!alive) return
+      setAssetCounts(
+        Object.fromEntries(counts.filter((c) => c !== null) as [string, number][]),
+      )
+    })
+    return () => {
+      alive = false
+    }
+  }, [accessToken, places])
 
   const countFor = (key: TabKey) =>
     places?.filter((p) => key === "ALL" || p.status === key).length ?? 0
@@ -196,8 +217,7 @@ function PlacesPage() {
       {visible.length > 0 && (
         <p style={S("color: var(--muted-foreground); font-size: 13px")}>
           <Trans>
-            Asset, ticket and worker counts appear once those services are
-            wired up.
+            Ticket and worker counts appear once those services are wired up.
           </Trans>
         </p>
       )}
@@ -258,7 +278,9 @@ function PlacesPage() {
                     className="font-mono tabular-nums"
                     style={S("font-weight: 600")}
                   >
-                    {"\u2014"}
+                    {s.key === "assets"
+                      ? (assetCounts[p.id] ?? "\u2014")
+                      : "\u2014"}
                   </span>
                 </div>
               ))}

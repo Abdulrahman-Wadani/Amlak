@@ -1,4 +1,9 @@
-import type { CreatePlaceInput, Place } from "@amlak/shared"
+import type {
+  Asset,
+  CreateAssetInput,
+  CreatePlaceInput,
+  Place,
+} from "@amlak/shared"
 
 function normalizePlace(p: Place): Place {
   return {
@@ -29,6 +34,44 @@ export function getPlace(token: string, placeId: string): Promise<Place> {
     if (!data || typeof data.id !== "string") throw new Error("place not found")
     return normalizePlace(data)
   })
+}
+
+export function getPlaceAssets(token: string, placeId: string): Promise<Asset[]> {
+  return request<{ assets: unknown }>(`/places/${placeId}/assets`, token).then(
+    (data) => {
+      if (!data || !Array.isArray(data.assets)) {
+        throw new Error("/assets returned no list")
+      }
+      return data.assets as Asset[]
+    },
+  )
+}
+
+export async function createAsset(
+  token: string,
+  placeId: string,
+  input: CreateAssetInput,
+): Promise<Asset> {
+  const res = await fetch(`/api/v1/places/${placeId}/assets`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    credentials: "same-origin",
+    body: JSON.stringify({ ...input, status: input.status ?? "GOOD" }),
+  })
+  const wrapped: unknown = await res.json().catch(() => null)
+  const asset = (wrapped as { assets?: unknown } | null)?.assets
+  if (
+    !res.ok ||
+    !asset ||
+    typeof asset !== "object" ||
+    typeof (asset as Asset).id !== "string"
+  ) {
+    throw new Error("asset not created")
+  }
+  return asset as Asset
 }
 
 export class PlaceNameTakenError extends Error {}
