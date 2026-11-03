@@ -2,7 +2,7 @@ import type { Paginated } from "@amlak/shared";
 import { z } from "zod";
 import { parse } from "./validation.ts";
 
-const pageQuerySchema = z.object({
+export const pageQuerySchema = z.object({
 	page: z.coerce.number().int().min(1).default(1),
 	page_size: z.coerce.number().int().min(1).max(100).default(20),
 });

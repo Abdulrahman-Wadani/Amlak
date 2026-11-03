@@ -7,24 +7,30 @@ export const PLACE_STATUSES = [
 ] as const;
 export type PlaceStatus = (typeof PLACE_STATUSES)[number];
 
-export type Place = {
-	id: string;
-	owner_id: string;
-	place_name: string;
-	place_type: string;
-	description: string | null;
-	address: string | null;
-	city: string;
-	latitude: number | null;
-	longitude: number | null;
-	status: PlaceStatus;
-	/** Never sent to Workers. */
-	monthly_maintenance_budget?: number | null;
-	currency: string;
-	timezone: string;
-	created_at: string;
-	updated_at: string;
-};
+export const placeSchema = z
+	.object({
+		id: z.uuid(),
+		owner_id: z.uuid(),
+		place_name: z.string(),
+		place_type: z.string(),
+		description: z.string().nullable(),
+		address: z.string().nullable(),
+		city: z.string(),
+		latitude: z.number().nullable(),
+		longitude: z.number().nullable(),
+		status: z.enum(PLACE_STATUSES),
+		monthly_maintenance_budget: z
+			.number()
+			.nullable()
+			.optional()
+			.meta({ description: "Never sent to Workers" }),
+		currency: z.string(),
+		timezone: z.string(),
+		created_at: z.iso.datetime(),
+		updated_at: z.iso.datetime(),
+	})
+	.meta({ id: "Place" });
+export type Place = z.infer<typeof placeSchema>;
 
 const isTimeZone = (name: string) => {
 	try {

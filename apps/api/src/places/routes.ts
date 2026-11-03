@@ -13,7 +13,7 @@ import * as places from "./service.ts";
 
 export const placesRouter = Router();
 
-const placeParams = z.object({ placeId: z.uuid() });
+export const placeParams = z.object({ placeId: z.uuid() });
 const managerOrWorker = [requireAuth, requireRole("MANAGER", "WORKER")];
 const managerOnly = [requireAuth, requireRole("MANAGER")];
 
