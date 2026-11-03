@@ -1,4 +1,5 @@
-import type { Role } from "./roles.ts";
+import { z } from "zod";
+import { ROLES } from "./roles.ts";
 
 export const LANGUAGES = ["ar", "en"] as const;
 export type Language = (typeof LANGUAGES)[number];
@@ -11,17 +12,20 @@ export const USER_STATUSES = [
 ] as const;
 export type UserStatus = (typeof USER_STATUSES)[number];
 
-export type User = {
-	id: string;
-	email: string;
-	fullname: string;
-	phone: string;
-	picture_url: string | null;
-	role: Role;
-	status: UserStatus;
-	preferred_language: Language;
-	email_verified_at: string | null;
-	manager_id: string | null;
-	created_at: string;
-	updated_at: string;
-};
+export const userSchema = z
+	.object({
+		id: z.uuid(),
+		email: z.email(),
+		fullname: z.string(),
+		phone: z.string(),
+		picture_url: z.string().nullable(),
+		role: z.enum(ROLES),
+		status: z.enum(USER_STATUSES),
+		preferred_language: z.enum(LANGUAGES),
+		email_verified_at: z.iso.datetime().nullable(),
+		manager_id: z.uuid().nullable(),
+		created_at: z.iso.datetime(),
+		updated_at: z.iso.datetime(),
+	})
+	.meta({ id: "User" });
+export type User = z.infer<typeof userSchema>;

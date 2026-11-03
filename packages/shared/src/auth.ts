@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LANGUAGES, type User } from "./users.ts";
+import { LANGUAGES, userSchema } from "./users.ts";
 
 export const emailSchema = z.string().trim().toLowerCase().pipe(z.email());
 
@@ -49,10 +49,19 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
-export type AccessToken = {
-	access_token: string;
-	token_type: "Bearer";
-	expires_in: number;
-};
+const accessTokenFields = z.object({
+	access_token: z.string(),
+	token_type: z.literal("Bearer"),
+	expires_in: z
+		.number()
+		.int()
+		.meta({ description: "Seconds until it expires" }),
+});
 
-export type LoginResponse = AccessToken & { user: User };
+export const accessTokenSchema = accessTokenFields.meta({ id: "AccessToken" });
+export type AccessToken = z.infer<typeof accessTokenSchema>;
+
+export const loginResponseSchema = accessTokenFields
+	.extend({ user: userSchema })
+	.meta({ id: "LoginResponse" });
+export type LoginResponse = z.infer<typeof loginResponseSchema>;

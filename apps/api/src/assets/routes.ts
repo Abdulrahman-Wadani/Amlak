@@ -8,13 +8,13 @@ import { z } from "zod";
 import { currentUser, requireAuth } from "../middleware/require-auth.ts";
 import { requireRole } from "../middleware/require-role.ts";
 import { parsePage } from "../pagination.ts";
+import { placeParams } from "../places/routes.ts";
 import { parse } from "../validation.ts";
 import * as assets from "./service.ts";
 
 export const assetsRouter = Router();
 
-const placeParams = z.object({ placeId: z.uuid() });
-const assetParams = z.object({ assetId: z.uuid() });
+export const assetParams = z.object({ assetId: z.uuid() });
 const managerOrWorker = [requireAuth, requireRole("MANAGER", "WORKER")];
 const managerOnly = [requireAuth, requireRole("MANAGER")];
 

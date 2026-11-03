@@ -1,9 +1,11 @@
 import cookieParser from "cookie-parser";
 import express from "express";
+import swaggerUi from "swagger-ui-express";
 import { assetsRouter } from "./assets/routes.ts";
 import { authRouter } from "./auth/routes.ts";
 import { errorHandler } from "./middleware/error-handler.ts";
 import { notFound } from "./middleware/not-found.ts";
+import { openApiDocument } from "./openapi.ts";
 import { placesRouter } from "./places/routes.ts";
 
 export const app = express();
@@ -14,6 +16,14 @@ app.use(cookieParser());
 app.use("/api/v1", authRouter);
 app.use("/api/v1", placesRouter);
 app.use("/api/v1", assetsRouter);
+
+app.use(
+	"/api/docs",
+	swaggerUi.serve,
+	swaggerUi.setup(openApiDocument, {
+		swaggerOptions: { persistAuthorization: true },
+	}),
+);
 
 app.use(notFound);
 app.use(errorHandler);

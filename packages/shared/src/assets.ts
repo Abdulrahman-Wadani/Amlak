@@ -8,17 +8,19 @@ export const ASSET_STATUSES = [
 ] as const;
 export type AssetStatus = (typeof ASSET_STATUSES)[number];
 
-export type Asset = {
-	id: string;
-	place_id: string;
-	name: string;
-	type: string;
-	status: AssetStatus;
-	/** YYYY-MM-DD, or null when unknown. */
-	purchase_date: string | null;
-	created_at: string;
-	updated_at: string;
-};
+export const assetSchema = z
+	.object({
+		id: z.uuid(),
+		place_id: z.uuid(),
+		name: z.string(),
+		type: z.string(),
+		status: z.enum(ASSET_STATUSES),
+		purchase_date: z.iso.date().nullable(),
+		created_at: z.iso.datetime(),
+		updated_at: z.iso.datetime(),
+	})
+	.meta({ id: "Asset" });
+export type Asset = z.infer<typeof assetSchema>;
 
 const assetFields = z.object({
 	name: z.string().trim().min(1),
