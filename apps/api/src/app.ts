@@ -1,5 +1,6 @@
 import cookieParser from "cookie-parser";
 import express from "express";
+import { assetsRouter } from "./assets/routes.ts";
 import { authRouter } from "./auth/routes.ts";
 import { errorHandler } from "./middleware/error-handler.ts";
 import { notFound } from "./middleware/not-found.ts";
@@ -12,6 +13,7 @@ app.use(cookieParser());
 
 app.use("/api/v1", authRouter);
 app.use("/api/v1", placesRouter);
+app.use("/api/v1", assetsRouter);
 
 app.use(notFound);
 app.use(errorHandler);
