@@ -259,6 +259,7 @@ function PlaceDetailPage() {
           style={S(
             "display: flex; flex-direction: column; gap: 6px; min-width: 0"
           )}
+          style={S("height: 40px; padding: 0 16px; gap: 8px")}
         >
           <div
             style={S(
@@ -660,7 +661,6 @@ function PlaceDetailPage() {
                   style={S("font-size: 17px; font-weight: 750")}
                 >
                   <Trans>Assets</Trans>
-
                   {assets !== null && (
                     <span
                       style={S(
@@ -711,7 +711,6 @@ function PlaceDetailPage() {
                     size={28}
                     style={S("color: var(--muted-foreground)")}
                   />
-
                   <p
                     style={S(
                       "font-size: 14px; font-weight: 650; margin: 0"
@@ -719,7 +718,6 @@ function PlaceDetailPage() {
                   >
                     <Trans>No assets yet.</Trans>
                   </p>
-
                   <p
                     style={S(
                       "font-size: 13px; color: var(--muted-foreground); margin: 0"
