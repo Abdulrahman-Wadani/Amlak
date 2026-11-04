@@ -1,55 +1,266 @@
-import type { CreatePlaceInput, Place } from "@amlak/shared"
+
+import type {
+  Asset,
+  CreateAssetInput,
+  CreatePlaceInput,
+  Place,
+  WorkerResponse,
+} from "@amlak/shared"
+
+// API response types
+interface ApiResponse<T> {
+  data: T
+  message?: string
+  pagination?: {
+    page: number
+    page_size: number
+    total: number
+    total_pages: number
+  }
+}
 
 function normalizePlace(p: Place): Place {
   return {
     ...p,
-    monthly_maintenance_budget: Number(p.monthly_maintenance_budget),
+    monthly_maintenance_budget: Number(
+      p.monthly_maintenance_budget,
+    ),
   }
 }
 
-async function request<T>(path: string, token: string): Promise<T> {
-  const res = await fetch(`/api/v1${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
-    credentials: "same-origin",
-  })
-  if (!res.ok) throw new Error(`${path} failed with ${res.status}`)
-  return (await res.json()) as T
+// Extract data from the API response.
+// Supports both { data: ... } and the old direct response.
+function unwrapResponse<T>(response: unknown): T {
+  if (
+    response !== null &&
+    typeof response === "object" &&
+    "data" in response
+  ) {
+    return (response as ApiResponse<T>).data
+  }
+
+  return response as T
 }
 
+async function apiRequest<T>(
+  path: string,
+  token: string,
+  options: RequestInit = {},
+): Promise<T> {
+  const res = await fetch(`/api/v1${path}`, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...(options.body
+        ? { "Content-Type": "application/json" }
+        : {}),
+      ...options.headers,
+    },
+    credentials: "same-origin",
+  })
+
+  const response: unknown = await res.json().catch(() => null)
+
+  if (!res.ok) {
+    const message =
+      response &&
+      typeof response === "object" &&
+      "message" in response
+        ? String((response as { message: unknown }).message)
+        : `${path} failed with ${res.status}`
+
+    throw new Error(message)
+  }
+
+  return unwrapResponse<T>(response)
+}
+
+// Places
 export function getPlaces(token: string): Promise<Place[]> {
-  return request<Place[]>("/places", token).then((data) => {
-    if (!Array.isArray(data)) throw new Error("/places returned no list")
+  return apiRequest<Place[]>("/places", token).then((data) => {
+    if (!Array.isArray(data)) {
+      throw new Error("/places returned no list")
+    }
+
     return data.map(normalizePlace)
   })
 }
 
-export function getPlace(token: string, placeId: string): Promise<Place> {
-  return request<Place>(`/place/${placeId}`, token).then((data) => {
-    // The API answers 201 with {"message":"place not found"} for bad ids.
-    if (!data || typeof data.id !== "string") throw new Error("place not found")
-    return normalizePlace(data)
+export function getPlace(
+  token: string,
+  placeId: string,
+): Promise<Place> {
+  return apiRequest<Place>(`/places/${placeId}`, token).then(
+    (data) => {
+      if (!data || typeof data.id !== "string") {
+        throw new Error("place not found")
+      }
+
+      return normalizePlace(data)
+    },
+  )
+}
+
+export function getPlaceAssets(
+  token: string,
+  placeId: string,
+): Promise<Asset[]> {
+  return apiRequest<Asset[]>(
+    `/places/${placeId}/assets`,
+    token,
+  ).then((data) => {
+    if (!Array.isArray(data)) {
+      throw new Error("/assets returned no list")
+    }
+
+    return data
   })
 }
 
+export async function createAsset(
+  token: string,
+  placeId: string,
+  input: CreateAssetInput,
+): Promise<Asset> {
+  const asset = await apiRequest<Asset>(
+    `/places/${placeId}/assets`,
+    token,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        ...input,
+        status: input.status ?? "GOOD",
+      }),
+    },
+  )
+
+  if (!asset || typeof asset.id !== "string") {
+    throw new Error("asset not created")
+  }
+
+  return asset
+}
+
+// Create place
 export class PlaceNameTakenError extends Error {}
 
 export async function createPlace(
   token: string,
   input: CreatePlaceInput,
 ): Promise<Place> {
-  const res = await fetch("/api/v1/place", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-    credentials: "same-origin",
-    body: JSON.stringify(input),
-  })
-  const data: unknown = await res.json().catch(() => null)
-  if (typeof data === "string") throw new PlaceNameTakenError(data)
-  if (!res.ok || !data || typeof data !== "object" || typeof (data as Place).id !== "string") {
-    throw new Error("place not created")
+  try {
+    const place = await apiRequest<Place | string>(
+      "/places",
+      token,
+      {
+        method: "POST",
+        body: JSON.stringify(input),
+      },
+    )
+
+    if (typeof place === "string") {
+      throw new PlaceNameTakenError(place)
+    }
+
+    if (!place || typeof place.id !== "string") {
+      throw new Error("place not created")
+    }
+
+    return normalizePlace(place)
+  } catch (error) {
+    if (error instanceof PlaceNameTakenError) {
+      throw error
+    }
+
+    throw error
   }
-  return normalizePlace(data as Place)
+}
+
+// Workers
+export function getWorkers(
+  token: string,
+): Promise<WorkerResponse[]> {
+  return apiRequest<WorkerResponse[]>("/workers", token).then(
+    (data) => {
+      if (!Array.isArray(data)) {
+        throw new Error("/workers returned no list")
+      }
+
+      return data
+    },
+  )
+}
+
+export function getWorkerById(
+  token: string,
+  id: string,
+): Promise<WorkerResponse> {
+  return apiRequest<WorkerResponse>(`/workers/${id}`, token).then(
+    (data) => {
+      if (!data || typeof data.id !== "string") {
+        throw new Error("worker not found")
+      }
+
+      return data
+    },
+  )
+}
+
+export async function createWorker(
+  accessToken: string,
+  payload: {
+    fullname: string
+    email: string
+    phone: string
+    preferred_language?: "ar" | "en"
+  },
+): Promise<WorkerResponse> {
+  const worker = await apiRequest<WorkerResponse>(
+    "/workers",
+    accessToken,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    },
+  )
+
+  if (!worker || typeof worker.id !== "string") {
+    throw new Error("worker not created")
+  }
+
+  return worker
+}
+
+// Update place
+export async function updatePlace(
+  accessToken: string,
+  placeId: string,
+  data: {
+    place_name: string
+    place_type: string
+    city: string
+    address: string | null
+    description: string | null
+    monthly_maintenance_budget: number
+    latitude: number | null
+    longitude: number | null
+    currency: string
+    timezone: string
+    status: "ACTIVE" | "INACTIVE"
+  },
+): Promise<Place> {
+  const place = await apiRequest<Place>(
+    `/places/${placeId}`,
+    accessToken,
+    {
+      method: "PUT",
+      body: JSON.stringify(data),
+    },
+  )
+
+  if (!place || typeof place.id !== "string") {
+    throw new Error("Failed to update place")
+  }
+
+  return normalizePlace(place)
 }
