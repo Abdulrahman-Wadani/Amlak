@@ -1,6 +1,10 @@
 
 import { useEffect, useState, type ReactNode } from "react"
-import { Link, createFileRoute } from "@tanstack/react-router"
+import {
+  Link,
+  createFileRoute,
+  useNavigate,
+} from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { useLingui } from "@lingui/react"
 import type { WorkerResponse } from "@amlak/shared"
@@ -12,6 +16,7 @@ import {
   MapPin,
   Phone,
   Save,
+  Trash2,
   UserRound,
 } from "lucide-react"
 
@@ -41,13 +46,18 @@ export const Route = createFileRoute(
 
 function WorkerDetailPage() {
   const { worker_id } = Route.useParams()
+  const navigate = useNavigate()
   const { i18n } = useLingui()
   const { accessToken } = useAuth()
 
   const [worker, setWorker] = useState<WorkerResponse | null>(null)
   const [failed, setFailed] = useState(false)
+
   const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
   const [saveError, setSaveError] = useState("")
+  const [deleteError, setDeleteError] = useState("")
   const [saveSuccess, setSaveSuccess] = useState(false)
 
   const [fullname, setFullname] = useState("")
@@ -80,6 +90,7 @@ function WorkerDetailPage() {
     }
   }, [accessToken, worker_id])
 
+  // Update worker
   async function handleUpdate() {
     if (!accessToken || !worker) return
 
@@ -96,7 +107,7 @@ function WorkerDetailPage() {
     }
 
     try {
-      const response = await fetch(`/api/v1/worker/${worker.id}`, {
+      const response = await fetch(`/api/v1/workers/${worker.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -134,6 +145,49 @@ function WorkerDetailPage() {
       )
     } finally {
       setSaving(false)
+    }
+  }
+
+  // Delete worker
+  async function handleDelete() {
+    if (!accessToken || !worker || deleting) return
+
+    const confirmed = window.confirm(
+      `هل أنت متأكد من حذف العامل "${worker.fullname}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+    )
+
+    if (!confirmed) return
+
+    setDeleting(true)
+    setDeleteError("")
+    setSaveError("")
+
+    try {
+      const response = await fetch(`/api/v1/workers/${worker.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+
+      const result = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(
+          result?.message ?? `Delete failed (${response.status})`,
+        )
+      }
+
+      await navigate({ to: "/workers" })
+    } catch (error) {
+      console.error("Delete worker error:", error)
+      setDeleteError(
+        error instanceof Error
+          ? error.message
+          : "Failed to delete worker",
+      )
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -584,7 +638,7 @@ function WorkerDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Save Actions */}
+          {/* Actions */}
           <div
             style={S(`
               display: flex;
@@ -613,6 +667,23 @@ function WorkerDetailPage() {
               </p>
             )}
 
+            {deleteError && (
+              <p
+                role="alert"
+                style={S(`
+                  display: flex;
+                  align-items: center;
+                  gap: 7px;
+                  margin: 0;
+                  color: var(--destructive);
+                  font-size: 13px;
+                `)}
+              >
+                <CircleAlert size={16} />
+                {deleteError}
+              </p>
+            )}
+
             {saveSuccess && (
               <p
                 role="status"
@@ -630,19 +701,43 @@ function WorkerDetailPage() {
               </p>
             )}
 
-            <Button
-              onClick={handleUpdate}
-              disabled={!worker || saving}
-              className="am-btn am-solid"
+            <div
               style={S(`
-                min-width: 130px;
-                height: 42px;
-                gap: 8px;
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 10px;
+                width: 100%;
               `)}
             >
-              <Save size={16} />
-              {saving ? "جارٍ الحفظ..." : "حفظ التغييرات"}
-            </Button>
+              <Button
+                onClick={handleUpdate}
+                disabled={!worker || saving || deleting}
+                className="am-btn am-solid"
+                style={S(`
+                  min-width: 130px;
+                  height: 42px;
+                  gap: 8px;
+                `)}
+              >
+                <Save size={16} />
+                {saving ? "جارٍ الحفظ..." : "حفظ التغييرات"}
+              </Button>
+
+              <Button
+                onClick={handleDelete}
+                disabled={!worker || saving || deleting}
+                variant="destructive"
+                style={S(`
+                  min-width: 130px;
+                  height: 42px;
+                  gap: 8px;
+                `)}
+              >
+                <Trash2 size={16} />
+                {deleting ? "جارٍ الحذف..." : "حذف العامل"}
+              </Button>
+            </div>
           </div>
         </>
       )}

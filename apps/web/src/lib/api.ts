@@ -264,3 +264,23 @@ export async function updatePlace(
 
   return normalizePlace(place)
 }
+
+export async function deleteWorker(
+  token: string,
+  workerId: string
+): Promise<void> {
+  const response = await fetch(`/api/v1/workers/${workerId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  const result = await response.json().catch(() => null)
+
+  if (!response.ok) {
+    throw new Error(
+      result?.message ?? `Delete failed (${response.status})`
+    )
+  }
+}
