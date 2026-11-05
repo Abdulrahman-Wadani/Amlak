@@ -27,6 +27,7 @@ import {
   X,
   Trash2,
   Users,
+  UserMinus,
 } from "lucide-react"
 import {
   Card,
@@ -35,6 +36,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   AssetStatusBadge,
@@ -81,6 +90,7 @@ function PlaceDetailPage() {
   const [deleteError, setDeleteError] = useState("")
   const [selectedWorkerId, setSelectedWorkerId] = useState("")
   const [addingWorker, setAddingWorker] = useState(false)
+  const [unassigningWorkerId, setUnassigningWorkerId] = useState<string | null>(null)
   const [workerError, setWorkerError] = useState("")
   const [workerSuccess, setWorkerSuccess] = useState("")
 
@@ -205,6 +215,45 @@ function PlaceDetailPage() {
     }
   }
 
+  async function handleUnassignWorker(worker: Worker) {
+    if (!accessToken || unassigningWorkerId) return
+
+    const confirmed = window.confirm(
+      `هل أنت متأكد من إزالة العامل "${worker.fullname}" من هذه الملكية؟`,
+    )
+    if (!confirmed) return
+
+    try {
+      setUnassigningWorkerId(worker.id)
+      setWorkerError("")
+      setWorkerSuccess("")
+
+      const response = await fetch(
+        `/api/v1/places/${place_id}/workers/${worker.id}`,
+        {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      )
+      const result = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        throw new Error(result?.message ?? `Unassign failed (${response.status})`)
+      }
+
+      const refreshedWorkers = await getWorkers(accessToken)
+      setWorkers(refreshedWorkers)
+      setWorkerSuccess(`تمت إزالة العامل ${worker.fullname} من الملكية بنجاح.`)
+    } catch (error) {
+      console.error("Unassign worker error:", error)
+      setWorkerError(
+        error instanceof Error ? error.message : "Failed to unassign worker",
+      )
+    } finally {
+      setUnassigningWorkerId(null)
+    }
+  }
+
   async function handleAddWorker(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (!accessToken || !selectedWorkerId || addingWorker) return
@@ -266,9 +315,19 @@ function PlaceDetailPage() {
             )}
           >
             <Building2 size={16} />
-            <span>
-              <Trans>Property details</Trans>
-            </span>
+            <Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink render={<a href="/" />}>الرئيسية</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbLink render={<a href="/places" />}>
+        العقارات
+      </BreadcrumbLink>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
           </div>
 
           <h1
@@ -291,6 +350,7 @@ function PlaceDetailPage() {
           )}
         >
           {place && (
+              
             <button
               type="button"
               onClick={openEditForm}
@@ -318,18 +378,8 @@ function PlaceDetailPage() {
               {deleting ? "جارٍ الحذف..." : "حذف الملكية"}
             </button>
           )}
-
-          <Link
-            to="/places"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "sm" }),
-              "am-btn"
-            )}
-            style={S("height: 40px; padding: 0 16px; gap: 8px")}
-          >
-            <ArrowRight size={16} />
-            <Trans>Your places</Trans>
-          </Link>
+        
+        
         </div>
       </div>
 
@@ -856,6 +906,16 @@ function PlaceDetailPage() {
                                 {worker.phone}
                               </span>
                             )}
+                            <button
+                              type="button"
+                              onClick={() => handleUnassignWorker(worker)}
+                              disabled={unassigningWorkerId !== null || addingWorker}
+                              className="am-btn"
+                              style={S("height: 34px; align-self: flex-start; margin-top: 6px; padding: 0 10px; display: flex; align-items: center; gap: 6px; border: 1px solid var(--destructive); color: var(--destructive); opacity: unassigningWorkerId !== null ? .6 : 1")}
+                            >
+                              <UserMinus size={14} />
+                              {unassigningWorkerId === worker.id ? "جارٍ الإزالة..." : "إزالة من الملكية"}
+                            </button>
                           </div>
                         ))}
                     </div>

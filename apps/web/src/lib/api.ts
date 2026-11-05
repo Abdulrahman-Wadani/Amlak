@@ -284,3 +284,33 @@ export async function deleteWorker(
     )
   }
 }
+const expense = {
+  "data": [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c60",
+      "place_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c10",
+      "ticket_id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40",
+      "created_by": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+      "category": "MAINTENANCE",
+      "description": "AC capacitor and refrigerant",
+      "amount": 420,
+      "currency": "SAR",
+      "expense_date": "2026-10-13",
+      "receipt_url": "https://amlak-uploads.s3.amazonaws.com/receipts/9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c60/3e4f5a6b-7c8d-4e9f-8a1b-2c3d4e5f6a7b.jpg?X-Amz-Signature=...",
+      "created_at": "2026-10-13T18:00:00Z",
+      "updated_at": "2026-10-13T18:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "page_size": 20,
+    "total": 1,
+    "total_pages": 1
+  }
+};
+export async function expenseslist(
+  token: string,
+  placeId: string,
+): Promise<Blob> {
+return expense.data;
+}
