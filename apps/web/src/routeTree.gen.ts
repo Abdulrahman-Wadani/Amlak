@@ -23,6 +23,9 @@ import { Route as AuthenticatedTicketsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedWorkersRouteImport } from './routes/_authenticated/workers'
 import { Route as AuthenticatedPlacePlace_idRouteImport } from './routes/_authenticated/place/$place_id'
 import { Route as AuthenticatedPlaceNewRouteImport } from './routes/_authenticated/place/new'
+import { Route as AuthenticatedWorkerWorker_idRouteImport } from './routes/_authenticated/worker/$worker_id'
+import { Route as AuthenticatedWorkerNewRouteImport } from './routes/_authenticated/worker/new'
+import { Route as AuthenticatedPlaceAssetNewRouteImport } from './routes/_authenticated/place/asset/new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -95,6 +98,23 @@ const AuthenticatedPlaceNewRoute = AuthenticatedPlaceNewRouteImport.update({
   path: '/place/new',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedWorkerWorker_idRoute =
+  AuthenticatedWorkerWorker_idRouteImport.update({
+    id: '/worker/$worker_id',
+    path: '/worker/$worker_id',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedWorkerNewRoute = AuthenticatedWorkerNewRouteImport.update({
+  id: '/worker/new',
+  path: '/worker/new',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedPlaceAssetNewRoute =
+  AuthenticatedPlaceAssetNewRouteImport.update({
+    id: '/place/asset/new',
+    path: '/place/asset/new',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -110,6 +130,9 @@ export interface FileRoutesByFullPath {
   '/workers': typeof AuthenticatedWorkersRoute
   '/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
   '/place/new': typeof AuthenticatedPlaceNewRoute
+  '/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
+  '/worker/new': typeof AuthenticatedWorkerNewRoute
+  '/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -125,6 +148,9 @@ export interface FileRoutesByTo {
   '/workers': typeof AuthenticatedWorkersRoute
   '/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
   '/place/new': typeof AuthenticatedPlaceNewRoute
+  '/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
+  '/worker/new': typeof AuthenticatedWorkerNewRoute
+  '/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,6 +168,9 @@ export interface FileRoutesById {
   '/_authenticated/workers': typeof AuthenticatedWorkersRoute
   '/_authenticated/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
   '/_authenticated/place/new': typeof AuthenticatedPlaceNewRoute
+  '/_authenticated/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
+  '/_authenticated/worker/new': typeof AuthenticatedWorkerNewRoute
+  '/_authenticated/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -159,6 +188,9 @@ export interface FileRouteTypes {
     | '/workers'
     | '/place/$place_id'
     | '/place/new'
+    | '/worker/$worker_id'
+    | '/worker/new'
+    | '/place/asset/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -174,6 +206,9 @@ export interface FileRouteTypes {
     | '/workers'
     | '/place/$place_id'
     | '/place/new'
+    | '/worker/$worker_id'
+    | '/worker/new'
+    | '/place/asset/new'
   id:
     | '__root__'
     | '/'
@@ -190,6 +225,9 @@ export interface FileRouteTypes {
     | '/_authenticated/workers'
     | '/_authenticated/place/$place_id'
     | '/_authenticated/place/new'
+    | '/_authenticated/worker/$worker_id'
+    | '/_authenticated/worker/new'
+    | '/_authenticated/place/asset/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -299,6 +337,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlaceNewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/worker/$worker_id': {
+      id: '/_authenticated/worker/$worker_id'
+      path: '/worker/$worker_id'
+      fullPath: '/worker/$worker_id'
+      preLoaderRoute: typeof AuthenticatedWorkerWorker_idRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/worker/new': {
+      id: '/_authenticated/worker/new'
+      path: '/worker/new'
+      fullPath: '/worker/new'
+      preLoaderRoute: typeof AuthenticatedWorkerNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/place/asset/new': {
+      id: '/_authenticated/place/asset/new'
+      path: '/place/asset/new'
+      fullPath: '/place/asset/new'
+      preLoaderRoute: typeof AuthenticatedPlaceAssetNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
@@ -313,6 +372,9 @@ interface AuthenticatedRouteChildren {
   AuthenticatedWorkersRoute: typeof AuthenticatedWorkersRoute
   AuthenticatedPlacePlace_idRoute: typeof AuthenticatedPlacePlace_idRoute
   AuthenticatedPlaceNewRoute: typeof AuthenticatedPlaceNewRoute
+  AuthenticatedWorkerWorker_idRoute: typeof AuthenticatedWorkerWorker_idRoute
+  AuthenticatedWorkerNewRoute: typeof AuthenticatedWorkerNewRoute
+  AuthenticatedPlaceAssetNewRoute: typeof AuthenticatedPlaceAssetNewRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -326,6 +388,9 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedWorkersRoute: AuthenticatedWorkersRoute,
   AuthenticatedPlacePlace_idRoute: AuthenticatedPlacePlace_idRoute,
   AuthenticatedPlaceNewRoute: AuthenticatedPlaceNewRoute,
+  AuthenticatedWorkerWorker_idRoute: AuthenticatedWorkerWorker_idRoute,
+  AuthenticatedWorkerNewRoute: AuthenticatedWorkerNewRoute,
+  AuthenticatedPlaceAssetNewRoute: AuthenticatedPlaceAssetNewRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

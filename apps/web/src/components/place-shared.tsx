@@ -62,6 +62,55 @@ export function StatusBadge({ status }: { status: string }) {
   )
 }
 
+export function AssetStatusBadge({ status }: { status: string }) {
+  if (status === "GOOD") {
+    return (
+      <Chip
+        bg="var(--good-50)"
+        border="var(--good-200)"
+        text="var(--good-700)"
+        dot="var(--good)"
+      >
+        <Trans>Good</Trans>
+      </Chip>
+    )
+  }
+  if (status === "NEEDS_MAINTENANCE") {
+    return (
+      <Chip
+        bg="var(--warn-50)"
+        border="var(--warn-200)"
+        text="var(--warn-700)"
+        dot="var(--warn)"
+      >
+        <Trans>Needs maintenance</Trans>
+      </Chip>
+    )
+  }
+  if (status === "UNDER_MAINTENANCE") {
+    return (
+      <Chip
+        bg="var(--info-50)"
+        border="var(--info-200)"
+        text="var(--info-700)"
+        dot="var(--info)"
+      >
+        <Trans>Under maintenance</Trans>
+      </Chip>
+    )
+  }
+  return (
+    <Chip
+      bg="var(--crit-50)"
+      border="var(--crit-200)"
+      text="var(--crit-900)"
+      dot="var(--crit)"
+    >
+      <Trans>Out of service</Trans>
+    </Chip>
+  )
+}
+
 export function TypeLabel({ type }: { type: string }) {
   switch (type.toUpperCase().replace(/[\s-]+/g, "_")) {
     case "APARTMENT":
