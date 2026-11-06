@@ -3,6 +3,7 @@ export * from "./auth.ts";
 export * from "./pagination.ts";
 export * from "./place-workers.ts";
 export * from "./places.ts";
+export * from "./profile.ts";
 export * from "./roles.ts";
 export * from "./users.ts";
 export * from "./workers.ts";

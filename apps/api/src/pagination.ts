@@ -14,7 +14,6 @@ export type Page = {
 	take: number;
 };
 
-/** Reads `page` and `page_size` from a request's query string. */
 export function parsePage(query: unknown): Page {
 	const { page, page_size } = parse(pageQuerySchema, query);
 	return {
@@ -25,7 +24,6 @@ export function parsePage(query: unknown): Page {
 	};
 }
 
-/** Wraps one page of rows in the list response shape. */
 export function paginated<T>(
 	data: T[],
 	total: number,

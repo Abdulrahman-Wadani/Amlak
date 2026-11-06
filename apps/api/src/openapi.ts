@@ -17,6 +17,7 @@ import {
 	registerSchema,
 	updateAssetSchema,
 	updatePlaceSchema,
+	updateProfileSchema,
 	updateWorkerSchema,
 	userSchema,
 	verificationCodeSchema,
@@ -142,6 +143,30 @@ export const openApiDocument = createDocument({
 				tags: ["Auth"],
 				summary: "Log out and clear the refresh_token cookie",
 				responses: { "204": { description: "Logged out" } },
+			},
+		},
+		"/users/me": {
+			get: {
+				tags: ["Profile"],
+				summary: "Get my profile (any role)",
+				security: loggedIn,
+				responses: {
+					"200": ok("Your profile", userSchema),
+					"401": fail("Missing, invalid or expired access token"),
+				},
+			},
+			put: {
+				tags: ["Profile"],
+				summary: "Update my name, phone or language (any role)",
+				security: loggedIn,
+				requestBody: {
+					content: { "multipart/form-data": { schema: updateProfileSchema } },
+				},
+				responses: {
+					"200": ok("Your updated profile", userSchema),
+					"401": fail("Missing, invalid or expired access token"),
+					"422": fail("Some fields are invalid"),
+				},
 			},
 		},
 		"/places": {
