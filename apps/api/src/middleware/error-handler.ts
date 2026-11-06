@@ -1,4 +1,5 @@
 import type { ErrorRequestHandler } from "express";
+import multer from "multer";
 import { AppError } from "../errors.ts";
 
 export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
@@ -13,6 +14,15 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
 			code: error.code,
 			message: error.message,
 			details: error.details,
+		});
+		return;
+	}
+
+	if (error instanceof multer.MulterError) {
+		res.status(422).json({
+			code: "VALIDATION_ERROR",
+			message: "Some fields are invalid",
+			details: { fields: { [error.field ?? "body"]: error.message } },
 		});
 		return;
 	}
