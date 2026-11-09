@@ -39,7 +39,7 @@ export async function listWorkers(
 		}),
 		prisma.user.count({ where }),
 	]);
-	return paginated(rows.map(toWorker), total, page);
+	return paginated(await Promise.all(rows.map(toWorker)), total, page);
 }
 
 export async function getWorker(
@@ -97,7 +97,7 @@ export async function createWorker(
 			action: "WORKER_CREATE",
 			entityType: "User",
 			entityId: row.id,
-			newValues: toWorker(row),
+			newValues: await toWorker(row),
 			ipAddress,
 		});
 		return row;
@@ -166,7 +166,7 @@ export async function deleteWorker(
 			action: "WORKER_DELETE",
 			entityType: "User",
 			entityId: worker.id,
-			oldValues: toWorker(worker),
+			oldValues: await toWorker(worker),
 			ipAddress,
 		});
 	});
