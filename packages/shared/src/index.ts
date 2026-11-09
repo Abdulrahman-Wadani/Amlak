@@ -7,3 +7,4 @@ export * from "./profile.ts";
 export * from "./roles.ts";
 export * from "./users.ts";
 export * from "./workers.ts";
+export * from "./bookings.ts";

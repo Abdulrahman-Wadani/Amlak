@@ -284,3 +284,142 @@ export async function deleteWorker(
     )
   }
 }
+
+export async function getAssetById(
+  token: string,
+  assetId: string,
+): Promise<Asset> {
+  return apiRequest<Asset>(`/assets/${assetId}`, token).then(
+    (data) => {
+      if (!data || typeof data.id !== "string") {
+        throw new Error("asset not found")
+      }
+
+      return data
+    },
+  )
+}
+
+export async function getTicketsForPlace(
+  token: string,
+  placeId: string,
+) {
+  return [{
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40",
+      "place_id": "8cab34c5-291f-4ba7-b3fc-6834d54fba50",
+      "asset_id": "e99bdd97-4e6b-4eb4-94ff-13a208b4fee5",
+      "periodic_maintenance_id": null,
+      "ticket_type": "CORRECTIVE",
+      "priority": "HIGH",
+      "status": "APPROVED",
+      "description": "هواء المكيف خربان",
+      "reporter_id": "d20242bc-2813-4a7d-9ec7-eb60e1a0db94",
+      "assignee_id": "d20242bc-2813-4a7d-9ec7-eb60e1a0db94",
+      "due_date": "2026-10-14",
+      "is_overdue": true,
+      "estimated_cost": 350,
+      "actual_cost": 500,
+      "reviewed_by": "d20242bc-2813-4a7d-9ec7-eb60e1a0db94",
+      "reviewed_at": "2026-10-11T12:00:00Z",
+      "rejection_reason": "تحت المراجعة",
+      "completed_at": "2026-10-15T10:00:00Z",
+      "completion_notes": "الامور تحت السيطرة",
+      "created_at": "2026-10-11T09:30:00Z",
+      "updated_at": "2026-10-11T12:00:00Z"
+    }]
+}
+
+export async function getTicketById(
+  token: string,
+  ticketId: string,
+) {
+  return [{
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c40",
+      "place_id": "8cab34c5-291f-4ba7-b3fc-6834d54fba50",
+      "asset_id": "e99bdd97-4e6b-4eb4-94ff-13a208b4fee5",
+      "periodic_maintenance_id": null,
+      "ticket_type": "CORRECTIVE",
+      "priority": "HIGH",
+      "status": "APPROVED",
+      "description": "هواء المكيف خربان",
+      "reporter_id": "d20242bc-2813-4a7d-9ec7-eb60e1a0db94",
+      "assignee_id": "d20242bc-2813-4a7d-9ec7-eb60e1a0db94",
+      "due_date": "2026-10-14",
+      "is_overdue": true,
+      "estimated_cost": 350,
+      "actual_cost": 500,
+      "reviewed_by": "d20242bc-2813-4a7d-9ec7-eb60e1a0db94",
+      "reviewed_at": "2026-10-11T12:00:00Z",
+      "rejection_reason": "تحت المراجعة",
+      "completed_at": "2026-10-15T10:00:00Z",
+      "completion_notes": "الامور تحت السيطرة",
+      "created_at": "2026-10-11T09:30:00Z",
+      "updated_at": "2026-10-11T12:00:00Z"
+    }]
+}
+
+export async function expenseslist(
+  token: string,
+  placeId: string,
+): Promise<Blob> {
+return expense.data;
+}
+
+// for test now only
+export type TicketPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+
+export interface CreateTicketInput {
+  asset_id?: string
+  priority?: TicketPriority
+  description?: string
+  photos?: File[]
+}
+
+export async function createTicket(
+  token: string,
+  placeId: string,
+  input: CreateTicketInput,
+) {
+  const formData = new FormData()
+
+  if (input.asset_id) {
+    formData.append("asset_id", input.asset_id)
+  }
+
+  if (input.priority) {
+    formData.append("priority", input.priority)
+  }
+
+  if (input.description) {
+    formData.append("description", input.description)
+  }
+
+  for (const photo of input.photos ?? []) {
+    formData.append("photos", photo)
+  }
+
+  const res = await fetch(`/api/v1/places/${placeId}/tickets`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+    credentials: "same-origin",
+  })
+
+  const response: unknown = await res.json().catch(() => null)
+
+  if (!res.ok) {
+    const message =
+      response &&
+      typeof response === "object" &&
+      "message" in response
+        ? String((response as { message: unknown }).message)
+        : `Create ticket failed with ${res.status}`
+
+    throw new Error(message)
+  }
+
+  return unwrapResponse(response)
+}
+

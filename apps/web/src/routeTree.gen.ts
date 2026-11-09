@@ -23,8 +23,11 @@ import { Route as AuthenticatedTicketsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedWorkersRouteImport } from './routes/_authenticated/workers'
 import { Route as AuthenticatedPlacePlace_idRouteImport } from './routes/_authenticated/place/$place_id'
 import { Route as AuthenticatedPlaceNewRouteImport } from './routes/_authenticated/place/new'
+import { Route as AuthenticatedTicketTicket_idRouteImport } from './routes/_authenticated/ticket/$ticket_id'
+import { Route as AuthenticatedTicketNewRouteImport } from './routes/_authenticated/ticket/new'
 import { Route as AuthenticatedWorkerWorker_idRouteImport } from './routes/_authenticated/worker/$worker_id'
 import { Route as AuthenticatedWorkerNewRouteImport } from './routes/_authenticated/worker/new'
+import { Route as AuthenticatedPlaceAssetAsset_idRouteImport } from './routes/_authenticated/place/asset/$asset_id'
 import { Route as AuthenticatedPlaceAssetNewRouteImport } from './routes/_authenticated/place/asset/new'
 
 const IndexRoute = IndexRouteImport.update({
@@ -98,6 +101,17 @@ const AuthenticatedPlaceNewRoute = AuthenticatedPlaceNewRouteImport.update({
   path: '/place/new',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedTicketTicket_idRoute =
+  AuthenticatedTicketTicket_idRouteImport.update({
+    id: '/ticket/$ticket_id',
+    path: '/ticket/$ticket_id',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedTicketNewRoute = AuthenticatedTicketNewRouteImport.update({
+  id: '/ticket/new',
+  path: '/ticket/new',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedWorkerWorker_idRoute =
   AuthenticatedWorkerWorker_idRouteImport.update({
     id: '/worker/$worker_id',
@@ -109,6 +123,12 @@ const AuthenticatedWorkerNewRoute = AuthenticatedWorkerNewRouteImport.update({
   path: '/worker/new',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedPlaceAssetAsset_idRoute =
+  AuthenticatedPlaceAssetAsset_idRouteImport.update({
+    id: '/place/asset/$asset_id',
+    path: '/place/asset/$asset_id',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedPlaceAssetNewRoute =
   AuthenticatedPlaceAssetNewRouteImport.update({
     id: '/place/asset/new',
@@ -130,8 +150,11 @@ export interface FileRoutesByFullPath {
   '/workers': typeof AuthenticatedWorkersRoute
   '/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
   '/place/new': typeof AuthenticatedPlaceNewRoute
+  '/ticket/$ticket_id': typeof AuthenticatedTicketTicket_idRoute
+  '/ticket/new': typeof AuthenticatedTicketNewRoute
   '/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
   '/worker/new': typeof AuthenticatedWorkerNewRoute
+  '/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
 }
 export interface FileRoutesByTo {
@@ -148,8 +171,11 @@ export interface FileRoutesByTo {
   '/workers': typeof AuthenticatedWorkersRoute
   '/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
   '/place/new': typeof AuthenticatedPlaceNewRoute
+  '/ticket/$ticket_id': typeof AuthenticatedTicketTicket_idRoute
+  '/ticket/new': typeof AuthenticatedTicketNewRoute
   '/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
   '/worker/new': typeof AuthenticatedWorkerNewRoute
+  '/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
 }
 export interface FileRoutesById {
@@ -168,8 +194,11 @@ export interface FileRoutesById {
   '/_authenticated/workers': typeof AuthenticatedWorkersRoute
   '/_authenticated/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
   '/_authenticated/place/new': typeof AuthenticatedPlaceNewRoute
+  '/_authenticated/ticket/$ticket_id': typeof AuthenticatedTicketTicket_idRoute
+  '/_authenticated/ticket/new': typeof AuthenticatedTicketNewRoute
   '/_authenticated/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
   '/_authenticated/worker/new': typeof AuthenticatedWorkerNewRoute
+  '/_authenticated/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/_authenticated/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
 }
 export interface FileRouteTypes {
@@ -188,8 +217,11 @@ export interface FileRouteTypes {
     | '/workers'
     | '/place/$place_id'
     | '/place/new'
+    | '/ticket/$ticket_id'
+    | '/ticket/new'
     | '/worker/$worker_id'
     | '/worker/new'
+    | '/place/asset/$asset_id'
     | '/place/asset/new'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -206,8 +238,11 @@ export interface FileRouteTypes {
     | '/workers'
     | '/place/$place_id'
     | '/place/new'
+    | '/ticket/$ticket_id'
+    | '/ticket/new'
     | '/worker/$worker_id'
     | '/worker/new'
+    | '/place/asset/$asset_id'
     | '/place/asset/new'
   id:
     | '__root__'
@@ -225,8 +260,11 @@ export interface FileRouteTypes {
     | '/_authenticated/workers'
     | '/_authenticated/place/$place_id'
     | '/_authenticated/place/new'
+    | '/_authenticated/ticket/$ticket_id'
+    | '/_authenticated/ticket/new'
     | '/_authenticated/worker/$worker_id'
     | '/_authenticated/worker/new'
+    | '/_authenticated/place/asset/$asset_id'
     | '/_authenticated/place/asset/new'
   fileRoutesById: FileRoutesById
 }
@@ -337,6 +375,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlaceNewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/ticket/$ticket_id': {
+      id: '/_authenticated/ticket/$ticket_id'
+      path: '/ticket/$ticket_id'
+      fullPath: '/ticket/$ticket_id'
+      preLoaderRoute: typeof AuthenticatedTicketTicket_idRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/ticket/new': {
+      id: '/_authenticated/ticket/new'
+      path: '/ticket/new'
+      fullPath: '/ticket/new'
+      preLoaderRoute: typeof AuthenticatedTicketNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/worker/$worker_id': {
       id: '/_authenticated/worker/$worker_id'
       path: '/worker/$worker_id'
@@ -349,6 +401,13 @@ declare module '@tanstack/react-router' {
       path: '/worker/new'
       fullPath: '/worker/new'
       preLoaderRoute: typeof AuthenticatedWorkerNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/place/asset/$asset_id': {
+      id: '/_authenticated/place/asset/$asset_id'
+      path: '/place/asset/$asset_id'
+      fullPath: '/place/asset/$asset_id'
+      preLoaderRoute: typeof AuthenticatedPlaceAssetAsset_idRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/place/asset/new': {
@@ -372,8 +431,11 @@ interface AuthenticatedRouteChildren {
   AuthenticatedWorkersRoute: typeof AuthenticatedWorkersRoute
   AuthenticatedPlacePlace_idRoute: typeof AuthenticatedPlacePlace_idRoute
   AuthenticatedPlaceNewRoute: typeof AuthenticatedPlaceNewRoute
+  AuthenticatedTicketTicket_idRoute: typeof AuthenticatedTicketTicket_idRoute
+  AuthenticatedTicketNewRoute: typeof AuthenticatedTicketNewRoute
   AuthenticatedWorkerWorker_idRoute: typeof AuthenticatedWorkerWorker_idRoute
   AuthenticatedWorkerNewRoute: typeof AuthenticatedWorkerNewRoute
+  AuthenticatedPlaceAssetAsset_idRoute: typeof AuthenticatedPlaceAssetAsset_idRoute
   AuthenticatedPlaceAssetNewRoute: typeof AuthenticatedPlaceAssetNewRoute
 }
 
@@ -388,8 +450,11 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedWorkersRoute: AuthenticatedWorkersRoute,
   AuthenticatedPlacePlace_idRoute: AuthenticatedPlacePlace_idRoute,
   AuthenticatedPlaceNewRoute: AuthenticatedPlaceNewRoute,
+  AuthenticatedTicketTicket_idRoute: AuthenticatedTicketTicket_idRoute,
+  AuthenticatedTicketNewRoute: AuthenticatedTicketNewRoute,
   AuthenticatedWorkerWorker_idRoute: AuthenticatedWorkerWorker_idRoute,
   AuthenticatedWorkerNewRoute: AuthenticatedWorkerNewRoute,
+  AuthenticatedPlaceAssetAsset_idRoute: AuthenticatedPlaceAssetAsset_idRoute,
   AuthenticatedPlaceAssetNewRoute: AuthenticatedPlaceAssetNewRoute,
 }
 
