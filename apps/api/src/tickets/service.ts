@@ -7,42 +7,60 @@ import type {
 } from "@amlak/shared";
 import { auditLog } from "../audit.ts";
 import type { AuthUser } from "../auth/tokens.ts";
+import { toDbDate, todayIn } from "../dates.ts";
 import { prisma } from "../db.ts";
 import { AppError } from "../errors.ts";
+import type { Prisma } from "../generated/prisma/client.ts";
 import { notify } from "../notifications.ts";
 import { type Page, paginated } from "../pagination.ts";
-import { findPlaceFor } from "../places/access.ts";
+import { findPlaceFor, visiblePlaces } from "../places/access.ts";
 import { type ImageFile, storeImage } from "../uploads/storage.ts";
-import { findTicketFor, ticketInclude, visibleTickets } from "./access.ts";
-import { toTicket } from "./present.ts";
+import {
+	findTicketFor,
+	ticketInclude,
+	ticketListInclude,
+	visibleTickets,
+} from "./access.ts";
+import { toTicket, toTicketWithPhotos } from "./present.ts";
 
 export async function listTickets(
 	user: AuthUser,
 	query: ListTicketsQuery,
 	page: Page,
 ): Promise<Paginated<Ticket>> {
-	const where = { ...visibleTickets(user), ...query };
+	const { overdue, ...filters } = query;
+	const where: Prisma.MaintenanceTicketWhereInput = {
+		...visibleTickets(user),
+		...filters,
+	};
+	if (overdue === true) {
+		where.AND = [await overdueTickets(user)];
+	}
+	if (overdue === false) {
+		where.NOT = [await overdueTickets(user)];
+	}
 	const [rows, total] = await prisma.$transaction([
 		prisma.maintenanceTicket.findMany({
 			where,
-			include: ticketInclude,
+			include: ticketListInclude,
 			orderBy: [{ created_at: "desc" }, { id: "asc" }],
 			skip: page.skip,
 			take: page.take,
 		}),
 		prisma.maintenanceTicket.count({ where }),
 	]);
-	const tickets = await Promise.all(
+	return paginated(
 		rows.map((row) => toTicket(row, user.role)),
+		total,
+		page,
 	);
-	return paginated(tickets, total, page);
 }
 
 export async function getTicket(
 	user: AuthUser,
 	ticketId: string,
 ): Promise<Ticket> {
-	return toTicket(await findTicketFor(user, ticketId), user.role);
+	return toTicketWithPhotos(await findTicketFor(user, ticketId), user.role);
 }
 
 /**
@@ -118,7 +136,7 @@ export async function createTicket(
 		}
 		return ticket;
 	});
-	return toTicket(row, user.role);
+	return toTicketWithPhotos(row, user.role);
 }
 
 async function assertAssetInPlace(assetId: string, placeId: string) {
@@ -131,4 +149,25 @@ async function assertAssetInPlace(assetId: string, placeId: string) {
 			fields: { asset_id: "This asset is not in this place" },
 		});
 	}
+}
+
+/**
+ * APPROVED tickets whose due date has passed. "Today" depends on each
+ * place's time zone, so the condition is built once per time zone in use.
+ */
+async function overdueTickets(
+	user: AuthUser,
+): Promise<Prisma.MaintenanceTicketWhereInput> {
+	const zones = await prisma.place.findMany({
+		where: visiblePlaces(user),
+		distinct: ["timezone"],
+		select: { timezone: true },
+	});
+	return {
+		status: "APPROVED",
+		OR: zones.map(({ timezone }) => ({
+			place: { timezone },
+			due_date: { lt: toDbDate(todayIn(timezone)) },
+		})),
+	};
 }

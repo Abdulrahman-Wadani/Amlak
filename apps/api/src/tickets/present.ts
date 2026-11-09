@@ -1,14 +1,13 @@
 import type { Ticket, TicketAttachment } from "@amlak/shared";
 import type { AuthUser } from "../auth/tokens.ts";
-import { fromDbDate } from "../dates.ts";
+import { fromDbDate, todayIn } from "../dates.ts";
 import type { TicketAttachment as AttachmentRow } from "../generated/prisma/client.ts";
 import { imageUrl } from "../uploads/storage.ts";
-import type { TicketRow } from "./access.ts";
+import type { TicketListRow, TicketRow } from "./access.ts";
 
-export async function toTicket(
-	row: TicketRow,
-	role: AuthUser["role"],
-): Promise<Ticket> {
+/** A ticket as lists return it, without photos. */
+export function toTicket(row: TicketListRow, role: AuthUser["role"]): Ticket {
+	const dueDate = row.due_date ? fromDbDate(row.due_date) : null;
 	const ticket: Ticket = {
 		id: row.id,
 		place_id: row.place_id,
@@ -24,16 +23,29 @@ export async function toTicket(
 		reviewed_at: row.reviewed_at?.toISOString() ?? null,
 		rejection_reason: row.rejection_reason,
 		actual_cost: row.actual_cost?.toNumber() ?? null,
-		due_date: row.due_date ? fromDbDate(row.due_date) : null,
+		due_date: dueDate,
+		is_overdue:
+			row.status === "APPROVED" &&
+			dueDate !== null &&
+			dueDate < todayIn(row.place.timezone),
 		completed_at: row.completed_at?.toISOString() ?? null,
 		completion_notes: row.completion_notes,
-		attachments: await Promise.all(row.attachments.map(toAttachment)),
 		created_at: row.created_at.toISOString(),
 		updated_at: row.updated_at.toISOString(),
 	};
 	if (role !== "WORKER") {
 		ticket.estimated_cost = row.estimated_cost?.toNumber() ?? null;
 	}
+	return ticket;
+}
+
+/** A single ticket, with signed links to its photos. */
+export async function toTicketWithPhotos(
+	row: TicketRow,
+	role: AuthUser["role"],
+): Promise<Ticket> {
+	const ticket = toTicket(row, role);
+	ticket.attachments = await Promise.all(row.attachments.map(toAttachment));
 	return ticket;
 }
 
@@ -45,5 +57,6 @@ async function toAttachment(row: AttachmentRow): Promise<TicketAttachment> {
 		file_url: await imageUrl(row.file_url),
 		uploaded_by: row.uploaded_by,
 		created_at: row.created_at.toISOString(),
+		updated_at: row.updated_at.toISOString(),
 	};
 }
