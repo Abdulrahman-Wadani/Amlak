@@ -10,8 +10,14 @@ export type AuditAction =
 	| "WORKER_REACTIVATE"
 	| "WORKER_REACTIVATE"
 	| "WORKER_ASSIGN"
-	| "WORKER_UNASSIGN";
-export type AuditEntity = "User" | "Place" | "Asset" | "PlaceWorker";
+	| "WORKER_UNASSIGN"
+	| "TICKET_CREATE";
+export type AuditEntity =
+	| "User"
+	| "Place"
+	| "Asset"
+	| "PlaceWorker"
+	| "MaintenanceTicket";
 
 export type AuditEntry = {
 	action: AuditAction;
