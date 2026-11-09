@@ -5,9 +5,11 @@ import {
 	assignWorkerSchema,
 	createAssetSchema,
 	createPlaceSchema,
+	createTicketSchema,
 	createWorkerSchema,
 	listAssetsQuerySchema,
 	listPlacesQuerySchema,
+	listTicketsQuerySchema,
 	listWorkersQuerySchema,
 	loginResponseSchema,
 	loginSchema,
@@ -15,6 +17,7 @@ import {
 	placeSchema,
 	placeWorkerSchema,
 	registerSchema,
+	ticketSchema,
 	updateAssetSchema,
 	updatePlaceSchema,
 	updateProfileSchema,
@@ -30,6 +33,7 @@ import { assetParams } from "./assets/routes.ts";
 import { pageQuerySchema } from "./pagination.ts";
 import { placeWorkerParams } from "./place-workers/routes.ts";
 import { placeParams } from "./places/routes.ts";
+import { ticketParams } from "./tickets/routes.ts";
 import { workerParams } from "./workers/routes.ts";
 
 const errorSchema = z
@@ -274,6 +278,64 @@ export const openApiDocument = createDocument({
 					"422": fail(
 						"Some fields are invalid, or purchase_date is in the future",
 					),
+					...guarded,
+				},
+			},
+		},
+		"/places/{placeId}/tickets": {
+			post: {
+				tags: ["Maintenance tickets"],
+				summary:
+					"Report damage with photos (Worker on the place, or its Manager)",
+				security: loggedIn,
+				requestParams: { path: placeParams },
+				requestBody: {
+					content: {
+						"multipart/form-data": {
+							schema: createTicketSchema.extend({
+								photos: z
+									.array(z.file())
+									.min(1)
+									.max(5)
+									.meta({ description: "1 to 5 JPEG, PNG or WebP photos" }),
+							}),
+						},
+					},
+				},
+				responses: {
+					"201": ok("The new ticket, waiting for review", ticketSchema),
+					"404": fail("Place not found"),
+					"422": fail(
+						"Some fields are invalid, a photo is missing, or the asset is not in this place",
+					),
+					...guarded,
+				},
+			},
+		},
+		"/tickets": {
+			get: {
+				tags: ["Maintenance tickets"],
+				summary: "List the tickets you can see",
+				security: loggedIn,
+				requestParams: {
+					query: listTicketsQuerySchema.extend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok("One page of tickets", paginatedSchema(ticketSchema)),
+					"422": fail("Invalid filter or page"),
+					...guarded,
+				},
+			},
+		},
+		"/tickets/{ticketId}": {
+			get: {
+				tags: ["Maintenance tickets"],
+				summary: "Get a ticket with its photos",
+				security: loggedIn,
+				requestParams: { path: ticketParams },
+				responses: {
+					"200": ok("The ticket", ticketSchema),
+					"404": fail("Ticket not found"),
 					...guarded,
 				},
 			},

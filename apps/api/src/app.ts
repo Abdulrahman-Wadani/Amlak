@@ -8,6 +8,7 @@ import { notFound } from "./middleware/not-found.ts";
 import { openApiDocument } from "./openapi.ts";
 import { placeWorkersRouter } from "./place-workers/routes.ts";
 import { placesRouter } from "./places/routes.ts";
+import { ticketsRouter } from "./tickets/routes.ts";
 import { usersRouter } from "./users/routes.ts";
 import { workersRouter } from "./workers/routes.ts";
 
@@ -22,6 +23,7 @@ app.use("/api/v1", placesRouter);
 app.use("/api/v1", assetsRouter);
 app.use("/api/v1", workersRouter);
 app.use("/api/v1", placeWorkersRouter);
+app.use("/api/v1", ticketsRouter);
 
 app.use(
 	"/api/docs",
