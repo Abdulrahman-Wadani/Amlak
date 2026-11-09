@@ -198,7 +198,7 @@ export async function login(
 		entityId: user.id,
 		ipAddress,
 	});
-	return { session, user: toUser(user) };
+	return { session, user: await toUser(user) };
 }
 
 export async function refresh(

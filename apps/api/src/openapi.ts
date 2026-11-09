@@ -157,10 +157,19 @@ export const openApiDocument = createDocument({
 			},
 			put: {
 				tags: ["Profile"],
-				summary: "Update my name, phone or language (any role)",
+				summary: "Update my name, phone, language or picture (any role)",
 				security: loggedIn,
 				requestBody: {
-					content: { "multipart/form-data": { schema: updateProfileSchema } },
+					content: {
+						"multipart/form-data": {
+							schema: updateProfileSchema.extend({
+								picture: z
+									.file()
+									.optional()
+									.meta({ description: "JPEG, PNG or WebP, up to 10 MB" }),
+							}),
+						},
+					},
 				},
 				responses: {
 					"200": ok("Your updated profile", userSchema),
