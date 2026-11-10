@@ -21,6 +21,7 @@ import {
 	ticketListInclude,
 	visibleTickets,
 } from "./access.ts";
+import { submittedNotice } from "./messages.ts";
 import { toTicket, toTicketWithPhotos } from "./present.ts";
 
 export async function listTickets(
@@ -129,8 +130,11 @@ export async function createTicket(
 		if (place.owner_id !== user.user_id) {
 			await notify(tx, place.owner_id, {
 				type: "TICKET_SUBMITTED",
-				title: "New maintenance ticket",
-				message: `${place.place_name}: ${ticket.description}`,
+				notice: (language) =>
+					submittedNotice(language, {
+						placeName: place.place_name,
+						description: ticket.description,
+					}),
 				senderId: user.user_id,
 			});
 		}

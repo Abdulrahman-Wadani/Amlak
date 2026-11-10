@@ -2,7 +2,7 @@ import { fromDbDate, todayIn } from "../dates.ts";
 import { prisma } from "../db.ts";
 import { sendEmailOrLog } from "../email.ts";
 import { notify } from "../notifications.ts";
-import { overdueMessage } from "../tickets/messages.ts";
+import { overdueEmail, overdueNotice } from "../tickets/messages.ts";
 
 /**
  * Alerts the place's owner about each APPROVED ticket past its due date, in
@@ -29,13 +29,11 @@ export async function sendOverdueAlerts(): Promise<number> {
 		}
 
 		const owner = ticket.place.owner;
-		const message = overdueMessage(owner.preferred_language, {
-			recipientName: owner.fullname,
+		const facts = {
 			placeName: ticket.place.place_name,
 			description: ticket.description,
 			dueDate,
-			assigneeName: ticket.assignee?.fullname ?? "-",
-		});
+		};
 		// Marking the ticket first makes the alert go out once, even when two
 		// runs overlap.
 		const marked = await prisma.$transaction(async (tx) => {
@@ -52,18 +50,22 @@ export async function sendOverdueAlerts(): Promise<number> {
 			}
 			await notify(tx, owner.id, {
 				type: "MAINTENANCE_OVERDUE",
-				title: message.subject,
-				message: message.summary,
+				notice: (language) => overdueNotice(language, facts),
 			});
 			return true;
 		});
 		if (!marked) {
 			continue;
 		}
+		const email = overdueEmail(owner.preferred_language, {
+			...facts,
+			recipientName: owner.fullname,
+			assigneeName: ticket.assignee?.fullname ?? "-",
+		});
 		await sendEmailOrLog({
 			to: owner.email,
-			subject: message.subject,
-			text: message.body,
+			subject: email.subject,
+			text: email.body,
 		});
 		sent++;
 	}

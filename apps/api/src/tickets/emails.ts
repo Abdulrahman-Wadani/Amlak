@@ -1,7 +1,7 @@
 import { addDays, fromDbDate, todayIn } from "../dates.ts";
 import { prisma } from "../db.ts";
 import { sendEmail } from "../email.ts";
-import { assignedMessage } from "./messages.ts";
+import { assignedEmail } from "./messages.ts";
 
 /**
  * Emails the assignee that a ticket is now theirs, in their language. Called
@@ -17,7 +17,7 @@ export async function emailAssignee(ticketId: string): Promise<void> {
 		if (!ticket.assignee || !ticket.due_date) {
 			return;
 		}
-		const message = assignedMessage(ticket.assignee.preferred_language, {
+		const email = assignedEmail(ticket.assignee.preferred_language, {
 			recipientName: ticket.assignee.fullname,
 			placeName: ticket.place.place_name,
 			description: ticket.description,
@@ -25,8 +25,8 @@ export async function emailAssignee(ticketId: string): Promise<void> {
 		});
 		await sendEmail({
 			to: ticket.assignee.email,
-			subject: message.subject,
-			text: message.body,
+			subject: email.subject,
+			text: email.body,
 		});
 	} catch (error) {
 		console.error("Could not email the assignee of ticket", ticketId, error);

@@ -6,6 +6,7 @@ import { AppError } from "../errors.ts";
 import { notify } from "../notifications.ts";
 import { type ImageFile, storeImage } from "../uploads/storage.ts";
 import { findTicketFor } from "./access.ts";
+import { completedNotice } from "./messages.ts";
 import { toTicketWithPhotos } from "./present.ts";
 import { moveTicket } from "./review.ts";
 
@@ -97,8 +98,11 @@ export async function completeTicket(
 		if (place.owner_id !== user.user_id) {
 			await notify(tx, place.owner_id, {
 				type: "TICKET_COMPLETED",
-				title: "Maintenance ticket completed",
-				message: `${place.place_name}: ${ticket.description}`,
+				notice: (language) =>
+					completedNotice(language, {
+						placeName: place.place_name,
+						description: ticket.description,
+					}),
 				senderId: user.user_id,
 			});
 		}
