@@ -11,7 +11,12 @@ export type AuditAction =
 	| "WORKER_REACTIVATE"
 	| "WORKER_ASSIGN"
 	| "WORKER_UNASSIGN"
-	| "TICKET_CREATE";
+	| "TICKET_CREATE"
+	| "WORKER_UNASSIGN"
+	| "TICKET_CREATE"
+	| "TICKET_APPROVE"
+	| "TICKET_REJECT"
+	| "TICKET_REASSIGN";
 export type AuditEntity =
 	| "User"
 	| "Place"
