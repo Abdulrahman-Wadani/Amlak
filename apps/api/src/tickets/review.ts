@@ -152,7 +152,7 @@ export async function reassignTicket(
  * Updates the ticket only if it still has the expected status, so two
  * requests at once cannot both go through. Otherwise it is a 409.
  */
-async function moveTicket(
+export async function moveTicket(
 	tx: Prisma.TransactionClient,
 	ticket: TicketRow,
 	expected: TicketStatus,

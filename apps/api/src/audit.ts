@@ -16,7 +16,9 @@ export type AuditAction =
 	| "TICKET_CREATE"
 	| "TICKET_APPROVE"
 	| "TICKET_REJECT"
-	| "TICKET_REASSIGN";
+	| "TICKET_REASSIGN"
+	| "TICKET_REASSIGN"
+	| "TICKET_COMPLETE";
 export type AuditEntity =
 	| "User"
 	| "Place"

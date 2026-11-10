@@ -4,6 +4,7 @@ import {
 	approveTicketSchema,
 	assetSchema,
 	assignWorkerSchema,
+	completeTicketSchema,
 	createAssetSchema,
 	createPlaceSchema,
 	createTicketSchema,
@@ -395,6 +396,35 @@ export const openApiDocument = createDocument({
 						"Some fields are invalid, the assignee is not allowed for this place, or the due date is past",
 					),
 					...guarded,
+				},
+			},
+		},
+		"/tickets/{ticketId}/complete": {
+			post: {
+				tags: ["Maintenance tickets"],
+				summary: "Complete an approved ticket with after photos (its assignee)",
+				security: loggedIn,
+				requestParams: { path: ticketParams },
+				requestBody: {
+					content: {
+						"multipart/form-data": {
+							schema: completeTicketSchema.extend({
+								photos: z
+									.array(z.file())
+									.min(1)
+									.max(5)
+									.meta({ description: "1 to 5 JPEG, PNG or WebP photos" }),
+							}),
+						},
+					},
+				},
+				responses: {
+					"200": ok("The completed ticket", ticketSchema),
+					"401": fail("Missing, invalid or expired access token"),
+					"403": fail("You are not this ticket's assignee"),
+					"404": fail("Ticket not found"),
+					"409": fail("The ticket is not approved"),
+					"422": fail("Some fields are invalid, or no after photo was sent"),
 				},
 			},
 		},

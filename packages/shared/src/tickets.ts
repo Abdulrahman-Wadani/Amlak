@@ -112,3 +112,15 @@ export const reassignTicketSchema = z.object({
 	due_date: z.iso.date("Use the YYYY-MM-DD format"),
 });
 export type ReassignTicketInput = z.infer<typeof reassignTicketSchema>;
+
+/** The text fields of a completion; the after photos come as files. */
+export const completeTicketSchema = z.object({
+	actual_cost: z
+		.string()
+		.trim()
+		.regex(/^\d+(\.\d{1,2})?$/, "Use a number like 320 or 320.50")
+		.transform(Number)
+		.meta({ description: "What the repair cost, at most 2 decimals" }),
+	completion_notes: z.string().trim().max(2000).optional(),
+});
+export type CompleteTicketInput = z.infer<typeof completeTicketSchema>;
