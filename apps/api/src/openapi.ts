@@ -7,6 +7,7 @@ import {
 	completeTicketSchema,
 	createAssetSchema,
 	createPlaceSchema,
+	createScheduleSchema,
 	createTicketSchema,
 	createWorkerSchema,
 	listAssetsQuerySchema,
@@ -21,6 +22,7 @@ import {
 	reassignTicketSchema,
 	registerSchema,
 	rejectTicketSchema,
+	scheduleSchema,
 	ticketSchema,
 	updateAssetSchema,
 	updatePlaceSchema,
@@ -37,6 +39,7 @@ import { assetParams } from "./assets/routes.ts";
 import { pageQuerySchema } from "./pagination.ts";
 import { placeWorkerParams } from "./place-workers/routes.ts";
 import { placeParams } from "./places/routes.ts";
+import { scheduleParams } from "./schedules/routes.ts";
 import { ticketParams } from "./tickets/routes.ts";
 import { workerParams } from "./workers/routes.ts";
 
@@ -425,6 +428,48 @@ export const openApiDocument = createDocument({
 					"404": fail("Ticket not found"),
 					"409": fail("The ticket is not approved"),
 					"422": fail("Some fields are invalid, or no after photo was sent"),
+				},
+			},
+		},
+		"/assets/{assetId}/maintenance-schedules": {
+			get: {
+				tags: ["Maintenance schedules"],
+				summary: "List an asset's active schedules",
+				security: loggedIn,
+				requestParams: { path: assetParams, query: pageQuerySchema },
+				responses: {
+					"200": ok("One page of schedules", paginatedSchema(scheduleSchema)),
+					"404": fail("Asset not found"),
+					"422": fail("Invalid page"),
+					...guarded,
+				},
+			},
+			post: {
+				tags: ["Maintenance schedules"],
+				summary: "Schedule periodic maintenance for an asset (Manager)",
+				security: loggedIn,
+				requestParams: { path: assetParams },
+				requestBody: json(createScheduleSchema),
+				responses: {
+					"201": ok("The new schedule", scheduleSchema),
+					"404": fail("Asset not found"),
+					"422": fail(
+						"Some fields are invalid, the date is past, or default_assignee_id is not allowed for this place",
+					),
+					...guarded,
+				},
+			},
+		},
+		"/maintenance-schedules/{scheduleId}": {
+			delete: {
+				tags: ["Maintenance schedules"],
+				summary: "Stop a schedule (Manager)",
+				security: loggedIn,
+				requestParams: { path: scheduleParams },
+				responses: {
+					"204": { description: "Stopped; tickets it created stay" },
+					"404": fail("Schedule not found, or already stopped"),
+					...guarded,
 				},
 			},
 		},
