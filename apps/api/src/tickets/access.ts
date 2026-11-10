@@ -1,7 +1,11 @@
 import type { AuthUser } from "../auth/tokens.ts";
 import { prisma } from "../db.ts";
 import { AppError } from "../errors.ts";
-import type { Prisma, PrismaClient } from "../generated/prisma/client.ts";
+import type {
+	Place as PlaceRow,
+	Prisma,
+	PrismaClient,
+} from "../generated/prisma/client.ts";
 import { visiblePlaces } from "../places/access.ts";
 
 export const ticketListInclude = {
@@ -43,4 +47,36 @@ export async function findTicketFor(
 		throw new AppError("NOT_FOUND", "Ticket not found");
 	}
 	return ticket;
+}
+
+/**
+ * The assignee is an ACTIVE worker assigned to the place, or the place's
+ * owner, so a Manager without workers can handle their own tickets. `field`
+ * names the body field in the 422, since schedules call it differently.
+ */
+export async function assertCanBeAssignee(
+	db: PrismaClient | Prisma.TransactionClient,
+	assigneeId: string,
+	place: PlaceRow,
+	field: "assignee_id" | "default_assignee_id",
+) {
+	if (assigneeId === place.owner_id) {
+		return;
+	}
+	const assignment = await db.placeWorker.findFirst({
+		where: {
+			place_id: place.id,
+			worker_id: assigneeId,
+			is_active: true,
+			worker: { status: "ACTIVE" },
+		},
+		select: { id: true },
+	});
+	if (!assignment) {
+		const fields: Record<string, string> = {};
+		fields[field] = "Choose an active worker on this place, or yourself";
+		throw new AppError("VALIDATION_ERROR", "Some fields are invalid", {
+			fields,
+		});
+	}
 }

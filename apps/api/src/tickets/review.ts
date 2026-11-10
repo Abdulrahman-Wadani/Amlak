@@ -15,7 +15,12 @@ import type {
 	TicketStatus,
 } from "../generated/prisma/client.ts";
 import { notify } from "../notifications.ts";
-import { findTicketFor, type TicketRow, ticketInclude } from "./access.ts";
+import {
+	assertCanBeAssignee,
+	findTicketFor,
+	type TicketRow,
+	ticketInclude,
+} from "./access.ts";
 import { toTicketWithPhotos } from "./present.ts";
 
 /**
@@ -33,7 +38,7 @@ export async function approveTicket(
 		const place = await tx.place.findUniqueOrThrow({
 			where: { id: ticket.place_id },
 		});
-		await assertCanBeAssignee(tx, input.assignee_id, place);
+		await assertCanBeAssignee(tx, input.assignee_id, place, "assignee_id");
 		assertNotPast(input.due_date, place.timezone);
 
 		const approved = await moveTicket(tx, ticket, "PENDING_REVIEW", {
@@ -122,7 +127,7 @@ export async function reassignTicket(
 		const place = await tx.place.findUniqueOrThrow({
 			where: { id: ticket.place_id },
 		});
-		await assertCanBeAssignee(tx, input.assignee_id, place);
+		await assertCanBeAssignee(tx, input.assignee_id, place, "assignee_id");
 		assertNotPast(input.due_date, place.timezone);
 
 		const changed = await moveTicket(tx, ticket, "APPROVED", {
@@ -173,36 +178,6 @@ export async function moveTicket(
 		where: { id: ticket.id },
 		include: ticketInclude,
 	});
-}
-
-/**
- * The assignee is an ACTIVE worker assigned to the place, or the place's
- * owner, so a Manager without workers can handle their own tickets.
- */
-async function assertCanBeAssignee(
-	tx: Prisma.TransactionClient,
-	assigneeId: string,
-	place: Place,
-) {
-	if (assigneeId === place.owner_id) {
-		return;
-	}
-	const assignment = await tx.placeWorker.findFirst({
-		where: {
-			place_id: place.id,
-			worker_id: assigneeId,
-			is_active: true,
-			worker: { status: "ACTIVE" },
-		},
-		select: { id: true },
-	});
-	if (!assignment) {
-		throw new AppError("VALIDATION_ERROR", "Some fields are invalid", {
-			fields: {
-				assignee_id: "Choose an active worker on this place, or yourself",
-			},
-		});
-	}
 }
 
 function assertNotPast(date: string, timeZone: string) {
