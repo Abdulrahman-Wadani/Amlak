@@ -9,10 +9,13 @@ import { Trans } from "@lingui/react/macro"
 import { useLingui } from "@lingui/react"
 import type { Asset, Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
+import { cn } from "cn"
+import { buttonVariants,Button } from "@/components/ui/button"
 import {
   getAssetById,
   getPlace,
   getTicketsForPlace,
+  getScheduledMaintenancesForAsset,
 } from "@/lib/api"
 import { S } from "@/lib/dom-style"
 import {
@@ -22,14 +25,17 @@ import {
   MapPin,
   Wrench,
   AlertTriangle,
+  Plus
 } from "lucide-react"
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  CardAction,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Badge } from "@/components/ui/badge"
 import {
   AssetStatusBadge,
   StatusBadge,
@@ -49,7 +55,7 @@ export const Route = createFileRoute("/_authenticated/place/asset/$asset_id")({
 
 function AssetDetailPage() {
   const { asset_id } = useParams({
-    from: "/_authenticated/asset/$asset_id",
+    from: "/_authenticated/place/asset/$asset_id",
   })
 
   const { i18n } = useLingui()
@@ -60,8 +66,33 @@ function AssetDetailPage() {
   const [tickets, setTickets] = useState<
     Awaited<ReturnType<typeof getTicketsForPlace>> | null
   >(null)
-
+  const [scheduledMaintenances, setScheduledMaintenances] = useState<any[]>([])
+  const [scheduledLoading, setScheduledLoading] = useState(true)
   const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+  if (!accessToken || !asset_id) return
+
+  const loadScheduledMaintenances = async () => {
+    try {
+      setScheduledLoading(true)
+
+      const data = await getScheduledMaintenancesForAsset(
+        accessToken,
+        asset_id
+      )
+
+      setScheduledMaintenances(data)
+    } catch (error) {
+      console.error("Failed to load scheduled maintenances:", error)
+      setScheduledMaintenances([])
+    } finally {
+      setScheduledLoading(false)
+    }
+  }
+
+  loadScheduledMaintenances()
+}, [accessToken, asset_id])
 
   useEffect(() => {
     if (!accessToken) return
@@ -136,7 +167,7 @@ function AssetDetailPage() {
       new Date(value.length === 10 ? `${value}T00:00:00` : value)
     )
   }
-
+  
   return (
     <div
       dir="rtl"
@@ -166,12 +197,6 @@ function AssetDetailPage() {
                   العقارات
                 </BreadcrumbLink>
               </BreadcrumbItem>
-
-              <BreadcrumbSeparator />
-
-              <BreadcrumbItem>
-                <BreadcrumbPage>تفاصيل الأصل</BreadcrumbPage>
-              </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
 
@@ -188,17 +213,6 @@ function AssetDetailPage() {
               ))}
           </h1>
         </div>
-
-        <Link
-          to="/places"
-          className="am-btn"
-          style={S(
-            "height: 40px; padding: 0 16px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); text-decoration: none"
-          )}
-        >
-          <ArrowRight size={16} />
-          <Trans>Your places</Trans>
-        </Link>
       </div>
 
       {failed && (
@@ -427,6 +441,213 @@ function AssetDetailPage() {
               )}
             </CardContent>
           </Card>
+
+{/* Scheduled Maintenances */}
+{/* Scheduled Maintenances */}
+<Card
+  className="am-lift"
+  style={S(
+    "padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0"
+  )}
+>
+  <CardHeader
+    style={S(
+      "padding: 18px 20px; border-bottom: 1px solid var(--border)"
+    )}
+  >
+    <div
+      style={S(
+        "display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px"
+      )}
+    >
+      <div style={S("display: flex; align-items: center; gap: 10px")}>
+        <CardTitle style={S("font-size: 17px; font-weight: 750")}>
+          <Trans>الصيانة المجدولة</Trans>
+        </CardTitle>
+
+        <span
+          style={S(
+            "font-size: 12px; color: var(--muted-foreground)"
+          )}
+        >
+          {scheduledMaintenances.length}
+        </span>
+      </div>
+
+      <Link
+        to="/place/asset/maintenance/new"
+        search={{
+          asset_id,
+          place_id: asset?.place_id ?? "",
+        }}
+        className={cn(
+          buttonVariants({ variant: "outline", size: "sm" }),
+          "am-btn"
+        )}
+        style={S(
+          "height: 38px; padding: 0 12px; gap: 6px; white-space: nowrap"
+        )}
+      >
+        <Plus size={16} />
+        <Trans>جدولة صيانة</Trans>
+      </Link>
+    </div>
+  </CardHeader>
+
+  <CardContent style={S("padding: 20px")}>
+  {scheduledLoading ? (
+    <div style={S("display: flex; flex-direction: column; gap: 12px")}>
+      <Skeleton style={S("height: 100px")} />
+      <Skeleton style={S("height: 100px")} />
+    </div>
+  ) : scheduledMaintenances.length === 0 ? (
+    <div
+      style={S(
+        "display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 32px 16px; text-align: center"
+      )}
+    >
+      <CalendarDays
+        size={30}
+        style={S("color: var(--muted-foreground); opacity: 0.6")}
+      />
+
+      <p
+        style={S(
+          "font-size: 14px; color: var(--muted-foreground); margin: 0"
+        )}
+      >
+        <Trans>لا توجد صيانة دورية مجدولة لهذا الأصل.</Trans>
+      </p>
+    </div>
+  ) : (
+    <div style={S("display: flex; flex-direction: column; gap: 12px")}>
+      {scheduledMaintenances.map((maintenance) => {
+        const dueDate = new Date(`${maintenance.next_due_date}T00:00:00`)
+
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        const daysRemaining = Math.round(
+          (dueDate.getTime() - today.getTime()) /
+            (1000 * 60 * 60 * 24)
+        )
+
+        const intervalUnitLabels: Record<string, string> = {
+          DAY: "يوم",
+          WEEK: "أسبوع",
+          MONTH: "شهر",
+          YEAR: "سنة",
+        }
+
+        return (
+          <div
+            key={maintenance.id}
+            style={S(
+              "padding: 16px; border: 1px solid var(--border); background: var(--card); display: flex; flex-direction: column; gap: 14px"
+            )}
+          >
+            {/* Header */}
+            <div
+              style={S(
+                "display: flex; align-items: flex-start; justify-content: space-between; gap: 12px"
+              )}
+            >
+              <div style={S("display: flex; flex-direction: column; gap: 7px")}>
+                <strong style={S("font-size: 14px; font-weight: 700")}>
+                  {maintenance.description}
+                </strong>
+
+                <span
+                  style={S(
+                    "font-size: 12px; color: var(--muted-foreground)"
+                  )}
+                >
+                  <Trans>تتكرر كل</Trans>{" "}
+                  {maintenance.interval_count}{" "}
+                  {intervalUnitLabels[maintenance.interval_unit] ??
+                    maintenance.interval_unit}
+                </span>
+              </div>
+
+              <CalendarDays
+                size={19}
+                style={S("color: var(--muted-foreground); flex-shrink: 0")}
+              />
+            </div>
+
+            {/* Maintenance Details */}
+            <div
+              style={S(
+                "display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; padding-top: 13px; border-top: 1px solid var(--border)"
+              )}
+            >
+              <div style={S("display: flex; flex-direction: column; gap: 5px")}>
+                <span
+                  style={S("font-size: 11px; color: var(--muted-foreground)")}
+                >
+                  <Trans>موعد الصيانة القادمة</Trans>
+                </span>
+
+                <strong style={S("font-size: 13px")}>
+                  {formatDate(maintenance.next_due_date)}
+                </strong>
+              </div>
+
+              <div style={S("display: flex; flex-direction: column; gap: 5px")}>
+                <span
+                  style={S("font-size: 11px; color: var(--muted-foreground)")}
+                >
+                  <Trans>التنبيه قبل الموعد</Trans>
+                </span>
+
+                <strong style={S("font-size: 13px")}>
+                  {maintenance.lead_days} <Trans>يوم</Trans>
+                </strong>
+              </div>
+            </div>
+
+            {/* Remaining Days */}
+            <div
+              style={S(
+                `font-size: 12px; font-weight: 600; padding: 10px 12px; ${
+                  daysRemaining < 0
+                    ? "background: var(--destructive); color: white"
+                    : "background: var(--muted); color: var(--foreground)"
+                }`
+              )}
+            >
+              {daysRemaining < 0
+                ? `متأخرة منذ ${Math.abs(daysRemaining)} يوم`
+                : daysRemaining === 0
+                  ? "موعد الصيانة اليوم"
+                  : `متبقي ${daysRemaining} يوم على الصيانة`}
+            </div>
+
+            {/* Cancel Schedule */}
+            <div
+              style={S(
+                "display: flex; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--border)"
+              )}
+            >
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => handleCancelSchedule(maintenance.id)}
+                style={S(
+                  "color: var(--destructive); border-color: var(--destructive)"
+                )}
+              >
+                <Trans>إلغاء الجدولة</Trans>
+              </Button>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )}
+</CardContent>
+</Card>
         </>
       )}
     </div>

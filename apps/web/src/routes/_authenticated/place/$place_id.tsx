@@ -89,6 +89,7 @@ function PlaceDetailPage() {
   const [tickets, setTickets] = useState<Awaited<ReturnType<typeof getTicketsForPlace>> | null>(null)
   const [failed, setFailed] = useState(false)
 
+
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState("")
   const [selectedWorkerId, setSelectedWorkerId] = useState("")
@@ -391,17 +392,6 @@ function getWorkerName(userId: string | null | undefined) {
             </button>
           )}
 
-          <Link
-            to="/places"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "sm" }),
-              "am-btn"
-            )}
-            style={S("height: 40px; padding: 0 16px; gap: 8px")}
-          >
-            <ArrowRight size={16} />
-            <Trans>Your places</Trans>
-          </Link>
         </div>
       </div>
 
@@ -807,8 +797,9 @@ function getWorkerName(userId: string | null | undefined) {
                 >
                   {assets.map((a) => (
                     <Link
-                      link={`/place/asset/${a.id}`}
-                      search={a.id}
+                      key={a.id}
+                      to="/place/asset/$asset_id"
+                      params={{ asset_id: a.id }}
                       className="am-lift"
                       style={S(
                         "display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; border: 1px solid var(--border); padding: 14px; background: var(--card)"

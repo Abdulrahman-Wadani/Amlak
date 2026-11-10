@@ -423,3 +423,102 @@ export async function createTicket(
   return unwrapResponse(response)
 }
 
+export async function getScheduledMaintenancesForAsset(
+  token: string,
+  assetId: string,
+) {
+  return [
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c30",
+      "asset_id": "e99bdd97-4e6b-4eb4-94ff-13a208b4fee5",
+      "description": "تنظيف وصيانة المكيفات",
+      "interval_count": 3,
+      "interval_unit": "MONTH",
+      "next_due_date": "2026-11-01",
+      "lead_days": 7,
+      "default_assignee_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "created_at": "2026-10-10T08:00:00Z",
+      "updated_at": "2026-10-10T08:00:00Z"
+    },
+    {
+      "id": "9a7d1c3e-5f60-4b2a-9c8d-2e3f4a5b6c30",
+      "asset_id": "e99bdd97-4e6b-4eb4-94ff-13a208b4fee5",
+      "description": "تنظيف وصيانة المكيفات",
+      "interval_count": 3,
+      "interval_unit": "MONTH",
+      "next_due_date": "2026-11-01",
+      "lead_days": 7,
+      "default_assignee_id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e02",
+      "created_at": "2026-10-10T08:00:00Z",
+      "updated_at": "2026-10-10T08:00:00Z"
+    }
+  ]
+}
+
+
+export type IntervalUnit = "DAY" | "WEEK" | "MONTH" | "YEAR"
+
+export interface CreateMaintenanceScheduleInput {
+  description: string
+  interval_count: number
+  interval_unit: IntervalUnit
+  next_due_date: string
+  lead_days?: number
+  default_assignee_id?: string
+}
+
+export async function createMaintenanceSchedule(
+  token: string,
+  assetId: string,
+  input: CreateMaintenanceScheduleInput
+) {
+  const response = await fetch(
+    `/api/v1/assets/${assetId}/maintenance-schedules`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      credentials: "same-origin",
+      body: JSON.stringify(input),
+    }
+  )
+
+  const data: unknown = await response.json().catch(() => null)
+
+  if (!response.ok) {
+    const message =
+      typeof data === "object" &&
+      data !== null &&
+      "message" in data &&
+      typeof data.message === "string"
+        ? data.message
+        : "Failed to create maintenance schedule"
+
+    throw new Error(message)
+  }
+
+  return data
+}
+
+export async function updateProfile(){
+  return {}
+}
+
+export async function getProfile(token: string) {
+  return {
+  "id": "6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01",
+  "email": "sara@example.com",
+  "fullname": "Sara A. Alqahtani",
+  "phone": "+966512345678",
+  "picture_url": "https://amlak-uploads.s3.amazonaws.com/profiles/6f1c2a9e-3b4d-4c5e-8f70-1a2b3c4d5e01/8c9d0e1f-2a3b-4c5d-9e6f-7a8b9c0d1e2f.jpg?X-Amz-Signature=...",
+  "role": "MANAGER",
+  "status": "ACTIVE",
+  "preferred_language": "ar",
+  "email_verified_at": "2026-01-01T10:05:00Z",
+  "manager_id": null,
+  "created_at": "2026-01-01T10:00:00Z",
+  "updated_at": "2026-10-12T10:00:00Z"
+}
+}
