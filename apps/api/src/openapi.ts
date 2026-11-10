@@ -1,6 +1,7 @@
 import {
 	accessTokenSchema,
 	accountSetupSchema,
+	approveTicketSchema,
 	assetSchema,
 	assignWorkerSchema,
 	createAssetSchema,
@@ -16,7 +17,9 @@ import {
 	paginatedSchema,
 	placeSchema,
 	placeWorkerSchema,
+	reassignTicketSchema,
 	registerSchema,
+	rejectTicketSchema,
 	ticketSchema,
 	updateAssetSchema,
 	updatePlaceSchema,
@@ -321,7 +324,10 @@ export const openApiDocument = createDocument({
 					query: listTicketsQuerySchema.extend(pageQuerySchema.shape),
 				},
 				responses: {
-					"200": ok("One page of tickets", paginatedSchema(ticketSchema)),
+					"200": ok(
+						"One page of tickets, without attachments",
+						paginatedSchema(ticketSchema),
+					),
 					"422": fail("Invalid filter or page"),
 					...guarded,
 				},
@@ -336,6 +342,58 @@ export const openApiDocument = createDocument({
 				responses: {
 					"200": ok("The ticket", ticketSchema),
 					"404": fail("Ticket not found"),
+					...guarded,
+				},
+			},
+		},
+		"/tickets/{ticketId}/approve": {
+			post: {
+				tags: ["Maintenance tickets"],
+				summary: "Approve a ticket and assign a worker and due date (Manager)",
+				security: loggedIn,
+				requestParams: { path: ticketParams },
+				requestBody: json(approveTicketSchema),
+				responses: {
+					"200": ok("The approved ticket", ticketSchema),
+					"404": fail("Ticket not found"),
+					"409": fail("The ticket is not waiting for review"),
+					"422": fail(
+						"Some fields are invalid, the assignee is not allowed for this place, or the due date is past",
+					),
+					...guarded,
+				},
+			},
+		},
+		"/tickets/{ticketId}/reject": {
+			post: {
+				tags: ["Maintenance tickets"],
+				summary: "Reject a ticket with a reason (Manager)",
+				security: loggedIn,
+				requestParams: { path: ticketParams },
+				requestBody: json(rejectTicketSchema),
+				responses: {
+					"200": ok("The rejected ticket", ticketSchema),
+					"404": fail("Ticket not found"),
+					"409": fail("The ticket is not waiting for review"),
+					"422": fail("The reason is missing"),
+					...guarded,
+				},
+			},
+		},
+		"/tickets/{ticketId}/reassign": {
+			post: {
+				tags: ["Maintenance tickets"],
+				summary: "Change an approved ticket's assignee and due date (Manager)",
+				security: loggedIn,
+				requestParams: { path: ticketParams },
+				requestBody: json(reassignTicketSchema),
+				responses: {
+					"200": ok("The updated ticket", ticketSchema),
+					"404": fail("Ticket not found"),
+					"409": fail("The ticket is not approved"),
+					"422": fail(
+						"Some fields are invalid, the assignee is not allowed for this place, or the due date is past",
+					),
 					...guarded,
 				},
 			},

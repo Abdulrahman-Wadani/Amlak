@@ -90,3 +90,25 @@ export const listTicketsQuerySchema = z.object({
 		.meta({ description: "true: APPROVED tickets past their due_date" }),
 });
 export type ListTicketsQuery = z.infer<typeof listTicketsQuerySchema>;
+
+export const approveTicketSchema = z.object({
+	assignee_id: z.uuid().meta({
+		description: "An ACTIVE worker assigned to the place, or the place's owner",
+	}),
+	due_date: z.iso.date("Use the YYYY-MM-DD format"),
+	estimated_cost: z.number().min(0).optional(),
+});
+export type ApproveTicketInput = z.infer<typeof approveTicketSchema>;
+
+export const rejectTicketSchema = z.object({
+	reason: z.string().trim().min(1).max(1000),
+});
+export type RejectTicketInput = z.infer<typeof rejectTicketSchema>;
+
+export const reassignTicketSchema = z.object({
+	assignee_id: z.uuid().meta({
+		description: "An ACTIVE worker assigned to the place, or the place's owner",
+	}),
+	due_date: z.iso.date("Use the YYYY-MM-DD format"),
+});
+export type ReassignTicketInput = z.infer<typeof reassignTicketSchema>;
