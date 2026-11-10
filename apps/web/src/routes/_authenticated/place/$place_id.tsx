@@ -10,6 +10,7 @@ import {
   getPlaceAssets,
   getWorkers,
   updatePlace,
+  getTicketsForPlace,
 } from "@/lib/api"
 import { S } from "@/lib/dom-style"
 import { buttonVariants } from "@/components/ui/button"
@@ -27,6 +28,8 @@ import {
   X,
   Trash2,
   Users,
+  Wrench,
+  AlertTriangle,
 } from "lucide-react"
 import {
   Card,
@@ -41,6 +44,14 @@ import {
   StatusBadge,
   TypeLabel,
 } from "@/components/place-shared"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 export const Route = createFileRoute("/_authenticated/place/$place_id")({
   component: PlaceDetailPage,
@@ -75,7 +86,9 @@ function PlaceDetailPage() {
   const [place, setPlace] = useState<Place | null>(null)
   const [assets, setAssets] = useState<Asset[] | null>(null)
   const [workers, setWorkers] = useState<Worker[] | null>(null)
+  const [tickets, setTickets] = useState<Awaited<ReturnType<typeof getTicketsForPlace>> | null>(null)
   const [failed, setFailed] = useState(false)
+
 
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState("")
@@ -109,6 +122,13 @@ function PlaceDetailPage() {
         if (alive) setWorkers([])
       })
 
+  getTicketsForPlace(accessToken, place_id)
+  .then((list) => alive && setTickets(list))
+  .catch((error) => {
+    console.error("Failed to load maintenance tickets:", error)
+    if (alive) setTickets([])
+  })
+
     return () => {
       alive = false
     }
@@ -122,6 +142,48 @@ function PlaceDetailPage() {
     i18n.locale === "ar" ? "ar" : "en",
     { dateStyle: "medium" }
   )
+const ticketLabels: Record<string, string> = {
+  CORRECTIVE: "صيانة تصحيحية",
+  PREVENTIVE: "صيانة وقائية",
+
+  LOW: "منخفضة",
+  MEDIUM: "متوسطة",
+  HIGH: "عالية",
+  URGENT: "عاجلة",
+
+  PENDING: "معلقة",
+  SUBMITTED: "مرسلة",
+  UNDER_REVIEW: "قيد المراجعة",
+  APPROVED: "مقبولة",
+  REJECTED: "مرفوضة",
+  IN_PROGRESS: "قيد التنفيذ",
+  COMPLETED: "مكتملة",
+  CANCELLED: "ملغاة",
+}
+
+function getTicketLabel(value: string) {
+  return ticketLabels[value] ?? value
+}
+
+function formatTicketDate(value: string | null | undefined) {
+  if (!value) return "—"
+
+  return day.format(
+    new Date(value.length === 10 ? `${value}T00:00:00` : value)
+  )
+}
+
+function getAssetForTicket(assetId: string | null) {
+  if (!assetId || !assets) return null
+
+  return assets.find((asset) => asset.id === assetId) ?? null
+}
+function getWorkerName(userId: string | null | undefined) {
+  if (!userId || !workers) return "—"
+
+  return workers.find((worker) => worker.id === userId)?.fullname ?? "—"
+}
+
 
   function openEditForm() {
     if (!place) return
@@ -259,16 +321,27 @@ function PlaceDetailPage() {
           style={S(
             "display: flex; flex-direction: column; gap: 6px; min-width: 0"
           )}
+          style={S("height: 40px; padding: 0 16px; gap: 8px")}
         >
           <div
             style={S(
               "display: flex; align-items: center; gap: 8px; color: var(--muted-foreground); font-size: 13px"
             )}
           >
-            <Building2 size={16} />
-            <span>
-              <Trans>Property details</Trans>
-            </span>
+            <Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink render={<a href="/" />}>الرئيسية</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbLink render={<a href="/places" />}>
+        العقارات
+      </BreadcrumbLink>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
+
           </div>
 
           <h1
@@ -319,17 +392,6 @@ function PlaceDetailPage() {
             </button>
           )}
 
-          <Link
-            to="/places"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "sm" }),
-              "am-btn"
-            )}
-            style={S("height: 40px; padding: 0 16px; gap: 8px")}
-          >
-            <ArrowRight size={16} />
-            <Trans>Your places</Trans>
-          </Link>
         </div>
       </div>
 
@@ -660,7 +722,6 @@ function PlaceDetailPage() {
                   style={S("font-size: 17px; font-weight: 750")}
                 >
                   <Trans>Assets</Trans>
-
                   {assets !== null && (
                     <span
                       style={S(
@@ -711,7 +772,6 @@ function PlaceDetailPage() {
                     size={28}
                     style={S("color: var(--muted-foreground)")}
                   />
-
                   <p
                     style={S(
                       "font-size: 14px; font-weight: 650; margin: 0"
@@ -719,7 +779,6 @@ function PlaceDetailPage() {
                   >
                     <Trans>No assets yet.</Trans>
                   </p>
-
                   <p
                     style={S(
                       "font-size: 13px; color: var(--muted-foreground); margin: 0"
@@ -737,8 +796,10 @@ function PlaceDetailPage() {
                   )}
                 >
                   {assets.map((a) => (
-                    <div
+                    <Link
                       key={a.id}
+                      to="/place/asset/$asset_id"
+                      params={{ asset_id: a.id }}
                       className="am-lift"
                       style={S(
                         "display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; border: 1px solid var(--border); padding: 14px; background: var(--card)"
@@ -779,7 +840,7 @@ function PlaceDetailPage() {
                       <div style={S("flex-shrink: 0")}>
                         <AssetStatusBadge status={a.status} />
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               )}
@@ -914,6 +975,93 @@ function PlaceDetailPage() {
               )}
             </CardContent>
           </Card>
+
+       {/* Maintenance Tickets */}
+<Card
+  className="am-lift"
+  style={S("padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0")}
+>
+  <CardHeader
+    style={S("padding: 18px 20px; border-bottom: 1px solid var(--border)")}
+  >
+    <CardTitle style={S("font-size: 17px; font-weight: 750")}>
+      تذاكر الصيانة
+      {tickets !== null && (
+        <span style={S("margin-inline-start: 8px; font-size: 12px; color: var(--muted-foreground)")}>
+          {tickets.length}
+        </span>
+      )}
+      <CardAction>
+                <Link
+                  to="/ticket/new"
+                  search={{ place_id }}
+                  className={cn(
+                    buttonVariants({ variant: "outline", size: "sm" }),
+                    "am-btn"
+                  )}
+                  style={S(
+                    "height: 38px; padding: 0 12px; gap: 6px; white-space: nowrap"
+                  )}
+                >
+                  <Plus size={16} />
+                  <Trans>أضافة تذكرة</Trans>
+                </Link>
+              </CardAction>
+    </CardTitle>
+  </CardHeader>
+
+  <CardContent style={S("padding: 20px")}>
+    {tickets === null ? (
+      <Skeleton style={S("height: 70px")} />
+    ) : tickets.length === 0 ? (
+      <p style={S("text-align: center; color: var(--muted-foreground); font-size: 14px")}>
+        لا توجد تذاكر صيانة لهذه الملكية.
+      </p>
+    ) : (
+      <div style={S("display: flex; flex-direction: column; gap: 10px")}>
+        {tickets.map((ticket) => {
+          const asset = assets?.find((a) => a.id === ticket.asset_id)
+
+          return (
+            <Link
+              key={ticket.id}
+              to="/ticket/$ticket_id"
+              params={{ ticket_id: ticket.id }}
+              className="am-lift"
+              style={S(
+                "display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px; border: 1px solid var(--border); background: var(--card); text-decoration: none; color: inherit"
+              )}
+            >
+              <div style={S("display: flex; flex-direction: column; gap: 6px; min-width: 0")}>
+                <strong style={S("font-size: 14px")}>
+                  {ticket.description || "تذكرة صيانة"}
+                </strong>
+
+                <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
+                  {asset?.name ?? "الأصل غير محدد"}
+                  {" · "}
+                  {ticket.ticket_type === "CORRECTIVE"
+                    ? "صيانة تصحيحية"
+                    : "صيانة وقائية"}
+                </span>
+
+                <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
+                  الأولوية: {ticket.priority}
+                </span>
+              </div>
+
+              <div style={S("display: flex; align-items: center; gap: 10px")}>
+                <StatusBadge status={String(ticket.status)} />
+                <ArrowRight size={17} />
+              </div>
+            </Link>
+          )
+        })}
+      </div>
+    )}
+  </CardContent>
+</Card>
+
         </>
       )}
     </div>

@@ -95,6 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null)
       })
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [])
 
   async function login(email: string, password: string) {

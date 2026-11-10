@@ -644,6 +644,123 @@ msgstr "لم نتمكن من تحميل هذا العقار."
 msgid "We could not load your places."
 msgstr "تعذّر تحميل عقاراتك."
 
+#: src/routes/_authenticated//asset/maintenance/new
+msgid "New Scheduled Maintenance"
+msgstr "اضافة جدولة صيانة"
+msgid "Create a recurring maintenance schedule for an asset."
+msgstr "انشاء جدولة صيانة للأصل"
+msgid "Asset"
+msgstr "الأصل"
+msgid "Repeat Every"
+msgstr "تكرار كل"
+msgid "Interval Unit"
+msgstr "الوحدة"
+msgid "Next Due Date"
+msgstr "تاريخ الصيانة القادم"
+msgid "Reminder Before Due Date (Days)"
+msgstr "التذكير قبل"
+msgid "Default Assignee ID"
+msgstr "هوية المسؤول (اختياري)"
+msgid "Create Schedule"
+msgstr "انشاء جدولة"
+
+
+#: src/routes/_authenticated/profile
+
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ar\n"
+
+msgid "Profile"
+msgstr "الملف الشخصي"
+
+msgid "My Profile"
+msgstr "الملف الشخصي"
+
+msgid "View your account information."
+msgstr "بيانات حسابك الشحصي"
+
+msgid "MANAGER"
+msgstr "اداري"
+
+msgid "WORKER"
+msgstr "عامل"
+
+msgid "Personal Information"
+msgstr "المعلومات الشخصية"
+
+msgid "Update Profile"
+msgstr "تحديث الملف الشخصي"
+
+msgid "Full Name"
+msgstr "الاسم الكامل"
+
+msgid "Email Address"
+msgstr "البريد الإلكتروني"
+
+msgid "Phone Number"
+msgstr "رقم الجوال"
+
+msgid "Role"
+msgstr "الصلاحية"
+
+msgid "Account Status"
+msgstr "حالة الحساب"
+
+msgid "Preferred Language"
+msgstr "اللغة المفضلة"
+
+msgid "Email Verification"
+msgstr "التحقق من البريد الإلكتروني"
+
+msgid "Verified"
+msgstr "تم التحقق"
+
+msgid "Not Verified"
+msgstr "لم يتم التحقق"
+
+msgid "Created At"
+msgstr "تاريخ الإنشاء"
+
+msgid "Updated At"
+msgstr "تاريخ التحديث"
+
+msgid "Active"
+msgstr "نشط"
+
+msgid "Inactive"
+msgstr "غير نشط"
+
+msgid "Manager"
+msgstr "مدير"
+
+msgid "Admin"
+msgstr "مسؤول"
+
+msgid "Worker"
+msgstr "عامل"
+
+msgid "Arabic"
+msgstr "العربية"
+
+msgid "English"
+msgstr "الإنجليزية"
+
+msgid "Loading profile..."
+msgstr "جارٍ تحميل الملف الشخصي..."
+
+msgid "Failed to load profile"
+msgstr "فشل تحميل الملف الشخصي"
+
+msgid "Email Verified At"
+msgstr "تاريخ تأكيد البريد الاكتروني"
+
+msgid "Last Updated"
+msgstr "اخر تحديث"
+
+
+
 #: src/components/email-verify-panel.tsx:35
 msgid "We sent a 6-digit code to <0>{email}</0>."
 msgstr "أرسلنا رمزًا مكوّنًا من 6 أرقام إلى <0>{email}</0>."
