@@ -21,6 +21,7 @@ import {
 	type TicketRow,
 	ticketInclude,
 } from "./access.ts";
+import { emailAssignee, reminderSentAtOnAssign } from "./emails.ts";
 import { toTicketWithPhotos } from "./present.ts";
 
 /**
@@ -46,6 +47,7 @@ export async function approveTicket(
 			assignee_id: input.assignee_id,
 			due_date: toDbDate(input.due_date),
 			estimated_cost: input.estimated_cost,
+			reminder_sent_at: reminderSentAtOnAssign(input.due_date, place.timezone),
 			reviewed_by: manager.user_id,
 			reviewed_at: new Date(),
 		});
@@ -71,6 +73,9 @@ export async function approveTicket(
 		await notifyAssignee(tx, manager, approved, place);
 		return approved;
 	});
+	if (row.assignee_id !== manager.user_id) {
+		void emailAssignee(row.id);
+	}
 	return toTicketWithPhotos(row, manager.role);
 }
 
@@ -133,7 +138,7 @@ export async function reassignTicket(
 		const changed = await moveTicket(tx, ticket, "APPROVED", {
 			assignee_id: input.assignee_id,
 			due_date: toDbDate(input.due_date),
-			reminder_sent_at: null,
+			reminder_sent_at: reminderSentAtOnAssign(input.due_date, place.timezone),
 			overdue_alert_sent_at: null,
 		});
 		await auditLog(tx, manager.user_id, {
@@ -150,6 +155,9 @@ export async function reassignTicket(
 		await notifyAssignee(tx, manager, changed, place);
 		return changed;
 	});
+	if (row.assignee_id !== manager.user_id) {
+		void emailAssignee(row.id);
+	}
 	return toTicketWithPhotos(row, manager.role);
 }
 

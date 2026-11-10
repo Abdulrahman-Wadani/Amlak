@@ -3,6 +3,7 @@ import { prisma } from "../db.ts";
 import type { Prisma } from "../generated/prisma/client.ts";
 import { notify } from "../notifications.ts";
 import { canBeAssignee } from "../tickets/access.ts";
+import { emailAssignee, reminderSentAtOnAssign } from "../tickets/emails.ts";
 
 const scheduleInclude = {
 	asset: { include: { place: true } },
@@ -73,7 +74,7 @@ function nextDueDate(schedule: ScheduleRow): string {
 async function createTicketFor(
 	schedule: ScheduleRow,
 ): Promise<ScheduleRow | null> {
-	return prisma.$transaction(async (tx) => {
+	const result = await prisma.$transaction(async (tx) => {
 		const { count } = await tx.periodicMaintenance.updateMany({
 			where: {
 				id: schedule.id,
@@ -98,7 +99,7 @@ async function createTicketFor(
 			assigneeId = schedule.default_assignee_id;
 		}
 
-		await tx.maintenanceTicket.create({
+		const ticket = await tx.maintenanceTicket.create({
 			data: {
 				place_id: place.id,
 				asset_id: schedule.asset_id,
@@ -109,6 +110,9 @@ async function createTicketFor(
 				status: assigneeId ? "APPROVED" : "PENDING_REVIEW",
 				assignee_id: assigneeId,
 				due_date: schedule.next_due_date,
+				reminder_sent_at: assigneeId
+					? reminderSentAtOnAssign(dueDate, place.timezone)
+					: null,
 			},
 		});
 		if (assigneeId) {
@@ -128,9 +132,18 @@ async function createTicketFor(
 				message: `${place.place_name}: ${schedule.description} (due ${dueDate})`,
 			});
 		}
-		return tx.periodicMaintenance.findUniqueOrThrow({
+		const moved = await tx.periodicMaintenance.findUniqueOrThrow({
 			where: { id: schedule.id },
 			include: scheduleInclude,
 		});
+		return { moved, assignedTicketId: assigneeId ? ticket.id : null };
 	});
+	if (!result) {
+		return null;
+	}
+	// The email goes after the transaction, once the ticket is saved.
+	if (result.assignedTicketId) {
+		await emailAssignee(result.assignedTicketId);
+	}
+	return result.moved;
 }
