@@ -4,6 +4,7 @@ import type { Prisma } from "../generated/prisma/client.ts";
 import { notify } from "../notifications.ts";
 import { canBeAssignee } from "../tickets/access.ts";
 import { emailAssignee, reminderSentAtOnAssign } from "../tickets/emails.ts";
+import { assignedNotice, submittedNotice } from "../tickets/messages.ts";
 
 const scheduleInclude = {
 	asset: { include: { place: true } },
@@ -122,14 +123,21 @@ async function createTicketFor(
 			});
 			await notify(tx, assigneeId, {
 				type: "TICKET_ASSIGNED",
-				title: "Maintenance ticket assigned to you",
-				message: `${place.place_name}: ${schedule.description} (due ${dueDate})`,
+				notice: (language) =>
+					assignedNotice(language, {
+						placeName: place.place_name,
+						description: schedule.description,
+						dueDate,
+					}),
 			});
 		} else {
 			await notify(tx, place.owner_id, {
 				type: "TICKET_SUBMITTED",
-				title: "New maintenance ticket",
-				message: `${place.place_name}: ${schedule.description} (due ${dueDate})`,
+				notice: (language) =>
+					submittedNotice(language, {
+						placeName: place.place_name,
+						description: schedule.description,
+					}),
 			});
 		}
 		const moved = await tx.periodicMaintenance.findUniqueOrThrow({

@@ -22,6 +22,7 @@ import {
 	ticketInclude,
 } from "./access.ts";
 import { emailAssignee, reminderSentAtOnAssign } from "./emails.ts";
+import { assignedNotice, rejectedNotice } from "./messages.ts";
 import { toTicketWithPhotos } from "./present.ts";
 
 /**
@@ -105,10 +106,17 @@ export async function rejectTicket(
 		// Scheduler tickets have no reporter, and nobody is told about their
 		// own action.
 		if (ticket.reporter_id && ticket.reporter_id !== manager.user_id) {
+			const place = await tx.place.findUniqueOrThrow({
+				where: { id: ticket.place_id },
+			});
 			await notify(tx, ticket.reporter_id, {
 				type: "TICKET_REJECTED",
-				title: "Maintenance ticket rejected",
-				message: `${ticket.description}: ${input.reason}`,
+				notice: (language) =>
+					rejectedNotice(language, {
+						placeName: place.place_name,
+						description: ticket.description,
+						reason: input.reason,
+					}),
 				senderId: manager.user_id,
 			});
 		}
@@ -206,11 +214,15 @@ async function notifyAssignee(
 	if (!ticket.assignee_id || ticket.assignee_id === manager.user_id) {
 		return;
 	}
-	const due = ticket.due_date ? fromDbDate(ticket.due_date) : "";
+	const dueDate = ticket.due_date ? fromDbDate(ticket.due_date) : "";
 	await notify(tx, ticket.assignee_id, {
 		type: "TICKET_ASSIGNED",
-		title: "Maintenance ticket assigned to you",
-		message: `${place.place_name}: ${ticket.description} (due ${due})`,
+		notice: (language) =>
+			assignedNotice(language, {
+				placeName: place.place_name,
+				description: ticket.description,
+				dueDate,
+			}),
 		senderId: manager.user_id,
 	});
 }

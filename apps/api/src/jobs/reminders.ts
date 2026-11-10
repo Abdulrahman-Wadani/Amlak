@@ -2,7 +2,7 @@ import { addDays, fromDbDate, todayIn } from "../dates.ts";
 import { prisma } from "../db.ts";
 import { sendEmailOrLog } from "../email.ts";
 import { notify } from "../notifications.ts";
-import { reminderMessage } from "../tickets/messages.ts";
+import { reminderEmail, reminderNotice } from "../tickets/messages.ts";
 
 /**
  * Reminds each assignee of their APPROVED tickets due tomorrow, in the
@@ -29,12 +29,11 @@ export async function sendReminders(): Promise<number> {
 			continue;
 		}
 
-		const message = reminderMessage(assignee.preferred_language, {
-			recipientName: assignee.fullname,
+		const facts = {
 			placeName: ticket.place.place_name,
 			description: ticket.description,
 			dueDate,
-		});
+		};
 		// Marking the ticket first makes the reminder go out once, even when
 		// two runs overlap.
 		const marked = await prisma.$transaction(async (tx) => {
@@ -47,18 +46,21 @@ export async function sendReminders(): Promise<number> {
 			}
 			await notify(tx, assignee.id, {
 				type: "MAINTENANCE_REMINDER",
-				title: message.subject,
-				message: message.summary,
+				notice: (language) => reminderNotice(language, facts),
 			});
 			return true;
 		});
 		if (!marked) {
 			continue;
 		}
+		const email = reminderEmail(assignee.preferred_language, {
+			...facts,
+			recipientName: assignee.fullname,
+		});
 		await sendEmailOrLog({
 			to: assignee.email,
-			subject: message.subject,
-			text: message.body,
+			subject: email.subject,
+			text: email.body,
 		});
 		sent++;
 	}
