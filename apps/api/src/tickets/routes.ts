@@ -1,5 +1,6 @@
 import {
 	approveTicketSchema,
+	completeTicketSchema,
 	createTicketSchema,
 	listTicketsQuerySchema,
 	reassignTicketSchema,
@@ -13,6 +14,7 @@ import { parsePage } from "../pagination.ts";
 import { placeParams } from "../places/routes.ts";
 import { imageFiles, uploadedImages } from "../uploads/middleware.ts";
 import { parse } from "../validation.ts";
+import { completeTicket } from "./complete.ts";
 import * as review from "./review.ts";
 import * as tickets from "./service.ts";
 
@@ -89,5 +91,24 @@ ticketsRouter.post(
 		res.json(
 			await review.reassignTicket(currentUser(res), ticketId, input, req.ip),
 		);
+	},
+);
+
+ticketsRouter.post(
+	"/tickets/:ticketId/complete",
+	...managerOrWorker,
+	imageFiles("photos", 5),
+	async (req, res) => {
+		const { ticketId } = parse(ticketParams, req.params);
+		const input = parse(completeTicketSchema, req.body);
+		const photos = uploadedImages(req);
+		const ticket = await completeTicket(
+			currentUser(res),
+			ticketId,
+			input,
+			photos,
+			req.ip,
+		);
+		res.json(ticket);
 	},
 );
