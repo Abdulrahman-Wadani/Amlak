@@ -51,17 +51,15 @@ export async function findTicketFor(
 
 /**
  * The assignee is an ACTIVE worker assigned to the place, or the place's
- * owner, so a Manager without workers can handle their own tickets. `field`
- * names the body field in the 422, since schedules call it differently.
+ * owner, so a Manager without workers can handle their own tickets.
  */
-export async function assertCanBeAssignee(
+export async function canBeAssignee(
 	db: PrismaClient | Prisma.TransactionClient,
 	assigneeId: string,
 	place: PlaceRow,
-	field: "assignee_id" | "default_assignee_id",
-) {
+): Promise<boolean> {
 	if (assigneeId === place.owner_id) {
-		return;
+		return true;
 	}
 	const assignment = await db.placeWorker.findFirst({
 		where: {
@@ -72,7 +70,20 @@ export async function assertCanBeAssignee(
 		},
 		select: { id: true },
 	});
-	if (!assignment) {
+	return assignment !== null;
+}
+
+/**
+ * Throws a 422 when the assignee is not allowed. `field` names the body
+ * field in the error, since schedules call it differently.
+ */
+export async function assertCanBeAssignee(
+	db: PrismaClient | Prisma.TransactionClient,
+	assigneeId: string,
+	place: PlaceRow,
+	field: "assignee_id" | "default_assignee_id",
+) {
+	if (!(await canBeAssignee(db, assigneeId, place))) {
 		const fields: Record<string, string> = {};
 		fields[field] = "Choose an active worker on this place, or yourself";
 		throw new AppError("VALIDATION_ERROR", "Some fields are invalid", {
