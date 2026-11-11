@@ -290,7 +290,7 @@ function ProfilePage() {
     },
     {
       label: <Trans>Preferred Language</Trans>,
-      value: <Trans>profile.preferred_language.toUpperCase()</Trans>,
+      value: profile.preferred_language.toUpperCase(),
       icon: Languages,
     },
     {

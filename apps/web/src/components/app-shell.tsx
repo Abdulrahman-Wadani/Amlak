@@ -6,7 +6,6 @@ import { useLingui } from "@lingui/react"
 import { useAuth } from "@/lib/auth"
 import { S } from "@/lib/dom-style"
 
-
 type NavItem = { to: string; label: ReactNode; d: string }
 
 const NAV: NavItem[] = [
@@ -21,16 +20,6 @@ const NAV: NavItem[] = [
     d: "M4 3h16v18H4zM9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M10 21v-3h4v3",
   },
   {
-    to: "/tickets",
-    label: <Trans>Maintenance</Trans>,
-    d: "M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.8-.4-.4-2.8z",
-  },
-  {
-    to: "/bookings",
-    label: <Trans>Bookings</Trans>,
-    d: "M3 5h18v16H3zM3 10h18M8 3v4M16 3v4",
-  },
-  {
     to: "/finance",
     label: <Trans>Finance</Trans>,
     d: "M3 7h18v13H3zM5 7V6a2 2 0 0 1 2-2h10v3M16.5 13.5",
@@ -43,7 +32,28 @@ const NAV: NavItem[] = [
 ]
 
 const NAV_STYLE =
-  "display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: 0px; text-decoration: none; color: #1B2430; font-size: 15px; font-weight: 500"
+  "display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; white-space: nowrap; text-decoration: none; color: var(--foreground); font-size: 14px; font-weight: 500"
+
+const ICON_STYLE = S("display: block; flex: none; width: 18px; height: 18px")
+
+function Icon({ d, children }: { d?: string; children?: ReactNode }) {
+  return (
+    <svg
+      aria-hidden="true"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={ICON_STYLE}
+    >
+      {d ? <path d={d} /> : children}
+    </svg>
+  )
+}
 
 export function AppShell({ role }: { role: "manager" | "worker" | "admin" }) {
   useLingui() // subscribe so strings refresh on language flip
@@ -52,36 +62,43 @@ export function AppShell({ role }: { role: "manager" | "worker" | "admin" }) {
   return (
     <div
       style={S(
-        "min-height: 100vh; display: flex; flex-wrap: wrap; background: var(--background); color: var(--foreground); font-family: var(--font-sans); font-size: 15px; line-height: 1.6"
+        "min-height: 100vh; display: flex; flex-direction: column; background: var(--background); color: var(--foreground); font-family: var(--font-sans); font-size: 15px; line-height: 1.6"
       )}
     >
       <nav
         aria-label={t`Main menu`}
         style={S(
-          "flex: 1 1 248px; box-sizing: border-box; background: #FFFFFF; color: #1B2430; border-inline-end: 1px solid #D3D9E2; padding: 24px 16px; display: flex; flex-direction: column; gap: 28px"
+          "position: sticky; top: 0; z-index: 20; box-sizing: border-box; flex: none; display: flex; align-items: center; gap: 20px; height: 56px; padding: 0 20px; background: var(--card); color: var(--foreground); border-block-end: 1px solid var(--border)"
         )}
       >
-        <div style={S("padding: 0 8px")}>
-          <div style={S("display: flex; align-items: center; gap: 10px")}>
-            <div
-              aria-hidden="true"
-              style={S(
-                "width: 30px; height: 30px; flex: none; background: #1B2430; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: var(--font-sans); font-size: 16px; font-weight: 800; line-height: 1"
-              )}
-            >
-              A
-            </div>
-            <span
-              style={S(
-                "font-family: var(--font-sans); font-size: 23px; font-weight: 800; line-height: 1; color: #1B2430"
-              )}
-            >
-              Amlak
-            </span>
-          </div>
-        </div>
+        <Link
+          to="/home"
+          style={S(
+            "display: flex; align-items: center; gap: 8px; text-decoration: none; flex: none"
+          )}
+        >
+          <span
+            aria-hidden="true"
+            style={S(
+              "width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: var(--foreground); color: var(--card); font-family: var(--font-sans); font-size: 14px; font-weight: 800; line-height: 1"
+            )}
+          >
+            A
+          </span>
+          <span
+            style={S(
+              "font-family: var(--font-sans); font-size: 19px; font-weight: 800; line-height: 1; color: var(--foreground)"
+            )}
+          >
+            Amlak
+          </span>
+        </Link>
 
-        <div style={S("display: flex; flex-direction: column; gap: 4px")}>
+        <div
+          style={S(
+            "display: flex; align-items: center; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none"
+          )}
+        >
           {NAV.map((item) => (
             <Link
               key={item.to}
@@ -90,20 +107,7 @@ export function AppShell({ role }: { role: "manager" | "worker" | "admin" }) {
               activeProps={{ "aria-current": "page" }}
               style={S(NAV_STYLE)}
             >
-              <svg
-                aria-hidden="true"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={S("display: block; flex: none")}
-              >
-                <path d={item.d} />
-              </svg>
+              <Icon d={item.d} />
               {item.label}
             </Link>
           ))}
@@ -111,7 +115,7 @@ export function AppShell({ role }: { role: "manager" | "worker" | "admin" }) {
 
         <div
           style={S(
-            "margin-top: auto; display: flex; flex-direction: column; gap: 12px"
+            "margin-inline-start: auto; display: flex; align-items: center; gap: 10px; flex: none"
           )}
         >
           <Link
@@ -120,29 +124,18 @@ export function AppShell({ role }: { role: "manager" | "worker" | "admin" }) {
             activeProps={{ "aria-current": "page" }}
             style={S(NAV_STYLE)}
           >
-            <svg
-              aria-hidden="true"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={S("display: block; flex: none")}
-            >
+            <Icon>
               <circle cx="12" cy="8" r="4" />
               <path d="M4 21a8 8 0 0 1 16 0" />
-            </svg>
+            </Icon>
             <Trans>Account</Trans>
           </Link>
-          <div
+          <span
             style={S(
-              "display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-top: 1px solid #D3D9E2"
+              "display: flex; align-items: center; gap: 10px; border-inline-start: 1px solid var(--border); padding-inline-start: 12px"
             )}
           >
-            <span style={S("font-size: 14px; font-weight: 600")}>
+            <span style={S("font-size: 13px; font-weight: 600")}>
               {user?.fullname}
             </span>
             <button
@@ -150,16 +143,16 @@ export function AppShell({ role }: { role: "manager" | "worker" | "admin" }) {
               className="am-btn"
               onClick={() => logout()}
               style={S(
-                "height: 32px; padding: 0 12px; border: 1px solid #1B2430; background: transparent; color: #1B2430; font: inherit; font-size: 13px; font-weight: 600; cursor: pointer"
+                "height: 30px; padding: 0 10px; border: 1px solid var(--foreground); background: transparent; color: var(--foreground); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer"
               )}
             >
               <Trans>Sign out</Trans>
             </button>
-          </div>
+          </span>
         </div>
       </nav>
 
-      <div style={S("flex: 4 1 0; min-width: 0; box-sizing: border-box")}>
+      <div style={S("flex: 1 1 auto; min-width: 0; box-sizing: border-box")}>
         <Outlet />
       </div>
     </div>

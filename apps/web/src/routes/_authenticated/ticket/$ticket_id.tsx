@@ -248,6 +248,9 @@ function TicketDetailPage() {
     setActualCost("")
     setCompletionNotes("")
     setPhotos([])
+    document.querySelectorAll(".am-btn").forEach(btn => {
+    btn.style.display = "";
+  });
   }
 
   const sendAction = async (
@@ -396,6 +399,9 @@ function TicketDetailPage() {
   const openAction = (nextAction: ActionType) => {
     setAction(nextAction)
     setActionError(null)
+    document.querySelectorAll(".am-btn").forEach(btn => {
+    btn.style.display = "none";
+  });
   }
 
   const date = (value: string | null | undefined) => {
@@ -473,7 +479,7 @@ function TicketDetailPage() {
   }) => (
     <section
       style={S(
-        "padding:20px; border:1px solid var(--border); border-radius:14px; background:var(--card); display:flex; flex-direction:column; gap:20px",
+        "padding:20px; border:1px solid var(--border);  background:var(--card); display:flex; flex-direction:column; gap:20px",
       )}
     >
       <div style={S("display:flex; align-items:center; gap:9px")}>
@@ -497,7 +503,7 @@ function TicketDetailPage() {
   )
 
   const fieldStyle = S(
-    "width:100%; min-height:40px; padding:9px 12px; border:1px solid var(--border); border-radius:8px; background:var(--background); color:var(--foreground)",
+    "width:100%; min-height:40px; padding:9px 12px; border:1px solid var(--border); background:var(--background); color:var(--foreground)",
   )
 
   const labelStyle = S("display:block; font-size:13px; font-weight:600; margin-bottom:7px")
@@ -643,7 +649,7 @@ function TicketDetailPage() {
         {ticket.rejection_reason && (
           <div
             style={S(
-              "padding:14px; border-radius:10px; background:#dc262610; display:flex; flex-direction:column; gap:7px",
+              "padding:14px;  background:#dc262610; display:flex; flex-direction:column; gap:7px",
             )}
           >
             <strong style={S("font-size:13px; color:#dc2626")}>سبب الرفض</strong>
@@ -756,7 +762,7 @@ function TicketDetailPage() {
         {action && (
           <div
             style={S(
-              "margin:0 20px 20px; padding:18px; border:1px solid var(--border); border-radius:12px; display:flex; flex-direction:column; gap:16px",
+              "margin:0 20px 20px; padding:18px; border:1px solid var(--border); display:flex; flex-direction:column; gap:16px",
             )}
           >
             <div style={S("display:flex; align-items:center; justify-content:space-between; gap:12px")}>
@@ -920,6 +926,7 @@ function TicketDetailPage() {
               )}
 
               <Button
+                id="cancel-action-btn"
                 variant="outline"
                 onClick={resetActionForm}
                 disabled={actionLoading}
