@@ -13,6 +13,7 @@ import {
 	createScheduleSchema,
 	createTicketSchema,
 	createWorkerSchema,
+	forgotPasswordSchema,
 	listAssetsQuerySchema,
 	listBookingsQuerySchema,
 	listPlacesQuerySchema,
@@ -26,6 +27,7 @@ import {
 	reassignTicketSchema,
 	registerSchema,
 	rejectTicketSchema,
+	resetPasswordSchema,
 	scheduleSchema,
 	ticketSchema,
 	updateAssetSchema,
@@ -114,6 +116,36 @@ export const openApiDocument = createDocument({
 				responses: {
 					"204": { description: "Sent, if the account is pending" },
 					"429": fail("Wait before asking for another code"),
+				},
+			},
+		},
+		"/auth/password/forgot": {
+			post: {
+				tags: ["Auth"],
+				summary: "Email a password reset link",
+				requestBody: json(forgotPasswordSchema),
+				responses: {
+					"204": {
+						description:
+							"Sent if the account is ACTIVE or waiting for its email check; the same response for any other email",
+					},
+					"429": fail("Wait before asking for another link"),
+				},
+			},
+		},
+		"/auth/password/reset": {
+			post: {
+				tags: ["Auth"],
+				summary: "Set a new password from the reset link",
+				requestBody: json(resetPasswordSchema),
+				responses: {
+					"204": {
+						description:
+							"Changed; every device is logged out. A pending account becomes ACTIVE",
+					},
+					"422": fail(
+						"The link is wrong, expired or used, or the password is weak",
+					),
 				},
 			},
 		},
