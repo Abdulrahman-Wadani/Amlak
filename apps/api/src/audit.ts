@@ -14,13 +14,17 @@ export type AuditAction =
 	| "TICKET_APPROVE"
 	| "TICKET_REJECT"
 	| "TICKET_REASSIGN"
-	| "TICKET_COMPLETE";
+	| "TICKET_COMPLETE"
+	| "TICKET_COMPLETE"
+	| "BOOKING_CREATE"
+	| "BOOKING_CANCEL";
 export type AuditEntity =
 	| "User"
 	| "Place"
 	| "Asset"
 	| "PlaceWorker"
-	| "MaintenanceTicket";
+	| "MaintenanceTicket"
+	| "Booking";
 
 export type AuditEntry = {
 	action: AuditAction;

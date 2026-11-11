@@ -1,5 +1,6 @@
 export * from "./assets.ts";
 export * from "./auth.ts";
+export * from "./bookings.ts";
 export * from "./pagination.ts";
 export * from "./place-workers.ts";
 export * from "./places.ts";

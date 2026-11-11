@@ -3,6 +3,7 @@ import express from "express";
 import swaggerUi from "swagger-ui-express";
 import { assetsRouter } from "./assets/routes.ts";
 import { authRouter } from "./auth/routes.ts";
+import { bookingsRouter } from "./bookings/routes.ts";
 import { errorHandler } from "./middleware/error-handler.ts";
 import { notFound } from "./middleware/not-found.ts";
 import { openApiDocument } from "./openapi.ts";
@@ -26,6 +27,7 @@ app.use("/api/v1", workersRouter);
 app.use("/api/v1", placeWorkersRouter);
 app.use("/api/v1", ticketsRouter);
 app.use("/api/v1", schedulesRouter);
+app.use("/api/v1", bookingsRouter);
 
 app.use(
 	"/api/docs",
