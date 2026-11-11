@@ -15,9 +15,10 @@ export type AuditAction =
 	| "TICKET_REJECT"
 	| "TICKET_REASSIGN"
 	| "TICKET_COMPLETE"
-	| "TICKET_COMPLETE"
 	| "BOOKING_CREATE"
-	| "BOOKING_CANCEL";
+	| "BOOKING_CANCEL"
+	| "BOOKING_CHECK_IN"
+	| "BOOKING_CHECK_OUT";
 export type AuditEntity =
 	| "User"
 	| "Place"

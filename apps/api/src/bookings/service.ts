@@ -200,6 +200,6 @@ export async function moveBooking(
  * Locks the place's row until the transaction ends. A second booking for
  * the same place waits here, then sees the first one in its overlap check.
  */
-async function lockPlace(tx: Prisma.TransactionClient, placeId: string) {
+export async function lockPlace(tx: Prisma.TransactionClient, placeId: string) {
 	await tx.$queryRaw`SELECT id FROM places WHERE id = ${placeId}::uuid FOR UPDATE`;
 }
