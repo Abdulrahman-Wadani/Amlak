@@ -4,13 +4,17 @@ import {
 	approveTicketSchema,
 	assetSchema,
 	assignWorkerSchema,
+	bookingSchema,
+	cancelBookingSchema,
 	completeTicketSchema,
 	createAssetSchema,
+	createBookingSchema,
 	createPlaceSchema,
 	createScheduleSchema,
 	createTicketSchema,
 	createWorkerSchema,
 	listAssetsQuerySchema,
+	listBookingsQuerySchema,
 	listPlacesQuerySchema,
 	listTicketsQuerySchema,
 	listWorkersQuerySchema,
@@ -36,6 +40,7 @@ import {
 import { z } from "zod";
 import { createDocument } from "zod-openapi";
 import { assetParams } from "./assets/routes.ts";
+import { bookingParams } from "./bookings/routes.ts";
 import { pageQuerySchema } from "./pagination.ts";
 import { placeWorkerParams } from "./place-workers/routes.ts";
 import { placeParams } from "./places/routes.ts";
@@ -469,6 +474,70 @@ export const openApiDocument = createDocument({
 				responses: {
 					"204": { description: "Stopped; tickets it created stay" },
 					"404": fail("Schedule not found, or already stopped"),
+					...guarded,
+				},
+			},
+		},
+		"/places/{placeId}/bookings": {
+			get: {
+				tags: ["Bookings"],
+				summary: "Booking calendar: the stays that touch from–to",
+				security: loggedIn,
+				requestParams: {
+					path: placeParams,
+					query: listBookingsQuerySchema.safeExtend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok("One page of bookings", paginatedSchema(bookingSchema)),
+					"404": fail("Place not found"),
+					"422": fail("Invalid dates, filter or page"),
+					...guarded,
+				},
+			},
+			post: {
+				tags: ["Bookings"],
+				summary: "Add a booking",
+				security: loggedIn,
+				requestParams: { path: placeParams },
+				requestBody: json(createBookingSchema),
+				responses: {
+					"201": ok("The new booking, CONFIRMED", bookingSchema),
+					"404": fail("Place not found"),
+					"409": fail(
+						"The dates overlap another booking; see details.conflicting_booking_id",
+					),
+					"422": fail(
+						"Some fields are invalid, the stay is over, or the place is not ACTIVE",
+					),
+					...guarded,
+				},
+			},
+		},
+		"/bookings/{bookingId}": {
+			get: {
+				tags: ["Bookings"],
+				summary: "Get a booking",
+				security: loggedIn,
+				requestParams: { path: bookingParams },
+				responses: {
+					"200": ok("The booking", bookingSchema),
+					"404": fail("Booking not found"),
+					...guarded,
+				},
+			},
+		},
+		"/bookings/{bookingId}/cancel": {
+			post: {
+				tags: ["Bookings"],
+				summary: "Cancel a CONFIRMED booking",
+				security: loggedIn,
+				requestParams: { path: bookingParams },
+				requestBody: json(cancelBookingSchema),
+				responses: {
+					"200": ok("The cancelled booking", bookingSchema),
+					"404": fail("Booking not found"),
+					"409": fail("The booking is not CONFIRMED"),
+					"422": fail("The reason is missing"),
 					...guarded,
 				},
 			},
