@@ -11,6 +11,7 @@ import { parsePage } from "../pagination.ts";
 import { placeParams } from "../places/routes.ts";
 import { parse } from "../validation.ts";
 import * as bookings from "./service.ts";
+import { checkIn, checkOut } from "./stays.ts";
 
 export const bookingsRouter = Router();
 
@@ -64,5 +65,23 @@ bookingsRouter.post(
 		res.json(
 			await bookings.cancelBooking(currentUser(res), bookingId, input, req.ip),
 		);
+	},
+);
+
+bookingsRouter.post(
+	"/bookings/:bookingId/check-in",
+	...managerOrWorker,
+	async (req, res) => {
+		const { bookingId } = parse(bookingParams, req.params);
+		res.json(await checkIn(currentUser(res), bookingId, req.ip));
+	},
+);
+
+bookingsRouter.post(
+	"/bookings/:bookingId/check-out",
+	...managerOrWorker,
+	async (req, res) => {
+		const { bookingId } = parse(bookingParams, req.params);
+		res.json(await checkOut(currentUser(res), bookingId, req.ip));
 	},
 );

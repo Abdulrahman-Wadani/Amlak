@@ -542,6 +542,36 @@ export const openApiDocument = createDocument({
 				},
 			},
 		},
+		"/bookings/{bookingId}/check-in": {
+			post: {
+				tags: ["Bookings"],
+				summary: "Check the guest in",
+				security: loggedIn,
+				requestParams: { path: bookingParams },
+				responses: {
+					"200": ok("The booking, CHECKED_IN", bookingSchema),
+					"404": fail("Booking not found"),
+					"409": fail(
+						"Not CONFIRMED, or not ready: details.reason is BEFORE_CHECK_IN_DATE, or PLACE_OCCUPIED with details.occupied_by_booking_id",
+					),
+					...guarded,
+				},
+			},
+		},
+		"/bookings/{bookingId}/check-out": {
+			post: {
+				tags: ["Bookings"],
+				summary: "Check the guest out",
+				security: loggedIn,
+				requestParams: { path: bookingParams },
+				responses: {
+					"200": ok("The booking, CHECKED_OUT", bookingSchema),
+					"404": fail("Booking not found"),
+					"409": fail("The booking is not CHECKED_IN"),
+					...guarded,
+				},
+			},
+		},
 		"/places/{placeId}/workers": {
 			get: {
 				tags: ["Place workers"],
