@@ -72,3 +72,15 @@ export const accountSetupSchema = z.object({
 	password: passwordSchema,
 });
 export type AccountSetupInput = z.infer<typeof accountSetupSchema>;
+
+export const forgotPasswordSchema = z.object({
+	email: emailSchema,
+});
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z.object({
+	email: emailSchema,
+	token: z.string().min(1).meta({ description: "From the reset link" }),
+	new_password: passwordSchema,
+});
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
