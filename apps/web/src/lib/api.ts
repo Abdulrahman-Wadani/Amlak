@@ -284,3 +284,359 @@ export async function deleteWorker(
     )
   }
 }
+
+export async function getAssetById(
+  token: string,
+  assetId: string,
+): Promise<Asset> {
+  return apiRequest<Asset>(`/assets/${assetId}`, token).then(
+    (data) => {
+      if (!data || typeof data.id !== "string") {
+        throw new Error("asset not found")
+      }
+
+      return data
+    },
+  )
+}
+
+export async function getTicketsForPlace(
+  token: string,
+  placeId: string,
+) {
+  const response = await fetch(`/api/v1/tickets?place_id=${placeId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    credentials: "same-origin",
+  }).then((res) => res.json())
+
+  return response.data;
+}
+
+export async function getTicketById(
+  token: string,
+  ticketId: string,
+) {
+  const response = await fetch(`/api/v1/tickets/${ticketId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    credentials: "same-origin",
+  }).then((res) => res.json())
+
+  return response;
+}
+
+export async function expenseslist(
+  token: string,
+  placeId: string,
+): Promise<Blob> {
+return expense.data;
+}
+
+// for test now only
+export type TicketPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT"
+
+export interface CreateTicketInput {
+  asset_id?: string
+  priority?: TicketPriority
+  description?: string
+  photos?: File[]
+}
+
+export async function createTicket(
+  token: string,
+  placeId: string,
+  input: CreateTicketInput,
+) {
+  const formData = new FormData()
+
+  if (input.asset_id) {
+    formData.append("asset_id", input.asset_id)
+  }
+
+  if (input.priority) {
+    formData.append("priority", input.priority)
+  }
+
+  if (input.description) {
+    formData.append("description", input.description)
+  }
+
+  for (const photo of input.photos ?? []) {
+    formData.append("photos", photo)
+  }
+
+  const res = await fetch(`/api/v1/places/${placeId}/tickets`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+    credentials: "same-origin",
+  })
+
+  const response: unknown = await res.json().catch(() => null)
+
+  if (!res.ok) {
+    const message =
+      response &&
+      typeof response === "object" &&
+      "message" in response
+        ? String((response as { message: unknown }).message)
+        : `Create ticket failed with ${res.status}`
+
+    throw new Error(message)
+  }
+
+  return unwrapResponse(response)
+}
+// maintinance buttons
+
+export interface ApproveTicketInput {
+  assignee_id: string;
+  due_date: string;
+  estimated_cost: number;
+}
+
+export interface RejectTicketInput {
+  reason: string;
+}
+
+export interface ReassignTicketInput {
+  assignee_id: string;
+  due_date: string;
+}
+
+export interface CompleteTicketInput {
+  actual_cost: number;
+  completion_notes?: string;
+  photos: File[];
+}
+
+async function ticketRequest<T>(
+  token: string,
+  ticketId: string,
+  action: string,
+  body: object | FormData,
+): Promise<T> {
+  const isFormData = body instanceof FormData;
+
+  const response = await fetch(
+    `/api/v1/tickets/${ticketId}/${action}`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
+      },
+      body: isFormData ? body : JSON.stringify(body),
+    },
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.message || result.error || `Failed to ${action} ticket`,
+    );
+  }
+
+  return result as T;
+}
+
+// 1. Approve ticket
+export async function approveTicket(
+  token: string,
+  ticketId: string,
+  input: ApproveTicketInput,
+) {
+  return ticketRequest(
+    token,
+    ticketId,
+    "approve",
+    input,
+  );
+}
+
+// 2. Reject ticket
+export async function rejectTicket(
+  token: string,
+  ticketId: string,
+  input: RejectTicketInput,
+) {
+  return ticketRequest(
+    token,
+    ticketId,
+    "reject",
+    input,
+  );
+}
+
+// 3. Reassign ticket
+export async function reassignTicket(
+  token: string,
+  ticketId: string,
+  input: ReassignTicketInput,
+) {
+  return ticketRequest(
+    token,
+    ticketId,
+    "reassign",
+    input,
+  );
+}
+
+// 4. Complete ticket
+export async function completeTicket(
+  token: string,
+  ticketId: string,
+  input: CompleteTicketInput,
+) {
+  const formData = new FormData();
+
+  formData.append("actual_cost", String(input.actual_cost));
+
+  if (input.completion_notes) {
+    formData.append("completion_notes", input.completion_notes);
+  }
+
+  input.photos.forEach((photo) => {
+    formData.append("photos", photo);
+  });
+
+  return ticketRequest(
+    token,
+    ticketId,
+    "complete",
+    formData,
+  );
+}
+
+
+
+export async function getScheduledMaintenancesForAsset(
+  token: string,
+  assetId: string,
+) {
+  return apiRequest(`/assets/${assetId}/maintenance-schedules`, token)
+}
+
+
+export type IntervalUnit = "DAY" | "WEEK" | "MONTH" | "YEAR"
+
+export interface CreateMaintenanceScheduleInput {
+  description: string
+  interval_count: number
+  interval_unit: IntervalUnit
+  next_due_date: string
+  lead_days?: number
+  default_assignee_id?: string
+}
+
+export async function createMaintenanceSchedule(
+  token: string,
+  assetId: string,
+  input: CreateMaintenanceScheduleInput
+) {
+  const response = await fetch(
+    `/api/v1/assets/${assetId}/maintenance-schedules`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      credentials: "same-origin",
+      body: JSON.stringify(input),
+    }
+  )
+
+  const data: unknown = await response.json().catch(() => null)
+
+  if (!response.ok) {
+    const message =
+      typeof data === "object" &&
+      data !== null &&
+      "message" in data &&
+      typeof data.message === "string"
+        ? data.message
+        : "Failed to create maintenance schedule"
+
+    throw new Error(message)
+  }
+
+  return data
+}
+
+export async function handleCancelSchedule(
+  token: string,
+  scheduleId: string
+) {
+  const response = await fetch(
+    `/api/v1/maintenance-schedules/${scheduleId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "same-origin",
+    }
+  )
+  if (!response.ok) {
+    const data: unknown = await response.json().catch(() => null)
+    const message =
+      typeof data === "object" &&
+      data !== null &&
+      "message" in data &&
+      typeof data.message === "string"
+        ? data.message
+        : "Failed to cancel maintenance schedule"
+
+    throw new Error(message)
+  }
+  return document.location.reload()
+}
+
+
+export async function updateProfile(
+  accessToken: string,
+  data: {
+    fullname: string
+    phone: string | null
+    preferred_language: string
+    picture?: File | null
+  }
+) {
+  const formData = new FormData()
+
+  formData.append("fullname", data.fullname)
+  formData.append("phone", data.phone || "")
+  formData.append("preferred_language", data.preferred_language)
+
+  if (data.picture) {
+    formData.append("picture", data.picture)
+  }
+
+  const response = await fetch("/api/v1/users/me", {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: formData,
+  })
+
+  if (!response.ok) {
+    const result = await response.json().catch(() => null)
+    throw new Error(result?.message || "Failed to update profile")
+  }
+
+  return response.json()
+}
+
+export async function getProfile(token: string) {
+  return apiRequest('/users/me', token)
+}

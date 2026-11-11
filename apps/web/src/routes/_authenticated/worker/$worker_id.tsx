@@ -34,6 +34,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 
 import { StatusBadge } from "@/components/place-shared"
 import "@/styles/motion.css"
@@ -233,17 +241,19 @@ function WorkerDetailPage() {
               font-size: 13px;
             `)}
           >
-            <Link
-              to="/workers"
-              style={S(`
-                color: inherit;
-                text-decoration: none;
-              `)}
-            >
-              العمال
-            </Link>
-            <span>/</span>
-            <span>التفاصيل</span>
+<Breadcrumb>
+  <BreadcrumbList>
+    <BreadcrumbItem>
+      <BreadcrumbLink render={<a href="/" />}>الرئيسية</BreadcrumbLink>
+    </BreadcrumbItem>
+    <BreadcrumbSeparator />
+    <BreadcrumbItem>
+      <BreadcrumbLink render={<a href="/workers" />}>
+        العمال
+      </BreadcrumbLink>
+    </BreadcrumbItem>
+  </BreadcrumbList>
+</Breadcrumb>
           </div>
 
           <h1
