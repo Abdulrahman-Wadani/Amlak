@@ -274,7 +274,7 @@ function AddWorker() {
           <Trans>What happens next?</Trans>
         </h2>
 
-        <ul className="list-disc pl-5 text-sm text-muted-foreground space-y-2">
+        <ul className="list-disc ps-5 text-sm text-muted-foreground space-y-2">
           <li>
             <Trans>The worker account will be created with invited status.</Trans>
           </li>
