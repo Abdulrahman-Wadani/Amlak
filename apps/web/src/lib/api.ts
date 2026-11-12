@@ -1,4 +1,5 @@
 
+import type { BookingInput } from "./validators"
 import type {
   Asset,
   CreateAssetInput,
@@ -42,7 +43,7 @@ function unwrapResponse<T>(response: unknown): T {
   return response as T
 }
 
-async function apiRequest<T>(
+export async function apiRequest<T>(
   path: string,
   token: string,
   options: RequestInit = {},
@@ -69,7 +70,20 @@ async function apiRequest<T>(
         ? String((response as { message: unknown }).message)
         : `${path} failed with ${res.status}`
 
-    throw new Error(message)
+    const error = new Error(message) as Error & {
+      code?: string
+      details?: Record<string, unknown>
+    }
+    error.code =
+      response && typeof response === "object" && "code" in response
+        ? String((response as { code: unknown }).code)
+        : ""
+    error.details =
+      response && typeof response === "object" && "details" in response
+        ? (response as { details?: Record<string, unknown> }).details
+        : undefined
+
+    throw error
   }
 
   return unwrapResponse<T>(response)
@@ -174,6 +188,105 @@ export async function createPlace(
 
     throw error
   }
+}
+
+// shortcut: packages/shared has no bookings.ts on this branch; when it lands,
+// delete this shape and import Booking from @amlak/shared.
+export type BookingStatus =
+  | "CONFIRMED"
+  | "CHECKED_IN"
+  | "CHECKED_OUT"
+  | "CANCELLED"
+
+export interface Booking {
+  id: string
+  guest_name: string
+  guest_phone: string
+  guest_email: string | null
+  guest_count: number
+  check_in_date: string
+  check_out_date: string
+  total_price: number
+  currency: string
+  status: BookingStatus
+  notes: string | null
+  ready_for_check_in: boolean
+  cancellation_reason: string | null
+}
+
+export interface BookingWindow {
+  from: string
+  to: string
+}
+
+export async function getBookingsForPlace(
+  token: string,
+  placeId: string,
+  window: BookingWindow,
+  page = 1,
+): Promise<Booking[]> {
+  const query = new URLSearchParams({
+    from: window.from,
+    to: window.to,
+    page: String(page),
+    page_size: "100",
+  })
+
+  return apiRequest<Booking[]>(
+    `/places/${placeId}/bookings?${query.toString()}`,
+    token,
+  ).then((data) => {
+    if (!Array.isArray(data)) {
+      throw new Error("/bookings returned no list")
+    }
+
+    return data
+  })
+}
+
+export async function createBooking(
+  token: string,
+  placeId: string,
+  input: BookingInput,
+): Promise<Booking> {
+  return apiRequest<Booking>(`/places/${placeId}/bookings`, token, {
+    method: "POST",
+    body: JSON.stringify(input),
+  })
+}
+
+export function updateBooking(
+  token: string,
+  bookingId: string,
+  input: BookingInput,
+): Promise<Booking> {
+  return apiRequest<Booking>(`/bookings/${bookingId}`, token, {
+    method: "PUT",
+    body: JSON.stringify(input),
+  })
+}
+
+export function checkInBooking(token: string, bookingId: string): Promise<Booking> {
+  return apiRequest<Booking>(`/bookings/${bookingId}/check-in`, token, {
+    method: "POST",
+  })
+}
+
+export function checkOutBooking(token: string, bookingId: string): Promise<Booking> {
+  return apiRequest<Booking>(`/bookings/${bookingId}/check-out`, token, {
+    method: "POST",
+  })
+}
+
+export function cancelBooking(
+  token: string,
+  bookingId: string,
+  reason: string,
+): Promise<Booking> {
+  return apiRequest<Booking>(`/bookings/${bookingId}/cancel`, token, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  })
 }
 
 // Workers

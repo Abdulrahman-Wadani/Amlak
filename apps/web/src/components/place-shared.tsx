@@ -111,6 +111,55 @@ export function AssetStatusBadge({ status }: { status: string }) {
   )
 }
 
+export function BookingStatusChip({ status }: { status: string }) {
+  if (status === "CHECKED_IN") {
+    return (
+      <Chip
+        bg="var(--good-50)"
+        border="var(--good-200)"
+        text="var(--good-700)"
+        dot="var(--good)"
+      >
+        <Trans>Checked in</Trans>
+      </Chip>
+    )
+  }
+  if (status === "CHECKED_OUT") {
+    return (
+      <Chip
+        bg="var(--info-50)"
+        border="var(--info-200)"
+        text="var(--info-700)"
+        dot="var(--info)"
+      >
+        <Trans>Checked out</Trans>
+      </Chip>
+    )
+  }
+  if (status === "CANCELLED") {
+    return (
+      <Chip
+        bg="var(--crit-50)"
+        border="var(--crit-200)"
+        text="var(--crit-900)"
+        dot="var(--crit)"
+      >
+        <Trans>Cancelled</Trans>
+      </Chip>
+    )
+  }
+  return (
+    <Chip
+      bg="var(--muted)"
+      border="var(--border)"
+      text="var(--foreground)"
+      dot="var(--muted-foreground)"
+    >
+      <Trans>Confirmed</Trans>
+    </Chip>
+  )
+}
+
 export function TypeLabel({ type }: { type: string }) {
   switch (type.toUpperCase().replace(/[\s-]+/g, "_")) {
     case "APARTMENT":

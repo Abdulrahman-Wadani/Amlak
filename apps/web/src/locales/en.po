@@ -670,3 +670,273 @@ msgstr "You can request a new code in"
 #: src/routes/_authenticated/place/$place_id.tsx:83
 msgid "Your places"
 msgstr "Your places"
+
+#: src/components/place-bookings.tsx:468
+msgid "Add booking"
+msgstr "Add booking"
+
+#: src/components/place-bookings.tsx:211
+msgid "Back"
+msgstr "Back"
+
+#: src/components/place-shared.tsx:147
+msgid "Cancelled"
+msgstr "Cancelled"
+
+#: src/components/place-bookings.tsx:305
+msgid "Check-in"
+msgstr "Check-in"
+
+#: src/components/place-bookings.tsx:318
+msgid "Check-out"
+msgstr "Check-out"
+
+#: src/components/place-shared.tsx:123
+msgid "Checked in"
+msgstr "Checked in"
+
+#: src/components/place-shared.tsx:135
+msgid "Checked out"
+msgstr "Checked out"
+
+#: src/components/place-bookings.tsx:246
+msgid "Close"
+msgstr "Close"
+
+#: src/components/place-shared.tsx:158
+msgid "Confirmed"
+msgstr "Confirmed"
+
+#: src/components/place-bookings.tsx:168
+msgid "Could not save the booking. Please try again."
+msgstr "Could not save the booking. Please try again."
+
+#: src/components/place-bookings.tsx:288
+msgid "Guest email"
+msgstr "Guest email"
+
+#: src/components/place-bookings.tsx:261
+msgid "Guest name"
+msgstr "Guest name"
+
+#: src/components/place-bookings.tsx:274
+msgid "Guest phone"
+msgstr "Guest phone"
+
+#: src/components/place-bookings.tsx:439
+msgid "guests"
+msgstr "guests"
+
+#: src/components/place-bookings.tsx:335
+msgid "Guests"
+msgstr "Guests"
+
+#: src/components/place-bookings.tsx:235
+msgid "Next month"
+msgstr "Next month"
+
+#: src/components/place-bookings.tsx:416
+msgid "No bookings in this month."
+msgstr "No bookings in this month."
+
+#: src/components/place-bookings.tsx:364
+msgid "Notes"
+msgstr "Notes"
+
+#: src/components/place-bookings.tsx:219
+msgid "Previous month"
+msgstr "Previous month"
+
+#: src/components/place-bookings.tsx:393
+msgid "Save booking"
+msgstr "Save booking"
+
+#: src/components/place-bookings.tsx:390
+msgid "Saving…"
+msgstr "Saving…"
+
+#: src/components/place-bookings.tsx:167
+msgid "Those dates are already booked for this property."
+msgstr "Those dates are already booked for this property."
+
+#: src/components/place-bookings.tsx:349
+msgid "Total price"
+msgstr "Total price"
+
+#: src/components/place-bookings.tsx:404
+msgid "Try again in a moment."
+msgstr "Try again in a moment."
+
+#: src/components/place-bookings.tsx:401
+msgid "We could not load the bookings for this property."
+msgstr "We could not load the bookings for this property."
+
+#: src/components/place-bookings.tsx
+msgid "Enter the guest name"
+msgstr "Enter the guest name"
+
+#: src/components/place-bookings.tsx
+msgid "Use the international phone format"
+msgstr "Use the international phone format"
+
+#: src/components/place-bookings.tsx
+msgid "Enter a valid email address"
+msgstr "Enter a valid email address"
+
+#: src/components/place-bookings.tsx
+msgid "Enter the number of guests"
+msgstr "Enter the number of guests"
+
+#: src/components/place-bookings.tsx
+msgid "Choose the check-in date"
+msgstr "Choose the check-in date"
+
+#: src/components/place-bookings.tsx
+msgid "Choose a check-out date after the check-in date"
+msgstr "Choose a check-out date after the check-in date"
+
+#: src/components/place-bookings.tsx
+msgid "Enter the total price"
+msgstr "Enter the total price"
+
+#: src/components/place-bookings.tsx
+msgid "Notes are too long"
+msgstr "Notes are too long"
+
+#: src/components/place-bookings.tsx
+msgid "All bookings"
+msgstr "All bookings"
+
+#: src/components/place-bookings.tsx
+msgid "By month"
+msgstr "By month"
+
+#: src/components/place-bookings.tsx
+msgid "Cancel booking"
+msgstr "Cancel booking"
+
+#: src/components/place-bookings.tsx
+msgid "Cancellation reason"
+msgstr "Cancellation reason"
+
+#: src/components/place-bookings.tsx
+msgid "Confirm cancel"
+msgstr "Confirm cancel"
+
+#: src/components/place-bookings.tsx
+msgid "Could not cancel the booking. Please try again."
+msgstr "Could not cancel the booking. Please try again."
+
+#: src/components/place-bookings.tsx
+msgid "Could not update the booking. Please try again."
+msgstr "Could not update the booking. Please try again."
+
+#: src/components/place-bookings.tsx
+msgid "Edit"
+msgstr "Edit"
+
+#: src/components/place-bookings.tsx
+msgid "Enter the reason for the cancellation"
+msgstr "Enter the reason for the cancellation"
+
+#: src/components/place-bookings.tsx
+msgid "Load more"
+msgstr "Load more"
+
+#: src/components/place-bookings.tsx
+msgid "No bookings for this property yet."
+msgstr "No bookings for this property yet."
+
+#: src/components/place-bookings.tsx
+msgid "Save changes"
+msgstr "Save changes"
+
+#: src/components/place-bookings.tsx
+msgid "This booking can no longer be cancelled."
+msgstr "This booking can no longer be cancelled."
+#: src/components/place-bookings.tsx
+msgid "Filter bookings by month"
+msgstr "Filter bookings by month"
+
+#: src/components/place-bookings.tsx
+msgid "Add a stay to block its dates on the calendar."
+msgstr "Add a stay to block its dates on the calendar."
+
+#: src/components/place-bookings.tsx
+msgid "Cancel this booking?"
+msgstr "Cancel this booking?"
+
+#: src/components/place-bookings.tsx
+msgid "Cancelling…"
+msgstr "Cancelling…"
+
+#: src/components/place-bookings.tsx
+msgid "Edit booking"
+msgstr "Edit booking"
+
+#: src/components/place-bookings.tsx
+msgid "Use the international format, e.g. +966512345678"
+msgstr "Use the international format, e.g. +966512345678"
+
+#: src/components/place-bookings.tsx
+msgid "Guest"
+msgstr "Guest"
+
+#: src/components/place-bookings.tsx
+msgid "Stay"
+msgstr "Stay"
+
+#: src/components/place-bookings.tsx
+msgid "Why is this stay being cancelled?"
+msgstr "Why is this stay being cancelled?"
+
+#: src/components/place-bookings.tsx
+msgid "Kept in the booking record."
+msgstr "Kept in the booking record."
+
+#: src/components/place-bookings.tsx
+msgid "Example: the guest changed their plans"
+msgstr "Example: the guest changed their plans"
+
+#: src/components/place-bookings.tsx
+msgid "Check in"
+msgstr "Check in"
+
+#: src/components/place-bookings.tsx
+msgid "Check out"
+msgstr "Check out"
+
+#: src/components/place-bookings.tsx
+msgid "Another guest has not checked out yet."
+msgstr "Another guest has not checked out yet."
+
+#: src/components/place-bookings.tsx
+msgid "This booking can no longer be moved to another state."
+msgstr "This booking can no longer be moved to another state."
+#: src/components/place-bookings.tsx
+msgid "Check-in opens on"
+msgstr "Check-in opens on"
+
+#: src/components/place-bookings.tsx
+msgid "Check this guest in?"
+msgstr "Check this guest in?"
+
+#: src/components/place-bookings.tsx
+msgid "Check this guest out?"
+msgstr "Check this guest out?"
+
+#: src/components/place-bookings.tsx
+msgid "Confirm check-in"
+msgstr "Confirm check-in"
+
+#: src/components/place-bookings.tsx
+msgid "Confirm check-out"
+msgstr "Confirm check-out"
+
+#: src/components/place-bookings.tsx
+msgid "Check-in has not opened for this stay yet."
+msgstr "Check-in has not opened for this stay yet."
+
+#: src/components/place-bookings.tsx
+msgid "Could not change the booking. Please try again."
+msgstr "Could not change the booking. Please try again."

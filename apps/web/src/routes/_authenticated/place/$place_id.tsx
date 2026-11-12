@@ -39,6 +39,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { PlaceBookings } from "@/components/place-bookings"
 import {
   AssetStatusBadge,
   StatusBadge,
@@ -88,7 +89,7 @@ function PlaceDetailPage() {
   const [workers, setWorkers] = useState<Worker[] | null>(null)
   const [tickets, setTickets] = useState<Awaited<ReturnType<typeof getTicketsForPlace>> | null>(null)
   const [failed, setFailed] = useState(false)
-  const [activeSection, setActiveSection] = useState<"assets" | "workers" | "tickets" | null>(null)
+  const [activeSection, setActiveSection] = useState<"assets" | "workers" | "tickets" | "bookings" | null>(null)
 
 
   const [deleting, setDeleting] = useState(false)
@@ -733,7 +734,22 @@ function getWorkerName(userId: string | null | undefined) {
               <Wrench size={16} />
               تذاكر الصيانة
             </Button>
+            <Button
+              type="button"
+              variant={activeSection === "bookings" ? "default" : "outline"}
+              size="sm"
+              className="am-btn"
+              onClick={() => setActiveSection(activeSection === "bookings" ? null : "bookings")}
+              style={S("height: 40px; padding: 0 16px; gap: 8px")}
+            >
+              <CalendarDays size={16} />
+              <Trans>Bookings</Trans>
+            </Button>
           </div>
+
+          {activeSection === "bookings" && (
+            <PlaceBookings placeId={place_id} />
+          )}
 
           {activeSection === "assets" && (
           <Card

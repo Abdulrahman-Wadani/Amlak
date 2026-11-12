@@ -664,7 +664,6 @@ msgstr "هوية المسؤول (اختياري)"
 msgid "Create Schedule"
 msgstr "انشاء جدولة"
 
-
 #: src/routes/_authenticated/profile
 
 msgid ""
@@ -759,8 +758,6 @@ msgstr "تاريخ تأكيد البريد الاكتروني"
 msgid "Last Updated"
 msgstr "اخر تحديث"
 
-
-
 #: src/components/email-verify-panel.tsx:35
 msgid "We sent a 6-digit code to <0>{email}</0>."
 msgstr "أرسلنا رمزًا مكوّنًا من 6 أرقام إلى <0>{email}</0>."
@@ -787,3 +784,273 @@ msgstr "يمكنك طلب رمز جديد خلال"
 #: src/routes/_authenticated/place/$place_id.tsx:83
 msgid "Your places"
 msgstr "عقاراتك"
+
+#: src/components/place-bookings.tsx:468
+msgid "Add booking"
+msgstr "إضافة حجز"
+
+#: src/components/place-bookings.tsx:211
+msgid "Back"
+msgstr "رجوع"
+
+#: src/components/place-shared.tsx:147
+msgid "Cancelled"
+msgstr "ملغى"
+
+#: src/components/place-bookings.tsx:305
+msgid "Check-in"
+msgstr "الوصول"
+
+#: src/components/place-bookings.tsx:318
+msgid "Check-out"
+msgstr "المغادرة"
+
+#: src/components/place-shared.tsx:123
+msgid "Checked in"
+msgstr "تم تسجيل الوصول"
+
+#: src/components/place-shared.tsx:135
+msgid "Checked out"
+msgstr "تم تسجيل المغادرة"
+
+#: src/components/place-bookings.tsx:246
+msgid "Close"
+msgstr "إغلاق"
+
+#: src/components/place-shared.tsx:158
+msgid "Confirmed"
+msgstr "مؤكد"
+
+#: src/components/place-bookings.tsx:168
+msgid "Could not save the booking. Please try again."
+msgstr "تعذّر حفظ الحجز. حاول مرة أخرى."
+
+#: src/components/place-bookings.tsx:288
+msgid "Guest email"
+msgstr "بريد الضيف"
+
+#: src/components/place-bookings.tsx:261
+msgid "Guest name"
+msgstr "اسم الضيف"
+
+#: src/components/place-bookings.tsx:274
+msgid "Guest phone"
+msgstr "هاتف الضيف"
+
+#: src/components/place-bookings.tsx:439
+msgid "guests"
+msgstr "ضيوف"
+
+#: src/components/place-bookings.tsx:335
+msgid "Guests"
+msgstr "عدد الضيوف"
+
+#: src/components/place-bookings.tsx:235
+msgid "Next month"
+msgstr "الشهر التالي"
+
+#: src/components/place-bookings.tsx:416
+msgid "No bookings in this month."
+msgstr "لا توجد حجوزات في هذا الشهر."
+
+#: src/components/place-bookings.tsx:364
+msgid "Notes"
+msgstr "ملاحظات"
+
+#: src/components/place-bookings.tsx:219
+msgid "Previous month"
+msgstr "الشهر السابق"
+
+#: src/components/place-bookings.tsx:393
+msgid "Save booking"
+msgstr "حفظ الحجز"
+
+#: src/components/place-bookings.tsx:390
+msgid "Saving…"
+msgstr "جارٍ الحفظ…"
+
+#: src/components/place-bookings.tsx:167
+msgid "Those dates are already booked for this property."
+msgstr "هذه التواريخ محجوزة بالفعل لهذه الملكية."
+
+#: src/components/place-bookings.tsx:349
+msgid "Total price"
+msgstr "السعر الإجمالي"
+
+#: src/components/place-bookings.tsx:404
+msgid "Try again in a moment."
+msgstr "أعد المحاولة بعد قليل."
+
+#: src/components/place-bookings.tsx:401
+msgid "We could not load the bookings for this property."
+msgstr "تعذّر تحميل حجوزات هذه الملكية."
+
+#: src/components/place-bookings.tsx
+msgid "Enter the guest name"
+msgstr "أدخل اسم الضيف"
+
+#: src/components/place-bookings.tsx
+msgid "Use the international phone format"
+msgstr "استخدم الصيغة الدولية للرقم"
+
+#: src/components/place-bookings.tsx
+msgid "Enter a valid email address"
+msgstr "أدخل بريداً إلكترونياً صحيحاً"
+
+#: src/components/place-bookings.tsx
+msgid "Enter the number of guests"
+msgstr "أدخل عدد الضيوف"
+
+#: src/components/place-bookings.tsx
+msgid "Choose the check-in date"
+msgstr "اختر تاريخ الوصول"
+
+#: src/components/place-bookings.tsx
+msgid "Choose a check-out date after the check-in date"
+msgstr "اختر تاريخ مغادرة بعد تاريخ الوصول"
+
+#: src/components/place-bookings.tsx
+msgid "Enter the total price"
+msgstr "أدخل السعر الإجمالي"
+
+#: src/components/place-bookings.tsx
+msgid "Notes are too long"
+msgstr "الملاحظات أطول من الحد المسموح"
+
+#: src/components/place-bookings.tsx
+msgid "All bookings"
+msgstr "كل الحجوزات"
+
+#: src/components/place-bookings.tsx
+msgid "By month"
+msgstr "حسب الشهر"
+
+#: src/components/place-bookings.tsx
+msgid "Cancel booking"
+msgstr "إلغاء الحجز"
+
+#: src/components/place-bookings.tsx
+msgid "Cancellation reason"
+msgstr "سبب الإلغاء"
+
+#: src/components/place-bookings.tsx
+msgid "Confirm cancel"
+msgstr "تأكيد الإلغاء"
+
+#: src/components/place-bookings.tsx
+msgid "Could not cancel the booking. Please try again."
+msgstr "تعذّر إلغاء الحجز. حاول مرة أخرى."
+
+#: src/components/place-bookings.tsx
+msgid "Could not update the booking. Please try again."
+msgstr "تعذّر تعديل الحجز. حاول مرة أخرى."
+
+#: src/components/place-bookings.tsx
+msgid "Edit"
+msgstr "تعديل"
+
+#: src/components/place-bookings.tsx
+msgid "Enter the reason for the cancellation"
+msgstr "أدخل سبب الإلغاء"
+
+#: src/components/place-bookings.tsx
+msgid "Load more"
+msgstr "تحميل المزيد"
+
+#: src/components/place-bookings.tsx
+msgid "No bookings for this property yet."
+msgstr "لا توجد حجوزات لهذا العقار بعد."
+
+#: src/components/place-bookings.tsx
+msgid "Save changes"
+msgstr "حفظ التعديلات"
+
+#: src/components/place-bookings.tsx
+msgid "This booking can no longer be cancelled."
+msgstr "لم يعد بإمكانك إلغاء هذا الحجز."
+#: src/components/place-bookings.tsx
+msgid "Filter bookings by month"
+msgstr "تصفية الحجوزات حسب الشهر"
+
+#: src/components/place-bookings.tsx
+msgid "Add a stay to block its dates on the calendar."
+msgstr "أضف إقامة لحجز هذه التواريخ في التقويم."
+
+#: src/components/place-bookings.tsx
+msgid "Cancel this booking?"
+msgstr "إلغاء هذا الحجز؟"
+
+#: src/components/place-bookings.tsx
+msgid "Cancelling…"
+msgstr "جارٍ الإلغاء…"
+
+#: src/components/place-bookings.tsx
+msgid "Use the international format, e.g. +966512345678"
+msgstr "استخدم الصيغة الدولية، مثل +966512345678"
+
+#: src/components/place-bookings.tsx
+msgid "Guest"
+msgstr "الضيف"
+
+#: src/components/place-bookings.tsx
+msgid "Stay"
+msgstr "الإقامة"
+
+#: src/components/place-bookings.tsx
+msgid "Why is this stay being cancelled?"
+msgstr "لماذا تم إلغاء هذه الإقامة؟"
+
+#: src/components/place-bookings.tsx
+msgid "Kept in the booking record."
+msgstr "يُحفظ في سجل الحجز."
+
+#: src/components/place-bookings.tsx
+msgid "Example: the guest changed their plans"
+msgstr "مثال: غيّر الضيف خطته"
+
+#: src/components/place-bookings.tsx
+msgid "Check in"
+msgstr "تسجيل الوصول"
+
+#: src/components/place-bookings.tsx
+msgid "Check out"
+msgstr "تسجيل المغادرة"
+
+#: src/components/place-bookings.tsx
+msgid "Another guest has not checked out yet."
+msgstr "ضيف آخر لم يُغادر بعد."
+
+#: src/components/place-bookings.tsx
+msgid "This booking can no longer be moved to another state."
+msgstr "لم يعد بإمكانه تغيير حالته."
+#: src/components/place-bookings.tsx
+msgid "Check-in opens on"
+msgstr "تسجيل الوصول متاح في"
+
+#: src/components/place-bookings.tsx
+msgid "Check this guest in?"
+msgstr "تسجيل وصول الضيف؟"
+
+#: src/components/place-bookings.tsx
+msgid "Check this guest out?"
+msgstr "تسجيل مغادرة الضيف؟"
+
+#: src/components/place-bookings.tsx
+msgid "Confirm check-in"
+msgstr "تأكيد الوصول"
+
+#: src/components/place-bookings.tsx
+msgid "Confirm check-out"
+msgstr "تأكيد المغادرة"
+
+#: src/components/place-bookings.tsx
+msgid "Check-in has not opened for this stay yet."
+msgstr "لم يحِن موعد الوصول بعد."
+
+#: src/components/place-bookings.tsx
+msgid "Could not change the booking. Please try again."
+msgstr "تعذّر تغيير حالة الحجز. حاول مرة أخرى."
+
+#: src/components/place-bookings.tsx
+msgid "Edit booking"
+msgstr "تعديل الحجز"
