@@ -1,6 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { type SubmitEvent, useEffect, useState } from "react"
-import { CircleAlert } from "lucide-react"
 import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
 import { signUpInput } from "@/lib/validators"
@@ -10,6 +9,7 @@ import { AuthBrandPanel } from "@/components/auth-brand-panel"
 import { EmailVerifyPanel } from "@/components/email-verify-panel"
 import { Alert, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
+import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
@@ -149,12 +149,7 @@ function SignUp() {
                     onChange={(e) => setFullname(e.target.value)}
                     disabled={loading}
                   />
-                  {errors.fullname && (
-                    <p className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
-                      <CircleAlert size={14} />
-                      {errors.fullname}
-                    </p>
-                  )}
+                  <FieldError errors={[{ message: errors.fullname }]} />
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -171,12 +166,7 @@ function SignUp() {
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={loading}
                   />
-                  {errors.email && (
-                    <p className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
-                      <CircleAlert size={14} />
-                      {errors.email}
-                    </p>
-                  )}
+                  <FieldError errors={[{ message: errors.email }]} />
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -193,12 +183,7 @@ function SignUp() {
                     onChange={(e) => setPhone(e.target.value)}
                     disabled={loading}
                   />
-                  {errors.phone && (
-                    <p className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
-                      <CircleAlert size={14} />
-                      {errors.phone}
-                    </p>
-                  )}
+                  <FieldError errors={[{ message: errors.phone }]} />
                 </div>
 
                 <div className="flex flex-col gap-2">
@@ -232,12 +217,7 @@ function SignUp() {
                       <Trans>One symbol (like ! or @)</Trans>
                     </li>
                   </ul>
-                  {errors.password && (
-                    <p className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
-                      <CircleAlert size={14} />
-                      {errors.password}
-                    </p>
-                  )}
+                  <FieldError errors={[{ message: errors.password }]} />
                 </div>
 
                 <div className="flex flex-col gap-2">
