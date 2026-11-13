@@ -5,6 +5,7 @@ import { assetsRouter } from "./assets/routes.ts";
 import { authRouter } from "./auth/routes.ts";
 import { bookingsRouter } from "./bookings/routes.ts";
 import { dashboardRouter } from "./dashboard/routes.ts";
+import { expensesRouter } from "./expenses/routes.ts";
 import { errorHandler } from "./middleware/error-handler.ts";
 import { notFound } from "./middleware/not-found.ts";
 import { openApiDocument } from "./openapi.ts";
@@ -30,6 +31,7 @@ app.use("/api/v1", ticketsRouter);
 app.use("/api/v1", schedulesRouter);
 app.use("/api/v1", bookingsRouter);
 app.use("/api/v1", dashboardRouter);
+app.use("/api/v1", expensesRouter);
 
 app.use(
 	"/api/docs",

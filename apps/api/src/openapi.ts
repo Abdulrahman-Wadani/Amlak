@@ -9,14 +9,17 @@ import {
 	completeTicketSchema,
 	createAssetSchema,
 	createBookingSchema,
+	createExpenseSchema,
 	createPlaceSchema,
 	createScheduleSchema,
 	createTicketSchema,
 	createWorkerSchema,
 	dashboardQuerySchema,
+	expenseSchema,
 	forgotPasswordSchema,
 	listAssetsQuerySchema,
 	listBookingsQuerySchema,
+	listExpensesQuerySchema,
 	listPlacesQuerySchema,
 	listTicketsQuerySchema,
 	listWorkersQuerySchema,
@@ -33,6 +36,7 @@ import {
 	scheduleSchema,
 	ticketSchema,
 	updateAssetSchema,
+	updateExpenseSchema,
 	updatePlaceSchema,
 	updateProfileSchema,
 	updateWorkerSchema,
@@ -45,6 +49,7 @@ import { z } from "zod";
 import { createDocument } from "zod-openapi";
 import { assetParams } from "./assets/routes.ts";
 import { bookingParams } from "./bookings/routes.ts";
+import { expenseParams } from "./expenses/routes.ts";
 import { pageQuerySchema } from "./pagination.ts";
 import { placeWorkerParams } from "./place-workers/routes.ts";
 import { placeParams } from "./places/routes.ts";
@@ -617,6 +622,99 @@ export const openApiDocument = createDocument({
 				responses: {
 					"200": ok("One page of places", paginatedSchema(placeHealthSchema)),
 					"422": fail("Invalid place_id or page"),
+					...guarded,
+				},
+			},
+		},
+		"/places/{placeId}/expenses": {
+			get: {
+				tags: ["Expenses"],
+				summary: "List a place's expenses (Manager)",
+				security: loggedIn,
+				requestParams: {
+					path: placeParams,
+					query: listExpensesQuerySchema.safeExtend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok("One page of expenses", paginatedSchema(expenseSchema)),
+					"404": fail("Place not found"),
+					"422": fail("Invalid dates, category or page"),
+					...guarded,
+				},
+			},
+			post: {
+				tags: ["Expenses"],
+				summary: "Log an expense, with an optional receipt photo (Manager)",
+				security: loggedIn,
+				requestParams: { path: placeParams },
+				requestBody: {
+					content: {
+						"multipart/form-data": {
+							schema: createExpenseSchema.extend({
+								receipt: z
+									.file()
+									.optional()
+									.meta({ description: "A JPEG, PNG or WebP photo" }),
+							}),
+						},
+					},
+				},
+				responses: {
+					"201": ok("The new expense", expenseSchema),
+					"404": fail("Place not found"),
+					"422": fail(
+						"Some fields are invalid, the receipt is not an image, or the ticket is not in this place",
+					),
+					...guarded,
+				},
+			},
+		},
+		"/expenses/{expenseId}": {
+			get: {
+				tags: ["Expenses"],
+				summary: "Get an expense (Manager)",
+				security: loggedIn,
+				requestParams: { path: expenseParams },
+				responses: {
+					"200": ok("The expense", expenseSchema),
+					"404": fail("Expense not found"),
+					...guarded,
+				},
+			},
+			put: {
+				tags: ["Expenses"],
+				summary:
+					"Update an expense; send only the fields that change (Manager)",
+				security: loggedIn,
+				requestParams: { path: expenseParams },
+				requestBody: {
+					content: {
+						"multipart/form-data": {
+							schema: updateExpenseSchema.extend({
+								receipt: z.file().optional().meta({
+									description: "Replaces the current receipt photo",
+								}),
+							}),
+						},
+					},
+				},
+				responses: {
+					"200": ok("The updated expense", expenseSchema),
+					"404": fail("Expense not found"),
+					"422": fail(
+						"Some fields are invalid, the receipt is not an image, or the ticket is not in this place",
+					),
+					...guarded,
+				},
+			},
+			delete: {
+				tags: ["Expenses"],
+				summary: "Delete an expense and its receipt (Manager)",
+				security: loggedIn,
+				requestParams: { path: expenseParams },
+				responses: {
+					"204": { description: "Deleted; the audit log keeps its values" },
+					"404": fail("Expense not found"),
 					...guarded,
 				},
 			},
