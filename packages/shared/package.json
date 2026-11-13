@@ -1,0 +1,19 @@
+{
+	"name": "@amlak/shared",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"check": "biome check",
+		"fix": "biome check --write",
+		"typecheck": "tsc"
+	},
+	"devDependencies": {
+		"typescript": "^7.0.2"
+	},
+	"dependencies": {
+		"zod": "^4.6.7"
+	}
+}

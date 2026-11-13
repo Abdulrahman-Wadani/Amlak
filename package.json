@@ -1,0 +1,17 @@
+{
+	"name": "amlak",
+	"private": true,
+	"workspaces": [
+		"apps/api",
+		"apps/web",
+		"packages/*"
+	],
+	"scripts": {
+		"typecheck": "bun run --filter \"*\" typecheck",
+		"check": "biome check",
+		"fix": "biome check --write"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.5.15"
+	}
+}

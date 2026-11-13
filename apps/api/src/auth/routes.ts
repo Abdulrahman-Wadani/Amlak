@@ -1,0 +1,96 @@
+import {
+	type AccessToken,
+	accountSetupSchema,
+	forgotPasswordSchema,
+	type LoginResponse,
+	loginSchema,
+	registerSchema,
+	resetPasswordSchema,
+	verificationCodeSchema,
+	verifyEmailSchema,
+} from "@amlak/shared";
+import { type CookieOptions, type Response, Router } from "express";
+import { parse } from "../validation.ts";
+import { requestPasswordReset, resetPassword } from "./password-reset.ts";
+import * as auth from "./service.ts";
+import { REFRESH_TOKEN_MS, type Session } from "./sessions.ts";
+import { ACCESS_TOKEN_SECONDS } from "./tokens.ts";
+
+export const authRouter = Router();
+
+const refreshCookie: CookieOptions = {
+	httpOnly: true,
+	secure: true,
+	sameSite: "strict",
+	path: "/api/v1/auth",
+};
+
+authRouter.post("/auth/register", async (req, res) => {
+	const input = parse(registerSchema, req.body);
+	res.status(201).json(await auth.register(input));
+});
+
+authRouter.post("/auth/verify-email", async (req, res) => {
+	const input = parse(verifyEmailSchema, req.body);
+	await auth.verifyEmail(input);
+	res.status(204).end();
+});
+
+authRouter.post("/auth/verification-code", async (req, res) => {
+	const input = parse(verificationCodeSchema, req.body);
+	await auth.sendVerificationCode(input);
+	res.status(204).end();
+});
+
+authRouter.post("/auth/login", async (req, res) => {
+	const input = parse(loginSchema, req.body);
+	const { session, user } = await auth.login(input, req.ip);
+	setRefreshCookie(res, session.refreshToken);
+	const body: LoginResponse = { ...accessTokenBody(session), user };
+	res.json(body);
+});
+
+authRouter.post("/auth/refresh", async (req, res) => {
+	const session = await auth.refresh(req.cookies.refresh_token);
+	setRefreshCookie(res, session.refreshToken);
+	res.json(accessTokenBody(session));
+});
+
+authRouter.post("/auth/logout", async (req, res) => {
+	await auth.logout(req.cookies.refresh_token);
+	res.clearCookie("refresh_token", refreshCookie);
+	res.status(204).end();
+});
+
+function accessTokenBody(session: Session): AccessToken {
+	return {
+		access_token: session.accessToken,
+		token_type: "Bearer",
+		expires_in: ACCESS_TOKEN_SECONDS,
+	};
+}
+
+function setRefreshCookie(res: Response, token: string) {
+	res.cookie("refresh_token", token, {
+		...refreshCookie,
+		maxAge: REFRESH_TOKEN_MS,
+	});
+}
+
+authRouter.post("/auth/account-setup", async (req, res) => {
+	const input = parse(accountSetupSchema, req.body);
+	await auth.setUpAccount(input);
+	res.status(204).end();
+});
+
+authRouter.post("/auth/password/forgot", async (req, res) => {
+	const input = parse(forgotPasswordSchema, req.body);
+	await requestPasswordReset(input);
+	res.status(204).end();
+});
+
+authRouter.post("/auth/password/reset", async (req, res) => {
+	const input = parse(resetPasswordSchema, req.body);
+	await resetPassword(input);
+	res.status(204).end();
+});
