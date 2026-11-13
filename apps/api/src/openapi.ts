@@ -12,6 +12,7 @@ import {
 	completeTicketSchema,
 	createAssetSchema,
 	createBookingSchema,
+	createContentSchema,
 	createExpenseSchema,
 	createPlaceSchema,
 	createScheduleSchema,
@@ -25,6 +26,7 @@ import {
 	forgotPasswordSchema,
 	listAssetsQuerySchema,
 	listBookingsQuerySchema,
+	listContentQuerySchema,
 	listExpensesQuerySchema,
 	listNotificationsQuerySchema,
 	listPlacesQuerySchema,
@@ -49,6 +51,7 @@ import {
 	supportTicketSchema,
 	ticketSchema,
 	updateAssetSchema,
+	updateContentSchema,
 	updateExpenseSchema,
 	updatePlaceSchema,
 	updateProfileSchema,
@@ -56,12 +59,14 @@ import {
 	userSchema,
 	verificationCodeSchema,
 	verifyEmailSchema,
+	webContentSchema,
 	workerSchema,
 } from "@amlak/shared";
 import { z } from "zod";
 import { createDocument } from "zod-openapi";
 import { assetParams } from "./assets/routes.ts";
 import { bookingParams } from "./bookings/routes.ts";
+import { contentParams } from "./content/routes.ts";
 import { expenseParams } from "./expenses/routes.ts";
 import { notificationParams } from "./notifications/routes.ts";
 import { pageQuerySchema } from "./pagination.ts";
@@ -897,6 +902,73 @@ export const openApiDocument = createDocument({
 					"404": fail("Support ticket not found"),
 					"409": fail("The ticket is already resolved"),
 					"422": fail("The response is missing"),
+					...guarded,
+				},
+			},
+		},
+		"/content": {
+			get: {
+				tags: ["Web content"],
+				summary: "List pages: published ones, plus drafts for an Admin",
+				description:
+					"Public. A token is optional; an Admin's token adds the drafts.",
+				security: [{}, { bearerAuth: [] }],
+				requestParams: {
+					query: listContentQuerySchema.extend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok("One page of pages", paginatedSchema(webContentSchema)),
+					"401": fail("A token was sent but is invalid or expired"),
+					"422": fail("Invalid filter or page"),
+				},
+			},
+			post: {
+				tags: ["Web content"],
+				summary: "Create a page (Admin)",
+				security: loggedIn,
+				requestBody: json(createContentSchema),
+				responses: {
+					"201": ok("The new page", webContentSchema),
+					"409": fail("The slug is taken in this language"),
+					"422": fail("Some fields are invalid"),
+					...guarded,
+				},
+			},
+		},
+		"/content/{contentId}": {
+			get: {
+				tags: ["Web content"],
+				summary: "Get a page: public if published, Admin only if a draft",
+				security: [{}, { bearerAuth: [] }],
+				requestParams: { path: contentParams },
+				responses: {
+					"200": ok("The page", webContentSchema),
+					"401": fail("A token was sent but is invalid or expired"),
+					"404": fail("Page not found, or a draft and you are not an Admin"),
+				},
+			},
+			put: {
+				tags: ["Web content"],
+				summary: "Edit, publish or unpublish a page (Admin)",
+				security: loggedIn,
+				requestParams: { path: contentParams },
+				requestBody: json(updateContentSchema),
+				responses: {
+					"200": ok("The updated page", webContentSchema),
+					"404": fail("Page not found"),
+					"409": fail("The slug is taken in this language"),
+					"422": fail("Some fields are invalid"),
+					...guarded,
+				},
+			},
+			delete: {
+				tags: ["Web content"],
+				summary: "Delete a page (Admin)",
+				security: loggedIn,
+				requestParams: { path: contentParams },
+				responses: {
+					"204": { description: "Deleted" },
+					"404": fail("Page not found"),
 					...guarded,
 				},
 			},

@@ -4,6 +4,7 @@ import swaggerUi from "swagger-ui-express";
 import { assetsRouter } from "./assets/routes.ts";
 import { authRouter } from "./auth/routes.ts";
 import { bookingsRouter } from "./bookings/routes.ts";
+import { contentRouter } from "./content/routes.ts";
 import { dashboardRouter } from "./dashboard/routes.ts";
 import { expensesRouter } from "./expenses/routes.ts";
 import { errorHandler } from "./middleware/error-handler.ts";
@@ -38,6 +39,7 @@ app.use("/api/v1", expensesRouter);
 app.use("/api/v1", reportsRouter);
 app.use("/api/v1", notificationsRouter);
 app.use("/api/v1", supportRouter);
+app.use("/api/v1", contentRouter);
 
 app.use(
 	"/api/docs",
