@@ -16,6 +16,8 @@ import {
 	createWorkerSchema,
 	dashboardQuerySchema,
 	expenseSchema,
+	financialReportQuerySchema,
+	financialReportSchema,
 	forgotPasswordSchema,
 	listAssetsQuerySchema,
 	listBookingsQuerySchema,
@@ -715,6 +717,23 @@ export const openApiDocument = createDocument({
 				responses: {
 					"204": { description: "Deleted; the audit log keeps its values" },
 					"404": fail("Expense not found"),
+					...guarded,
+				},
+			},
+		},
+		"/reports/financial": {
+			get: {
+				tags: ["Reports"],
+				summary: "Income, expenses and profit for a period (Manager)",
+				security: loggedIn,
+				requestParams: { query: financialReportQuerySchema },
+				responses: {
+					"200": ok(
+						"One row per place, plus totals per currency",
+						financialReportSchema,
+					),
+					"404": fail("Place not found"),
+					"422": fail("Missing or invalid dates or place_id"),
 					...guarded,
 				},
 			},
