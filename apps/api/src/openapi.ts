@@ -1,6 +1,7 @@
 import {
 	accessTokenSchema,
 	accountSetupSchema,
+	adminUpdateUserSchema,
 	announcementResultSchema,
 	announcementSchema,
 	approveTicketSchema,
@@ -27,6 +28,7 @@ import {
 	listNotificationsQuerySchema,
 	listPlacesQuerySchema,
 	listTicketsQuerySchema,
+	listUsersQuerySchema,
 	listWorkersQuerySchema,
 	loginResponseSchema,
 	loginSchema,
@@ -63,6 +65,7 @@ import { placeWorkerParams } from "./place-workers/routes.ts";
 import { placeParams } from "./places/routes.ts";
 import { scheduleParams } from "./schedules/routes.ts";
 import { ticketParams } from "./tickets/routes.ts";
+import { userParams } from "./users/routes.ts";
 import { workerParams } from "./workers/routes.ts";
 
 const errorSchema = z
@@ -788,6 +791,50 @@ export const openApiDocument = createDocument({
 					"200": ok("The notification, read", notificationSchema),
 					"401": fail("Missing, invalid or expired access token"),
 					"404": fail("Notification not found"),
+				},
+			},
+		},
+		"/users": {
+			get: {
+				tags: ["Users (Admin)"],
+				summary: "List every account (Admin)",
+				security: loggedIn,
+				requestParams: {
+					query: listUsersQuerySchema.extend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok("One page of users", paginatedSchema(userSchema)),
+					"422": fail("Invalid filter or page"),
+					...guarded,
+				},
+			},
+		},
+		"/users/{userId}": {
+			get: {
+				tags: ["Users (Admin)"],
+				summary: "Get any account (Admin)",
+				security: loggedIn,
+				requestParams: { path: userParams },
+				responses: {
+					"200": ok("The user", userSchema),
+					"404": fail("User not found"),
+					...guarded,
+				},
+			},
+			put: {
+				tags: ["Users (Admin)"],
+				summary: "Edit, deactivate or reactivate any account (Admin)",
+				security: loggedIn,
+				requestParams: { path: userParams },
+				requestBody: json(adminUpdateUserSchema),
+				responses: {
+					"200": ok("The updated user", userSchema),
+					"404": fail("User not found"),
+					"409": fail(
+						"Only a deactivated user whose email was verified can be reactivated",
+					),
+					"422": fail("Invalid fields, or an Admin changing their own status"),
+					...guarded,
 				},
 			},
 		},
