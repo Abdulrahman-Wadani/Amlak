@@ -1,6 +1,8 @@
 import {
 	accessTokenSchema,
 	accountSetupSchema,
+	announcementResultSchema,
+	announcementSchema,
 	approveTicketSchema,
 	assetSchema,
 	assignWorkerSchema,
@@ -22,11 +24,14 @@ import {
 	listAssetsQuerySchema,
 	listBookingsQuerySchema,
 	listExpensesQuerySchema,
+	listNotificationsQuerySchema,
 	listPlacesQuerySchema,
 	listTicketsQuerySchema,
 	listWorkersQuerySchema,
 	loginResponseSchema,
 	loginSchema,
+	notificationPageSchema,
+	notificationSchema,
 	paginatedSchema,
 	placeHealthSchema,
 	placeSchema,
@@ -52,6 +57,7 @@ import { createDocument } from "zod-openapi";
 import { assetParams } from "./assets/routes.ts";
 import { bookingParams } from "./bookings/routes.ts";
 import { expenseParams } from "./expenses/routes.ts";
+import { notificationParams } from "./notifications/routes.ts";
 import { pageQuerySchema } from "./pagination.ts";
 import { placeWorkerParams } from "./place-workers/routes.ts";
 import { placeParams } from "./places/routes.ts";
@@ -735,6 +741,53 @@ export const openApiDocument = createDocument({
 					"404": fail("Place not found"),
 					"422": fail("Missing or invalid dates or place_id"),
 					...guarded,
+				},
+			},
+		},
+		"/notifications": {
+			get: {
+				tags: ["Notifications"],
+				summary: "List my notifications, newest first",
+				security: loggedIn,
+				requestParams: {
+					query: listNotificationsQuerySchema.extend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok(
+						"One page of my notifications, plus my unread count",
+						notificationPageSchema,
+					),
+					"401": fail("Missing, invalid or expired access token"),
+					"422": fail("Invalid filter or page"),
+				},
+			},
+			post: {
+				tags: ["Notifications"],
+				summary: "Send an announcement to a role or to some users (Admin)",
+				security: loggedIn,
+				requestBody: json(announcementSchema),
+				responses: {
+					"201": ok(
+						"Saved for every ACTIVE recipient; the emails go out after this response",
+						announcementResultSchema,
+					),
+					"422": fail(
+						"Both or neither of role and user_ids, or a missing text",
+					),
+					...guarded,
+				},
+			},
+		},
+		"/notifications/{notificationId}/read": {
+			post: {
+				tags: ["Notifications"],
+				summary: "Mark one of my notifications as read",
+				security: loggedIn,
+				requestParams: { path: notificationParams },
+				responses: {
+					"200": ok("The notification, read", notificationSchema),
+					"401": fail("Missing, invalid or expired access token"),
+					"404": fail("Notification not found"),
 				},
 			},
 		},

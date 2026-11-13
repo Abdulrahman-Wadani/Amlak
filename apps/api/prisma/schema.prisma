@@ -406,6 +406,7 @@ model Notification {
     recipient User  @relation("NotificationRecipient", fields: [user_id], references: [id], onDelete: Cascade)
     sender    User? @relation("NotificationSender", fields: [sender_id], references: [id])
 
+    @@index([user_id, created_at])
     @@map("notifications")
 }
 
