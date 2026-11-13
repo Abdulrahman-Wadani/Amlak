@@ -14,6 +14,7 @@ import { placeWorkersRouter } from "./place-workers/routes.ts";
 import { placesRouter } from "./places/routes.ts";
 import { reportsRouter } from "./reports/routes.ts";
 import { schedulesRouter } from "./schedules/routes.ts";
+import { supportRouter } from "./support/routes.ts";
 import { ticketsRouter } from "./tickets/routes.ts";
 import { usersRouter } from "./users/routes.ts";
 import { workersRouter } from "./workers/routes.ts";
@@ -36,6 +37,7 @@ app.use("/api/v1", dashboardRouter);
 app.use("/api/v1", expensesRouter);
 app.use("/api/v1", reportsRouter);
 app.use("/api/v1", notificationsRouter);
+app.use("/api/v1", supportRouter);
 
 app.use(
 	"/api/docs",

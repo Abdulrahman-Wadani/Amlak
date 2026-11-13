@@ -12,6 +12,7 @@ export * from "./profile.ts";
 export * from "./reports.ts";
 export * from "./roles.ts";
 export * from "./schedules.ts";
+export * from "./support.ts";
 export * from "./tickets.ts";
 export * from "./users.ts";
 export * from "./workers.ts";

@@ -15,6 +15,7 @@ import {
 	createExpenseSchema,
 	createPlaceSchema,
 	createScheduleSchema,
+	createSupportTicketSchema,
 	createTicketSchema,
 	createWorkerSchema,
 	dashboardQuerySchema,
@@ -27,6 +28,7 @@ import {
 	listExpensesQuerySchema,
 	listNotificationsQuerySchema,
 	listPlacesQuerySchema,
+	listSupportTicketsQuerySchema,
 	listTicketsQuerySchema,
 	listUsersQuerySchema,
 	listWorkersQuerySchema,
@@ -42,7 +44,9 @@ import {
 	registerSchema,
 	rejectTicketSchema,
 	resetPasswordSchema,
+	resolveSupportTicketSchema,
 	scheduleSchema,
+	supportTicketSchema,
 	ticketSchema,
 	updateAssetSchema,
 	updateExpenseSchema,
@@ -64,6 +68,7 @@ import { pageQuerySchema } from "./pagination.ts";
 import { placeWorkerParams } from "./place-workers/routes.ts";
 import { placeParams } from "./places/routes.ts";
 import { scheduleParams } from "./schedules/routes.ts";
+import { supportTicketParams } from "./support/routes.ts";
 import { ticketParams } from "./tickets/routes.ts";
 import { userParams } from "./users/routes.ts";
 import { workerParams } from "./workers/routes.ts";
@@ -834,6 +839,64 @@ export const openApiDocument = createDocument({
 						"Only a deactivated user whose email was verified can be reactivated",
 					),
 					"422": fail("Invalid fields, or an Admin changing their own status"),
+					...guarded,
+				},
+			},
+		},
+		"/support-tickets": {
+			get: {
+				tags: ["Support"],
+				summary: "List support tickets: all for Admins, my own for others",
+				security: loggedIn,
+				requestParams: {
+					query: listSupportTicketsQuerySchema.extend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok(
+						"One page of support tickets",
+						paginatedSchema(supportTicketSchema),
+					),
+					"401": fail("Missing, invalid or expired access token"),
+					"422": fail("Invalid filter or page"),
+				},
+			},
+			post: {
+				tags: ["Support"],
+				summary: "Submit a support ticket (Manager, Worker)",
+				security: loggedIn,
+				requestBody: json(createSupportTicketSchema),
+				responses: {
+					"201": ok("The new ticket, OPEN", supportTicketSchema),
+					"422": fail("The subject or description is missing"),
+					...guarded,
+				},
+			},
+		},
+		"/support-tickets/{ticketId}": {
+			get: {
+				tags: ["Support"],
+				summary: "Get a support ticket (Admin, or who submitted it)",
+				security: loggedIn,
+				requestParams: { path: supportTicketParams },
+				responses: {
+					"200": ok("The support ticket", supportTicketSchema),
+					"401": fail("Missing, invalid or expired access token"),
+					"404": fail("Support ticket not found"),
+				},
+			},
+		},
+		"/support-tickets/{ticketId}/resolve": {
+			post: {
+				tags: ["Support"],
+				summary: "Resolve with a response; the submitter is notified (Admin)",
+				security: loggedIn,
+				requestParams: { path: supportTicketParams },
+				requestBody: json(resolveSupportTicketSchema),
+				responses: {
+					"200": ok("The resolved ticket", supportTicketSchema),
+					"404": fail("Support ticket not found"),
+					"409": fail("The ticket is already resolved"),
+					"422": fail("The response is missing"),
 					...guarded,
 				},
 			},
