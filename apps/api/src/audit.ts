@@ -18,14 +18,18 @@ export type AuditAction =
 	| "BOOKING_CREATE"
 	| "BOOKING_CANCEL"
 	| "BOOKING_CHECK_IN"
-	| "BOOKING_CHECK_OUT";
+	| "BOOKING_CHECK_OUT"
+	| "EXPENSE_CREATE"
+	| "EXPENSE_UPDATE"
+	| "EXPENSE_DELETE";
 export type AuditEntity =
 	| "User"
 	| "Place"
 	| "Asset"
 	| "PlaceWorker"
 	| "MaintenanceTicket"
-	| "Booking";
+	| "Booking"
+	| "Expense";
 
 export type AuditEntry = {
 	action: AuditAction;
