@@ -2,6 +2,7 @@ export * from "./admin-users.ts";
 export * from "./assets.ts";
 export * from "./auth.ts";
 export * from "./bookings.ts";
+export * from "./content.ts";
 export * from "./dashboard.ts";
 export * from "./expenses.ts";
 export * from "./notifications.ts";

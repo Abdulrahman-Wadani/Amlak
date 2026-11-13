@@ -14,35 +14,55 @@ import * as admin from "./admin.ts";
 import * as users from "./service.ts";
 
 export const usersRouter = Router();
-usersRouter.use(requireAuth);
 
 export const userParams = z.object({ userId: z.uuid() });
+const adminOnly = [requireAuth, requireRole("ADMIN")];
 
-usersRouter.get("/users/me", async (_req, res) => {
+usersRouter.get("/users/me", requireAuth, async (_req, res) => {
 	res.json(await users.getMe(currentUser(res)));
 });
 
-usersRouter.put("/users/me", imageFiles("picture", 1), async (req, res) => {
-	const input = parse(updateProfileSchema, req.body);
-	const [picture] = uploadedImages(req);
-	res.json(await users.updateMe(currentUser(res), input, picture));
-});
+usersRouter.put(
+	"/users/me",
+	requireAuth,
+	imageFiles("picture", 1),
+	async (req, res) => {
+		const input = parse(updateProfileSchema, req.body);
+		const [picture] = uploadedImages(req);
+		res.json(await users.updateMe(currentUser(res), input, picture));
+	},
+);
 
 // The Admin's user management. "/users/me" above is matched first.
 
-usersRouter.get("/users", requireRole("ADMIN"), async (req, res) => {
-	const query = parse(listUsersQuerySchema, req.query);
-	const page = parsePage(req.query);
-	res.json(await admin.listUsers(query, page));
-});
+usersRouter.get(
+	"/users",
+	...adminOnly,
+	requireRole("ADMIN"),
+	async (req, res) => {
+		const query = parse(listUsersQuerySchema, req.query);
+		const page = parsePage(req.query);
+		res.json(await admin.listUsers(query, page));
+	},
+);
 
-usersRouter.get("/users/:userId", requireRole("ADMIN"), async (req, res) => {
-	const { userId } = parse(userParams, req.params);
-	res.json(await admin.getUser(userId));
-});
+usersRouter.get(
+	"/users/:userId",
+	...adminOnly,
+	requireRole("ADMIN"),
+	async (req, res) => {
+		const { userId } = parse(userParams, req.params);
+		res.json(await admin.getUser(userId));
+	},
+);
 
-usersRouter.put("/users/:userId", requireRole("ADMIN"), async (req, res) => {
-	const { userId } = parse(userParams, req.params);
-	const input = parse(adminUpdateUserSchema, req.body);
-	res.json(await admin.updateUser(currentUser(res), userId, input, req.ip));
-});
+usersRouter.put(
+	"/users/:userId",
+	...adminOnly,
+	requireRole("ADMIN"),
+	async (req, res) => {
+		const { userId } = parse(userParams, req.params);
+		const input = parse(adminUpdateUserSchema, req.body);
+		res.json(await admin.updateUser(currentUser(res), userId, input, req.ip));
+	},
+);
