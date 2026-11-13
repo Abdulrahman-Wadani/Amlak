@@ -13,6 +13,7 @@ import {
 	createScheduleSchema,
 	createTicketSchema,
 	createWorkerSchema,
+	dashboardQuerySchema,
 	forgotPasswordSchema,
 	listAssetsQuerySchema,
 	listBookingsQuerySchema,
@@ -22,6 +23,7 @@ import {
 	loginResponseSchema,
 	loginSchema,
 	paginatedSchema,
+	placeHealthSchema,
 	placeSchema,
 	placeWorkerSchema,
 	reassignTicketSchema,
@@ -600,6 +602,21 @@ export const openApiDocument = createDocument({
 					"200": ok("The booking, CHECKED_OUT", bookingSchema),
 					"404": fail("Booking not found"),
 					"409": fail("The booking is not CHECKED_IN"),
+					...guarded,
+				},
+			},
+		},
+		"/dashboard": {
+			get: {
+				tags: ["Dashboard"],
+				summary: "Property and asset health, one row per place you can see",
+				security: loggedIn,
+				requestParams: {
+					query: dashboardQuerySchema.extend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok("One page of places", paginatedSchema(placeHealthSchema)),
+					"422": fail("Invalid place_id or page"),
 					...guarded,
 				},
 			},
