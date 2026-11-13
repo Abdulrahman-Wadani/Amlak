@@ -221,6 +221,7 @@ model Place {
     bookings Booking[]
     expenses Expense[]
 
+    @@index([owner_id])
     @@map("places")
 }
 
@@ -258,6 +259,7 @@ model Asset {
 
     tickets MaintenanceTicket[]
 
+    @@index([place_id, status])
     @@map("assets")
 }
 
@@ -316,6 +318,7 @@ model MaintenanceTicket {
 
     expenses Expense[]
 
+    @@index([place_id, status, due_date])
     @@map("maintenance_tickets")
 }
 
@@ -363,6 +366,8 @@ model Booking {
     checked_in  User? @relation("BookingCheckIn", fields: [checked_in_by], references: [id], onDelete: Restrict)
     checked_out User? @relation("BookingCheckOut", fields: [checked_out_by], references: [id], onDelete: Restrict)
 
+    @@index([place_id, check_in_date])
+    @@index([place_id, check_out_date])
     @@map("bookings")
 }
 
@@ -383,6 +388,7 @@ model Expense {
     ticket  MaintenanceTicket? @relation(fields: [ticket_id], references: [id])
     creator User               @relation(fields: [created_by], references: [id])
 
+    @@index([place_id, expense_date])
     @@map("expenses")
 }
 
