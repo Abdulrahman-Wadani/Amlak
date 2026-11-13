@@ -38,7 +38,6 @@ usersRouter.put(
 usersRouter.get(
 	"/users",
 	...adminOnly,
-	requireRole("ADMIN"),
 	async (req, res) => {
 		const query = parse(listUsersQuerySchema, req.query);
 		const page = parsePage(req.query);
@@ -49,7 +48,6 @@ usersRouter.get(
 usersRouter.get(
 	"/users/:userId",
 	...adminOnly,
-	requireRole("ADMIN"),
 	async (req, res) => {
 		const { userId } = parse(userParams, req.params);
 		res.json(await admin.getUser(userId));
@@ -59,7 +57,6 @@ usersRouter.get(
 usersRouter.put(
 	"/users/:userId",
 	...adminOnly,
-	requireRole("ADMIN"),
 	async (req, res) => {
 		const { userId } = parse(userParams, req.params);
 		const input = parse(adminUpdateUserSchema, req.body);
