@@ -21,7 +21,9 @@ export type AuditAction =
 	| "BOOKING_CHECK_OUT"
 	| "EXPENSE_CREATE"
 	| "EXPENSE_UPDATE"
-	| "EXPENSE_DELETE";
+	| "EXPENSE_DELETE"
+	| "USER_DEACTIVATE"
+	| "USER_REACTIVATE";
 export type AuditEntity =
 	| "User"
 	| "Place"
