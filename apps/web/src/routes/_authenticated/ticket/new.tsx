@@ -29,6 +29,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import Form from "@/components/form"
 
 
 import { cn } from "cn"
@@ -59,8 +60,8 @@ function AddTicket() {
   const navigate = useNavigate()
   const { place_id } = Route.useSearch()
 
-  const [places, setPlaces] = useState<Place[] | null>(null)
-  const [assets, setAssets] = useState<Asset[] | null>(null)
+const [places, setPlaces] = useState<Place[]>([])
+const [assets, setAssets] = useState<Asset[]>([])
 
   const [placeId, setPlaceId] = useState(place_id)
   const [assetId, setAssetId] = useState("")
@@ -104,7 +105,7 @@ function AddTicket() {
     let alive = true
 
     setLoadingAssets(true)
-    setAssets(null)
+    setAssets([])
     setAssetId("")
 
     getPlaceAssets(accessToken, placeId)
@@ -144,50 +145,57 @@ function AddTicket() {
     setPhotos((current) => current.filter((_, i) => i !== index))
   }
 
-  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
-    e.preventDefault()
+  async function handleSubmit(
+  token: string,
+  values: Record<string, string | File[]>
+) {
+  const selectedPlaceId = values.placeId as string
+  const selectedAssetId = values.assetId as string
+  const selectedPriority = values.priority as TicketPriority
+  const selectedDescription = values.description as string
+  const selectedPhotos = (values.photos as File[]) || []
 
-    if (!accessToken) return
+  if (!token) return
 
-    setFormError("")
-    setPhotoError("")
+  setFormError("")
+  setPhotoError("")
 
-    if (!placeId) {
-      setFormError("اختر العقار أولاً")
-      return
-    }
-
-    if (photos.length > 5) {
-      setPhotoError("يمكنك إضافة 5 صور كحد أقصى")
-      return
-    }
-
-    setLoading(true)
-
-    try {
-      await createTicket(accessToken, placeId, {
-        asset_id: assetId || undefined,
-        priority: priority || undefined,
-        description: description.trim() || undefined,
-        photos,
-      })
-
-      void navigate({
-        to: "/place/$place_id",
-        params: { place_id: placeId },
-      })
-    } catch (error) {
-      console.error("Failed to create ticket:", error)
-
-      setFormError(
-        error instanceof Error
-          ? error.message
-          : "تعذر إنشاء تذكرة الصيانة",
-      )
-    } finally {
-      setLoading(false)
-    }
+  if (!selectedPlaceId) {
+    setFormError("اختر العقار أولاً")
+    return
   }
+
+  if (selectedPhotos.length > 5) {
+    setPhotoError("يمكنك إضافة 5 صور كحد أقصى")
+    return
+  }
+
+  setLoading(true)
+
+  try {
+    await createTicket(token, selectedPlaceId, {
+      asset_id: selectedAssetId || undefined,
+      priority: selectedPriority || undefined,
+      description: selectedDescription.trim() || undefined,
+      photos: selectedPhotos,
+    })
+
+    void navigate({
+      to: "/place/$place_id",
+      params: { place_id: selectedPlaceId },
+    })
+  } catch (error) {
+    console.error("Failed to create ticket:", error)
+
+    setFormError(
+      error instanceof Error
+        ? error.message
+        : "تعذر إنشاء تذكرة الصيانة",
+    )
+  } finally {
+    setLoading(false)
+  }
+}
 
   return (
     <div
@@ -220,7 +228,7 @@ function AddTicket() {
     </BreadcrumbItem>
   </BreadcrumbList>
 </Breadcrumb>
-
+<center>
       <div style={S("display:flex; flex-direction:column; gap:6px")}>
         <h1 style={S("font-size:30px; font-weight:800; margin:0")}>
           <Trans>رفع تذكرة صيانة</Trans>
@@ -230,204 +238,58 @@ function AddTicket() {
           تسجيل بلاغ صيانة جديد
         </p>
       </div>
+        <Form
+  fields={[
+    {
+      name: "placeId",
+      label: "العقار",
+      type: "select",
+      required: true,
+      defaultValue: place_id,
+      hidden:true,
+    },
+    {
+      name: "assetId",
+      label: "الأصل",
+      type: "select",
+      options: assets.map((asset) => ({
+        value: asset.id,
+        label: asset.name,
+      })),
+    },
+    {
+      name: "priority",
+      label: "الأولوية",
+      type: "select",
+      required: true,
+      defaultValue: "MEDIUM",
+      options: [
+        { value: "LOW", label: "منخفضة" },
+        { value: "MEDIUM", label: "متوسطة" },
+        { value: "HIGH", label: "عالية" },
+        { value: "URGENT", label: "عاجلة" },
+      ],
+    },
+    {
+      name: "description",
+      label: "وصف المشكلة",
+      type: "text",
+      required: true,
+    },
+    {
+      name: "photos",
+      label: "صور المشكلة",
+      type: "file",
+      accept: "image/*",
+      multiple: true,
+    },
+  ]}
+  args={{ accessToken }}
+  callable={handleSubmit}
+/>
 
-      <form
-        onSubmit={handleSubmit}
-        noValidate
-        style={S(
-          "display:flex; flex-direction:column; gap:20px; background:var(--card); border:1px solid var(--border); padding:24px; box-shadow:2px 2px 0 rgba(27,36,48,0.1)",
-        )}
-      >
-        {/* Place */}
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="place" className="text-sm font-semibold">
-            <Trans>Place</Trans>
-          </Label>
+  </center>
 
-          <Select
-            value={placeId}
-            onValueChange={(value) => setPlaceId(String(value))}
-          >
-            <SelectTrigger id="place" style={S("width:100%; height:40px")}>
-              <SelectValue placeholder="اختر العقار">
-                {(value: string | null) =>
-                  places?.find((p) => p.id === value)?.place_name ??
-                  "اختر العقار"
-                }
-              </SelectValue>
-            </SelectTrigger>
-
-            <SelectContent>
-              {(places ?? []).map((place) => (
-                <SelectItem key={place.id} value={place.id}>
-                  {place.place_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Asset */}
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="asset" className="text-sm font-semibold">
-            الأصل المرتبط بالتذكرة
-          </Label>
-
-          <Select
-            value={assetId}
-            onValueChange={(value) => setAssetId(String(value))}
-            disabled={!placeId || loadingAssets || !assets?.length}
-          >
-            <SelectTrigger id="asset" style={S("width:100%; height:40px")}>
-              <SelectValue placeholder="اختر الأصل (اختياري)">
-                {(value: string | null) =>
-                  assets?.find((asset) => asset.id === value)?.name ??
-                  "اختر الأصل (اختياري)"
-                }
-              </SelectValue>
-            </SelectTrigger>
-
-            <SelectContent>
-              {(assets ?? []).map((asset) => (
-                <SelectItem key={asset.id} value={asset.id}>
-                  {asset.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {loadingAssets && (
-            <p className="text-xs text-muted-foreground">
-              جاري تحميل الأصول...
-            </p>
-          )}
-
-          {placeId && !loadingAssets && assets?.length === 0 && (
-            <p className="text-xs text-muted-foreground">
-              لا توجد أصول مسجلة لهذا العقار
-            </p>
-          )}
-        </div>
-
-        {/* Priority */}
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="priority" className="text-sm font-semibold">
-            الأولوية
-          </Label>
-
-          <Select
-            value={priority}
-            onValueChange={(value) =>
-              setPriority(value as TicketPriority)
-            }
-          >
-            <SelectTrigger id="priority" style={S("width:100%; height:40px")}>
-              <SelectValue placeholder="اختر الأولوية (اختياري)">
-                {(value: string | null) =>
-                  value
-                    ? priorityLabels[value as TicketPriority]
-                    : "اختر الأولوية (اختياري)"
-                }
-              </SelectValue>
-            </SelectTrigger>
-
-            <SelectContent>
-              {PRIORITIES.map((item) => (
-                <SelectItem key={item} value={item}>
-                  {priorityLabels[item]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Description */}
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="description" className="text-sm font-semibold">
-            وصف المشكلة
-          </Label>
-
-          <Textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="اشرح المشكلة أو العطل..."
-            rows={5}
-            className="resize-y"
-          />
-        </div>
-
-        {/* Photos */}
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="photos" className="text-sm font-semibold">
-            صور الضرر
-          </Label>
-
-          <Input
-            id="photos"
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handlePhotosChange}
-          />
-
-          <p className="text-xs text-muted-foreground">
-            يمكنك إرفاق حتى 5 صور.
-          </p>
-
-          {photoError && (
-            <p className={errorText}>
-              <CircleAlert size={14} />
-              {photoError}
-            </p>
-          )}
-
-          {photos.length > 0 && (
-            <div className="flex flex-col gap-2 mt-2">
-              {photos.map((photo, index) => (
-                <div
-                  key={`${photo.name}-${index}`}
-                  className="flex items-center justify-between gap-3 rounded-md border p-2"
-                >
-                  <span className="text-sm truncate">
-                    {photo.name}
-                  </span>
-
-                  <button
-                    type="button"
-                    onClick={() => removePhoto(index)}
-                    className="text-muted-foreground hover:text-destructive"
-                    aria-label="Remove photo"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {formError && (
-          <p className={errorText}>
-            <CircleAlert size={14} />
-            {formError}
-          </p>
-        )}
-
-        <div style={S("display:flex; gap:10px; padding-top:4px")}>
-          <Link
-            to={placeId ? "/place/$place_id" : "/places"}
-            params={placeId ? { place_id: placeId } : undefined}
-            className={cn(buttonVariants({ variant: "outline" }))}
-          >
-            <Trans>Cancel</Trans>
-          </Link>
-
-          <Button type="submit" disabled={loading || !placeId}>
-            {loading ? "جاري الإرسال..." : "إنشاء التذكرة"}
-          </Button>
-        </div>
-      </form>
     </div>
   )
 }

@@ -19,8 +19,10 @@ import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/h
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedPlacesRouteImport } from './routes/_authenticated/places'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedTestRouteImport } from './routes/_authenticated/test'
 import { Route as AuthenticatedTicketsRouteImport } from './routes/_authenticated/tickets'
 import { Route as AuthenticatedWorkersRouteImport } from './routes/_authenticated/workers'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedPlacePlace_idRouteImport } from './routes/_authenticated/place/$place_id'
 import { Route as AuthenticatedPlaceNewRouteImport } from './routes/_authenticated/place/new'
 import { Route as AuthenticatedTicketTicket_idRouteImport } from './routes/_authenticated/ticket/$ticket_id'
@@ -81,6 +83,11 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedTestRoute = AuthenticatedTestRouteImport.update({
+  id: '/test',
+  path: '/test',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedTicketsRoute = AuthenticatedTicketsRouteImport.update({
   id: '/tickets',
   path: '/tickets',
@@ -89,6 +96,11 @@ const AuthenticatedTicketsRoute = AuthenticatedTicketsRouteImport.update({
 const AuthenticatedWorkersRoute = AuthenticatedWorkersRouteImport.update({
   id: '/workers',
   path: '/workers',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedPlacePlace_idRoute =
@@ -153,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/places': typeof AuthenticatedPlacesRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/test': typeof AuthenticatedTestRoute
   '/tickets': typeof AuthenticatedTicketsRoute
   '/workers': typeof AuthenticatedWorkersRoute
   '/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
@@ -161,6 +174,7 @@ export interface FileRoutesByFullPath {
   '/ticket/new': typeof AuthenticatedTicketNewRoute
   '/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
   '/worker/new': typeof AuthenticatedWorkerNewRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
   '/place/asset/maintenance/new': typeof AuthenticatedPlaceAssetMaintenanceNewRoute
@@ -175,6 +189,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/places': typeof AuthenticatedPlacesRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/test': typeof AuthenticatedTestRoute
   '/tickets': typeof AuthenticatedTicketsRoute
   '/workers': typeof AuthenticatedWorkersRoute
   '/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
@@ -183,6 +198,7 @@ export interface FileRoutesByTo {
   '/ticket/new': typeof AuthenticatedTicketNewRoute
   '/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
   '/worker/new': typeof AuthenticatedWorkerNewRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
   '/place/asset/maintenance/new': typeof AuthenticatedPlaceAssetMaintenanceNewRoute
@@ -199,6 +215,7 @@ export interface FileRoutesById {
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/places': typeof AuthenticatedPlacesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/test': typeof AuthenticatedTestRoute
   '/_authenticated/tickets': typeof AuthenticatedTicketsRoute
   '/_authenticated/workers': typeof AuthenticatedWorkersRoute
   '/_authenticated/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
@@ -207,6 +224,7 @@ export interface FileRoutesById {
   '/_authenticated/ticket/new': typeof AuthenticatedTicketNewRoute
   '/_authenticated/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
   '/_authenticated/worker/new': typeof AuthenticatedWorkerNewRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/_authenticated/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
   '/_authenticated/place/asset/maintenance/new': typeof AuthenticatedPlaceAssetMaintenanceNewRoute
@@ -223,6 +241,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/places'
     | '/profile'
+    | '/test'
     | '/tickets'
     | '/workers'
     | '/place/$place_id'
@@ -231,6 +250,7 @@ export interface FileRouteTypes {
     | '/ticket/new'
     | '/worker/$worker_id'
     | '/worker/new'
+    | '/admin/'
     | '/place/asset/$asset_id'
     | '/place/asset/new'
     | '/place/asset/maintenance/new'
@@ -245,6 +265,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/places'
     | '/profile'
+    | '/test'
     | '/tickets'
     | '/workers'
     | '/place/$place_id'
@@ -253,6 +274,7 @@ export interface FileRouteTypes {
     | '/ticket/new'
     | '/worker/$worker_id'
     | '/worker/new'
+    | '/admin'
     | '/place/asset/$asset_id'
     | '/place/asset/new'
     | '/place/asset/maintenance/new'
@@ -268,6 +290,7 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications'
     | '/_authenticated/places'
     | '/_authenticated/profile'
+    | '/_authenticated/test'
     | '/_authenticated/tickets'
     | '/_authenticated/workers'
     | '/_authenticated/place/$place_id'
@@ -276,6 +299,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ticket/new'
     | '/_authenticated/worker/$worker_id'
     | '/_authenticated/worker/new'
+    | '/_authenticated/admin/'
     | '/_authenticated/place/asset/$asset_id'
     | '/_authenticated/place/asset/new'
     | '/_authenticated/place/asset/maintenance/new'
@@ -360,6 +384,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/test': {
+      id: '/_authenticated/test'
+      path: '/test'
+      fullPath: '/test'
+      preLoaderRoute: typeof AuthenticatedTestRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/tickets': {
       id: '/_authenticated/tickets'
       path: '/tickets'
@@ -372,6 +403,13 @@ declare module '@tanstack/react-router' {
       path: '/workers'
       fullPath: '/workers'
       preLoaderRoute: typeof AuthenticatedWorkersRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/place/$place_id': {
@@ -447,6 +485,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPlacesRoute: typeof AuthenticatedPlacesRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedTestRoute: typeof AuthenticatedTestRoute
   AuthenticatedTicketsRoute: typeof AuthenticatedTicketsRoute
   AuthenticatedWorkersRoute: typeof AuthenticatedWorkersRoute
   AuthenticatedPlacePlace_idRoute: typeof AuthenticatedPlacePlace_idRoute
@@ -455,6 +494,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedTicketNewRoute: typeof AuthenticatedTicketNewRoute
   AuthenticatedWorkerWorker_idRoute: typeof AuthenticatedWorkerWorker_idRoute
   AuthenticatedWorkerNewRoute: typeof AuthenticatedWorkerNewRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedPlaceAssetAsset_idRoute: typeof AuthenticatedPlaceAssetAsset_idRoute
   AuthenticatedPlaceAssetNewRoute: typeof AuthenticatedPlaceAssetNewRoute
   AuthenticatedPlaceAssetMaintenanceNewRoute: typeof AuthenticatedPlaceAssetMaintenanceNewRoute
@@ -467,6 +507,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPlacesRoute: AuthenticatedPlacesRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedTestRoute: AuthenticatedTestRoute,
   AuthenticatedTicketsRoute: AuthenticatedTicketsRoute,
   AuthenticatedWorkersRoute: AuthenticatedWorkersRoute,
   AuthenticatedPlacePlace_idRoute: AuthenticatedPlacePlace_idRoute,
@@ -475,6 +516,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedTicketNewRoute: AuthenticatedTicketNewRoute,
   AuthenticatedWorkerWorker_idRoute: AuthenticatedWorkerWorker_idRoute,
   AuthenticatedWorkerNewRoute: AuthenticatedWorkerNewRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedPlaceAssetAsset_idRoute: AuthenticatedPlaceAssetAsset_idRoute,
   AuthenticatedPlaceAssetNewRoute: AuthenticatedPlaceAssetNewRoute,
   AuthenticatedPlaceAssetMaintenanceNewRoute:

@@ -640,3 +640,7 @@ export async function updateProfile(
 export async function getProfile(token: string) {
   return apiRequest('/users/me', token)
 }
+
+export async function getUsers(token: string){
+  return apiRequest('/users', token)
+}

@@ -222,7 +222,7 @@ function PlacesPage() {
         </p>
       )}
 
-      <div style={S("display: flex; flex-direction: column; gap: 12px")}>
+      <div style={S("display: flex; flex-direction: row; gap: 12px")}>
         {visible.map((p) => (
           <Link
             key={p.id}

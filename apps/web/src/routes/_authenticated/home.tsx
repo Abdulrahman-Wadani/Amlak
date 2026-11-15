@@ -85,7 +85,7 @@ function HomePage() {
         aria-label="today"
         className="am-rise"
         style={S(
-          "background: var(--foreground); color: #fff; padding: 32px; box-shadow: 4px 4px 0 var(--warn); display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: flex-end; justify-content: space-between; box-sizing: border-box"
+          "background: var(--foreground); color: #fff; padding: 32px;  display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: flex-end; justify-content: space-between; box-sizing: border-box"
         )}
       >
         <div
@@ -136,7 +136,7 @@ function HomePage() {
 
       <div
         style={S(
-          "display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; align-items: start"
+          "display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; align-items: stretch"
         )}
       >
         <StatCard

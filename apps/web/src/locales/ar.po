@@ -290,6 +290,32 @@ msgstr "تظهر بيانات المصروفات هنا فور ربط خدمة �
 msgid "Expenses"
 msgstr "المصروفات"
 
+#: src/routes/_authenticated/place/new.tsx
+msgid "Save"
+msgstr: "حفظ"
+
+#: src/routes/_authenticated/ticket/new.tsx
+msgid "Save"
+msgstr: "حفظ"
+
+#: src/routes/_authenticated/worker/new.tsx
+msgid "Add worker"
+msgstr: "اضافة عامل"
+msgid "Create worker"
+msgstr: "انشاء عامل"
+msgid "Preferred language"
+msgstr: "اللغة المفضلة"
+msgid "Email Address"
+msgstr: "البريد"
+
+#: src/routes/_authenticated/place/asset/new.tsx
+msgid "Save"
+msgstr: "حفظ"
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx
+msgid "Save"
+msgstr: "حفظ"
+
+
 #: src/routes/_authenticated/places.tsx:160
 msgid "Filter by status"
 msgstr "تصفية حسب الحالة"

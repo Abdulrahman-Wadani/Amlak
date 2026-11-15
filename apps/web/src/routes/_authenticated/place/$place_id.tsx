@@ -310,7 +310,7 @@ function getWorkerName(userId: string | null | undefined) {
     <div
       dir="rtl"
       style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 900px"
+        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 80%"
       )}
     >
       <div
@@ -911,9 +911,7 @@ function getWorkerName(userId: string | null | undefined) {
     size="sm"
     className={cn(buttonVariants({ variant: "outline", size: "sm" }), "am-btn")}
     style={S("height: 38px; padding: 0 12px; gap: 6px; white-space: nowrap")}
-    onClick={() => {
-      document.getElementById("add-worker-form")?.scrollIntoView({ behavior: "smooth", block: "center" })
-    }}
+    onClick={handleAddWorker}
   >
     <Plus size={16} />
     إضافة عامل
@@ -998,9 +996,6 @@ function getWorkerName(userId: string | null | undefined) {
                             ))}
                         </select>
                       </label>
-                      <Button type="submit" disabled={addingWorker || !selectedWorkerId} size="sm" className="am-btn am-solid" style={S("height: 40px; padding: 0 16px")}>
-                        {addingWorker ? "جارٍ الإضافة..." : "إضافة العامل"}
-                      </Button>
                     </form>
                     {workerError && (
                       <p style={S("color: var(--destructive); font-size: 13px; margin: 10px 0 0")}>{workerError}</p>

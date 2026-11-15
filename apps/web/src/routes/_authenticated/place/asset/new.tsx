@@ -19,6 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import Form from "@/components/form"
+
 
 export const Route = createFileRoute("/_authenticated/place/asset/new")({
   component: AddAsset,
@@ -141,6 +143,7 @@ function AddAsset() {
     "flex items-center gap-1.5 text-[13px] leading-5 text-crit-900"
 
   return (
+    <center>
     <div
       style={S(
         "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 640px"
@@ -149,161 +152,18 @@ function AddAsset() {
       <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
         <Trans>Add asset</Trans>
       </h1>
-
-      <form
-        onSubmit={handleSubmit}
-        noValidate
-        style={S(
-          "display: flex; flex-direction: column; gap: 16px; background: #fff; border: 1px solid var(--border); padding: 24px; box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1)"
-        )}
-      >
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="place" className="text-sm font-semibold">
-            <Trans>Place</Trans>
-          </Label>
-          <Select
-            value={placeId}
-            onValueChange={(v) => setPlaceId(String(v))}
-          >
-            <SelectTrigger id="place" style={S("width: 100%; height: 40px")}>
-              <SelectValue placeholder={<Trans>Choose a place</Trans>}>
-                {(value: string | null) =>
-                  places?.find((p) => p.id === value)?.place_name ??
-                  value ?? (
-                    <Trans>Choose a place</Trans>
-                  )
-                }
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {(places ?? []).map((p) => (
-                <SelectItem key={p.id} value={p.id}>
-                  {p.place_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors.place && (
-            <p className={errorText}>
-              <CircleAlert size={14} />
-              {errors.place}
-            </p>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="asset-name" className="text-sm font-semibold">
-            <Trans>Asset name</Trans>
-          </Label>
-          <Input
-            id="asset-name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            aria-invalid={Boolean(errors.name)}
-          />
-          {errors.name && (
-            <p className={errorText}>
-              <CircleAlert size={14} />
-              {errors.name}
-            </p>
-          )}
-        </div>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="asset-type" className="text-sm font-semibold">
-              <Trans>Type</Trans>
-            </Label>
-            <Input
-              id="asset-type"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              aria-invalid={Boolean(errors.type)}
-            />
-            {errors.type && (
-              <p className={errorText}>
-                <CircleAlert size={14} />
-                {errors.type}
-              </p>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="asset-status" className="text-sm font-semibold">
-              <Trans>Status</Trans>
-            </Label>
-            <Select
-              value={status}
-              onValueChange={(v) => setStatus(String(v) as StatusKey)}
-            >
-              <SelectTrigger
-                id="asset-status"
-                style={S("width: 100%; height: 40px")}
-              >
-                <SelectValue>
-                  {(value: string | null) => <StatusLabel status={value ?? ""} />}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    <StatusLabel status={s} />
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="purchase-date" className="text-sm font-semibold">
-            <Trans>Purchase date</Trans>
-          </Label>
-          <Input
-            id="purchase-date"
-            type="date"
-            max={today}
-            value={purchaseDate}
-            onChange={(e) => setPurchaseDate(e.target.value)}
-            aria-invalid={Boolean(errors.purchase_date)}
-          />
-          {errors.purchase_date && (
-            <p className={errorText}>
-              <CircleAlert size={14} />
-              {errors.purchase_date}
-            </p>
-          )}
-        </div>
-
-        {formError && (
-          <p className={errorText}>
-            <CircleAlert size={14} />
-            {formError}
-          </p>
-        )}
-
-        <div style={S("display: flex; gap: 10px; padding-top: 4px")}>
-          {placeId ? (
-            <Link
-              to="/place/$place_id"
-              params={{ place_id: placeId }}
-              className={cn(buttonVariants({ variant: "outline" }))}
-            >
-              <Trans>Cancel</Trans>
-            </Link>
-          ) : (
-            <Link
-              to="/places"
-              className={cn(buttonVariants({ variant: "outline" }))}
-            >
-              <Trans>Cancel</Trans>
-            </Link>
-          )}
-          <Button type="submit" disabled={loading}>
-            <Trans>Save asset</Trans>
-          </Button>
-        </div>
-      </form>
+      <Form
+        fields={[
+          { name: "placeId", label: t`Place`, type: "select", defaultValue: placeId,hidden:true},
+          { name: "name", label: t`Asset name`, type: "text" },
+          { name: "type", label: t`Type`, type: "text" },
+          { name: "status", label: t`Status`, type: "select", options: STATUSES.map((s) => ({ value: s, label: <StatusLabel status={s} /> })) },
+          { name: "purchase_date", label: t`Purchase date`, type: "date" },
+        ]}
+        callable={createAsset}
+        args={{token:accessToken, placeId:placeId}}
+      />
     </div>
+  </center>
   )
 }
