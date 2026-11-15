@@ -35,31 +35,19 @@ usersRouter.put(
 
 // The Admin's user management. "/users/me" above is matched first.
 
-usersRouter.get(
-	"/users",
-	...adminOnly,
-	async (req, res) => {
-		const query = parse(listUsersQuerySchema, req.query);
-		const page = parsePage(req.query);
-		res.json(await admin.listUsers(query, page));
-	},
-);
+usersRouter.get("/users", ...adminOnly, async (req, res) => {
+	const query = parse(listUsersQuerySchema, req.query);
+	const page = parsePage(req.query);
+	res.json(await admin.listUsers(query, page));
+});
 
-usersRouter.get(
-	"/users/:userId",
-	...adminOnly,
-	async (req, res) => {
-		const { userId } = parse(userParams, req.params);
-		res.json(await admin.getUser(userId));
-	},
-);
+usersRouter.get("/users/:userId", ...adminOnly, async (req, res) => {
+	const { userId } = parse(userParams, req.params);
+	res.json(await admin.getUser(userId));
+});
 
-usersRouter.put(
-	"/users/:userId",
-	...adminOnly,
-	async (req, res) => {
-		const { userId } = parse(userParams, req.params);
-		const input = parse(adminUpdateUserSchema, req.body);
-		res.json(await admin.updateUser(currentUser(res), userId, input, req.ip));
-	},
-);
+usersRouter.put("/users/:userId", ...adminOnly, async (req, res) => {
+	const { userId } = parse(userParams, req.params);
+	const input = parse(adminUpdateUserSchema, req.body);
+	res.json(await admin.updateUser(currentUser(res), userId, input, req.ip));
+});

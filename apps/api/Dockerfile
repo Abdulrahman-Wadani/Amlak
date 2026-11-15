@@ -19,4 +19,5 @@ RUN DATABASE_URL=postgresql://build:build@localhost:5432/build bunx prisma gener
 
 USER bun
 EXPOSE 3001
-CMD ["sh", "-c", "bunx prisma migrate deploy && bun src/server.ts"]
+# The seed only adds what is missing (the roles), so it is safe on every start.
+CMD ["sh", "-c", "bunx prisma migrate deploy && bun scripts/seed.ts && bun src/server.ts"]
