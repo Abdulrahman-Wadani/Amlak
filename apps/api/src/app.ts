@@ -22,6 +22,10 @@ import { workersRouter } from "./workers/routes.ts";
 
 export const app = express();
 
+// In production every request comes through Caddy. Trusting that one hop
+// makes req.ip the user's address, as the audit log needs, not Caddy's.
+app.set("trust proxy", 1);
+
 app.use(express.json());
 app.use(cookieParser());
 
