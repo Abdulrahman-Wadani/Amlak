@@ -55,6 +55,30 @@ export function StatusBadge({ status }: { status: string }) {
       </Chip>
     )
   }
+  if (status === "OPEN") {
+    return (
+      <Chip
+        bg="var(--warn-50)"
+        border="var(--warn-200)"
+        text="var(--warn-700)"
+        dot="var(--warn)"
+      >
+        <Trans>OPEN</Trans>
+      </Chip>
+    )
+  }
+  if (status === "RESOLVED") {
+    return (
+      <Chip
+        bg="var(--good-50)"
+        border="var(--good-200)"
+        text="var(--good-700)"
+        dot="var(--good)"
+      >
+        <Trans>RESOLVED</Trans>
+      </Chip>
+    )
+  }
   return (
     <Chip bg="#ffffff" border="var(--border)" text="var(--ink)" dot="#5b636e">
       <Trans>Inactive</Trans>

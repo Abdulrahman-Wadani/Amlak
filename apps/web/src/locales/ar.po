@@ -38,6 +38,17 @@ msgstr "إضافة أصل"
 #: src/routes/_authenticated/places.tsx:123
 msgid "Add place"
 msgstr "إضافة عقار"
+msgid "Add ticket"
+msgstr "رفع تذكرة"
+msgid "subject"
+msgstr "العنوان"
+msgid "description"
+msgstr "الوصف"
+msgid "OPEN"
+msgstr "مفتوحة"
+msgid "RESOLVED"
+msgstr "تم حلها"
+
 
 #: src/routes/_authenticated/home.tsx:239
 msgid "Add property"

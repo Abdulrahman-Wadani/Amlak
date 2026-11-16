@@ -111,7 +111,8 @@ function UsersPage() {
         !q ||
         user.fullname.toLowerCase().includes(q) ||
         user.email.toLowerCase().includes(q) ||
-        (user.phone ?? "").toLowerCase().includes(q)
+        (user.phone ?? "").toLowerCase().includes(q) ||
+        user.id.includes(q) 
 
       return matchesTab && matchesQuery
     })
@@ -139,21 +140,6 @@ function UsersPage() {
           المستخدمون
         </h1>
 
-        <Link
-          to="/worker/new"
-          className={cn(buttonVariants(), "am-btn am-solid")}
-          style={S(
-            "height: 44px; min-width: 44px; padding: 0 16px; font-size: 15px; font-weight: 600; box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1)",
-          )}
-        >
-          <Plus
-            aria-hidden="true"
-            style={S(
-              "width: 18px; height: 18px; display: block; flex: none",
-            )}
-          />
-          إضافة مستخدم
-        </Link>
       </div>
 
       {/* Search and Filters */}
@@ -188,7 +174,7 @@ function UsersPage() {
             type="search"
             className="am-input"
             style={S("padding-inline-start: 44px")}
-            placeholder="ابحث بالاسم أو البريد الإلكتروني أو الجوال"
+            placeholder="ابحث بالاسم أو البريد الإلكتروني أو الجوال او المعرف"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -307,7 +293,7 @@ function UsersPage() {
           {visible.map((user) => (
             <Link
               key={user.id}
-              to="/worker/$worker_id"
+              to="/admin/$worker_id"
               params={{ worker_id: user.id }}
               className="am-lift"
               style={S(

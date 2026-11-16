@@ -644,3 +644,160 @@ export async function getProfile(token: string) {
 export async function getUsers(token: string){
   return apiRequest('/users', token)
 }
+
+export type UserResponse = {
+  id: string
+  email: string
+  fullname: string
+  phone: string | null
+  picture_url: string | null
+  role: "ADMIN" | "MANAGER" | "WORKER"
+  status:
+    | "INVITED"
+    | "PENDING_VERIFICATION"
+    | "ACTIVE"
+    | "DEACTIVATED"
+  preferred_language: "ar" | "en"
+  email_verified_at: string | null
+  manager_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+type UserApiResponse = {
+  data?: UserResponse
+  message?: string
+}
+
+export async function getUserById(
+  accessToken: string,
+  userId: string,
+): Promise<UserResponse> {
+  const response = await fetch(`/api/v1/users/${userId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  })
+
+  const result = (await response.json().catch(() => null)) as
+    | UserApiResponse
+    | UserResponse
+    | null
+
+  if (!response.ok) {
+    throw new Error(
+      result && "message" in result
+        ? result.message
+        : `Failed to get user (${response.status})`,
+    )
+  }
+
+  if (!result) {
+    throw new Error("Invalid user response")
+  }
+
+  const user =
+    "data" in result && result.data
+      ? result.data
+      : (result as UserResponse)
+
+  return user
+}
+
+export type UpdateUserInput = {
+  fullname: string
+  phone: string | null
+  role: UserResponse["role"]
+  status: UserResponse["status"]
+  preferred_language: UserResponse["preferred_language"]
+}
+
+export async function updateUser(
+  accessToken: string,
+  userId: string,
+  payload: UpdateUserInput,
+): Promise<UserResponse> {
+  const response = await fetch(`/api/v1/users/${userId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(payload),
+  })
+
+  const result = (await response.json().catch(() => null)) as
+    | UserApiResponse
+    | UserResponse
+    | null
+
+  if (!response.ok) {
+    throw new Error(
+      result && "message" in result
+        ? result.message
+        : `Failed to update user (${response.status})`,
+    )
+  }
+
+  if (!result) {
+    throw new Error("Invalid update response")
+  }
+
+  return "data" in result && result.data
+    ? result.data
+    : (result as UserResponse)
+}
+
+export async function getSupportTicket(token:string){
+  return apiRequest('/support-tickets',token)
+}
+
+type createSpTicket = {
+  subject:string,
+  description:string
+}
+export async function createSupportTicket(token:string,input:[]){
+  const res = await fetch('/api/v1/support-tickets',
+    {
+      method:"POST",
+      headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(input),
+    }
+  )
+  return res
+}
+
+
+export async function getSupportTicketById(token:string,ticket:string){
+  return apiRequest(`/support-tickets/${ticket}`,token)
+}
+
+export async function resolveSupportTicket(
+  token: string,
+  ticketId: string,
+  admin_response: string
+) {
+  const response = await fetch(
+    `/api/v1/support-tickets/${ticketId}/resolve`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ admin_response }),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || result.error || "Failed to resolve ticket");
+  }
+
+  return result;
+}
