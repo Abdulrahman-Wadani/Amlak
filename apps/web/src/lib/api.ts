@@ -4,6 +4,7 @@ import type {
   Asset,
   CreateAssetInput,
   CreatePlaceInput,
+  Expense,
   Place,
   WorkerResponse,
 } from "@amlak/shared"
@@ -435,8 +436,12 @@ export async function getTicketById(
 export async function expenseslist(
   token: string,
   placeId: string,
-): Promise<Blob> {
-return expense.data;
+): Promise<Expense[]> {
+  // shortcut: first 100 expenses per place; page them when a place passes that
+  return apiRequest<Expense[]>(
+    `/places/${placeId}/expenses?page_size=100`,
+    token,
+  )
 }
 
 // for test now only

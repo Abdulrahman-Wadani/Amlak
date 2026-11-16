@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { useLingui } from "@lingui/react"
-import type { Place } from "@amlak/shared"
+import type { Expense, ExpenseCategory, Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { getPlaces, expenseslist } from "@/lib/api"
 import { S } from "@/lib/dom-style"
@@ -32,25 +32,7 @@ export const Route = createFileRoute("/_authenticated/finance")({
   component: FinancePage,
 })
 
-type ExpenseCategory =
-  | "MAINTENANCE"
-  | "UTILITIES"
-  | "TAXES"
-  | "CLEANING"
-  | "SUPPLIES"
-  | "OTHER"
-
 type CategoryKey = "ALL" | ExpenseCategory
-
-interface Expense {
-  id: string
-  place_id: string
-  category: ExpenseCategory
-  description: string | null
-  amount: string | number
-  expense_date: string
-  receipt_url: string | null
-}
 
 const CATEGORIES: {
   key: CategoryKey
@@ -154,7 +136,7 @@ function FinancePage() {
 
         if (placeFilter === "ALL") {
           const responses = await Promise.all(
-            places.map((place) =>
+            (places ?? []).map((place) =>
               expenseslist(accessToken!, place.id),
             ),
           )
@@ -179,7 +161,7 @@ function FinancePage() {
       }
     }
 
-    loadExpenses()
+    void loadExpenses()
 
     return () => {
       alive = false
