@@ -1,14 +1,17 @@
 import {
 	type AccessToken,
 	accountSetupSchema,
+	forgotPasswordSchema,
 	type LoginResponse,
 	loginSchema,
 	registerSchema,
+	resetPasswordSchema,
 	verificationCodeSchema,
 	verifyEmailSchema,
 } from "@amlak/shared";
 import { type CookieOptions, type Response, Router } from "express";
 import { parse } from "../validation.ts";
+import { requestPasswordReset, resetPassword } from "./password-reset.ts";
 import * as auth from "./service.ts";
 import { REFRESH_TOKEN_MS, type Session } from "./sessions.ts";
 import { ACCESS_TOKEN_SECONDS } from "./tokens.ts";
@@ -77,5 +80,17 @@ function setRefreshCookie(res: Response, token: string) {
 authRouter.post("/auth/account-setup", async (req, res) => {
 	const input = parse(accountSetupSchema, req.body);
 	await auth.setUpAccount(input);
+	res.status(204).end();
+});
+
+authRouter.post("/auth/password/forgot", async (req, res) => {
+	const input = parse(forgotPasswordSchema, req.body);
+	await requestPasswordReset(input);
+	res.status(204).end();
+});
+
+authRouter.post("/auth/password/reset", async (req, res) => {
+	const input = parse(resetPasswordSchema, req.body);
+	await resetPassword(input);
 	res.status(204).end();
 });

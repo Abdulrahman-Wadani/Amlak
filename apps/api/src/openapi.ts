@@ -1,46 +1,81 @@
 import {
 	accessTokenSchema,
 	accountSetupSchema,
+	adminUpdateUserSchema,
+	announcementResultSchema,
+	announcementSchema,
 	approveTicketSchema,
 	assetSchema,
 	assignWorkerSchema,
+	bookingSchema,
+	cancelBookingSchema,
 	completeTicketSchema,
 	createAssetSchema,
+	createBookingSchema,
+	createContentSchema,
+	createExpenseSchema,
 	createPlaceSchema,
 	createScheduleSchema,
+	createSupportTicketSchema,
 	createTicketSchema,
 	createWorkerSchema,
+	dashboardQuerySchema,
+	expenseSchema,
+	financialReportQuerySchema,
+	financialReportSchema,
+	forgotPasswordSchema,
 	listAssetsQuerySchema,
+	listBookingsQuerySchema,
+	listContentQuerySchema,
+	listExpensesQuerySchema,
+	listNotificationsQuerySchema,
 	listPlacesQuerySchema,
+	listSupportTicketsQuerySchema,
 	listTicketsQuerySchema,
+	listUsersQuerySchema,
 	listWorkersQuerySchema,
 	loginResponseSchema,
 	loginSchema,
+	notificationPageSchema,
+	notificationSchema,
 	paginatedSchema,
+	placeHealthSchema,
 	placeSchema,
 	placeWorkerSchema,
 	reassignTicketSchema,
 	registerSchema,
 	rejectTicketSchema,
+	resetPasswordSchema,
+	resolveSupportTicketSchema,
 	scheduleSchema,
+	supportTicketSchema,
 	ticketSchema,
 	updateAssetSchema,
+	updateContentSchema,
+	updateExpenseSchema,
 	updatePlaceSchema,
 	updateProfileSchema,
 	updateWorkerSchema,
 	userSchema,
 	verificationCodeSchema,
 	verifyEmailSchema,
+	webContentSchema,
 	workerSchema,
 } from "@amlak/shared";
 import { z } from "zod";
 import { createDocument } from "zod-openapi";
 import { assetParams } from "./assets/routes.ts";
+import { bookingParams } from "./bookings/routes.ts";
+import { contentParams } from "./content/routes.ts";
+import { expenseParams } from "./expenses/routes.ts";
+import { notificationParams } from "./notifications/routes.ts";
 import { pageQuerySchema } from "./pagination.ts";
 import { placeWorkerParams } from "./place-workers/routes.ts";
 import { placeParams } from "./places/routes.ts";
 import { scheduleParams } from "./schedules/routes.ts";
+import { supportTicketParams } from "./support/routes.ts";
 import { ticketParams } from "./tickets/routes.ts";
+import { userParams } from "./users/routes.ts";
 import { workerParams } from "./workers/routes.ts";
 
 const errorSchema = z
@@ -109,6 +144,36 @@ export const openApiDocument = createDocument({
 				responses: {
 					"204": { description: "Sent, if the account is pending" },
 					"429": fail("Wait before asking for another code"),
+				},
+			},
+		},
+		"/auth/password/forgot": {
+			post: {
+				tags: ["Auth"],
+				summary: "Email a password reset link",
+				requestBody: json(forgotPasswordSchema),
+				responses: {
+					"204": {
+						description:
+							"Sent if the account is ACTIVE or waiting for its email check; the same response for any other email",
+					},
+					"429": fail("Wait before asking for another link"),
+				},
+			},
+		},
+		"/auth/password/reset": {
+			post: {
+				tags: ["Auth"],
+				summary: "Set a new password from the reset link",
+				requestBody: json(resetPasswordSchema),
+				responses: {
+					"204": {
+						description:
+							"Changed; every device is logged out. A pending account becomes ACTIVE",
+					},
+					"422": fail(
+						"The link is wrong, expired or used, or the password is weak",
+					),
 				},
 			},
 		},
@@ -469,6 +534,441 @@ export const openApiDocument = createDocument({
 				responses: {
 					"204": { description: "Stopped; tickets it created stay" },
 					"404": fail("Schedule not found, or already stopped"),
+					...guarded,
+				},
+			},
+		},
+		"/places/{placeId}/bookings": {
+			get: {
+				tags: ["Bookings"],
+				summary: "Booking calendar: the stays that touch from–to",
+				security: loggedIn,
+				requestParams: {
+					path: placeParams,
+					query: listBookingsQuerySchema.safeExtend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok("One page of bookings", paginatedSchema(bookingSchema)),
+					"404": fail("Place not found"),
+					"422": fail("Invalid dates, filter or page"),
+					...guarded,
+				},
+			},
+			post: {
+				tags: ["Bookings"],
+				summary: "Add a booking",
+				security: loggedIn,
+				requestParams: { path: placeParams },
+				requestBody: json(createBookingSchema),
+				responses: {
+					"201": ok("The new booking, CONFIRMED", bookingSchema),
+					"404": fail("Place not found"),
+					"409": fail(
+						"The dates overlap another booking; see details.conflicting_booking_id",
+					),
+					"422": fail(
+						"Some fields are invalid, the stay is over, or the place is not ACTIVE",
+					),
+					...guarded,
+				},
+			},
+		},
+		"/bookings/{bookingId}": {
+			get: {
+				tags: ["Bookings"],
+				summary: "Get a booking",
+				security: loggedIn,
+				requestParams: { path: bookingParams },
+				responses: {
+					"200": ok("The booking", bookingSchema),
+					"404": fail("Booking not found"),
+					...guarded,
+				},
+			},
+		},
+		"/bookings/{bookingId}/cancel": {
+			post: {
+				tags: ["Bookings"],
+				summary: "Cancel a CONFIRMED booking",
+				security: loggedIn,
+				requestParams: { path: bookingParams },
+				requestBody: json(cancelBookingSchema),
+				responses: {
+					"200": ok("The cancelled booking", bookingSchema),
+					"404": fail("Booking not found"),
+					"409": fail("The booking is not CONFIRMED"),
+					"422": fail("The reason is missing"),
+					...guarded,
+				},
+			},
+		},
+		"/bookings/{bookingId}/check-in": {
+			post: {
+				tags: ["Bookings"],
+				summary: "Check the guest in",
+				security: loggedIn,
+				requestParams: { path: bookingParams },
+				responses: {
+					"200": ok("The booking, CHECKED_IN", bookingSchema),
+					"404": fail("Booking not found"),
+					"409": fail(
+						"Not CONFIRMED, or not ready: details.reason is BEFORE_CHECK_IN_DATE, or PLACE_OCCUPIED with details.occupied_by_booking_id",
+					),
+					...guarded,
+				},
+			},
+		},
+		"/bookings/{bookingId}/check-out": {
+			post: {
+				tags: ["Bookings"],
+				summary: "Check the guest out",
+				security: loggedIn,
+				requestParams: { path: bookingParams },
+				responses: {
+					"200": ok("The booking, CHECKED_OUT", bookingSchema),
+					"404": fail("Booking not found"),
+					"409": fail("The booking is not CHECKED_IN"),
+					...guarded,
+				},
+			},
+		},
+		"/dashboard": {
+			get: {
+				tags: ["Dashboard"],
+				summary: "Property and asset health, one row per place you can see",
+				security: loggedIn,
+				requestParams: {
+					query: dashboardQuerySchema.extend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok("One page of places", paginatedSchema(placeHealthSchema)),
+					"422": fail("Invalid place_id or page"),
+					...guarded,
+				},
+			},
+		},
+		"/places/{placeId}/expenses": {
+			get: {
+				tags: ["Expenses"],
+				summary: "List a place's expenses (Manager)",
+				security: loggedIn,
+				requestParams: {
+					path: placeParams,
+					query: listExpensesQuerySchema.safeExtend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok("One page of expenses", paginatedSchema(expenseSchema)),
+					"404": fail("Place not found"),
+					"422": fail("Invalid dates, category or page"),
+					...guarded,
+				},
+			},
+			post: {
+				tags: ["Expenses"],
+				summary: "Log an expense, with an optional receipt photo (Manager)",
+				security: loggedIn,
+				requestParams: { path: placeParams },
+				requestBody: {
+					content: {
+						"multipart/form-data": {
+							schema: createExpenseSchema.extend({
+								receipt: z
+									.file()
+									.optional()
+									.meta({ description: "A JPEG, PNG or WebP photo" }),
+							}),
+						},
+					},
+				},
+				responses: {
+					"201": ok("The new expense", expenseSchema),
+					"404": fail("Place not found"),
+					"422": fail(
+						"Some fields are invalid, the receipt is not an image, or the ticket is not in this place",
+					),
+					...guarded,
+				},
+			},
+		},
+		"/expenses/{expenseId}": {
+			get: {
+				tags: ["Expenses"],
+				summary: "Get an expense (Manager)",
+				security: loggedIn,
+				requestParams: { path: expenseParams },
+				responses: {
+					"200": ok("The expense", expenseSchema),
+					"404": fail("Expense not found"),
+					...guarded,
+				},
+			},
+			put: {
+				tags: ["Expenses"],
+				summary:
+					"Update an expense; send only the fields that change (Manager)",
+				security: loggedIn,
+				requestParams: { path: expenseParams },
+				requestBody: {
+					content: {
+						"multipart/form-data": {
+							schema: updateExpenseSchema.extend({
+								receipt: z.file().optional().meta({
+									description: "Replaces the current receipt photo",
+								}),
+							}),
+						},
+					},
+				},
+				responses: {
+					"200": ok("The updated expense", expenseSchema),
+					"404": fail("Expense not found"),
+					"422": fail(
+						"Some fields are invalid, the receipt is not an image, or the ticket is not in this place",
+					),
+					...guarded,
+				},
+			},
+			delete: {
+				tags: ["Expenses"],
+				summary: "Delete an expense and its receipt (Manager)",
+				security: loggedIn,
+				requestParams: { path: expenseParams },
+				responses: {
+					"204": { description: "Deleted; the audit log keeps its values" },
+					"404": fail("Expense not found"),
+					...guarded,
+				},
+			},
+		},
+		"/reports/financial": {
+			get: {
+				tags: ["Reports"],
+				summary: "Income, expenses and profit for a period (Manager)",
+				security: loggedIn,
+				requestParams: { query: financialReportQuerySchema },
+				responses: {
+					"200": ok(
+						"One row per place, plus totals per currency",
+						financialReportSchema,
+					),
+					"404": fail("Place not found"),
+					"422": fail("Missing or invalid dates or place_id"),
+					...guarded,
+				},
+			},
+		},
+		"/notifications": {
+			get: {
+				tags: ["Notifications"],
+				summary: "List my notifications, newest first",
+				security: loggedIn,
+				requestParams: {
+					query: listNotificationsQuerySchema.extend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok(
+						"One page of my notifications, plus my unread count",
+						notificationPageSchema,
+					),
+					"401": fail("Missing, invalid or expired access token"),
+					"422": fail("Invalid filter or page"),
+				},
+			},
+			post: {
+				tags: ["Notifications"],
+				summary: "Send an announcement to a role or to some users (Admin)",
+				security: loggedIn,
+				requestBody: json(announcementSchema),
+				responses: {
+					"201": ok(
+						"Saved for every ACTIVE recipient; the emails go out after this response",
+						announcementResultSchema,
+					),
+					"422": fail(
+						"Both or neither of role and user_ids, or a missing text",
+					),
+					...guarded,
+				},
+			},
+		},
+		"/notifications/{notificationId}/read": {
+			post: {
+				tags: ["Notifications"],
+				summary: "Mark one of my notifications as read",
+				security: loggedIn,
+				requestParams: { path: notificationParams },
+				responses: {
+					"200": ok("The notification, read", notificationSchema),
+					"401": fail("Missing, invalid or expired access token"),
+					"404": fail("Notification not found"),
+				},
+			},
+		},
+		"/users": {
+			get: {
+				tags: ["Users (Admin)"],
+				summary: "List every account (Admin)",
+				security: loggedIn,
+				requestParams: {
+					query: listUsersQuerySchema.extend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok("One page of users", paginatedSchema(userSchema)),
+					"422": fail("Invalid filter or page"),
+					...guarded,
+				},
+			},
+		},
+		"/users/{userId}": {
+			get: {
+				tags: ["Users (Admin)"],
+				summary: "Get any account (Admin)",
+				security: loggedIn,
+				requestParams: { path: userParams },
+				responses: {
+					"200": ok("The user", userSchema),
+					"404": fail("User not found"),
+					...guarded,
+				},
+			},
+			put: {
+				tags: ["Users (Admin)"],
+				summary: "Edit, deactivate or reactivate any account (Admin)",
+				security: loggedIn,
+				requestParams: { path: userParams },
+				requestBody: json(adminUpdateUserSchema),
+				responses: {
+					"200": ok("The updated user", userSchema),
+					"404": fail("User not found"),
+					"409": fail(
+						"Only a deactivated user whose email was verified can be reactivated",
+					),
+					"422": fail("Invalid fields, or an Admin changing their own status"),
+					...guarded,
+				},
+			},
+		},
+		"/support-tickets": {
+			get: {
+				tags: ["Support"],
+				summary: "List support tickets: all for Admins, my own for others",
+				security: loggedIn,
+				requestParams: {
+					query: listSupportTicketsQuerySchema.extend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok(
+						"One page of support tickets",
+						paginatedSchema(supportTicketSchema),
+					),
+					"401": fail("Missing, invalid or expired access token"),
+					"422": fail("Invalid filter or page"),
+				},
+			},
+			post: {
+				tags: ["Support"],
+				summary: "Submit a support ticket (Manager, Worker)",
+				security: loggedIn,
+				requestBody: json(createSupportTicketSchema),
+				responses: {
+					"201": ok("The new ticket, OPEN", supportTicketSchema),
+					"422": fail("The subject or description is missing"),
+					...guarded,
+				},
+			},
+		},
+		"/support-tickets/{ticketId}": {
+			get: {
+				tags: ["Support"],
+				summary: "Get a support ticket (Admin, or who submitted it)",
+				security: loggedIn,
+				requestParams: { path: supportTicketParams },
+				responses: {
+					"200": ok("The support ticket", supportTicketSchema),
+					"401": fail("Missing, invalid or expired access token"),
+					"404": fail("Support ticket not found"),
+				},
+			},
+		},
+		"/support-tickets/{ticketId}/resolve": {
+			post: {
+				tags: ["Support"],
+				summary: "Resolve with a response; the submitter is notified (Admin)",
+				security: loggedIn,
+				requestParams: { path: supportTicketParams },
+				requestBody: json(resolveSupportTicketSchema),
+				responses: {
+					"200": ok("The resolved ticket", supportTicketSchema),
+					"404": fail("Support ticket not found"),
+					"409": fail("The ticket is already resolved"),
+					"422": fail("The response is missing"),
+					...guarded,
+				},
+			},
+		},
+		"/content": {
+			get: {
+				tags: ["Web content"],
+				summary: "List pages: published ones, plus drafts for an Admin",
+				description:
+					"Public. A token is optional; an Admin's token adds the drafts.",
+				security: [{}, { bearerAuth: [] }],
+				requestParams: {
+					query: listContentQuerySchema.extend(pageQuerySchema.shape),
+				},
+				responses: {
+					"200": ok("One page of pages", paginatedSchema(webContentSchema)),
+					"401": fail("A token was sent but is invalid or expired"),
+					"422": fail("Invalid filter or page"),
+				},
+			},
+			post: {
+				tags: ["Web content"],
+				summary: "Create a page (Admin)",
+				security: loggedIn,
+				requestBody: json(createContentSchema),
+				responses: {
+					"201": ok("The new page", webContentSchema),
+					"409": fail("The slug is taken in this language"),
+					"422": fail("Some fields are invalid"),
+					...guarded,
+				},
+			},
+		},
+		"/content/{contentId}": {
+			get: {
+				tags: ["Web content"],
+				summary: "Get a page: public if published, Admin only if a draft",
+				security: [{}, { bearerAuth: [] }],
+				requestParams: { path: contentParams },
+				responses: {
+					"200": ok("The page", webContentSchema),
+					"401": fail("A token was sent but is invalid or expired"),
+					"404": fail("Page not found, or a draft and you are not an Admin"),
+				},
+			},
+			put: {
+				tags: ["Web content"],
+				summary: "Edit, publish or unpublish a page (Admin)",
+				security: loggedIn,
+				requestParams: { path: contentParams },
+				requestBody: json(updateContentSchema),
+				responses: {
+					"200": ok("The updated page", webContentSchema),
+					"404": fail("Page not found"),
+					"409": fail("The slug is taken in this language"),
+					"422": fail("Some fields are invalid"),
+					...guarded,
+				},
+			},
+			delete: {
+				tags: ["Web content"],
+				summary: "Delete a page (Admin)",
+				security: loggedIn,
+				requestParams: { path: contentParams },
+				responses: {
+					"204": { description: "Deleted" },
+					"404": fail("Page not found"),
 					...guarded,
 				},
 			},

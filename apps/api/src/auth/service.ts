@@ -15,13 +15,11 @@ import { AppError } from "../errors.ts";
 import { toUser } from "../users/present.ts";
 import { hashCode, newVerificationCode } from "./codes.ts";
 import { hashPassword, verifyPassword } from "./passwords.ts";
+import { assertCanSendToken } from "./rate-limit.ts";
 import { endSession, type Session, startSession } from "./sessions.ts";
 
 const CODE_LIFETIME_MS = 10 * 60 * 1000;
 const MAX_CODE_ATTEMPTS = 5;
-const RESEND_WAIT_MS = 60 * 1000;
-const MAX_CODES_PER_HOUR = 5;
-const HOUR_MS = 60 * 60 * 1000;
 
 export async function register(input: RegisterInput): Promise<User> {
 	const existing = await prisma.user.findUnique({
@@ -113,22 +111,7 @@ export async function sendVerificationCode(
 		return;
 	}
 
-	const lastHour = await prisma.verificationToken.findMany({
-		where: {
-			user_id: user.id,
-			token_type: "EMAIL_OTP",
-			created_at: { gt: new Date(Date.now() - HOUR_MS) },
-		},
-		orderBy: { created_at: "desc" },
-	});
-	const newest = lastHour[0];
-	const oldest = lastHour[lastHour.length - 1];
-	if (newest && Date.now() - newest.created_at.getTime() < RESEND_WAIT_MS) {
-		throw rateLimited(newest.created_at.getTime() + RESEND_WAIT_MS);
-	}
-	if (oldest && lastHour.length >= MAX_CODES_PER_HOUR) {
-		throw rateLimited(oldest.created_at.getTime() + HOUR_MS);
-	}
+	await assertCanSendToken(user.id, "EMAIL_OTP");
 
 	const code = newVerificationCode();
 	await prisma.$transaction([
@@ -156,13 +139,6 @@ function sendCodeEmail(to: string, code: string): Promise<void> {
 		to,
 		subject: "Your Amlak verification code",
 		text: `Your code is ${code}. It expires in 10 minutes.`,
-	});
-}
-
-function rateLimited(allowedAt: number): AppError {
-	const seconds = Math.ceil((allowedAt - Date.now()) / 1000);
-	return new AppError("RATE_LIMITED", "Too many codes requested", {
-		retry_after_seconds: seconds,
 	});
 }
 
@@ -275,7 +251,7 @@ export async function setUpAccount(input: AccountSetupInput): Promise<void> {
 	});
 }
 
-function invalidLink(): AppError {
+export function invalidLink(): AppError {
 	return new AppError("VALIDATION_ERROR", "Some fields are invalid", {
 		fields: { token: "The link is wrong, expired or already used" },
 	});
