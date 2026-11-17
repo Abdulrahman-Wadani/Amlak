@@ -10,6 +10,9 @@ import type {
   Place,
   PlaceWorker,
   SupportTicket,
+  Ticket,
+  TicketStatus,
+  UpdateAssetInput,
   Worker,
 } from "@amlak/shared"
 
@@ -46,6 +49,52 @@ function unwrapResponse<T>(response: unknown): T {
   }
 
   return response as T
+}
+
+export interface Pagination {
+  page: number
+  page_size: number
+  total: number
+  total_pages: number
+}
+
+/** A list endpoint's page: the rows and the pagination the API sends. */
+export interface PageOf<T> {
+  data: T[]
+  pagination: Pagination
+}
+
+/** GET a paginated list and keep its pagination (apiRequest drops it). */
+export async function apiPage<T>(path: string, token: string): Promise<PageOf<T>> {
+  const res = await authFetch(path, token)
+  const body = (await res.json().catch(() => null)) as PageOf<T> | null
+  if (!res.ok || !body || !Array.isArray(body.data) || !body.pagination) {
+    const message =
+      body && typeof body === "object" && "message" in body
+        ? String((body as { message: unknown }).message)
+        : `${path} failed with ${res.status}`
+    throw new Error(message)
+  }
+  return body
+}
+
+/**
+ * Every page of a list, for screens that sort by a field the API does not
+ * order by. Stops after `maxPages` pages of 100.
+ */
+export async function apiAllPages<T>(
+  path: string,
+  token: string,
+  maxPages = 20,
+): Promise<T[]> {
+  const join = path.includes("?") ? "&" : "?"
+  const rows: T[] = []
+  for (let page = 1; page <= maxPages; page++) {
+    const result = await apiPage<T>(`${path}${join}page=${page}&page_size=100`, token)
+    rows.push(...result.data)
+    if (page >= result.pagination.total_pages) break
+  }
+  return rows
 }
 
 export async function apiRequest<T>(
@@ -150,6 +199,59 @@ export async function createAsset(
   return asset
 }
 
+export function updateAsset(
+  token: string,
+  assetId: string,
+  input: UpdateAssetInput,
+): Promise<Asset> {
+  return apiRequest<Asset>(`/assets/${assetId}`, token, {
+    method: "PUT",
+    body: JSON.stringify(input),
+  })
+}
+
+export async function deleteAsset(token: string, assetId: string): Promise<void> {
+  const response = await authFetch(`/assets/${assetId}`, token, {
+    method: "DELETE",
+  })
+  if (!response.ok) {
+    const result = await response.json().catch(() => null)
+    throw new Error(result?.message ?? `Delete failed (${response.status})`)
+  }
+}
+
+// Tickets
+export interface TicketListQuery {
+  status?: TicketStatus
+  assignee_id?: string
+  place_id?: string
+  /** newest (the default): last created first. due_date: soonest due first, none last. */
+  sort?: "newest" | "due_date"
+}
+
+function ticketQuery(query: TicketListQuery): string {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    if (value) params.set(key, value)
+  }
+  return params.toString()
+}
+
+/** One page of tickets, in the order `query.sort` asks for. */
+export function listTickets(
+  token: string,
+  query: TicketListQuery,
+  page: number,
+  pageSize = 20,
+): Promise<PageOf<Ticket>> {
+  const params = ticketQuery(query)
+  return apiPage<Ticket>(
+    `/tickets?${params}${params ? "&" : ""}page=${page}&page_size=${pageSize}`,
+    token,
+  )
+}
+
+
 // Create place
 export class PlaceNameTakenError extends Error {}
 
@@ -237,6 +339,19 @@ export async function getBookingsForPlace(
 
     return data
   })
+}
+
+/** Every booking of a place that overlaps the window (pages of 100). */
+export function listAllBookingsForPlace(
+  token: string,
+  placeId: string,
+  window: BookingWindow,
+): Promise<Booking[]> {
+  const query = new URLSearchParams({ from: window.from, to: window.to })
+  return apiAllPages<Booking>(
+    `/places/${placeId}/bookings?${query.toString()}`,
+    token,
+  )
 }
 
 export async function createBooking(
@@ -1162,6 +1277,27 @@ export async function getContents(
   }
 
   return result
+}
+
+/**
+ * A published page by language and slug, for visitors who are not signed
+ * in, so no token. Resolves with null when there is no such page.
+ */
+export async function getPublicContent(
+  language: ContentLanguage,
+  slug: string,
+): Promise<WebContent | null> {
+  const query = new URLSearchParams({ language, slug })
+  const response = await fetch(`/api/v1/content?${query.toString()}`, {
+    credentials: "same-origin",
+  })
+  const result = (await response.json().catch(() => null)) as
+    | ContentListResponse
+    | null
+  if (!response.ok || !result || !Array.isArray(result.data)) {
+    throw new Error(`Failed to get content (${response.status})`)
+  }
+  return result.data.find((page) => page.slug === slug) ?? null
 }
 
 export async function getContentById(

@@ -2318,3 +2318,158 @@ msgstr "تعذر إلغاء الجدولة."
 #: src/routes/_authenticated/support/$support_id.tsx:528
 msgid "Support team"
 msgstr "فريق الدعم"
+
+#: src/routes/_authenticated/bookings.tsx:255
+msgid "{0} guests"
+msgstr "{0} ضيوف"
+
+#: src/routes/_authenticated/bookings.tsx:137
+msgid "All places"
+msgstr "كل العقارات"
+
+#: src/routes/_authenticated/tickets.tsx:67
+msgid "Approved tickets assigned to you, the soonest due first."
+msgstr "التذاكر المعتمدة المسندة إليك، الأقرب موعدًا أولًا."
+
+#: src/routes/_authenticated/bookings.tsx:169
+msgid "Check-ins today"
+msgstr "تسجيلات الدخول اليوم"
+
+#: src/routes/_authenticated/bookings.tsx:175
+msgid "Check-outs today"
+msgstr "تسجيلات الخروج اليوم"
+
+#: src/components/asset-manage.tsx:125
+msgid "Could not delete the asset."
+msgstr "تعذر حذف الأصل."
+
+#: src/components/asset-manage.tsx:155
+#: src/components/asset-manage.tsx:238
+msgid "Delete asset"
+msgstr "حذف الأصل"
+
+#: src/components/asset-manage.tsx:224
+msgid "Delete this asset?"
+msgstr "حذف هذا الأصل؟"
+
+#: src/components/asset-manage.tsx:238
+msgid "Deleting…"
+msgstr "جارٍ الحذف…"
+
+#: src/routes/_authenticated/tickets.tsx:228
+msgid "Due {0}"
+msgstr "الاستحقاق {0}"
+
+#: src/components/asset-manage.tsx:143
+#: src/components/asset-manage.tsx:162
+msgid "Edit asset"
+msgstr "تعديل الأصل"
+
+#: src/components/place-shared.tsx:224
+msgid "High"
+msgstr "عالية"
+
+#: src/components/asset-manage.tsx:228
+msgid "Its maintenance schedules stop, and its past tickets stay in the records. An asset with open tickets cannot be deleted."
+msgstr "تتوقف جداول صيانته، وتبقى تذاكره السابقة في السجلات. لا يمكن حذف أصل عليه تذاكر مفتوحة."
+
+#: src/components/place-shared.tsx:235
+msgid "Low"
+msgstr "منخفضة"
+
+#: src/components/place-shared.tsx:235
+msgid "Medium"
+msgstr "متوسطة"
+
+#: src/routes/_authenticated/home.tsx:240
+#: src/routes/_authenticated/tickets.tsx:66
+msgid "My tasks"
+msgstr "مهامي"
+
+#: src/routes/_authenticated/tickets.tsx:201
+msgid "New tickets will show here."
+msgstr "ستظهر التذاكر الجديدة هنا."
+
+#: src/routes/_authenticated/bookings.tsx:170
+msgid "No guests arrive today."
+msgstr "لا يصل ضيوف اليوم."
+
+#: src/routes/_authenticated/bookings.tsx:176
+msgid "No guests leave today."
+msgstr "لا يغادر ضيوف اليوم."
+
+#: src/routes/_authenticated/bookings.tsx:182
+msgid "No stays start in the next {UPCOMING_DAYS} days."
+msgstr "لا توجد إقامات تبدأ خلال الأيام الـ {UPCOMING_DAYS} القادمة."
+
+#: src/routes/_authenticated/tickets.tsx:110
+msgid "No tickets are waiting for review."
+msgstr "لا توجد تذاكر بانتظار المراجعة."
+
+#: src/components/place-shared.tsx:248
+msgid "Overdue"
+msgstr "متأخرة"
+
+#: src/components/pager.tsx:35
+msgid "Page {page} of {totalPages}"
+msgstr "صفحة {page} من {totalPages}"
+
+#: src/routes/p/$lang/$slug.tsx:68
+msgid "Page not found"
+msgstr "الصفحة غير موجودة"
+
+#: src/components/pager.tsx:20
+msgid "Pages"
+msgstr "الصفحات"
+
+#: src/routes/_authenticated/tickets.tsx:230
+msgid "Reported {0}"
+msgstr "أُبلغ عنها {0}"
+
+#: src/routes/_authenticated/tickets.tsx:107
+msgid "Reported damage that needs your approval, newest first."
+msgstr "بلاغات أعطال تحتاج موافقتك، الأحدث أولًا."
+
+#: src/components/asset-manage.tsx:124
+msgid "This asset has open maintenance tickets. Complete or reject them first."
+msgstr "على هذا الأصل تذاكر صيانة مفتوحة. أكملها أو ارفضها أولًا."
+
+#: src/routes/p/$lang/$slug.tsx:71
+msgid "This page does not exist or is not published."
+msgstr "هذه الصفحة غير موجودة أو غير منشورة."
+
+#: src/routes/_authenticated/bookings.tsx:120
+msgid "Today's arrivals and departures, and stays starting in the next {UPCOMING_DAYS} days."
+msgstr "وصول ومغادرة اليوم، والإقامات التي تبدأ خلال الأيام الـ {UPCOMING_DAYS} القادمة."
+
+#: src/routes/_authenticated/bookings.tsx:181
+msgid "Upcoming"
+msgstr "القادمة"
+
+#: src/components/place-shared.tsx:224
+msgid "Urgent"
+msgstr "عاجلة"
+
+#: src/routes/_authenticated/tickets.tsx:106
+msgid "Waiting for review"
+msgstr "بانتظار المراجعة"
+
+#: src/routes/_authenticated/bookings.tsx:155
+msgid "We could not load the bookings for:"
+msgstr "تعذر تحميل الحجوزات لـ:"
+
+#: src/routes/_authenticated/tickets.tsx:184
+msgid "We could not load the tickets."
+msgstr "تعذر تحميل التذاكر."
+
+#: src/routes/p/$lang/$slug.tsx:58
+msgid "We could not load this page. Try again later."
+msgstr "تعذر تحميل هذه الصفحة. حاول لاحقًا."
+
+#: src/routes/_authenticated/tickets.tsx:70
+msgid "You have no open tasks."
+msgstr "لا توجد لديك مهام مفتوحة."
+
+#: src/routes/_authenticated/bookings.tsx:162
+msgid "You have no places yet."
+msgstr "لا توجد لديك عقارات بعد."

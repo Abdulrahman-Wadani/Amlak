@@ -237,7 +237,7 @@ function HomePage() {
               "height: 44px; padding: 0 16px; background: #fff; color: var(--foreground); border: 1px solid #fff; font-size: 15px; font-weight: 600"
             )}
           >
-            <Trans>Review tickets</Trans>
+            {isWorker ? <Trans>My tasks</Trans> : <Trans>Review tickets</Trans>}
           </Link>
 
           <Link

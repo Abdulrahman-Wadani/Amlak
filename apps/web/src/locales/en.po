@@ -1916,3 +1916,158 @@ msgstr "Could not cancel the schedule."
 #: src/routes/_authenticated/support/$support_id.tsx:528
 msgid "Support team"
 msgstr "Support team"
+
+#: src/routes/_authenticated/bookings.tsx:255
+msgid "{0} guests"
+msgstr "{0} guests"
+
+#: src/routes/_authenticated/bookings.tsx:137
+msgid "All places"
+msgstr "All places"
+
+#: src/routes/_authenticated/tickets.tsx:67
+msgid "Approved tickets assigned to you, the soonest due first."
+msgstr "Approved tickets assigned to you, the soonest due first."
+
+#: src/routes/_authenticated/bookings.tsx:169
+msgid "Check-ins today"
+msgstr "Check-ins today"
+
+#: src/routes/_authenticated/bookings.tsx:175
+msgid "Check-outs today"
+msgstr "Check-outs today"
+
+#: src/components/asset-manage.tsx:125
+msgid "Could not delete the asset."
+msgstr "Could not delete the asset."
+
+#: src/components/asset-manage.tsx:155
+#: src/components/asset-manage.tsx:238
+msgid "Delete asset"
+msgstr "Delete asset"
+
+#: src/components/asset-manage.tsx:224
+msgid "Delete this asset?"
+msgstr "Delete this asset?"
+
+#: src/components/asset-manage.tsx:238
+msgid "Deleting…"
+msgstr "Deleting…"
+
+#: src/routes/_authenticated/tickets.tsx:228
+msgid "Due {0}"
+msgstr "Due {0}"
+
+#: src/components/asset-manage.tsx:143
+#: src/components/asset-manage.tsx:162
+msgid "Edit asset"
+msgstr "Edit asset"
+
+#: src/components/place-shared.tsx:224
+msgid "High"
+msgstr "High"
+
+#: src/components/asset-manage.tsx:228
+msgid "Its maintenance schedules stop, and its past tickets stay in the records. An asset with open tickets cannot be deleted."
+msgstr "Its maintenance schedules stop, and its past tickets stay in the records. An asset with open tickets cannot be deleted."
+
+#: src/components/place-shared.tsx:235
+msgid "Low"
+msgstr "Low"
+
+#: src/components/place-shared.tsx:235
+msgid "Medium"
+msgstr "Medium"
+
+#: src/routes/_authenticated/home.tsx:240
+#: src/routes/_authenticated/tickets.tsx:66
+msgid "My tasks"
+msgstr "My tasks"
+
+#: src/routes/_authenticated/tickets.tsx:201
+msgid "New tickets will show here."
+msgstr "New tickets will show here."
+
+#: src/routes/_authenticated/bookings.tsx:170
+msgid "No guests arrive today."
+msgstr "No guests arrive today."
+
+#: src/routes/_authenticated/bookings.tsx:176
+msgid "No guests leave today."
+msgstr "No guests leave today."
+
+#: src/routes/_authenticated/bookings.tsx:182
+msgid "No stays start in the next {UPCOMING_DAYS} days."
+msgstr "No stays start in the next {UPCOMING_DAYS} days."
+
+#: src/routes/_authenticated/tickets.tsx:110
+msgid "No tickets are waiting for review."
+msgstr "No tickets are waiting for review."
+
+#: src/components/place-shared.tsx:248
+msgid "Overdue"
+msgstr "Overdue"
+
+#: src/components/pager.tsx:35
+msgid "Page {page} of {totalPages}"
+msgstr "Page {page} of {totalPages}"
+
+#: src/routes/p/$lang/$slug.tsx:68
+msgid "Page not found"
+msgstr "Page not found"
+
+#: src/components/pager.tsx:20
+msgid "Pages"
+msgstr "Pages"
+
+#: src/routes/_authenticated/tickets.tsx:230
+msgid "Reported {0}"
+msgstr "Reported {0}"
+
+#: src/routes/_authenticated/tickets.tsx:107
+msgid "Reported damage that needs your approval, newest first."
+msgstr "Reported damage that needs your approval, newest first."
+
+#: src/components/asset-manage.tsx:124
+msgid "This asset has open maintenance tickets. Complete or reject them first."
+msgstr "This asset has open maintenance tickets. Complete or reject them first."
+
+#: src/routes/p/$lang/$slug.tsx:71
+msgid "This page does not exist or is not published."
+msgstr "This page does not exist or is not published."
+
+#: src/routes/_authenticated/bookings.tsx:120
+msgid "Today's arrivals and departures, and stays starting in the next {UPCOMING_DAYS} days."
+msgstr "Today's arrivals and departures, and stays starting in the next {UPCOMING_DAYS} days."
+
+#: src/routes/_authenticated/bookings.tsx:181
+msgid "Upcoming"
+msgstr "Upcoming"
+
+#: src/components/place-shared.tsx:224
+msgid "Urgent"
+msgstr "Urgent"
+
+#: src/routes/_authenticated/tickets.tsx:106
+msgid "Waiting for review"
+msgstr "Waiting for review"
+
+#: src/routes/_authenticated/bookings.tsx:155
+msgid "We could not load the bookings for:"
+msgstr "We could not load the bookings for:"
+
+#: src/routes/_authenticated/tickets.tsx:184
+msgid "We could not load the tickets."
+msgstr "We could not load the tickets."
+
+#: src/routes/p/$lang/$slug.tsx:58
+msgid "We could not load this page. Try again later."
+msgstr "We could not load this page. Try again later."
+
+#: src/routes/_authenticated/tickets.tsx:70
+msgid "You have no open tasks."
+msgstr "You have no open tasks."
+
+#: src/routes/_authenticated/bookings.tsx:162
+msgid "You have no places yet."
+msgstr "You have no places yet."

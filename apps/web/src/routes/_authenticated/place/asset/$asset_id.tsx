@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import {
   Link,
   createFileRoute,
+  useNavigate,
   useParams,
 } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
@@ -50,6 +51,8 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import Form from "@/components/form"
+import { AssetManage } from "@/components/asset-manage"
+import { todayIn } from "@/lib/dates"
 
 
 export const Route = createFileRoute("/_authenticated/place/asset/$asset_id")({
@@ -62,7 +65,8 @@ function AssetDetailPage() {
   })
 
   const { i18n } = useLingui()
-  const { accessToken } = useAuth()
+  const { accessToken, user } = useAuth()
+  const navigate = useNavigate()
 
   const [asset, setAsset] = useState<Asset | null>(null)
   const [place, setPlace] = useState<Place | null>(null)
@@ -236,6 +240,22 @@ const placeId = referrer
                 <Skeleton style={S("width: 220px; height: 28px")} />
               ))}
           </h1>
+
+          {asset && accessToken && user?.role === "MANAGER" && (
+            <AssetManage
+              key={asset.updated_at}
+              token={accessToken}
+              asset={asset}
+              today={todayIn(place?.timezone ?? "Asia/Riyadh")}
+              onUpdated={setAsset}
+              onDeleted={() =>
+                void navigate({
+                  to: "/place/$place_id",
+                  params: { place_id: asset.place_id },
+                })
+              }
+            />
+          )}
         </div>
       </div>
 

@@ -38,6 +38,7 @@ import { Route as AuthenticatedTicketTicket_idRouteImport } from './routes/_auth
 import { Route as AuthenticatedTicketNewRouteImport } from './routes/_authenticated/ticket/new'
 import { Route as AuthenticatedWorkerWorker_idRouteImport } from './routes/_authenticated/worker/$worker_id'
 import { Route as AuthenticatedWorkerNewRouteImport } from './routes/_authenticated/worker/new'
+import { Route as PLangSlugRouteImport } from './routes/p/$lang/$slug'
 import { Route as AuthenticatedPlaceAssetAsset_idRouteImport } from './routes/_authenticated/place/asset/$asset_id'
 import { Route as AuthenticatedPlaceAssetNewRouteImport } from './routes/_authenticated/place/asset/new'
 import { Route as AuthenticatedPlaceAssetMaintenanceNewRouteImport } from './routes/_authenticated/place/asset/maintenance/new'
@@ -195,6 +196,11 @@ const AuthenticatedWorkerNewRoute = AuthenticatedWorkerNewRouteImport.update({
   path: '/worker/new',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const PLangSlugRoute = PLangSlugRouteImport.update({
+  id: '/p/$lang/$slug',
+  path: '/p/$lang/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedPlaceAssetAsset_idRoute =
   AuthenticatedPlaceAssetAsset_idRouteImport.update({
     id: '/place/asset/$asset_id',
@@ -240,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/ticket/new': typeof AuthenticatedTicketNewRoute
   '/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
   '/worker/new': typeof AuthenticatedWorkerNewRoute
+  '/p/$lang/$slug': typeof PLangSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/content/': typeof AuthenticatedContentIndexRoute
   '/support/': typeof AuthenticatedSupportIndexRoute
@@ -273,6 +280,7 @@ export interface FileRoutesByTo {
   '/ticket/new': typeof AuthenticatedTicketNewRoute
   '/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
   '/worker/new': typeof AuthenticatedWorkerNewRoute
+  '/p/$lang/$slug': typeof PLangSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/content': typeof AuthenticatedContentIndexRoute
   '/support': typeof AuthenticatedSupportIndexRoute
@@ -308,6 +316,7 @@ export interface FileRoutesById {
   '/_authenticated/ticket/new': typeof AuthenticatedTicketNewRoute
   '/_authenticated/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
   '/_authenticated/worker/new': typeof AuthenticatedWorkerNewRoute
+  '/p/$lang/$slug': typeof PLangSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/content/': typeof AuthenticatedContentIndexRoute
   '/_authenticated/support/': typeof AuthenticatedSupportIndexRoute
@@ -343,6 +352,7 @@ export interface FileRouteTypes {
     | '/ticket/new'
     | '/worker/$worker_id'
     | '/worker/new'
+    | '/p/$lang/$slug'
     | '/admin/'
     | '/content/'
     | '/support/'
@@ -376,6 +386,7 @@ export interface FileRouteTypes {
     | '/ticket/new'
     | '/worker/$worker_id'
     | '/worker/new'
+    | '/p/$lang/$slug'
     | '/admin'
     | '/content'
     | '/support'
@@ -410,6 +421,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ticket/new'
     | '/_authenticated/worker/$worker_id'
     | '/_authenticated/worker/new'
+    | '/p/$lang/$slug'
     | '/_authenticated/admin/'
     | '/_authenticated/content/'
     | '/_authenticated/support/'
@@ -426,6 +438,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
+  PLangSlugRoute: typeof PLangSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -633,6 +646,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWorkerNewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/p/$lang/$slug': {
+      id: '/p/$lang/$slug'
+      path: '/p/$lang/$slug'
+      fullPath: '/p/$lang/$slug'
+      preLoaderRoute: typeof PLangSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/place/asset/$asset_id': {
       id: '/_authenticated/place/asset/$asset_id'
       path: '/place/asset/$asset_id'
@@ -726,6 +746,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
+  PLangSlugRoute: PLangSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
