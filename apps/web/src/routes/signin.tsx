@@ -94,7 +94,11 @@ function SignIn() {
                   <Trans>Password</Trans>
                 </Label>
                 <span className="text-[13px] text-muted-foreground underline">
+                  <Link
+                  to="/forgot-password"
+                  >
                   <Trans>Forgot password?</Trans>
+                  </Link>
                 </span>
               </div>
               <div className="relative">
