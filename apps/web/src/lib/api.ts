@@ -225,6 +225,8 @@ export interface TicketListQuery {
   status?: TicketStatus
   assignee_id?: string
   place_id?: string
+  /** newest (the default): last created first. due_date: soonest due first, none last. */
+  sort?: "newest" | "due_date"
 }
 
 function ticketQuery(query: TicketListQuery): string {
@@ -235,7 +237,7 @@ function ticketQuery(query: TicketListQuery): string {
   return params.toString()
 }
 
-/** One page of tickets, newest first (the API's order). */
+/** One page of tickets, in the order `query.sort` asks for. */
 export function listTickets(
   token: string,
   query: TicketListQuery,
@@ -249,13 +251,6 @@ export function listTickets(
   )
 }
 
-/** Every ticket that matches, to sort by a field the API does not order by. */
-export function listAllTickets(
-  token: string,
-  query: TicketListQuery,
-): Promise<Ticket[]> {
-  return apiAllPages<Ticket>(`/tickets?${ticketQuery(query)}`, token)
-}
 
 // Create place
 export class PlaceNameTakenError extends Error {}

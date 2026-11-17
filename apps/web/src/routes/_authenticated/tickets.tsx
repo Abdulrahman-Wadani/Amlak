@@ -5,9 +5,8 @@ import { useLingui } from "@lingui/react"
 import { CircleAlert } from "lucide-react"
 import type { Ticket } from "@amlak/shared"
 import { storedUser, useAuth } from "@/lib/auth"
-import { getPlaces, listAllTickets, listTickets } from "@/lib/api"
+import { getPlaces, listTickets } from "@/lib/api"
 import { S } from "@/lib/dom-style"
-import { byDueDate } from "@/lib/tickets"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Empty,
@@ -36,36 +35,41 @@ function TicketsPage() {
   return user?.role === "WORKER" ? <MyTasks /> : <WaitingForReview />
 }
 
-/**
- * The Worker's APPROVED tickets. The API orders tickets by creation date,
- * so all of them are loaded, sorted by due date and paged here.
- */
+/** The Worker's APPROVED tickets, soonest due first, paged by the API. */
 function MyTasks() {
   const { accessToken, user } = useAuth()
   const [tickets, setTickets] = useState<Ticket[] | null>(null)
   const [error, setError] = useState(false)
   const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
   const placeNames = usePlaceNames()
 
   useEffect(() => {
     if (!accessToken || !user) return
     let alive = true
-    listAllTickets(accessToken, { assignee_id: user.id, status: "APPROVED" })
-      .then((list) => alive && setTickets([...list].sort(byDueDate)))
+    setTickets(null)
+    listTickets(
+      accessToken,
+      { assignee_id: user.id, status: "APPROVED", sort: "due_date" },
+      page,
+      PAGE_SIZE,
+    )
+      .then((result) => {
+        if (!alive) return
+        setTickets(result.data)
+        setTotalPages(Math.max(1, result.pagination.total_pages))
+      })
       .catch(() => alive && setError(true))
     return () => {
       alive = false
     }
-  }, [accessToken, user])
-
-  const totalPages = Math.max(1, Math.ceil((tickets?.length ?? 0) / PAGE_SIZE))
-  const visible = tickets?.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE) ?? null
+  }, [accessToken, user, page])
 
   return (
     <TicketsLayout
       title={<Trans>My tasks</Trans>}
       intro={<Trans>Approved tickets assigned to you, the soonest due first.</Trans>}
-      tickets={visible}
+      tickets={tickets}
       error={error}
       empty={<Trans>You have no open tasks.</Trans>}
       placeNames={placeNames}
