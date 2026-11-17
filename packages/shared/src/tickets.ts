@@ -88,6 +88,10 @@ export const listTicketsQuerySchema = z.object({
 		.stringbool()
 		.optional()
 		.meta({ description: "true: APPROVED tickets past their due_date" }),
+	sort: z.enum(["newest", "due_date"]).default("newest").meta({
+		description:
+			"newest: last created first. due_date: soonest due first, tickets without a due date last",
+	}),
 });
 export type ListTicketsQuery = z.infer<typeof listTicketsQuerySchema>;
 
