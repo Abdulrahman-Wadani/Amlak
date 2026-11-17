@@ -11,6 +11,8 @@ import {
 } from "lucide-react"
 
 import { useAuth } from "@/lib/auth"
+import { t } from "@lingui/core/macro"
+import { Trans } from "@lingui/react/macro"
 import { getUsers } from "@/lib/api"
 import { S } from "@/lib/dom-style"
 
@@ -62,12 +64,13 @@ interface Users {
   assigned_places?: AssignedPlace[]
 }
 
+// Labels are components so they translate at render, not at import.
 const TABS = [
-  { key: "ALL", label: "الكل" },
-  { key: "ACTIVE", label: "نشط" },
-  { key: "INVITED", label: "الدعوات" },
-  { key: "PENDING_VERIFICATION", label: "بانتظار التحقق" },
-  { key: "DEACTIVATED", label: "غير نشط" },
+  { key: "ALL", label: <Trans>All</Trans> },
+  { key: "ACTIVE", label: <Trans>Active</Trans> },
+  { key: "INVITED", label: <Trans>Invited</Trans> },
+  { key: "PENDING_VERIFICATION", label: <Trans>Pending verification</Trans> },
+  { key: "DEACTIVATED", label: <Trans>Deactivated</Trans> },
 ] as const
 
 type TabKey = (typeof TABS)[number]["key"]
@@ -125,7 +128,6 @@ function UsersPage() {
 
   return (
     <div
-      dir="rtl"
       style={S(
         "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px",
       )}
@@ -137,7 +139,7 @@ function UsersPage() {
         )}
       >
         <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-          المستخدمون
+          <Trans>Users</Trans>
         </h1>
 
       </div>
@@ -159,7 +161,7 @@ function UsersPage() {
               "position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)",
             )}
           >
-            بحث
+            <Trans>Search</Trans>
           </Label>
 
           <Search
@@ -174,7 +176,7 @@ function UsersPage() {
             type="search"
             className="am-input"
             style={S("padding-inline-start: 44px")}
-            placeholder="ابحث بالاسم أو البريد الإلكتروني أو الجوال او المعرف"
+            placeholder={t`Search by name, email, phone or ID`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -182,7 +184,7 @@ function UsersPage() {
 
         <div
           role="group"
-          aria-label="تصفية حسب الحالة"
+          aria-label={t`Filter by status`}
           style={S("display: flex; gap: 8px; flex-wrap: wrap")}
         >
           {TABS.map((item) => (
@@ -247,7 +249,7 @@ function UsersPage() {
             aria-hidden="true"
             className="size-3.5 shrink-0"
           />
-          تعذر تحميل بيانات المستخدمين.
+          <Trans>We could not load the users.</Trans>
         </p>
       )}
 
@@ -257,14 +259,14 @@ function UsersPage() {
           <EmptyHeader>
             <EmptyTitle>
               {query || tab !== "ALL"
-                ? "لا يوجد مستخدمون مطابقون"
-                : "لا يوجد مستخدمون حتى الآن"}
+                ? t`No users match`
+                : t`No users yet`}
             </EmptyTitle>
 
             <EmptyDescription>
               {query || tab !== "ALL"
-                ? "جرّب تغيير كلمات البحث أو الفلتر المحدد."
-                : "لا يوجد مستخدمون لعرضهم حالياً."}
+                ? t`Try other search words or another filter.`
+                : t`There are no users to show.`}
             </EmptyDescription>
 
             {query || tab !== "ALL" ? (
@@ -276,7 +278,7 @@ function UsersPage() {
                   setTab("ALL")
                 }}
               >
-                مسح الفلاتر
+                <Trans>Clear filters</Trans>
               </Button>
             ) : null}
           </EmptyHeader>
@@ -324,12 +326,11 @@ function UsersPage() {
                   </div>
 
                   <div
-                    dir="ltr"
                     style={S(
-                      "margin-top: 3px; text-align: right; font-size: 11px; color: var(--muted-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
+                      "margin-top: 3px; font-size: 11px; color: var(--muted-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
                     )}
                   >
-                    {user.email}
+                    <bdi dir="ltr">{user.email}</bdi>
                   </div>
                 </div>
               </div>
@@ -364,7 +365,7 @@ function UsersPage() {
                 >
                   <Phone size={12} />
                   <span dir="ltr">
-                    {user.phone || "لا يوجد رقم"}
+                    {user.phone || t`No phone number`}
                   </span>
                 </span>
 
@@ -374,7 +375,7 @@ function UsersPage() {
                   )}
                 >
                   <MapPin size={12} />
-                  {user.assigned_places?.length ?? 0} أماكن
+                  <Trans>{user.assigned_places?.length ?? 0} places</Trans>
                 </span>
               </div>
 
@@ -415,7 +416,7 @@ function UsersPage() {
                   "margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 650; color: var(--muted-foreground)",
                 )}
               >
-                عرض التفاصيل
+                <Trans>View details</Trans>
                 <span aria-hidden="true">←</span>
               </div>
             </Link>

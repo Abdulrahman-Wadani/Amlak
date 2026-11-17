@@ -4,7 +4,7 @@ import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
 import { signUpInput } from "@/lib/validators"
 import { useAuth } from "@/lib/auth"
-import { useLanguage } from "@/lib/i18n"
+import { LANGUAGE_NAMES, useLanguage } from "@/lib/i18n"
 import { AuthBrandPanel } from "@/components/auth-brand-panel"
 import { EmailVerifyPanel } from "@/components/email-verify-panel"
 import { Alert, AlertTitle } from "@/components/ui/alert"
@@ -235,7 +235,7 @@ function SignUp() {
                           : "h-11 border border-input bg-card text-muted-foreground hover:bg-secondary"
                       }
                     >
-                      العربية
+                      {LANGUAGE_NAMES.ar}
                     </button>
                     <button
                       type="button"
@@ -248,7 +248,7 @@ function SignUp() {
                           : "-ms-px h-11 border border-input bg-card text-muted-foreground hover:bg-secondary"
                       }
                     >
-                      English
+                      {LANGUAGE_NAMES.en}
                     </button>
                   </div>
                 </div>

@@ -4,6 +4,7 @@
     import { S } from "@/lib/dom-style"
     import { Button } from "@/components/ui/button"
     import { Input } from "@/components/ui/input"
+    import { Textarea } from "@/components/ui/textarea"
     import { Label } from "@/components/ui/label"
     import {
     Select,
@@ -90,7 +91,7 @@ const convertValues = (values: Record<string, string>) => {
         return (
           <div key={field.name} className="flex flex-col gap-2">
             <Label htmlFor={field.name} className="text-sm font-semibold">
-              <Trans>{field.label}</Trans>
+              {field.label}
             </Label>
 
             {field.type === "select" ? (
@@ -115,6 +116,20 @@ const convertValues = (values: Record<string, string>) => {
                   ))}
                 </SelectContent>
               </Select>
+            ) : field.type === "textarea" ? (
+              <Textarea
+                id={field.name}
+                name={field.name}
+                rows={10}
+                required={field.required}
+                value={values[field.name] as string || ""}
+                onChange={(e) =>
+                  setValues((prev) => ({
+                    ...prev,
+                    [field.name]: e.target.value,
+                  }))
+                }
+              />
             ) : field.type === "file" ? (
               <Input
                 id={field.name}

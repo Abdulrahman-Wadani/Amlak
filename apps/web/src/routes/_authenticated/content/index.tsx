@@ -35,6 +35,8 @@ import {
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { Trans } from "@lingui/react/macro"
+import { useLingui } from "@lingui/react"
+import { t } from "@lingui/core/macro"
 
 
 import "@/styles/motion.css"
@@ -49,6 +51,7 @@ const PAGE_SIZE = 12
 
 function ContentPage() {
   const { accessToken } = useAuth()
+  const { i18n } = useLingui()
 
   const [contents, setContents] = useState<WebContent[] | null>(null)
   const [pagination, setPagination] = useState<ContentPagination | null>(null)
@@ -83,7 +86,7 @@ function ContentPage() {
         setError(
           err instanceof Error
             ? err.message
-            : "تعذر تحميل صفحات المحتوى.",
+            : t`We could not load the content pages.`,
         )
         setContents([])
       })
@@ -130,7 +133,6 @@ function ContentPage() {
 
   return (
     <div
-      dir="rtl"
       style={S(
         "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px",
       )}
@@ -143,14 +145,14 @@ function ContentPage() {
       >
         <div>
           <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-            إدارة المحتوى
+            <Trans>Content</Trans>
           </h1>
           <p
             style={S(
               "margin: 7px 0 0; color: var(--muted-foreground); font-size: 13px",
             )}
           >
-            إدارة صفحات الموقع ومحتواها وحالة نشرها.
+            <Trans>Manage the site's pages, their text and whether they are published.</Trans>
           </p>
         </div>
 
@@ -182,7 +184,7 @@ function ContentPage() {
               "position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)",
             )}
           >
-            البحث في المحتوى
+            <Trans>Search content</Trans>
           </Label>
 
           <Search
@@ -197,7 +199,7 @@ function ContentPage() {
             type="search"
             className="am-input"
             style={S("padding-inline-start: 42px")}
-            placeholder="ابحث بعنوان الصفحة أو الرابط..."
+            placeholder={t`Search by title or slug…`}
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
@@ -205,14 +207,14 @@ function ContentPage() {
 
         <div
           role="group"
-          aria-label="تصفية حسب اللغة"
+          aria-label={t`Filter by language`}
           style={S("display: flex; gap: 7px; flex-wrap: wrap")}
         >
           {(
             [
-              { key: "ALL", label: "كل اللغات" },
-              { key: "ar", label: "العربية" },
-              { key: "en", label: "الإنجليزية" },
+              { key: "ALL", label: t`All languages` },
+              { key: "ar", label: t`Arabic` },
+              { key: "en", label: t`English` },
             ] as const
           ).map((item) => (
             <button
@@ -231,14 +233,14 @@ function ContentPage() {
       {/* Status tabs */}
       <div
         role="group"
-        aria-label="تصفية حسب حالة النشر"
+        aria-label={t`Filter by publishing status`}
         style={S("display: flex; gap: 8px; flex-wrap: wrap")}
       >
         {(
           [
-            { key: "ALL", label: "الكل" },
-            { key: "PUBLISHED", label: "منشور" },
-            { key: "DRAFT", label: "مسودات" },
+            { key: "ALL", label: t`All` },
+            { key: "PUBLISHED", label: t`Published` },
+            { key: "DRAFT", label: t`Drafts` },
           ] as const
         ).map((item) => (
           <button
@@ -291,13 +293,13 @@ function ContentPage() {
           <EmptyHeader>
             <EmptyTitle>
               {query || tab !== "ALL" || language !== "ALL"
-                ? "لا توجد صفحات مطابقة"
-                : "لا توجد صفحات محتوى حتى الآن"}
+                ? t`No pages match`
+                : t`No content pages yet`}
             </EmptyTitle>
             <EmptyDescription>
               {query || tab !== "ALL" || language !== "ALL"
-                ? "جرّب تغيير البحث أو الفلاتر المحددة."
-                : "ابدأ بإنشاء أول صفحة محتوى."}
+                ? t`Try another search or other filters.`
+                : t`Create your first content page.`}
             </EmptyDescription>
 
             {query || tab !== "ALL" || language !== "ALL" ? (
@@ -310,12 +312,12 @@ function ContentPage() {
                   changeLanguage("ALL")
                 }}
               >
-                مسح الفلاتر
+                <Trans>Clear filters</Trans>
               </Button>
             ) : (
               <Link to="/content/new" className="am-btn">
                 <Plus size={15} />
-                إنشاء صفحة
+                <Trans>New page</Trans>
               </Link>
             )}
           </EmptyHeader>
@@ -357,12 +359,11 @@ function ContentPage() {
                     {content.title}
                   </div>
                   <div
-                    dir="ltr"
                     style={S(
-                      "margin-top: 5px; text-align: right; font-size: 11px; color: var(--muted-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
+                      "margin-top: 5px; font-size: 11px; color: var(--muted-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
                     )}
                   >
-                    /{content.slug}
+                    <bdi dir="ltr">/{content.slug}</bdi>
                   </div>
                 </div>
               </div>
@@ -378,7 +379,7 @@ function ContentPage() {
                   )}
                 >
                   <Globe size={12} />
-                  {content.language === "ar" ? "العربية" : "English"}
+                  {content.language === "ar" ? t`Arabic` : t`English`}
                 </span>
 
                 <span
@@ -387,7 +388,7 @@ function ContentPage() {
                   )}
                 >
                   {content.is_published ? <Eye size={12} /> : <EyeOff size={12} />}
-                  {content.is_published ? "منشور" : "مسودة"}
+                  {content.is_published ? t`Published` : t`Draft`}
                 </span>
               </div>
 
@@ -397,10 +398,10 @@ function ContentPage() {
                 )}
               >
                 <span>
-                  آخر تحديث:{" "}
-                  {new Date(content.updated_at).toLocaleDateString("ar-SA")}
+                  <Trans>Last updated:</Trans>{" "}
+                  {new Date(content.updated_at).toLocaleDateString(i18n.locale)}
                 </span>
-                <span>عرض التفاصيل ←</span>
+                <span><Trans>View details</Trans></span>
               </div>
             </Link>
           ))}
@@ -415,8 +416,9 @@ function ContentPage() {
           )}
         >
           <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-            صفحة {pagination.page} من {pagination.total_pages} — إجمالي{" "}
-            {pagination.total} صفحة
+            <Trans>
+              Page {pagination.page} of {pagination.total_pages} — {pagination.total} pages in total
+            </Trans>
           </span>
 
           <div style={S("display: flex; gap: 8px; align-items: center")}>
@@ -427,8 +429,8 @@ function ContentPage() {
               disabled={page <= 1}
               onClick={() => setPage((current) => current - 1)}
             >
-              <ChevronRight size={15} />
-              السابق
+              <ChevronLeft size={15} className="rtl:rotate-180" />
+              <Trans>Previous</Trans>
             </Button>
 
             <Button
@@ -438,8 +440,8 @@ function ContentPage() {
               disabled={page >= pagination.total_pages}
               onClick={() => setPage((current) => current + 1)}
             >
-              التالي
-              <ChevronLeft size={15} />
+              <Trans>Next</Trans>
+              <ChevronRight size={15} className="rtl:rotate-180" />
             </Button>
           </div>
         </div>

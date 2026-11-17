@@ -36,9 +36,10 @@ export const Route = createFileRoute("/_authenticated/support/")({
   component: UsersPage,
 })
 
+// Labels are components so they translate at render, not at import.
 const TABS = [
-  { key: "OPEN", label: "مفتوحة" },
-  { key: "RESOLVED", label: "تم حلها" },
+  { key: "OPEN", label: <Trans>Open</Trans> },
+  { key: "RESOLVED", label: <Trans>Resolved</Trans> },
 ] as const
 
 type TabKey = "ALL" | SupportTicketStatus
@@ -94,7 +95,6 @@ function UsersPage() {
 
   return (
     <div
-      dir="rtl"
       style={S(
         "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px",
       )}
@@ -111,7 +111,7 @@ function UsersPage() {
   `)}
 >
   <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-    <Trans>تذاكر الدعم</Trans>
+    <Trans>Support tickets</Trans>
   </h1>
 
   <Link
@@ -151,7 +151,7 @@ function UsersPage() {
               "position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)",
             )}
           >
-            بحث
+            <Trans>Search</Trans>
           </Label>
 
           <Search
@@ -174,7 +174,7 @@ function UsersPage() {
 
         <div
           role="group"
-          aria-label="تصفية حسب الحالة"
+          aria-label={t`Filter by status`}
           style={S("display: flex; gap: 8px; flex-wrap: wrap")}
         >
           {TABS.map((item) => (
@@ -239,7 +239,7 @@ function UsersPage() {
             aria-hidden="true"
             className="size-3.5 shrink-0"
           />
-          تعذر تحميل بيانات المستخدمين.
+          <Trans>We could not load the support tickets.</Trans>
         </p>
       )}
 
@@ -249,14 +249,14 @@ function UsersPage() {
           <EmptyHeader>
             <EmptyTitle>
               {query || tab !== "ALL"
-                ? "لا يوجد مستخدمون مطابقون"
-                : "لا يوجد مستخدمون حتى الآن"}
+                ? t`No tickets match`
+                : t`No support tickets yet`}
             </EmptyTitle>
 
             <EmptyDescription>
               {query || tab !== "ALL"
-                ? "جرّب تغيير كلمات البحث أو الفلتر المحدد."
-                : "لا يوجد مستخدمون لعرضهم حالياً."}
+                ? t`Try other search words or another filter.`
+                : t`Tickets you open show here.`}
             </EmptyDescription>
 
             {query || tab !== "ALL" ? (
@@ -268,7 +268,7 @@ function UsersPage() {
                   setTab("ALL")
                 }}
               >
-                مسح الفلاتر
+                <Trans>Clear filters</Trans>
               </Button>
             ) : null}
           </EmptyHeader>
@@ -316,12 +316,11 @@ function UsersPage() {
                   </div>
 
                   <div
-                    dir="ltr"
                     style={S(
-                      "margin-top: 3px; text-align: right; font-size: 11px; color: var(--muted-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
+                      "margin-top: 3px; font-size: 11px; color: var(--muted-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
                     )}
                   >
-                    {user.status}
+                    {user.status === "OPEN" ? <Trans>Open</Trans> : <Trans>Resolved</Trans>}
                   </div>
                 </div>
               </div>
@@ -351,7 +350,7 @@ function UsersPage() {
                   "margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 650; color: var(--muted-foreground)",
                 )}
               >
-                عرض التفاصيل
+                <Trans>View details</Trans>
                 <span aria-hidden="true">←</span>
               </div>
             </Link>

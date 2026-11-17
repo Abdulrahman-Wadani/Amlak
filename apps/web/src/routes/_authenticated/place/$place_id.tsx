@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react"
 import { Link, createFileRoute, useNavigate, useParams } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 import type { Asset, Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
@@ -43,6 +44,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { PlaceBookings } from "@/components/place-bookings"
 import {
   AssetStatusBadge,
+  PriorityChip,
   StatusBadge,
   TypeLabel,
 } from "@/components/place-shared"
@@ -82,7 +84,9 @@ function PlaceDetailPage() {
   })
 
   const { i18n } = useLingui()
-  const { accessToken } = useAuth()
+  const { accessToken, user } = useAuth()
+  // Editing, deleting and the assets and workers sections are for Managers.
+  const isManager = user?.role === "MANAGER"
   const navigate = useNavigate()
 
   const [place, setPlace] = useState<Place | null>(null)
@@ -118,12 +122,15 @@ function PlaceDetailPage() {
       .then((list) => alive && setAssets(list))
       .catch(() => alive && setAssets([]))
 
-    getWorkers(accessToken)
-      .then((list) => alive && setWorkers(list))
-      .catch((error) => {
-        console.error("Failed to load workers:", error)
-        if (alive) setWorkers([])
-      })
+    // GET /workers is Manager-only; Workers do not see the workers section.
+    if (isManager) {
+      getWorkers(accessToken)
+        .then((list) => alive && setWorkers(list))
+        .catch((error) => {
+          console.error("Failed to load workers:", error)
+          if (alive) setWorkers([])
+        })
+    }
 
   getTicketsForPlace(accessToken, place_id)
   .then((list) => alive && setTickets(list))
@@ -135,7 +142,7 @@ function PlaceDetailPage() {
     return () => {
       alive = false
     }
-  }, [accessToken, place_id])
+  }, [accessToken, place_id, isManager])
 
   const money = new Intl.NumberFormat(
     i18n.locale === "ar" ? "ar" : "en"
@@ -145,28 +152,6 @@ function PlaceDetailPage() {
     i18n.locale === "ar" ? "ar" : "en",
     { dateStyle: "medium" }
   )
-const ticketLabels: Record<string, string> = {
-  CORRECTIVE: "صيانة تصحيحية",
-  PREVENTIVE: "صيانة وقائية",
-
-  LOW: "منخفضة",
-  MEDIUM: "متوسطة",
-  HIGH: "عالية",
-  URGENT: "عاجلة",
-
-  PENDING: "معلقة",
-  SUBMITTED: "مرسلة",
-  UNDER_REVIEW: "قيد المراجعة",
-  APPROVED: "مقبولة",
-  REJECTED: "مرفوضة",
-  IN_PROGRESS: "قيد التنفيذ",
-  COMPLETED: "مكتملة",
-  CANCELLED: "ملغاة",
-}
-
-function getTicketLabel(value: string) {
-  return ticketLabels[value] ?? value
-}
 
 function formatTicketDate(value: string | null | undefined) {
   if (!value) return "—"
@@ -230,7 +215,7 @@ function getWorkerName(userId: string | null | undefined) {
       setUpdateError(
         error instanceof Error
           ? error.message
-          : "Failed to update property"
+          : t`Could not update the place.`
       )
     } finally {
       setSaving(false)
@@ -241,7 +226,7 @@ function getWorkerName(userId: string | null | undefined) {
     if (!accessToken || !place || deleting) return
 
     const confirmed = window.confirm(
-      `هل أنت متأكد من حذف الملكية "${place.place_name}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+      t`Delete the place "${place.place_name}"? This cannot be undone.`,
     )
     if (!confirmed) return
 
@@ -291,7 +276,7 @@ function getWorkerName(userId: string | null | undefined) {
       const refreshedWorkers = await getWorkers(accessToken)
       setWorkers(refreshedWorkers)
       setSelectedWorkerId("")
-      setWorkerSuccess("تمت إضافة العامل إلى الملكية بنجاح.")
+      setWorkerSuccess(t`The worker was added to the place.`)
     } catch (error) {
       console.error("Assign worker error:", error)
       setWorkerError(
@@ -305,7 +290,6 @@ function getWorkerName(userId: string | null | undefined) {
   return (
     <center>
     <div
-      dir="rtl"
       style={S(
         "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 80%"
       )}
@@ -328,12 +312,12 @@ function getWorkerName(userId: string | null | undefined) {
             <Breadcrumb>
   <BreadcrumbList>
     <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/" />}>الرئيسية</BreadcrumbLink>
+      <BreadcrumbLink render={<a href="/" />}><Trans>Home</Trans></BreadcrumbLink>
     </BreadcrumbItem>
     <BreadcrumbSeparator />
     <BreadcrumbItem>
       <BreadcrumbLink render={<a href="/places" />}>
-        العقارات
+        <Trans>Places</Trans>
       </BreadcrumbLink>
     </BreadcrumbItem>
   </BreadcrumbList>
@@ -360,7 +344,7 @@ function getWorkerName(userId: string | null | undefined) {
             "display: flex; align-items: center; gap: 8px; flex-wrap: wrap"
           )}
         >
-          {place && (
+          {place && isManager && (
             <button
               type="button"
               id="update"
@@ -371,11 +355,11 @@ function getWorkerName(userId: string | null | undefined) {
               )}
             >
               <Pencil size={16} />
-              <Trans>تحديث الملكية</Trans>
+              <Trans>Update place</Trans>
             </button>
           )}
 
-          {place && (
+          {place && isManager && (
             <button
               type="button"
               onClick={handleDelete}
@@ -387,7 +371,7 @@ function getWorkerName(userId: string | null | undefined) {
               )}
             >
               <Trash2 size={16} />
-              {deleting ? "جارٍ الحذف..." : "حذف الملكية"}
+              {deleting ? t`Deleting…` : t`Delete place`}
             </button>
           )}
 
@@ -452,7 +436,7 @@ function getWorkerName(userId: string | null | undefined) {
                   )}
                 >
                   <EditField
-                    label="اسم الملك"
+                    label={t`Place name`}
                     value={editForm.place_name}
                     onChange={(value) =>
                       setEditForm({ ...editForm, place_name: value })
@@ -460,7 +444,7 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="نوع الملك"
+                    label={t`Place type`}
                     value={editForm.place_type}
                     onChange={(value) =>
                       setEditForm({ ...editForm, place_type: value })
@@ -468,7 +452,7 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="المدينة"
+                    label={t`City`}
                     value={editForm.city}
                     onChange={(value) =>
                       setEditForm({ ...editForm, city: value })
@@ -476,7 +460,7 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="العنوان"
+                    label={t`Address`}
                     value={editForm.address ?? ""}
                     onChange={(value) =>
                       setEditForm({
@@ -487,7 +471,7 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="الوصف"
+                    label={t`Description`}
                     value={editForm.description ?? ""}
                     onChange={(value) =>
                       setEditForm({
@@ -498,7 +482,7 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="الميزانية الشهرية"
+                    label={t`Monthly budget`}
                     type="number"
                     value={String(editForm.monthly_maintenance_budget)}
                     onChange={(value) =>
@@ -510,7 +494,7 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="خط العرض"
+                    label={t`Latitude`}
                     type="number"
                     value={editForm.latitude?.toString() ?? ""}
                     onChange={(value) =>
@@ -522,7 +506,7 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="حط الطول"  
+                    label={t`Longitude`}
                     type="number"
                     value={editForm.longitude?.toString() ?? ""}
                     onChange={(value) =>
@@ -534,7 +518,7 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="العملة"
+                    label={t`Currency`}
                     value={editForm.currency}
                     onChange={(value) =>
                       setEditForm({ ...editForm, currency: value })
@@ -542,7 +526,7 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="التوقيت"
+                    label={t`Time zone`}
                     value={editForm.timezone}
                     onChange={(value) =>
                       setEditForm({ ...editForm, timezone: value })
@@ -554,7 +538,7 @@ function getWorkerName(userId: string | null | undefined) {
                       "display: flex; flex-direction: column; gap: 7px; font-size: 13px; font-weight: 600"
                     )}
                   >
-                    <Trans>الحالة</Trans>
+                    <Trans>Status</Trans>
 
                     <select
                       value={String(editForm.status)}
@@ -635,7 +619,7 @@ function getWorkerName(userId: string | null | undefined) {
               <CardTitle
                 style={S("font-size: 17px; font-weight: 750")}
               >
-                <Trans>معلومات الملكية</Trans>
+                <Trans>Place information</Trans>
               </CardTitle>
             </CardHeader>
 
@@ -700,6 +684,7 @@ function getWorkerName(userId: string | null | undefined) {
           </Card>
 
           <div style={S("display: flex; gap: 10px; flex-wrap: wrap; align-items: center")}>
+            {isManager && (
             <Button
               type="button"
               id="assets"
@@ -710,8 +695,10 @@ function getWorkerName(userId: string | null | undefined) {
               style={S("height: 40px; padding: 0 16px; gap: 8px")}
             >
               <Building2 size={16} />
-              الأصول
+              <Trans>Assets</Trans>
             </Button>
+            )}
+            {isManager && (
             <Button
               type="button"
               variant={activeSection === "workers" ? "default" : "outline"}
@@ -722,8 +709,9 @@ function getWorkerName(userId: string | null | undefined) {
               style={S("height: 40px; padding: 0 16px; gap: 8px")}
             >
               <Users size={16} />
-              العمال
+              <Trans>Workers</Trans>
             </Button>
+            )}
             <Button
               type="button"
               variant={activeSection === "tickets" ? "default" : "outline"}
@@ -733,7 +721,7 @@ function getWorkerName(userId: string | null | undefined) {
               style={S("height: 40px; padding: 0 16px; gap: 8px")}
             >
               <Wrench size={16} />
-              تذاكر الصيانة
+              <Trans>Maintenance tickets</Trans>
             </Button>
             <Button
               type="button"
@@ -914,7 +902,7 @@ function getWorkerName(userId: string | null | undefined) {
 >
   <CardTitle style={S("font-size: 17px; font-weight: 750")}>
     <Users size={17} style={S("display: inline; vertical-align: middle; margin-inline-end: 7px")} />
-    العمال
+    <Trans>Workers</Trans>
     {workers !== null && (
       <span style={S("margin-inline-start: 8px; font-size: 12px; font-weight: 600; color: var(--muted-foreground); border: 1px solid var(--border); padding: 2px 8px")}>
         {workers.filter((worker) => isWorkerAssignedToPlace(worker, place_id)).length}
@@ -931,7 +919,7 @@ function getWorkerName(userId: string | null | undefined) {
     onClick={handleAddWorker}
   >
     <Plus size={16} />
-    إضافة عامل
+    <Trans>Add worker</Trans>
   </Button>
 </CardHeader>
 
@@ -950,7 +938,7 @@ function getWorkerName(userId: string | null | undefined) {
                       )}
                     >
                       <Users size={26} style={S("color: var(--muted-foreground)")} />
-                      <p style={S("font-size: 14px; font-weight: 650; margin: 0")}>لا يوجد عمال مسندون لهذه الملكية.</p>
+                      <p style={S("font-size: 14px; font-weight: 650; margin: 0")}><Trans>No workers are assigned to this place.</Trans></p>
                     </div>
                   ) : (
                     <div
@@ -984,14 +972,14 @@ function getWorkerName(userId: string | null | undefined) {
                   )}
 
                   <div style={S("border-top: 1px solid var(--border); padding-top: 18px")}>
-                    <h3 style={S("font-size: 14px; font-weight: 700; margin: 0 0 12px")}>إضافة عامل</h3>
+                    <h3 style={S("font-size: 14px; font-weight: 700; margin: 0 0 12px")}><Trans>Add worker</Trans></h3>
                     <form
   id="add-worker-form"
   onSubmit={handleAddWorker}
   style={S("display: flex; align-items: end; gap: 10px; flex-wrap: wrap")}
 >
                       <label style={S("display: flex; flex-direction: column; gap: 7px; flex: 1; min-width: 220px; font-size: 13px; font-weight: 600")}>
-                        <span>اختر العامل (الاسم و ID)</span>
+                        <span><Trans>Choose a worker (name and ID)</Trans></span>
                         <select
                           value={selectedWorkerId}
                           onChange={(e) => {
@@ -1003,7 +991,7 @@ function getWorkerName(userId: string | null | undefined) {
                           required
                           style={S("height: 40px; padding: 0 10px; border: 1px solid var(--border); background: var(--card); min-width: 0")}
                         >
-                          <option value="">اختر عاملًا</option>
+                          <option value=""><Trans>Choose a worker</Trans></option>
                           {workers
                             .filter((worker) => !isWorkerAssignedToPlace(worker, place_id))
                             .map((worker) => (
@@ -1021,7 +1009,7 @@ function getWorkerName(userId: string | null | undefined) {
                       <p style={S("color: var(--primary); font-size: 13px; margin: 10px 0 0")}>{workerSuccess}</p>
                     )}
                     {workers.filter((worker) => !isWorkerAssignedToPlace(worker, place_id)).length === 0 && (
-                      <p style={S("color: var(--muted-foreground); font-size: 12px; margin: 10px 0 0")}>جميع العمال مسندون لهذه الملكية بالفعل.</p>
+                      <p style={S("color: var(--muted-foreground); font-size: 12px; margin: 10px 0 0")}><Trans>All your workers are already assigned to this place.</Trans></p>
                     )}
                   </div>
                 </>
@@ -1040,7 +1028,7 @@ function getWorkerName(userId: string | null | undefined) {
     style={S("padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px")}
   >
     <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-      تذاكر الصيانة
+      <Trans>Maintenance tickets</Trans>
       {tickets !== null && (
         <span style={S("margin-inline-start: 8px; font-size: 12px; color: var(--muted-foreground)")}>
           {tickets.length}
@@ -1060,7 +1048,7 @@ function getWorkerName(userId: string | null | undefined) {
                   )}
                 >
                   <Plus size={16} />
-                  <Trans>أضافة تذكرة</Trans>
+                  <Trans>Add ticket</Trans>
                 </Link>
     </CardAction>
   </CardHeader>
@@ -1070,7 +1058,7 @@ function getWorkerName(userId: string | null | undefined) {
       <Skeleton style={S("height: 70px")} />
     ) : tickets.length === 0 ? (
       <p style={S("text-align: center; color: var(--muted-foreground); font-size: 14px")}>
-        لا توجد تذاكر صيانة لهذه الملكية.
+        <Trans>This place has no maintenance tickets.</Trans>
       </p>
     ) : (
       <div style={S("display: flex; flex-direction: column; gap: 10px")}>
@@ -1089,25 +1077,25 @@ function getWorkerName(userId: string | null | undefined) {
             >
               <div style={S("display: flex; flex-direction: column; gap: 6px; min-width: 0")}>
                 <strong style={S("font-size: 14px")}>
-                  {ticket.description || "تذكرة صيانة"}
+                  {ticket.description || t`Maintenance ticket`}
                 </strong>
 
                 <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-                  {asset?.name ?? "الأصل غير محدد"}
+                  {asset?.name ?? t`No asset`}
                   {" · "}
                   {ticket.ticket_type === "CORRECTIVE"
-                    ? "صيانة تصحيحية"
-                    : "صيانة وقائية"}
+                    ? t`Corrective maintenance`
+                    : t`Preventive maintenance`}
                 </span>
 
                 <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-                  الأولوية: {ticket.priority}
+                  <PriorityChip priority={String(ticket.priority)} />
                 </span>
               </div>
 
               <div style={S("display: flex; align-items: center; gap: 10px")}>
                 <StatusBadge status={String(ticket.status)} />
-                <ArrowRight size={17} />
+                <ArrowRight size={17} className="rtl:rotate-180" />
               </div>
             </Link>
           )
@@ -1119,14 +1107,6 @@ function getWorkerName(userId: string | null | undefined) {
 
         </>
       )}
-      {
-        ["assets", "worker", "update", "remove"].forEach((id) => {
-  const element = document.getElementById(id)
-  if (useAuth().user.role != "MANAGER") {
-    element.style.display = "none"
-  }
-})
-      }
     </div>
     </center>
   )

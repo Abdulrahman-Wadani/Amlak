@@ -21,6 +21,7 @@ import {
 } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
+import { useLingui } from "@lingui/react"
 
 import { useAuth } from "@/lib/auth"
 import {
@@ -104,6 +105,7 @@ function TicketDetailPage() {
   })
 
   const { accessToken, user } = useAuth()
+  const { i18n } = useLingui()
 
   const [ticket, setTicket] = useState<Ticket | null>(null)
   const [asset, setAsset] = useState<Asset | null>(null)
@@ -208,7 +210,7 @@ function TicketDetailPage() {
           setError(
             err instanceof Error
               ? err.message
-              : "حدث خطأ أثناء تحميل التذكرة",
+              : t`We could not load the ticket`,
           )
         }
       } finally {
@@ -264,7 +266,7 @@ function TicketDetailPage() {
       setError(
         err instanceof Error
           ? err.message
-          : "حدث خطأ أثناء تحميل التذكرة",
+          : t`We could not load the ticket`,
       )
     } finally {
       setLoading(false)
@@ -307,7 +309,7 @@ function TicketDetailPage() {
       await loadTicketDetails()
     } catch (err) {
       setActionError(
-        err instanceof Error ? err.message : "تعذر قبول التذكرة",
+        err instanceof Error ? err.message : t`Could not approve the ticket`,
       )
     } finally {
       setActionLoading(false)
@@ -329,7 +331,7 @@ function TicketDetailPage() {
       await loadTicketDetails()
     } catch (err) {
       setActionError(
-        err instanceof Error ? err.message : "تعذر رفض التذكرة",
+        err instanceof Error ? err.message : t`Could not reject the ticket`,
       )
     } finally {
       setActionLoading(false)
@@ -354,7 +356,7 @@ function TicketDetailPage() {
       setActionError(
         err instanceof Error
           ? err.message
-          : "تعذر إعادة تعيين المكلف",
+          : t`Could not reassign the ticket`,
       )
     } finally {
       setActionLoading(false)
@@ -385,7 +387,7 @@ function TicketDetailPage() {
       await loadTicketDetails()
     } catch (err) {
       setActionError(
-        err instanceof Error ? err.message : "تعذر إكمال التذكرة",
+        err instanceof Error ? err.message : t`Could not complete the ticket`,
       )
     } finally {
       setActionLoading(false)
@@ -404,11 +406,18 @@ function TicketDetailPage() {
   const date = (value: string | null | undefined) => {
     if (!value) return "—"
 
+    // A date without a time (due_date) is shown as a date only.
+    if (value.length === 10) {
+      return new Date(`${value}T00:00:00`).toLocaleDateString(i18n.locale, {
+        dateStyle: "medium",
+      })
+    }
+
     const parsed = new Date(value)
 
     if (Number.isNaN(parsed.getTime())) return value
 
-    return parsed.toLocaleString("ar-SA", {
+    return parsed.toLocaleString(i18n.locale, {
       dateStyle: "medium",
       timeStyle: "short",
     })
@@ -417,36 +426,39 @@ function TicketDetailPage() {
   const money = (value: number | null) => {
     if (value === null || value === undefined) return "—"
 
-    return `${Number(value).toLocaleString("ar-SA")} ر.س`
+    return new Intl.NumberFormat(i18n.locale, {
+      style: "currency",
+      currency: place?.currency ?? "SAR",
+    }).format(Number(value))
   }
 
   const statusLabels: Record<string, string> = {
-    PENDING_REVIEW: "بانتظار المراجعة",
-    PENDING: "قيد الانتظار",
-    APPROVED: "تمت الموافقة",
-    REJECTED: "مرفوضة",
-    IN_PROGRESS: "قيد التنفيذ",
-    COMPLETED: "مكتملة",
-    CANCELLED: "ملغاة",
+    PENDING_REVIEW: t`Waiting for review`,
+    PENDING: t`Pending`,
+    APPROVED: t`Approved`,
+    REJECTED: t`Rejected`,
+    IN_PROGRESS: t`In progress`,
+    COMPLETED: t`Completed`,
+    CANCELLED: t`Cancelled`,
   }
 
   const priorityLabels: Record<string, string> = {
-    LOW: "منخفضة",
-    MEDIUM: "متوسطة",
-    HIGH: "عالية",
-    URGENT: "عاجلة",
+    LOW: t`Low`,
+    MEDIUM: t`Medium`,
+    HIGH: t`High`,
+    URGENT: t`Urgent`,
   }
 
   const typeLabels: Record<string, string> = {
-    CORRECTIVE: "صيانة تصحيحية",
-    PREVENTIVE: "صيانة وقائية",
+    CORRECTIVE: t`Corrective maintenance`,
+    PREVENTIVE: t`Preventive maintenance`,
   }
 
   const attachmentTypeLabels: Record<string, string> = {
-    DAMAGE: "صور الأضرار",
-    BEFORE: "صور قبل الصيانة",
-    AFTER: "صور بعد الصيانة",
-    COMPLETION: "صور الإنجاز",
+    DAMAGE: t`Damage photos`,
+    BEFORE: t`Before photos`,
+    AFTER: t`After photos`,
+    COMPLETION: t`Completion photos`,
   }
 
   const statusColors: Record<string, string> = {
@@ -530,7 +542,7 @@ function TicketDetailPage() {
   if (loading) {
     return (
       <div style={S("padding:32px; color:var(--muted-foreground)")}>
-        جاري تحميل تفاصيل التذكرة...
+        <Trans>Loading the ticket…</Trans>
       </div>
     )
   }
@@ -543,7 +555,7 @@ function TicketDetailPage() {
         )}
       >
         <p style={S("color:#dc2626")}>
-          {error || "لم يتم العثور على التذكرة"}
+          {error || t`Ticket not found`}
         </p>
       </div>
     )
@@ -594,7 +606,7 @@ function TicketDetailPage() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink render={<a href="/" />}>
-              الرئيسية
+              <Trans>Home</Trans>
             </BreadcrumbLink>
           </BreadcrumbItem>
 
@@ -602,7 +614,7 @@ function TicketDetailPage() {
 
           <BreadcrumbItem>
             <BreadcrumbLink render={<a href="/places" />}>
-              العقارات
+              <Trans>Places</Trans>
             </BreadcrumbLink>
           </BreadcrumbItem>
 
@@ -615,7 +627,7 @@ function TicketDetailPage() {
                   to="/place/$place_id"
                   params={{ place_id: ticket.place_id }}
                 >
-                  <Trans>الصفحة السابقة</Trans>
+                  <Trans>Place</Trans>
                 </Link>
               }
             />
@@ -630,7 +642,7 @@ function TicketDetailPage() {
       >
         <div style={S("display:flex; flex-direction:column; gap:8px")}>
           <h1 style={S("font-size:24px; font-weight:800; margin:0")}>
-            تفاصيل تذكرة الصيانة
+            <Trans>Maintenance ticket</Trans>
           </h1>
 
           <p
@@ -638,7 +650,7 @@ function TicketDetailPage() {
               "font-size:13px; color:var(--muted-foreground); margin:0",
             )}
           >
-            {ticket.description || "تذكرة صيانة"}
+            {ticket.description || t`Maintenance ticket`}
           </p>
         </div>
 
@@ -657,46 +669,46 @@ function TicketDetailPage() {
       </header>
 
       {/* First section: always visible */}
-      <Section title="معلومات التذكرة">
+      <Section title={t`Ticket information`}>
         <Grid>
           <InfoItem
-            label="نوع الصيانة"
+            label={t`Maintenance type`}
             value={typeLabels[ticket.ticket_type] || ticket.ticket_type}
           />
 
           <InfoItem
-            label="الأولوية"
+            label={t`Priority`}
             value={priorityLabels[ticket.priority] || ticket.priority}
           />
 
           <InfoItem
-            label="الحالة"
+            label={t`Status`}
             value={statusLabels[ticket.status] || ticket.status}
           />
 
           <InfoItem
-            label="تاريخ الاستحقاق"
+            label={t`Due date`}
             value={date(ticket.due_date)}
           />
 
           <InfoItem
-            label="حالة التأخير"
+            label={t`Overdue?`}
             value={
               ticket.is_overdue ? (
-                <span style={S("color:#dc2626")}>متأخرة</span>
+                <span style={S("color:#dc2626")}><Trans>Overdue</Trans></span>
               ) : (
-                "غير متأخرة"
+                t`Not overdue`
               )
             }
           />
 
           <InfoItem
-            label="تاريخ الإنشاء"
+            label={t`Created`}
             value={date(ticket.created_at)}
           />
 
           <InfoItem
-            label="آخر تحديث"
+            label={t`Last updated`}
             value={date(ticket.updated_at)}
           />
         </Grid>
@@ -706,20 +718,20 @@ function TicketDetailPage() {
             "border-top:1px solid var(--border); padding-top:16px",
           )}
         >
-          <InfoItem label="الوصف" value={ticket.description} />
+          <InfoItem label={t`Description`} value={ticket.description} />
         </div>
       </Section>
 
       <div style={S("display: flex; gap: 10px; flex-wrap: wrap; align-items: center")}>
   {[
-    { id: "asset-section", title: "الأصل المرتبط", icon: <Building2 size={16} /> },
-    { id: "cost-section", title: "التكاليف", icon: <Wallet size={16} /> },
-    { id: "review-section", title: "المراجعة", icon: <CheckCircle size={16} /> },
-    { id: "completion-section", title: "الإنجاز", icon: <CheckCheck size={16} /> },
-    { id: "people-section", title: "المسؤولون", icon: <Users size={16} /> },
-    { id: "timeline-section", title: "السجل الزمني", icon: <Clock3 size={16} /> },
-    { id: "actions-section", title: "إجراءات التذكرة", icon: <Wrench size={16} /> },
-    { id: "attachments-section", title: "الملحقات", icon: <Paperclip size={16} /> },
+    { id: "asset-section", title: t`Asset`, icon: <Building2 size={16} /> },
+    { id: "cost-section", title: t`Costs`, icon: <Wallet size={16} /> },
+    { id: "review-section", title: t`Review`, icon: <CheckCircle size={16} /> },
+    { id: "completion-section", title: t`Completion`, icon: <CheckCheck size={16} /> },
+    { id: "people-section", title: t`People`, icon: <Users size={16} /> },
+    { id: "timeline-section", title: t`Timeline`, icon: <Clock3 size={16} /> },
+    { id: "actions-section", title: t`Actions`, icon: <Wrench size={16} /> },
+    { id: "attachments-section", title: t`Attachments`, icon: <Paperclip size={16} /> },
   ]
     .filter((section) => section.id !== "actions-section" || hasActions)
     .map((section) => (
@@ -742,12 +754,12 @@ function TicketDetailPage() {
 
       {/* Asset */}
       <div id="asset-section" style={{ display: "none" }}>
-        <Section title="الأصل المرتبط">
+        <Section title={t`Asset`}>
           {asset ? (
             <Grid>
-              <InfoItem label="اسم الأصل" value={asset.name} />
-              <InfoItem label="نوع الأصل" value={asset.type} />
-              <InfoItem label="حالة الأصل" value={asset.status} />
+              <InfoItem label={t`Asset name`} value={asset.name} />
+              <InfoItem label={t`Asset type`} value={asset.type} />
+              <InfoItem label={t`Asset status`} value={asset.status} />
             </Grid>
           ) : (
             <p
@@ -755,7 +767,7 @@ function TicketDetailPage() {
                 "font-size:13px; color:var(--muted-foreground); margin:0",
               )}
             >
-              لا توجد بيانات للأصل أو لم يتم تحديد أصل لهذه التذكرة.
+              <Trans>This ticket has no asset.</Trans>
             </p>
           )}
         </Section>
@@ -763,15 +775,15 @@ function TicketDetailPage() {
 
       {/* Costs */}
       <div id="cost-section" style={{ display: "none" }}>
-        <Section title="التكاليف" icon={<Wallet size={18} />}>
+        <Section title={t`Costs`} icon={<Wallet size={18} />}>
           <Grid>
             <InfoItem
-              label="التكلفة التقديرية"
+              label={t`Estimated cost`}
               value={money(ticket.estimated_cost)}
             />
 
             <InfoItem
-              label="التكلفة الفعلية"
+              label={t`Actual cost`}
               value={money(ticket.actual_cost)}
             />
           </Grid>
@@ -780,17 +792,17 @@ function TicketDetailPage() {
 
       {/* Review */}
       <div id="review-section" style={{ display: "none" }}>
-        <Section title="معلومات المراجعة">
+        <Section title={t`Review`}>
           <Grid>
             <InfoItem
-              label="تمت المراجعة بواسطة"
+              label={t`Reviewed by`}
               value={
                 ticket.reviewed_by ? personName(ticket.reviewed_by) : null
               }
             />
 
             <InfoItem
-              label="تاريخ المراجعة"
+              label={t`Reviewed on`}
               value={date(ticket.reviewed_at)}
             />
           </Grid>
@@ -802,7 +814,7 @@ function TicketDetailPage() {
               )}
             >
               <strong style={S("font-size:13px; color:#dc2626")}>
-                سبب الرفض
+                <Trans>Reason for rejection</Trans>
               </strong>
 
               <p style={S("font-size:14px; margin:0")}>
@@ -816,17 +828,17 @@ function TicketDetailPage() {
       {/* Completion */}
       <div id="completion-section" style={{ display: "none" }}>
         <Section
-          title="معلومات الإنجاز"
+          title={t`Completion`}
           icon={<CalendarDays size={18} />}
         >
           <Grid>
             <InfoItem
-              label="تاريخ الإنجاز"
+              label={t`Completed on`}
               value={date(ticket.completed_at)}
             />
 
             <InfoItem
-              label="ملاحظات الإنجاز"
+              label={t`Completion notes`}
               value={ticket.completion_notes}
             />
           </Grid>
@@ -835,14 +847,14 @@ function TicketDetailPage() {
 
       {/* People */}
       <div id="people-section" style={{ display: "none" }}>
-        <Section title="المسؤولون">
+        <Section title={t`People`}>
           <Grid>
             <InfoItem
-              label="مُبلّغ التذكرة"
+              label={t`Reported by`}
               value={personName(ticket.reporter_id)}
             />
             <InfoItem
-              label="المسؤول عن التنفيذ"
+              label={t`Assignee`}
               value={ticket.assignee_id ? personName(ticket.assignee_id) : null}
             />
           </Grid>
@@ -851,25 +863,25 @@ function TicketDetailPage() {
 
       {/* Timeline */}
       <div id="timeline-section" style={{ display: "none" }}>
-        <Section title="السجل الزمني" icon={<Clock3 size={18} />}>
+        <Section title={t`Timeline`} icon={<Clock3 size={18} />}>
           <Grid>
             <InfoItem
-              label="تاريخ الإنشاء"
+              label={t`Created`}
               value={date(ticket.created_at)}
             />
 
             <InfoItem
-              label="تاريخ آخر تحديث"
+              label={t`Last updated`}
               value={date(ticket.updated_at)}
             />
 
             <InfoItem
-              label="تاريخ المراجعة"
+              label={t`Reviewed on`}
               value={date(ticket.reviewed_at)}
             />
 
             <InfoItem
-              label="تاريخ الإنجاز"
+              label={t`Completed on`}
               value={date(ticket.completed_at)}
             />
           </Grid>
@@ -894,7 +906,7 @@ function TicketDetailPage() {
                 "font-size:17px; font-weight:750; width:100%; text-align:center",
               )}
             >
-              إجراءات التذكرة
+              <Trans>Actions</Trans>
             </CardTitle>
           </CardHeader>
 
@@ -912,7 +924,7 @@ function TicketDetailPage() {
                   style={S("height:42px; padding:0 20px; gap:8px")}
                 >
                   <CheckCircle size={17} />
-                  <Trans>قبول التذكرة</Trans>
+                  <Trans>Approve ticket</Trans>
                 </Button>
 
                 <Button
@@ -924,7 +936,7 @@ function TicketDetailPage() {
                   )}
                 >
                   <XCircle size={17} />
-                  <Trans>رفض التذكرة</Trans>
+                  <Trans>Reject ticket</Trans>
                 </Button>
               </>
             )}
@@ -937,7 +949,7 @@ function TicketDetailPage() {
                 style={S("height:42px; padding:0 20px; gap:8px")}
               >
                 <UserRoundCog size={17} />
-                <Trans>إعادة تعيين المكلف</Trans>
+                <Trans>Reassign</Trans>
               </Button>
             )}
 
@@ -952,7 +964,7 @@ function TicketDetailPage() {
                   )}
                 >
                   <CheckCheck size={17} />
-                  <Trans>اكتملت التذكرة</Trans>
+                  <Trans>Complete ticket</Trans>
                 </Button>
               </>
             )}
@@ -970,10 +982,10 @@ function TicketDetailPage() {
                 )}
               >
                 <strong style={S("font-size:15px")}>
-                  {action === "approve" && "قبول التذكرة"}
-                  {action === "reject" && "رفض التذكرة"}
-                  {action === "reassign" && "إعادة تعيين المكلف"}
-                  {action === "complete" && "إكمال التذكرة"}
+                  {action === "approve" && t`Approve ticket`}
+                  {action === "reject" && t`Reject ticket`}
+                  {action === "reassign" && t`Reassign`}
+                  {action === "complete" && t`Complete ticket`}
                 </strong>
 
                 <Button
@@ -981,7 +993,7 @@ function TicketDetailPage() {
                   size="icon"
                   onClick={resetActionForm}
                   disabled={actionLoading}
-                  aria-label="إغلاق"
+                  aria-label={t`Close`}
                 >
                   <X size={17} />
                 </Button>
@@ -1011,7 +1023,7 @@ function TicketDetailPage() {
 
               {(action === "approve" || action === "reassign") && (
                 <div>
-                  <label style={labelStyle}>تاريخ الاستحقاق</label>
+                  <label style={labelStyle}><Trans>Due date</Trans></label>
 
                   <input
                     type="date"
@@ -1043,14 +1055,14 @@ function TicketDetailPage() {
 
               {action === "reject" && (
                 <div>
-                  <label style={labelStyle}>سبب الرفض</label>
+                  <label style={labelStyle}><Trans>Reason for rejection</Trans></label>
 
                   <textarea
                     value={rejectionReason}
                     onChange={(event) =>
                       setRejectionReason(event.target.value)
                     }
-                    placeholder="اكتب سبب رفض التذكرة"
+                    placeholder={t`Why is this ticket rejected?`}
                     rows={4}
                     style={{ ...fieldStyle, resize: "vertical" }}
                   />
@@ -1060,7 +1072,7 @@ function TicketDetailPage() {
               {action === "complete" && (
                 <>
                   <div>
-                    <label style={labelStyle}>التكلفة الفعلية</label>
+                    <label style={labelStyle}><Trans>Actual cost</Trans></label>
 
                     <input
                       type="number"
@@ -1077,7 +1089,7 @@ function TicketDetailPage() {
 
                   <div>
                     <label style={labelStyle}>
-                      ملاحظات الإنجاز (اختياري)
+                      <Trans>Completion notes (optional)</Trans>
                     </label>
 
                     <textarea
@@ -1085,7 +1097,7 @@ function TicketDetailPage() {
                       onChange={(event) =>
                         setCompletionNotes(event.target.value)
                       }
-                      placeholder="أضف ملاحظات الإنجاز"
+                      placeholder={t`Add completion notes`}
                       rows={3}
                       style={{ ...fieldStyle, resize: "vertical" }}
                     />
@@ -1093,7 +1105,7 @@ function TicketDetailPage() {
 
                   <div>
                     <label style={labelStyle}>
-                      صور الإنجاز (من 1 إلى 5 صور)
+                      <Trans>Completion photos (1 to 5)</Trans>
                     </label>
 
                     <input
@@ -1113,7 +1125,7 @@ function TicketDetailPage() {
                         "font-size:12px; color:var(--muted-foreground); margin:6px 0 0",
                       )}
                     >
-                      تم اختيار {photos.length} من 5 صور
+                      <Trans>{photos.length} of 5 photos chosen</Trans>
                     </p>
                   </div>
                 </>
@@ -1141,8 +1153,8 @@ function TicketDetailPage() {
                     }
                   >
                     {actionLoading
-                      ? "جاري التنفيذ..."
-                      : "تأكيد الموافقة"}
+                      ? t`Working…`
+                      : t`Confirm approval`}
                   </Button>
                 )}
 
@@ -1153,8 +1165,8 @@ function TicketDetailPage() {
                     disabled={actionLoading || !rejectionReason.trim()}
                   >
                     {actionLoading
-                      ? "جاري التنفيذ..."
-                      : "تأكيد الرفض"}
+                      ? t`Working…`
+                      : t`Confirm rejection`}
                   </Button>
                 )}
 
@@ -1168,8 +1180,8 @@ function TicketDetailPage() {
                     }
                   >
                     {actionLoading
-                      ? "جاري التنفيذ..."
-                      : "تأكيد إعادة التعيين"}
+                      ? t`Working…`
+                      : t`Confirm reassignment`}
                   </Button>
                 )}
 
@@ -1184,8 +1196,8 @@ function TicketDetailPage() {
                     }
                   >
                     {actionLoading
-                      ? "جاري التنفيذ..."
-                      : "تأكيد الإكمال"}
+                      ? t`Working…`
+                      : t`Confirm completion`}
                   </Button>
                 )}
 
@@ -1194,7 +1206,7 @@ function TicketDetailPage() {
                   onClick={resetActionForm}
                   disabled={actionLoading}
                 >
-                  إلغاء
+                  <Trans>Cancel</Trans>
                 </Button>
               </div>
             </div>
@@ -1204,7 +1216,7 @@ function TicketDetailPage() {
 
       {/* Attachments - Last section */}
       <div id="attachments-section" style={{ display: "none" }}>
-        <Section title="الملحقات" icon={<Paperclip size={18} />}>
+        <Section title={t`Attachments`} icon={<Paperclip size={18} />}>
           {ticket.attachments && ticket.attachments.length > 0 ? (
             <>
               <p
@@ -1212,7 +1224,7 @@ function TicketDetailPage() {
                   "font-size:13px; color:var(--muted-foreground); margin:0",
                 )}
               >
-                عدد المرفقات: {ticket.attachments.length}
+                <Trans>Attachments: {ticket.attachments.length}</Trans>
               </p>
 
               <div
@@ -1231,7 +1243,7 @@ function TicketDetailPage() {
                       href={attachment.file_url}
                       target="_blank"
                       rel="noreferrer"
-                      aria-label="فتح الصورة بالحجم الكامل"
+                      aria-label={t`Open the full-size photo`}
                       style={S(
                         "display:block; width:100%; height:200px; background:var(--muted); overflow:hidden",
                       )}
@@ -1264,7 +1276,7 @@ function TicketDetailPage() {
                           "font-size:12px; color:var(--muted-foreground)",
                         )}
                       >
-                        تاريخ الرفع: {date(attachment.created_at)}
+                        <Trans>Uploaded: {date(attachment.created_at)}</Trans>
                       </span>
 
                       <span
@@ -1283,7 +1295,7 @@ function TicketDetailPage() {
                           "font-size:13px; color:var(--primary); text-decoration:underline",
                         )}
                       >
-                        عرض الصورة بالحجم الكامل
+                        <Trans>View full size</Trans>
                       </a>
                     </div>
                   </div>
@@ -1296,7 +1308,7 @@ function TicketDetailPage() {
                 "font-size:13px; color:var(--muted-foreground); margin:0",
               )}
             >
-              لا توجد مرفقات لهذه التذكرة.
+              <Trans>This ticket has no attachments.</Trans>
             </p>
           )}
         </Section>
