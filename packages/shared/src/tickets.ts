@@ -14,6 +14,12 @@ export const TICKET_STATUSES = [
 ] as const;
 export type TicketStatus = (typeof TICKET_STATUSES)[number];
 
+/** Tickets still waiting for review or for the work to be done. */
+export const OPEN_TICKET_STATUSES: TicketStatus[] = [
+	"PENDING_REVIEW",
+	"APPROVED",
+];
+
 export const ATTACHMENT_TYPES = ["DAMAGE", "AFTER_REPAIR"] as const;
 export type AttachmentType = (typeof ATTACHMENT_TYPES)[number];
 
@@ -84,6 +90,10 @@ export const listTicketsQuerySchema = z.object({
 		.uuid()
 		.optional()
 		.meta({ description: 'Pass your own id for "my tasks"' }),
+	open: z.stringbool().optional().meta({
+		description:
+			"true: PENDING_REVIEW and APPROVED tickets, as the dashboard counts them. false: the others",
+	}),
 	overdue: z
 		.stringbool()
 		.optional()
