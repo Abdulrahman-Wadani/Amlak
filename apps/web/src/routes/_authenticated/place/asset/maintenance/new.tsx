@@ -1,32 +1,15 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useEffect, useState, type FormEvent } from "react"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
+import { useEffect, useState } from "react"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { CircleAlert } from "lucide-react"
 
 import { S } from "@/lib/dom-style"
 import { useAuth } from "@/lib/auth"
-import {
-  getPlaces,
-  getPlaceAssets,
-  createMaintenanceSchedule,
-} from "@/lib/api"
-
+import { getPlace, getPlaceWorkers, createMaintenanceSchedule } from "@/lib/api"
 import type { IntervalUnit } from "@/lib/api"
-import type { Place, Asset } from "@amlak/shared"
-
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import Form from "@/components/form"
+import { errorMessage } from "@/lib/errors"
+import Form, { type FormValues } from "@/components/form"
 
 export const Route = createFileRoute(
   "/_authenticated/place/asset/maintenance/new"
@@ -38,182 +21,104 @@ export const Route = createFileRoute(
   component: NewMaintenancePage,
 })
 
-const INTERVAL_UNITS: { value: IntervalUnit; label: string }[] = [
-  { value: "DAY", label: t`Day` },
-  { value: "WEEK", label: t`Week` },
-  { value: "MONTH", label: t`Month` },
-  { value: "YEAR", label: t`Year` },
-]
+// A function, not a constant: t must run after Lingui has a locale, so a
+// direct load of this page does not crash.
+function intervalUnits(): { value: IntervalUnit; label: string }[] {
+  return [
+    { value: "DAY", label: t`Day` },
+    { value: "WEEK", label: t`Week` },
+    { value: "MONTH", label: t`Month` },
+    { value: "YEAR", label: t`Year` },
+  ]
+}
+
+// Base UI's Select cannot hold an empty value, so "no default assignee" has
+// its own value and is sent as undefined.
+const NO_ASSIGNEE = "none"
 
 function NewMaintenancePage() {
   const { accessToken } = useAuth()
   const navigate = useNavigate()
   const { place_id, asset_id } = Route.useSearch()
 
-  const [places, setPlaces] = useState<Place[]>([])
-  const [assets, setAssets] = useState<Asset[]>([])
-
-  const [selectedPlace, setSelectedPlace] = useState(place_id)
-  const [selectedAsset, setSelectedAsset] = useState(asset_id)
-
-  const [description, setDescription] = useState("")
-  const [intervalCount, setIntervalCount] = useState("1")
-  const [intervalUnit, setIntervalUnit] = useState<IntervalUnit>("MONTH")
-  const [nextDueDate, setNextDueDate] = useState("")
-  const [leadDays, setLeadDays] = useState("7")
-  const [defaultAssigneeId, setDefaultAssigneeId] = useState("")
-
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [assigneeOptions, setAssigneeOptions] = useState<
+    { value: string; label: string }[]
+  >([])
 
+  // A default assignee must be the place's owner or one of its ACTIVE workers.
   useEffect(() => {
-    if (!accessToken) return
+    if (!accessToken || !place_id) return
 
-    const loadPlaces = async () => {
-      try {
-        const data = await getPlaces(accessToken)
-        setPlaces(data)
+    let alive = true
 
-        if (place_id) {
-          setSelectedPlace(place_id)
-        } else if (data.length > 0) {
-          setSelectedPlace(data[0].id)
-        }
-      } catch {
-        setError(t`Failed to load places`)
-      }
+    Promise.all([
+      getPlace(accessToken, place_id),
+      getPlaceWorkers(accessToken, place_id),
+    ])
+      .then(([place, placeWorkers]) => {
+        if (!alive) return
+
+        setAssigneeOptions([
+          { value: place.owner_id, label: t`You (owner)` },
+          ...placeWorkers
+            .filter((placeWorker) => placeWorker.worker.status === "ACTIVE")
+            .map((placeWorker) => ({
+              value: placeWorker.worker.id,
+              label: placeWorker.worker.fullname,
+            })),
+        ])
+      })
+      .catch((err) => {
+        console.warn("Could not load the place's workers:", err)
+      })
+
+    return () => {
+      alive = false
     }
-
-    loadPlaces()
   }, [accessToken, place_id])
 
-  useEffect(() => {
-    if (!accessToken || !selectedPlace) {
-      setAssets([])
-      setSelectedAsset("")
+  const handleSubmit = async (values: FormValues) => {
+    if (!accessToken) return
+    const text = (name: string) =>
+      typeof values[name] === "string" ? (values[name] as string).trim() : ""
+    const count = values.interval_count
+    const lead = values.lead_days
+    const description = text("description")
+    const nextDueDate = text("next_due_date")
+    const assignee = text("default_assignee_id")
+
+    if (!asset_id || !description || !nextDueDate) {
+      setError(t`Please fill in all required fields`)
+      return
+    }
+    if (
+      typeof count !== "number" ||
+      !Number.isInteger(count) ||
+      count < 1 ||
+      typeof lead !== "number" ||
+      !Number.isInteger(lead) ||
+      lead < 0
+    ) {
+      setError(t`Please enter valid interval and lead days values`)
       return
     }
 
-    const loadAssets = async () => {
-      try {
-        const data = await getPlaceAssets(accessToken, selectedPlace)
-        setAssets(data)
-
-        if (asset_id && data.some((asset) => asset.id === asset_id)) {
-          setSelectedAsset(asset_id)
-        } else if (data.length > 0) {
-          setSelectedAsset(data[0].id)
-        } else {
-          setSelectedAsset("")
-        }
-      } catch {
-        setError(t`Failed to load assets`)
-      }
-    }
-
-    loadAssets()
-  }, [accessToken, selectedPlace, asset_id])
-
-  const validate = () => {
-    const newErrors: Record<string, string> = {}
-
-    if (!selectedPlace) {
-      newErrors.place_id = t`Please select a place`
-    }
-
-    if (!selectedAsset) {
-      newErrors.asset_id = t`Please select an asset`
-    }
-
-    if (!description.trim()) {
-      newErrors.description = t`Description is required`
-    }
-
-    const count = Number(intervalCount)
-
-    if (!intervalCount || !Number.isInteger(count) || count < 1) {
-      newErrors.interval_count = t`Enter a valid interval`
-    }
-
-    const lead = Number(leadDays)
-
-    if (!leadDays || !Number.isInteger(lead) || lead < 0) {
-      newErrors.lead_days = t`Enter a valid number of days`
-    }
-
-    if (!nextDueDate) {
-      newErrors.next_due_date = t`Next due date is required`
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (
-  _args: Record<string, unknown>,
-  values: Record<string, string>,
-) => {
-  if (!accessToken) {
-    setError(t`You must be logged in`)
-    return
-  }
-
-  const {
-    asset_id,
-    description,
-    interval_count,
-    interval_unit,
-    next_due_date,
-    lead_days,
-    default_assignee_id,
-  } = values
-
-  if (!asset_id || !description.trim() || !next_due_date) {
-    setError(t`Please fill in all required fields`)
-    return
-  }
-
-  const count = Number(interval_count)
-  const lead = Number(lead_days)
-
-  if (
-    !Number.isInteger(count) ||
-    count < 1 ||
-    !Number.isInteger(lead) ||
-    lead < 0
-  ) {
-    setError(t`Please enter valid interval and lead days values`)
-    return
-  }
-
-  try {
-    setLoading(true)
     setError("")
-
-    await createMaintenanceSchedule(accessToken, asset_id, {
-      description: description.trim(),
-      interval_count: count,
-      interval_unit: interval_unit as IntervalUnit,
-      next_due_date,
-      lead_days: lead,
-      default_assignee_id: default_assignee_id || undefined,
-    })
-
-    navigate({
-      to: "/place/asset/$asset_id",
-      params: { asset_id },
-    })
-  } catch (err) {
-    setError(
-      err instanceof Error
-        ? err.message
-        : t`Failed to create maintenance schedule`,
-    )
-  } finally {
-    setLoading(false)
+    try {
+      await createMaintenanceSchedule(accessToken, asset_id, {
+        description,
+        interval_count: count,
+        interval_unit: (text("interval_unit") || "MONTH") as IntervalUnit,
+        next_due_date: nextDueDate,
+        lead_days: lead,
+        default_assignee_id: assignee && assignee !== NO_ASSIGNEE ? assignee : undefined,
+      })
+      void navigate({ to: "/place/asset/$asset_id", params: { asset_id } })
+    } catch (err) {
+      setError(errorMessage(err))
+    }
   }
-}
 
   return (
     <center>
@@ -231,24 +136,8 @@ function NewMaintenancePage() {
       <Form
   fields={[
     {
-      name: "asset_id",
-      label: t`Asset`,
-      type: "select",
-      required: true,
-      defaultValue: asset_id,
-      hidden: true
-    },
-    {
-      name: "place_id",
-      label: t`Asset`,
-      type: "select",
-      required: true,
-      defaultValue: place_id,
-      hidden: true
-    },
-    {
       name: "description",
-      label: t`description`,
+      label: t`Description`,
       type: "text",
       required: true,
     },
@@ -265,7 +154,7 @@ function NewMaintenancePage() {
       type: "select",
       required: true,
       defaultValue: "MONTH",
-      options: INTERVAL_UNITS.map((unit) => ({
+      options: intervalUnits().map((unit) => ({
         value: unit.value,
         label: unit.label,
       })),
@@ -285,12 +174,23 @@ function NewMaintenancePage() {
     },
     {
       name: "default_assignee_id",
-      label: t`Default Assignee ID`,
+      label: t`Default assignee (optional)`,
+      type: "select",
+      defaultValue: NO_ASSIGNEE,
+      options: [
+        { value: NO_ASSIGNEE, label: t`No default assignee` },
+        ...assigneeOptions,
+      ],
     },
   ]}
-  args={{ accessToken }}
-  callable={handleSubmit}
+  onSubmit={handleSubmit}
 />
+      {error && (
+        <p role="alert" className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900" style={S("margin-top: 12px")}>
+          <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+          {error}
+        </p>
+      )}
     </div>
     </center>
   )

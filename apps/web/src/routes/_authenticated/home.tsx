@@ -1,20 +1,11 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react"
-import { Link, createFileRoute } from "@tanstack/react-router"
-import {
-  CalendarDays,
-  ChevronDown,
-  ChevronUp,
-  Ticket,
-  Wallet,
-  Wrench,
-  AlertTriangle,
-  CheckCircle2,
-  LogOut,
-} from "lucide-react"
+import { Link, createFileRoute, redirect } from "@tanstack/react-router"
+import { CalendarDays, ChevronDown, ChevronUp, Ticket, Wallet, Wrench, AlertTriangle, CheckCircle2 } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 import type { Place } from "@amlak/shared"
-import { useAuth } from "@/lib/auth"
+import { storedUser, useAuth } from "@/lib/auth"
 import {
   getPlaces,
   getDashboard,
@@ -41,6 +32,12 @@ import { StatusBadge, TypeLabel } from "@/components/place-shared"
 import "@/styles/motion.css"
 
 export const Route = createFileRoute("/_authenticated/home")({
+  // Admins have no dashboard here; their start page is /admin.
+  beforeLoad: () => {
+    if (storedUser()?.role === "ADMIN") {
+      throw redirect({ to: "/admin" })
+    }
+  },
   component: HomePage,
 })
 
@@ -103,9 +100,6 @@ function HomePage() {
       alive = false
     }
   }, [accessToken])
-  if (useAuth().user.role == 'ADMIN'){
-  document.location.href="/admin"
-  }
 
 
   const locale = i18n.locale === "ar" ? "ar" : "en"
@@ -198,7 +192,7 @@ function HomePage() {
     >
       {/* Welcome section */}
       <section
-        aria-label="today"
+        aria-label={t`Today`}
         className="am-rise"
         style={S(
           "background: var(--foreground); color: #fff; padding: 32px; display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: flex-end; justify-content: space-between; box-sizing: border-box"
@@ -234,7 +228,7 @@ function HomePage() {
               "height: 44px; padding: 0 16px; background: #fff; color: var(--foreground); border: 1px solid #fff; font-size: 15px; font-weight: 600"
             )}
           >
-            <Trans>Review tickets</Trans>
+            {isWorker ? <Trans>My tasks</Trans> : <Trans>Review tickets</Trans>}
           </Link>
 
           <Link
@@ -481,7 +475,9 @@ function HomePage() {
                         "font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 14px"
                       )}
                     >
-                      {money(p.monthly_maintenance_budget)} {p.currency}
+                      {p.monthly_maintenance_budget == null
+                        ? "—"
+                        : `${money(p.monthly_maintenance_budget)} ${p.currency}`}
                     </span>
                   )}
 

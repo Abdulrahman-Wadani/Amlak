@@ -20,8 +20,11 @@ import {
   Wrench,
 } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
+import { useLingui } from "@lingui/react"
 
 import { useAuth } from "@/lib/auth"
+import { errorMessage } from "@/lib/errors"
 import {
   approveTicket,
   rejectTicket,
@@ -29,9 +32,10 @@ import {
   completeTicket,
   getTicketById,
   getAssetById,
-  getWorkerById,
+  getPlace,
+  getPlaceWorkers,
 } from "@/lib/api"
-import type { Asset } from "@amlak/shared"
+import type { Asset, Place, PlaceWorker } from "@amlak/shared"
 
 import {
   Breadcrumb,
@@ -101,12 +105,14 @@ function TicketDetailPage() {
     from: "/_authenticated/ticket/$ticket_id",
   })
 
-  const { accessToken } = useAuth()
+  const { accessToken, user } = useAuth()
+  const { i18n } = useLingui()
 
   const [ticket, setTicket] = useState<Ticket | null>(null)
   const [asset, setAsset] = useState<Asset | null>(null)
-  const [reporterName, setReporterName] = useState<string | null>(null)
-  const [assigneeName, setAssigneeName] = useState<string | null>(null)
+  // Loaded for Managers only: GET /places/{placeId}/workers is Manager-only.
+  const [place, setPlace] = useState<Place | null>(null)
+  const [placeWorkers, setPlaceWorkers] = useState<PlaceWorker[]>([])
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -115,16 +121,7 @@ function TicketDetailPage() {
   const [actionLoading, setActionLoading] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
 
-  const [assigneeId] = useState(() => {
-    if (typeof window === "undefined") return ""
-
-    try {
-      const authUser = sessionStorage.getItem("authUser")
-      return authUser ? JSON.parse(authUser).id ?? "" : ""
-    } catch {
-      return ""
-    }
-  })
+  const [assigneeId, setAssigneeId] = useState("")
 
   const [dueDate, setDueDate] = useState("")
   const [estimatedCost, setEstimatedCost] = useState("")
@@ -132,8 +129,6 @@ function TicketDetailPage() {
   const [actualCost, setActualCost] = useState("")
   const [completionNotes, setCompletionNotes] = useState("")
   const [photos, setPhotos] = useState<File[]>([])
-
-  const API_URL = import.meta.env.VITE_API_URL
 
   const S = (value: string): React.CSSProperties =>
     Object.fromEntries(
@@ -178,9 +173,6 @@ function TicketDetailPage() {
         if (!alive) return
 
         setTicket(selectedTicket)
-        setReporterName(selectedTicket.reporter_id)
-        setAssigneeName(selectedTicket.assignee_id || null)
-
         if (selectedTicket.asset_id) {
           try {
             const assetData = await getAssetById(
@@ -197,33 +189,19 @@ function TicketDetailPage() {
           setAsset(null)
         }
 
-        try {
-          const reporter = await getWorkerById(
-            accessToken,
-            selectedTicket.reporter_id,
-          )
-
-          if (alive) setReporterName(reporter.fullname)
-        } catch (workerError) {
-          console.warn(
-            "Could not load reporter as a worker:",
-            workerError,
-          )
-        }
-
-        if (selectedTicket.assignee_id) {
+        if (user?.role === "MANAGER") {
           try {
-            const assignee = await getWorkerById(
-              accessToken,
-              selectedTicket.assignee_id,
-            )
+            const [placeData, workersData] = await Promise.all([
+              getPlace(accessToken, selectedTicket.place_id),
+              getPlaceWorkers(accessToken, selectedTicket.place_id),
+            ])
 
-            if (alive) setAssigneeName(assignee.fullname)
-          } catch (workerError) {
-            console.warn(
-              "Could not load assignee as a worker:",
-              workerError,
-            )
+            if (alive) {
+              setPlace(placeData)
+              setPlaceWorkers(workersData)
+            }
+          } catch (peopleError) {
+            console.warn("Could not load the place's workers:", peopleError)
           }
         }
       } catch (err) {
@@ -231,9 +209,7 @@ function TicketDetailPage() {
 
         if (alive) {
           setError(
-            err instanceof Error
-              ? err.message
-              : "حدث خطأ أثناء تحميل التذكرة",
+            errorMessage(err),
           )
         }
       } finally {
@@ -246,7 +222,7 @@ function TicketDetailPage() {
     return () => {
       alive = false
     }
-  }, [accessToken, ticket_id])
+  }, [accessToken, ticket_id, user?.role])
 
   const loadTicketDetails = async () => {
     if (!accessToken) return
@@ -283,45 +259,11 @@ function TicketDetailPage() {
         setAsset(null)
       }
 
-      setReporterName(selectedTicket.reporter_id)
-      setAssigneeName(selectedTicket.assignee_id || null)
-
-      try {
-        const reporter = await getWorkerById(
-          accessToken,
-          selectedTicket.reporter_id,
-        )
-
-        setReporterName(reporter.fullname)
-      } catch (workerError) {
-        console.warn(
-          "Could not load reporter as a worker:",
-          workerError,
-        )
-      }
-
-      if (selectedTicket.assignee_id) {
-        try {
-          const assignee = await getWorkerById(
-            accessToken,
-            selectedTicket.assignee_id,
-          )
-
-          setAssigneeName(assignee.fullname)
-        } catch (workerError) {
-          console.warn(
-            "Could not load assignee as a worker:",
-            workerError,
-          )
-        }
-      }
     } catch (err) {
       console.error("Failed to load ticket:", err)
 
       setError(
-        err instanceof Error
-          ? err.message
-          : "حدث خطأ أثناء تحميل التذكرة",
+        errorMessage(err),
       )
     } finally {
       setLoading(false)
@@ -331,6 +273,7 @@ function TicketDetailPage() {
   const resetActionForm = () => {
     setAction(null)
     setActionError(null)
+    setAssigneeId("")
     setDueDate("")
     setEstimatedCost("")
     setRejectionReason("")
@@ -343,45 +286,8 @@ function TicketDetailPage() {
     })
   }
 
-  const sendAction = async (
-    endpoint: string,
-    body: Record<string, unknown> | FormData,
-  ) => {
-    if (!accessToken) {
-      throw new Error("انتهت الجلسة، سجل الدخول مرة أخرى")
-    }
-
-    const isFormData = body instanceof FormData
-
-    const response = await fetch(
-      `${API_URL}/tickets/${ticket_id}/${endpoint}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          ...(isFormData
-            ? {}
-            : { "Content-Type": "application/json" }),
-        },
-        body: isFormData ? body : JSON.stringify(body),
-      },
-    )
-
-    const result = await response.json().catch(() => null)
-
-    if (!response.ok) {
-      throw new Error(
-        result?.message ||
-          result?.error ||
-          `تعذر تنفيذ العملية (${response.status})`,
-      )
-    }
-
-    return result
-  }
-
   const handleApprove = async () => {
-    if (!assigneeId || !dueDate || estimatedCost === "") return
+    if (!accessToken || !assigneeId || !dueDate) return
 
     try {
       setActionLoading(true)
@@ -390,14 +296,17 @@ function TicketDetailPage() {
       await approveTicket(accessToken, ticket_id, {
         assignee_id: assigneeId,
         due_date: dueDate,
-        estimated_cost: Number(estimatedCost),
+        // Optional in the API: send it only when filled.
+        ...(estimatedCost.trim() === ""
+          ? {}
+          : { estimated_cost: Number(estimatedCost) }),
       })
 
       resetActionForm()
       await loadTicketDetails()
     } catch (err) {
       setActionError(
-        err instanceof Error ? err.message : "تعذر قبول التذكرة",
+        errorMessage(err),
       )
     } finally {
       setActionLoading(false)
@@ -405,7 +314,7 @@ function TicketDetailPage() {
   }
 
   const handleReject = async () => {
-    if (!rejectionReason.trim()) return
+    if (!accessToken || !rejectionReason.trim()) return
 
     try {
       setActionLoading(true)
@@ -419,7 +328,7 @@ function TicketDetailPage() {
       await loadTicketDetails()
     } catch (err) {
       setActionError(
-        err instanceof Error ? err.message : "تعذر رفض التذكرة",
+        errorMessage(err),
       )
     } finally {
       setActionLoading(false)
@@ -427,7 +336,7 @@ function TicketDetailPage() {
   }
 
   const handleReassign = async () => {
-    if (!assigneeId || !dueDate) return
+    if (!accessToken || !assigneeId || !dueDate) return
 
     try {
       setActionLoading(true)
@@ -442,9 +351,7 @@ function TicketDetailPage() {
       await loadTicketDetails()
     } catch (err) {
       setActionError(
-        err instanceof Error
-          ? err.message
-          : "تعذر إعادة تعيين المكلف",
+        errorMessage(err),
       )
     } finally {
       setActionLoading(false)
@@ -453,6 +360,7 @@ function TicketDetailPage() {
 
   const handleComplete = async () => {
     if (
+      !accessToken ||
       actualCost === "" ||
       Number(actualCost) < 0 ||
       photos.length < 1 ||
@@ -475,7 +383,7 @@ function TicketDetailPage() {
       await loadTicketDetails()
     } catch (err) {
       setActionError(
-        err instanceof Error ? err.message : "تعذر إكمال التذكرة",
+        errorMessage(err),
       )
     } finally {
       setActionLoading(false)
@@ -494,11 +402,18 @@ function TicketDetailPage() {
   const date = (value: string | null | undefined) => {
     if (!value) return "—"
 
+    // A date without a time (due_date) is shown as a date only.
+    if (value.length === 10) {
+      return new Date(`${value}T00:00:00`).toLocaleDateString(i18n.locale, {
+        dateStyle: "medium",
+      })
+    }
+
     const parsed = new Date(value)
 
     if (Number.isNaN(parsed.getTime())) return value
 
-    return parsed.toLocaleString("ar-SA", {
+    return parsed.toLocaleString(i18n.locale, {
       dateStyle: "medium",
       timeStyle: "short",
     })
@@ -507,36 +422,39 @@ function TicketDetailPage() {
   const money = (value: number | null) => {
     if (value === null || value === undefined) return "—"
 
-    return `${Number(value).toLocaleString("ar-SA")} ر.س`
+    return new Intl.NumberFormat(i18n.locale, {
+      style: "currency",
+      currency: place?.currency ?? "SAR",
+    }).format(Number(value))
   }
 
   const statusLabels: Record<string, string> = {
-    PENDING_REVIEW: "بانتظار المراجعة",
-    PENDING: "قيد الانتظار",
-    APPROVED: "تمت الموافقة",
-    REJECTED: "مرفوضة",
-    IN_PROGRESS: "قيد التنفيذ",
-    COMPLETED: "مكتملة",
-    CANCELLED: "ملغاة",
+    PENDING_REVIEW: t`Waiting for review`,
+    PENDING: t`Pending`,
+    APPROVED: t`Approved`,
+    REJECTED: t`Rejected`,
+    IN_PROGRESS: t`In progress`,
+    COMPLETED: t`Completed`,
+    CANCELLED: t`Cancelled`,
   }
 
   const priorityLabels: Record<string, string> = {
-    LOW: "منخفضة",
-    MEDIUM: "متوسطة",
-    HIGH: "عالية",
-    URGENT: "عاجلة",
+    LOW: t`Low`,
+    MEDIUM: t`Medium`,
+    HIGH: t`High`,
+    URGENT: t`Urgent`,
   }
 
   const typeLabels: Record<string, string> = {
-    CORRECTIVE: "صيانة تصحيحية",
-    PREVENTIVE: "صيانة وقائية",
+    CORRECTIVE: t`Corrective maintenance`,
+    PREVENTIVE: t`Preventive maintenance`,
   }
 
   const attachmentTypeLabels: Record<string, string> = {
-    DAMAGE: "صور الأضرار",
-    BEFORE: "صور قبل الصيانة",
-    AFTER: "صور بعد الصيانة",
-    COMPLETION: "صور الإنجاز",
+    DAMAGE: t`Damage photos`,
+    BEFORE: t`Before photos`,
+    AFTER: t`After photos`,
+    COMPLETION: t`Completion photos`,
   }
 
   const statusColors: Record<string, string> = {
@@ -620,7 +538,7 @@ function TicketDetailPage() {
   if (loading) {
     return (
       <div style={S("padding:32px; color:var(--muted-foreground)")}>
-        جاري تحميل تفاصيل التذكرة...
+        <Trans>Loading the ticket…</Trans>
       </div>
     )
   }
@@ -633,11 +551,46 @@ function TicketDetailPage() {
         )}
       >
         <p style={S("color:#dc2626")}>
-          {error || "لم يتم العثور على التذكرة"}
+          {error || t`Ticket not found`}
         </p>
       </div>
     )
   }
+
+  // The API lets only the place's Manager review and reassign, and only the
+  // assignee complete; offer only the buttons that can work.
+  const isPlaceManager =
+    user?.role === "MANAGER" && !!place && place.owner_id === user.id
+  const isAssignee = !!ticket.assignee_id && ticket.assignee_id === user?.id
+  const canReview = isPlaceManager && ticket.status === "PENDING_REVIEW"
+  const canReassign = isPlaceManager && ticket.status === "APPROVED"
+  const canComplete = isAssignee && ticket.status === "APPROVED"
+  const hasActions = canReview || canReassign || canComplete
+
+  const workerNames = new Map(
+    placeWorkers.map((placeWorker) => [
+      placeWorker.worker.id,
+      placeWorker.worker.fullname,
+    ]),
+  )
+  const personName = (id: string | null | undefined) => {
+    if (!id) return "—"
+    if (id === user?.id) return t`You`
+    return workerNames.get(id) ?? t`Another team member`
+  }
+
+  // Who can take the work: the place's owner and its ACTIVE workers.
+  const assigneeOptions = place
+    ? [
+        { id: place.owner_id, label: t`You (owner)` },
+        ...placeWorkers
+          .filter((placeWorker) => placeWorker.worker.status === "ACTIVE")
+          .map((placeWorker) => ({
+            id: placeWorker.worker.id,
+            label: placeWorker.worker.fullname,
+          })),
+      ]
+    : []
 
   return (
     <div
@@ -649,7 +602,7 @@ function TicketDetailPage() {
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink render={<a href="/" />}>
-              الرئيسية
+              <Trans>Home</Trans>
             </BreadcrumbLink>
           </BreadcrumbItem>
 
@@ -657,7 +610,7 @@ function TicketDetailPage() {
 
           <BreadcrumbItem>
             <BreadcrumbLink render={<a href="/places" />}>
-              العقارات
+              <Trans>Places</Trans>
             </BreadcrumbLink>
           </BreadcrumbItem>
 
@@ -670,7 +623,7 @@ function TicketDetailPage() {
                   to="/place/$place_id"
                   params={{ place_id: ticket.place_id }}
                 >
-                  <Trans>الصفحة السابقة</Trans>
+                  <Trans>Place</Trans>
                 </Link>
               }
             />
@@ -685,7 +638,7 @@ function TicketDetailPage() {
       >
         <div style={S("display:flex; flex-direction:column; gap:8px")}>
           <h1 style={S("font-size:24px; font-weight:800; margin:0")}>
-            تفاصيل تذكرة الصيانة
+            <Trans>Maintenance ticket</Trans>
           </h1>
 
           <p
@@ -693,7 +646,7 @@ function TicketDetailPage() {
               "font-size:13px; color:var(--muted-foreground); margin:0",
             )}
           >
-            {ticket.description || "تذكرة صيانة"}
+            {ticket.description || t`Maintenance ticket`}
           </p>
         </div>
 
@@ -712,46 +665,46 @@ function TicketDetailPage() {
       </header>
 
       {/* First section: always visible */}
-      <Section title="معلومات التذكرة">
+      <Section title={t`Ticket information`}>
         <Grid>
           <InfoItem
-            label="نوع الصيانة"
+            label={t`Maintenance type`}
             value={typeLabels[ticket.ticket_type] || ticket.ticket_type}
           />
 
           <InfoItem
-            label="الأولوية"
+            label={t`Priority`}
             value={priorityLabels[ticket.priority] || ticket.priority}
           />
 
           <InfoItem
-            label="الحالة"
+            label={t`Status`}
             value={statusLabels[ticket.status] || ticket.status}
           />
 
           <InfoItem
-            label="تاريخ الاستحقاق"
+            label={t`Due date`}
             value={date(ticket.due_date)}
           />
 
           <InfoItem
-            label="حالة التأخير"
+            label={t`Overdue?`}
             value={
               ticket.is_overdue ? (
-                <span style={S("color:#dc2626")}>متأخرة</span>
+                <span style={S("color:#dc2626")}><Trans>Overdue</Trans></span>
               ) : (
-                "غير متأخرة"
+                t`Not overdue`
               )
             }
           />
 
           <InfoItem
-            label="تاريخ الإنشاء"
+            label={t`Created`}
             value={date(ticket.created_at)}
           />
 
           <InfoItem
-            label="آخر تحديث"
+            label={t`Last updated`}
             value={date(ticket.updated_at)}
           />
         </Grid>
@@ -761,22 +714,25 @@ function TicketDetailPage() {
             "border-top:1px solid var(--border); padding-top:16px",
           )}
         >
-          <InfoItem label="الوصف" value={ticket.description} />
+          <InfoItem label={t`Description`} value={ticket.description} />
         </div>
       </Section>
 
       <div style={S("display: flex; gap: 10px; flex-wrap: wrap; align-items: center")}>
   {[
-    { id: "asset-section", title: "الأصل المرتبط", icon: <Building2 size={16} /> },
-    { id: "cost-section", title: "التكاليف", icon: <Wallet size={16} /> },
-    { id: "review-section", title: "المراجعة", icon: <CheckCircle size={16} /> },
-    { id: "completion-section", title: "الإنجاز", icon: <CheckCheck size={16} /> },
-    { id: "people-section", title: "المسؤولون", icon: <Users size={16} /> },
-    { id: "timeline-section", title: "السجل الزمني", icon: <Clock3 size={16} /> },
-    { id: "actions-section", title: "إجراءات التذكرة", icon: <Wrench size={16} /> },
-    { id: "attachments-section", title: "الملحقات", icon: <Paperclip size={16} /> },
-  ].map((section) => (
+    { id: "asset-section", title: t`Asset`, icon: <Building2 size={16} /> },
+    { id: "cost-section", title: t`Costs`, icon: <Wallet size={16} /> },
+    { id: "review-section", title: t`Review`, icon: <CheckCircle size={16} /> },
+    { id: "completion-section", title: t`Completion`, icon: <CheckCheck size={16} /> },
+    { id: "people-section", title: t`People`, icon: <Users size={16} /> },
+    { id: "timeline-section", title: t`Timeline`, icon: <Clock3 size={16} /> },
+    { id: "actions-section", title: t`Actions`, icon: <Wrench size={16} /> },
+    { id: "attachments-section", title: t`Attachments`, icon: <Paperclip size={16} /> },
+  ]
+    .filter((section) => section.id !== "actions-section" || hasActions)
+    .map((section) => (
     <Button
+  key={section.id}
   type="button"
   variant="outline"
   size="sm"
@@ -794,12 +750,12 @@ function TicketDetailPage() {
 
       {/* Asset */}
       <div id="asset-section" style={{ display: "none" }}>
-        <Section title="الأصل المرتبط">
+        <Section title={t`Asset`}>
           {asset ? (
             <Grid>
-              <InfoItem label="اسم الأصل" value={asset.name} />
-              <InfoItem label="نوع الأصل" value={asset.type} />
-              <InfoItem label="حالة الأصل" value={asset.status} />
+              <InfoItem label={t`Asset name`} value={asset.name} />
+              <InfoItem label={t`Asset type`} value={asset.type} />
+              <InfoItem label={t`Asset status`} value={asset.status} />
             </Grid>
           ) : (
             <p
@@ -807,7 +763,7 @@ function TicketDetailPage() {
                 "font-size:13px; color:var(--muted-foreground); margin:0",
               )}
             >
-              لا توجد بيانات للأصل أو لم يتم تحديد أصل لهذه التذكرة.
+              <Trans>This ticket has no asset.</Trans>
             </p>
           )}
         </Section>
@@ -815,15 +771,15 @@ function TicketDetailPage() {
 
       {/* Costs */}
       <div id="cost-section" style={{ display: "none" }}>
-        <Section title="التكاليف" icon={<Wallet size={18} />}>
+        <Section title={t`Costs`} icon={<Wallet size={18} />}>
           <Grid>
             <InfoItem
-              label="التكلفة التقديرية"
+              label={t`Estimated cost`}
               value={money(ticket.estimated_cost)}
             />
 
             <InfoItem
-              label="التكلفة الفعلية"
+              label={t`Actual cost`}
               value={money(ticket.actual_cost)}
             />
           </Grid>
@@ -832,15 +788,17 @@ function TicketDetailPage() {
 
       {/* Review */}
       <div id="review-section" style={{ display: "none" }}>
-        <Section title="معلومات المراجعة">
+        <Section title={t`Review`}>
           <Grid>
             <InfoItem
-              label="تمت المراجعة بواسطة"
-              value={ticket.reviewed_by}
+              label={t`Reviewed by`}
+              value={
+                ticket.reviewed_by ? personName(ticket.reviewed_by) : null
+              }
             />
 
             <InfoItem
-              label="تاريخ المراجعة"
+              label={t`Reviewed on`}
               value={date(ticket.reviewed_at)}
             />
           </Grid>
@@ -852,7 +810,7 @@ function TicketDetailPage() {
               )}
             >
               <strong style={S("font-size:13px; color:#dc2626")}>
-                سبب الرفض
+                <Trans>Reason for rejection</Trans>
               </strong>
 
               <p style={S("font-size:14px; margin:0")}>
@@ -866,17 +824,17 @@ function TicketDetailPage() {
       {/* Completion */}
       <div id="completion-section" style={{ display: "none" }}>
         <Section
-          title="معلومات الإنجاز"
+          title={t`Completion`}
           icon={<CalendarDays size={18} />}
         >
           <Grid>
             <InfoItem
-              label="تاريخ الإنجاز"
+              label={t`Completed on`}
               value={date(ticket.completed_at)}
             />
 
             <InfoItem
-              label="ملاحظات الإنجاز"
+              label={t`Completion notes`}
               value={ticket.completion_notes}
             />
           </Grid>
@@ -885,35 +843,41 @@ function TicketDetailPage() {
 
       {/* People */}
       <div id="people-section" style={{ display: "none" }}>
-        <Section title="المسؤولون">
+        <Section title={t`People`}>
           <Grid>
-            <InfoItem label="مُبلّغ التذكرة" value={reporterName} />
-            <InfoItem label="المسؤول عن التنفيذ" value={assigneeName} />
+            <InfoItem
+              label={t`Reported by`}
+              value={personName(ticket.reporter_id)}
+            />
+            <InfoItem
+              label={t`Assignee`}
+              value={ticket.assignee_id ? personName(ticket.assignee_id) : null}
+            />
           </Grid>
         </Section>
       </div>
 
       {/* Timeline */}
       <div id="timeline-section" style={{ display: "none" }}>
-        <Section title="السجل الزمني" icon={<Clock3 size={18} />}>
+        <Section title={t`Timeline`} icon={<Clock3 size={18} />}>
           <Grid>
             <InfoItem
-              label="تاريخ الإنشاء"
+              label={t`Created`}
               value={date(ticket.created_at)}
             />
 
             <InfoItem
-              label="تاريخ آخر تحديث"
+              label={t`Last updated`}
               value={date(ticket.updated_at)}
             />
 
             <InfoItem
-              label="تاريخ المراجعة"
+              label={t`Reviewed on`}
               value={date(ticket.reviewed_at)}
             />
 
             <InfoItem
-              label="تاريخ الإنجاز"
+              label={t`Completed on`}
               value={date(ticket.completed_at)}
             />
           </Grid>
@@ -938,7 +902,7 @@ function TicketDetailPage() {
                 "font-size:17px; font-weight:750; width:100%; text-align:center",
               )}
             >
-              إجراءات التذكرة
+              <Trans>Actions</Trans>
             </CardTitle>
           </CardHeader>
 
@@ -947,7 +911,7 @@ function TicketDetailPage() {
               "display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:12px; padding:24px 20px",
             )}
           >
-            {ticket.status === "PENDING_REVIEW" && (
+            {canReview && (
               <>
                 <Button
                   variant="default"
@@ -956,7 +920,7 @@ function TicketDetailPage() {
                   style={S("height:42px; padding:0 20px; gap:8px")}
                 >
                   <CheckCircle size={17} />
-                  <Trans>قبول التذكرة</Trans>
+                  <Trans>Approve ticket</Trans>
                 </Button>
 
                 <Button
@@ -968,23 +932,25 @@ function TicketDetailPage() {
                   )}
                 >
                   <XCircle size={17} />
-                  <Trans>رفض التذكرة</Trans>
+                  <Trans>Reject ticket</Trans>
                 </Button>
               </>
             )}
 
-            {ticket.status === "APPROVED" && (
-              <>
-                <Button
-                  variant="outline"
-                  className="am-btn"
-                  onClick={() => openAction("reassign")}
-                  style={S("height:42px; padding:0 20px; gap:8px")}
-                >
-                  <UserRoundCog size={17} />
-                  <Trans>إعادة تعيين المكلف</Trans>
-                </Button>
+            {canReassign && (
+              <Button
+                variant="outline"
+                className="am-btn"
+                onClick={() => openAction("reassign")}
+                style={S("height:42px; padding:0 20px; gap:8px")}
+              >
+                <UserRoundCog size={17} />
+                <Trans>Reassign</Trans>
+              </Button>
+            )}
 
+            {canComplete && (
+              <>
                 <Button
                   variant="outline"
                   className="am-btn"
@@ -994,7 +960,7 @@ function TicketDetailPage() {
                   )}
                 >
                   <CheckCheck size={17} />
-                  <Trans>اكتملت التذكرة</Trans>
+                  <Trans>Complete ticket</Trans>
                 </Button>
               </>
             )}
@@ -1012,10 +978,10 @@ function TicketDetailPage() {
                 )}
               >
                 <strong style={S("font-size:15px")}>
-                  {action === "approve" && "قبول التذكرة"}
-                  {action === "reject" && "رفض التذكرة"}
-                  {action === "reassign" && "إعادة تعيين المكلف"}
-                  {action === "complete" && "إكمال التذكرة"}
+                  {action === "approve" && t`Approve ticket`}
+                  {action === "reject" && t`Reject ticket`}
+                  {action === "reassign" && t`Reassign`}
+                  {action === "complete" && t`Complete ticket`}
                 </strong>
 
                 <Button
@@ -1023,7 +989,7 @@ function TicketDetailPage() {
                   size="icon"
                   onClick={resetActionForm}
                   disabled={actionLoading}
-                  aria-label="إغلاق"
+                  aria-label={t`Close`}
                 >
                   <X size={17} />
                 </Button>
@@ -1031,7 +997,29 @@ function TicketDetailPage() {
 
               {(action === "approve" || action === "reassign") && (
                 <div>
-                  <label style={labelStyle}>تاريخ الاستحقاق</label>
+                  <label htmlFor="ticket-assignee" style={labelStyle}>
+                    {t`Assignee`}
+                  </label>
+
+                  <select
+                    id="ticket-assignee"
+                    value={assigneeId}
+                    onChange={(event) => setAssigneeId(event.target.value)}
+                    style={fieldStyle}
+                  >
+                    <option value="">{t`Choose who does the work`}</option>
+                    {assigneeOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {(action === "approve" || action === "reassign") && (
+                <div>
+                  <label style={labelStyle}><Trans>Due date</Trans></label>
 
                   <input
                     type="date"
@@ -1045,7 +1033,7 @@ function TicketDetailPage() {
 
               {action === "approve" && (
                 <div>
-                  <label style={labelStyle}>التكلفة التقديرية</label>
+                  <label style={labelStyle}>{t`Estimated cost (optional)`}</label>
 
                   <input
                     type="number"
@@ -1063,14 +1051,14 @@ function TicketDetailPage() {
 
               {action === "reject" && (
                 <div>
-                  <label style={labelStyle}>سبب الرفض</label>
+                  <label style={labelStyle}><Trans>Reason for rejection</Trans></label>
 
                   <textarea
                     value={rejectionReason}
                     onChange={(event) =>
                       setRejectionReason(event.target.value)
                     }
-                    placeholder="اكتب سبب رفض التذكرة"
+                    placeholder={t`Why is this ticket rejected?`}
                     rows={4}
                     style={{ ...fieldStyle, resize: "vertical" }}
                   />
@@ -1080,7 +1068,7 @@ function TicketDetailPage() {
               {action === "complete" && (
                 <>
                   <div>
-                    <label style={labelStyle}>التكلفة الفعلية</label>
+                    <label style={labelStyle}><Trans>Actual cost</Trans></label>
 
                     <input
                       type="number"
@@ -1097,7 +1085,7 @@ function TicketDetailPage() {
 
                   <div>
                     <label style={labelStyle}>
-                      ملاحظات الإنجاز (اختياري)
+                      <Trans>Completion notes (optional)</Trans>
                     </label>
 
                     <textarea
@@ -1105,7 +1093,7 @@ function TicketDetailPage() {
                       onChange={(event) =>
                         setCompletionNotes(event.target.value)
                       }
-                      placeholder="أضف ملاحظات الإنجاز"
+                      placeholder={t`Add completion notes`}
                       rows={3}
                       style={{ ...fieldStyle, resize: "vertical" }}
                     />
@@ -1113,7 +1101,7 @@ function TicketDetailPage() {
 
                   <div>
                     <label style={labelStyle}>
-                      صور الإنجاز (من 1 إلى 5 صور)
+                      <Trans>Completion photos (1 to 5)</Trans>
                     </label>
 
                     <input
@@ -1133,7 +1121,7 @@ function TicketDetailPage() {
                         "font-size:12px; color:var(--muted-foreground); margin:6px 0 0",
                       )}
                     >
-                      تم اختيار {photos.length} من 5 صور
+                      <Trans>{photos.length} of 5 photos chosen</Trans>
                     </p>
                   </div>
                 </>
@@ -1157,13 +1145,12 @@ function TicketDetailPage() {
                       actionLoading ||
                       !assigneeId.trim() ||
                       !dueDate ||
-                      estimatedCost === "" ||
                       Number(estimatedCost) < 0
                     }
                   >
                     {actionLoading
-                      ? "جاري التنفيذ..."
-                      : "تأكيد الموافقة"}
+                      ? t`Working…`
+                      : t`Confirm approval`}
                   </Button>
                 )}
 
@@ -1174,8 +1161,8 @@ function TicketDetailPage() {
                     disabled={actionLoading || !rejectionReason.trim()}
                   >
                     {actionLoading
-                      ? "جاري التنفيذ..."
-                      : "تأكيد الرفض"}
+                      ? t`Working…`
+                      : t`Confirm rejection`}
                   </Button>
                 )}
 
@@ -1189,8 +1176,8 @@ function TicketDetailPage() {
                     }
                   >
                     {actionLoading
-                      ? "جاري التنفيذ..."
-                      : "تأكيد إعادة التعيين"}
+                      ? t`Working…`
+                      : t`Confirm reassignment`}
                   </Button>
                 )}
 
@@ -1205,8 +1192,8 @@ function TicketDetailPage() {
                     }
                   >
                     {actionLoading
-                      ? "جاري التنفيذ..."
-                      : "تأكيد الإكمال"}
+                      ? t`Working…`
+                      : t`Confirm completion`}
                   </Button>
                 )}
 
@@ -1215,7 +1202,7 @@ function TicketDetailPage() {
                   onClick={resetActionForm}
                   disabled={actionLoading}
                 >
-                  إلغاء
+                  <Trans>Cancel</Trans>
                 </Button>
               </div>
             </div>
@@ -1225,7 +1212,7 @@ function TicketDetailPage() {
 
       {/* Attachments - Last section */}
       <div id="attachments-section" style={{ display: "none" }}>
-        <Section title="الملحقات" icon={<Paperclip size={18} />}>
+        <Section title={t`Attachments`} icon={<Paperclip size={18} />}>
           {ticket.attachments && ticket.attachments.length > 0 ? (
             <>
               <p
@@ -1233,7 +1220,7 @@ function TicketDetailPage() {
                   "font-size:13px; color:var(--muted-foreground); margin:0",
                 )}
               >
-                عدد المرفقات: {ticket.attachments.length}
+                <Trans>Attachments: {ticket.attachments.length}</Trans>
               </p>
 
               <div
@@ -1252,7 +1239,7 @@ function TicketDetailPage() {
                       href={attachment.file_url}
                       target="_blank"
                       rel="noreferrer"
-                      aria-label="فتح الصورة بالحجم الكامل"
+                      aria-label={t`Open the full-size photo`}
                       style={S(
                         "display:block; width:100%; height:200px; background:var(--muted); overflow:hidden",
                       )}
@@ -1285,7 +1272,7 @@ function TicketDetailPage() {
                           "font-size:12px; color:var(--muted-foreground)",
                         )}
                       >
-                        تاريخ الرفع: {date(attachment.created_at)}
+                        <Trans>Uploaded: {date(attachment.created_at)}</Trans>
                       </span>
 
                       <span
@@ -1304,7 +1291,7 @@ function TicketDetailPage() {
                           "font-size:13px; color:var(--primary); text-decoration:underline",
                         )}
                       >
-                        عرض الصورة بالحجم الكامل
+                        <Trans>View full size</Trans>
                       </a>
                     </div>
                   </div>
@@ -1317,7 +1304,7 @@ function TicketDetailPage() {
                 "font-size:13px; color:var(--muted-foreground); margin:0",
               )}
             >
-              لا توجد مرفقات لهذه التذكرة.
+              <Trans>This ticket has no attachments.</Trans>
             </p>
           )}
         </Section>

@@ -11,6 +11,9 @@ import {
 } from "lucide-react"
 
 import { useAuth } from "@/lib/auth"
+import { t } from "@lingui/core/macro"
+import { Trans } from "@lingui/react/macro"
+import type { Worker } from "@amlak/shared"
 import { getWorkers } from "@/lib/api"
 import { S } from "@/lib/dom-style"
 
@@ -33,31 +36,12 @@ export const Route = createFileRoute("/_authenticated/workers")({
   component: WorkersPage,
 })
 
-type WorkerStatus =
-  | "ACTIVE"
-  | "INVITED"
-  | "PENDING_VERIFICATION"
-  | "DEACTIVATED"
-
-interface AssignedPlace {
-  id: string
-  place_name: string
-}
-
-interface Worker {
-  id: string
-  fullname: string
-  email: string
-  phone: string | null
-  status: WorkerStatus
-  assigned_places?: AssignedPlace[]
-}
-
+// Labels are components so they translate at render, not at import.
 const TABS = [
-  { key: "ALL", label: "الكل" },
-  { key: "ACTIVE", label: "نشط" },
-  { key: "INVITED", label: "الدعوات" },
-  { key: "DEACTIVATED", label: "غير نشط" },
+  { key: "ALL", label: <Trans>All</Trans> },
+  { key: "ACTIVE", label: <Trans>Active</Trans> },
+  { key: "INVITED", label: <Trans>Invited</Trans> },
+  { key: "DEACTIVATED", label: <Trans>Deactivated</Trans> },
 ] as const
 
 type TabKey = (typeof TABS)[number]["key"]
@@ -114,7 +98,6 @@ function WorkersPage() {
 
   return (
     <div
-      dir="rtl"
       style={S(
         "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px",
       )}
@@ -126,7 +109,7 @@ function WorkersPage() {
         )}
       >
         <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-          العمال
+          <Trans>Workers</Trans>
         </h1>
 
         <Link
@@ -142,7 +125,7 @@ function WorkersPage() {
               "width: 18px; height: 18px; display: block; flex: none",
             )}
           />
-          إضافة عامل
+          <Trans>Add worker</Trans>
         </Link>
       </div>
 
@@ -163,7 +146,7 @@ function WorkersPage() {
               "position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)",
             )}
           >
-            بحث
+            <Trans>Search</Trans>
           </Label>
 
           <Search
@@ -178,7 +161,7 @@ function WorkersPage() {
             type="search"
             className="am-input"
             style={S("padding-inline-start: 44px")}
-            placeholder="ابحث بالاسم أو البريد الإلكتروني أو الجوال"
+            placeholder={t`Search by name, email or phone`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -186,7 +169,7 @@ function WorkersPage() {
 
         <div
           role="group"
-          aria-label="تصفية حسب الحالة"
+          aria-label={t`Filter by status`}
           style={S("display: flex; gap: 8px; flex-wrap: wrap")}
         >
           {TABS.map((item) => (
@@ -251,7 +234,7 @@ function WorkersPage() {
             aria-hidden="true"
             className="size-3.5 shrink-0"
           />
-          تعذر تحميل بيانات العمال.
+          <Trans>We could not load the workers.</Trans>
         </p>
       )}
 
@@ -261,14 +244,14 @@ function WorkersPage() {
           <EmptyHeader>
             <EmptyTitle>
               {query || tab !== "ALL"
-                ? "لا يوجد عمال مطابقون"
-                : "لا يوجد عمال حتى الآن"}
+                ? t`No workers match`
+                : t`No workers yet`}
             </EmptyTitle>
 
             <EmptyDescription>
               {query || tab !== "ALL"
-                ? "جرّب تغيير كلمات البحث أو الفلتر المحدد."
-                : "أضف أول عامل للبدء بإدارة فريق العمل."}
+                ? t`Try other search words or another filter.`
+                : t`Add your first worker to start managing your team.`}
             </EmptyDescription>
 
             {query || tab !== "ALL" ? (
@@ -280,7 +263,7 @@ function WorkersPage() {
                   setTab("ALL")
                 }}
               >
-                مسح الفلاتر
+                <Trans>Clear filters</Trans>
               </Button>
             ) : (
               <Link
@@ -288,7 +271,7 @@ function WorkersPage() {
                 className={cn(buttonVariants(), "am-btn am-solid")}
               >
                 <Plus size={16} />
-                إضافة عامل
+                <Trans>Add worker</Trans>
               </Link>
             )}
           </EmptyHeader>
@@ -336,12 +319,11 @@ function WorkersPage() {
                   </div>
 
                   <div
-                    dir="ltr"
                     style={S(
-                      "margin-top: 3px; text-align: right; font-size: 11px; color: var(--muted-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
+                      "margin-top: 3px; font-size: 11px; color: var(--muted-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
                     )}
                   >
-                    {worker.email}
+                    <bdi dir="ltr">{worker.email}</bdi>
                   </div>
                 </div>
               </div>
@@ -364,7 +346,7 @@ function WorkersPage() {
                 >
                   <Phone size={12} />
                   <span dir="ltr">
-                    {worker.phone || "لا يوجد رقم"}
+                    {worker.phone || t`No phone number`}
                   </span>
                 </span>
 
@@ -374,7 +356,7 @@ function WorkersPage() {
                   )}
                 >
                   <MapPin size={12} />
-                  {worker.assigned_places?.length ?? 0} أماكن
+                  <Trans>{worker.assigned_places?.length ?? 0} places</Trans>
                 </span>
               </div>
 
@@ -388,7 +370,7 @@ function WorkersPage() {
                   >
                     {worker.assigned_places.slice(0, 2).map((place) => (
                       <span
-                        key={place.id}
+                        key={place.place_id}
                         style={S(
                           "max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 4px 7px; background: var(--muted); color: var(--muted-foreground); font-size: 10px",
                         )}
@@ -415,8 +397,8 @@ function WorkersPage() {
                   "margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 650; color: var(--muted-foreground)",
                 )}
               >
-                عرض التفاصيل
-                <span aria-hidden="true">←</span>
+                <Trans>View details</Trans>
+                <span aria-hidden="true" className="inline-block rtl:rotate-180">→</span>
               </div>
             </Link>
           ))}

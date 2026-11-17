@@ -1,38 +1,23 @@
-import { useEffect, useState, type SubmitEvent } from "react"
+import { useEffect, useState } from "react"
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import { CircleAlert, X } from "lucide-react"
-import type { Place, Asset } from "@amlak/shared"
+import { CircleAlert } from "lucide-react"
+import type { Asset } from "@amlak/shared"
 
 import { S } from "@/lib/dom-style"
 import { useAuth } from "@/lib/auth"
-import { createTicket, getPlaces, getPlaceAssets } from "@/lib/api"
+import { createTicket, getPlaceAssets } from "@/lib/api"
 import type { TicketPriority } from "@/lib/api"
-
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { errorMessage } from "@/lib/errors"
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import Form from "@/components/form"
-
-
-import { cn } from "cn"
+import Form, { type FormValues } from "@/components/form"
 
 export const Route = createFileRoute("/_authenticated/ticket/new")({
   component: AddTicket,
@@ -41,74 +26,20 @@ export const Route = createFileRoute("/_authenticated/ticket/new")({
   }),
 })
 
-const PRIORITIES: TicketPriority[] = [
-  "LOW",
-  "MEDIUM",
-  "HIGH",
-  "URGENT",
-]
-
-const priorityLabels: Record<TicketPriority, string> = {
-  LOW: "منخفضة",
-  MEDIUM: "متوسطة",
-  HIGH: "عالية",
-  URGENT: "عاجلة",
-}
-
 function AddTicket() {
   const { accessToken } = useAuth()
   const navigate = useNavigate()
   const { place_id } = Route.useSearch()
 
-const [places, setPlaces] = useState<Place[]>([])
-const [assets, setAssets] = useState<Asset[]>([])
-
-  const [placeId, setPlaceId] = useState(place_id)
-  const [assetId, setAssetId] = useState("")
-  const [priority, setPriority] = useState<TicketPriority | "">("")
-  const [description, setDescription] = useState("")
-  const [photos, setPhotos] = useState<File[]>([])
-
-  const [loading, setLoading] = useState(false)
-  const [loadingAssets, setLoadingAssets] = useState(false)
+  const [assets, setAssets] = useState<Asset[]>([])
   const [formError, setFormError] = useState("")
-  const [photoError, setPhotoError] = useState("")
-
-  const errorText =
-    "flex items-center gap-1.5 text-[13px] leading-5 text-crit-900"
 
   useEffect(() => {
-    if (!accessToken) return
+    if (!accessToken || !place_id) return
 
     let alive = true
 
-    getPlaces(accessToken)
-      .then((list) => {
-        if (alive) setPlaces(list)
-      })
-      .catch(() => {
-        if (alive) setPlaces([])
-      })
-
-    return () => {
-      alive = false
-    }
-  }, [accessToken])
-
-  useEffect(() => {
-    if (!accessToken || !placeId) {
-      setAssets([])
-      setAssetId("")
-      return
-    }
-
-    let alive = true
-
-    setLoadingAssets(true)
-    setAssets([])
-    setAssetId("")
-
-    getPlaceAssets(accessToken, placeId)
+    getPlaceAssets(accessToken, place_id)
       .then((list) => {
         if (alive) setAssets(list)
       })
@@ -116,90 +47,44 @@ const [assets, setAssets] = useState<Asset[]>([])
         console.error("Failed to load assets:", error)
         if (alive) setAssets([])
       })
-      .finally(() => {
-        if (alive) setLoadingAssets(false)
-      })
 
     return () => {
       alive = false
     }
-  }, [accessToken, placeId])
+  }, [accessToken, place_id])
 
-  function handlePhotosChange(
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) {
-    const selected = Array.from(e.target.files ?? [])
+  async function handleSubmit(values: FormValues) {
+    if (!accessToken) return
+    const text = (name: string) =>
+      typeof values[name] === "string" ? (values[name] as string).trim() : ""
+    const photos = Array.isArray(values.photos) ? values.photos : []
 
-    if (selected.length > 5) {
-      setPhotoError("يمكنك إضافة 5 صور كحد أقصى")
-      setPhotos([])
-      e.target.value = ""
+    if (!place_id) {
+      setFormError(t`Choose the place first`)
+      return
+    }
+    if (photos.length > 5) {
+      setFormError(t`You can add up to 5 photos`)
       return
     }
 
-    setPhotoError("")
-    setPhotos(selected)
+    setFormError("")
+    try {
+      await createTicket(accessToken, place_id, {
+        asset_id: text("assetId") || undefined,
+        priority: (text("priority") || undefined) as TicketPriority | undefined,
+        description: text("description") || undefined,
+        photos,
+      })
+
+      void navigate({ to: "/place/$place_id", params: { place_id } })
+    } catch (error) {
+      setFormError(errorMessage(error))
+    }
   }
-
-  function removePhoto(index: number) {
-    setPhotos((current) => current.filter((_, i) => i !== index))
-  }
-
-  async function handleSubmit(
-  token: string,
-  values: Record<string, string | File[]>
-) {
-  const selectedPlaceId = values.placeId as string
-  const selectedAssetId = values.assetId as string
-  const selectedPriority = values.priority as TicketPriority
-  const selectedDescription = values.description as string
-  const selectedPhotos = (values.photos as File[]) || []
-
-  if (!token) return
-
-  setFormError("")
-  setPhotoError("")
-
-  if (!selectedPlaceId) {
-    setFormError("اختر العقار أولاً")
-    return
-  }
-
-  if (selectedPhotos.length > 5) {
-    setPhotoError("يمكنك إضافة 5 صور كحد أقصى")
-    return
-  }
-
-  setLoading(true)
-
-  try {
-    await createTicket(token, selectedPlaceId, {
-      asset_id: selectedAssetId || undefined,
-      priority: selectedPriority || undefined,
-      description: selectedDescription.trim() || undefined,
-      photos: selectedPhotos,
-    })
-
-    void navigate({
-      to: "/place/$place_id",
-      params: { place_id: selectedPlaceId },
-    })
-  } catch (error) {
-    console.error("Failed to create ticket:", error)
-
-    setFormError(
-      error instanceof Error
-        ? error.message
-        : "تعذر إنشاء تذكرة الصيانة",
-    )
-  } finally {
-    setLoading(false)
-  }
-}
 
   return (
     <div
-      dir="rtl"
       style={S(
         "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 720px; width: 100%",
       )}
@@ -207,11 +92,11 @@ const [assets, setAssets] = useState<Asset[]>([])
 <Breadcrumb>
   <BreadcrumbList>
   <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/" />}>الرئيسية</BreadcrumbLink>
+      <BreadcrumbLink render={<a href="/" />}><Trans>Home</Trans></BreadcrumbLink>
     </BreadcrumbItem>
     <BreadcrumbSeparator />
     <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/places" />}>العقارات</BreadcrumbLink>
+      <BreadcrumbLink render={<a href="/places" />}><Trans>Places</Trans></BreadcrumbLink>
     </BreadcrumbItem>
     <BreadcrumbSeparator />
     <BreadcrumbItem>
@@ -221,7 +106,7 @@ const [assets, setAssets] = useState<Asset[]>([])
             to="/place/$place_id"
             params={{ place_id: place_id }}
           >
-            {place_id}
+            <Trans>Place</Trans>
           </Link>
         }
       />
@@ -231,26 +116,18 @@ const [assets, setAssets] = useState<Asset[]>([])
 <center>
       <div style={S("display:flex; flex-direction:column; gap:6px")}>
         <h1 style={S("font-size:30px; font-weight:800; margin:0")}>
-          <Trans>رفع تذكرة صيانة</Trans>
+          <Trans>Report damage</Trans>
         </h1>
 
         <p style={S("font-size:14px; color:var(--muted-foreground); margin:0")}>
-          تسجيل بلاغ صيانة جديد
+          <Trans>Report new damage for maintenance</Trans>
         </p>
       </div>
         <Form
   fields={[
     {
-      name: "placeId",
-      label: "العقار",
-      type: "select",
-      required: true,
-      defaultValue: place_id,
-      hidden:true,
-    },
-    {
       name: "assetId",
-      label: "الأصل",
+      label: t`Asset`,
       type: "select",
       options: assets.map((asset) => ({
         value: asset.id,
@@ -259,34 +136,39 @@ const [assets, setAssets] = useState<Asset[]>([])
     },
     {
       name: "priority",
-      label: "الأولوية",
+      label: t`Priority`,
       type: "select",
       required: true,
       defaultValue: "MEDIUM",
       options: [
-        { value: "LOW", label: "منخفضة" },
-        { value: "MEDIUM", label: "متوسطة" },
-        { value: "HIGH", label: "عالية" },
-        { value: "URGENT", label: "عاجلة" },
+        { value: "LOW", label: t`Low` },
+        { value: "MEDIUM", label: t`Medium` },
+        { value: "HIGH", label: t`High` },
+        { value: "URGENT", label: t`Urgent` },
       ],
     },
     {
       name: "description",
-      label: "وصف المشكلة",
+      label: t`Description`,
       type: "text",
       required: true,
     },
     {
       name: "photos",
-      label: "صور المشكلة",
+      label: t`Photos of the damage`,
       type: "file",
       accept: "image/*",
       multiple: true,
     },
   ]}
-  args={{ accessToken }}
-  callable={handleSubmit}
+  onSubmit={handleSubmit}
 />
+        {formError && (
+          <p role="alert" className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900" style={S("margin-top: 12px")}>
+            <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+            {formError}
+          </p>
+        )}
 
   </center>
 

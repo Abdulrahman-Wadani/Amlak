@@ -43,6 +43,8 @@ services:
     build:
       context: .
       dockerfile: apps/web/Dockerfile.prod
+      args:
+        VITE_TOMTOM_API_KEY: ${VITE_TOMTOM_API_KEY:-}
     restart: unless-stopped
     environment:
       DOMAIN: ${DOMAIN}

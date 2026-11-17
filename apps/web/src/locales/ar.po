@@ -7,77 +7,123 @@ msgstr ""
 "X-Generator: @lingui/cli\n"
 "Language: ar\n"
 
-#. js-lingui-explicit-id
-#: src/routes/_authenticated/notifications.tsx:426
-msgid "Admin"
-msgstr "المسؤول"
+#: src/lib/errors.ts:181
+msgid ", "
+msgstr "، "
 
-#. js-lingui-explicit-id
-#: src/routes/_authenticated/notifications.tsx:429
-msgid "Manager"
-msgstr "مدير"
+#. placeholder {0}: booking.guest_count
+#: src/routes/_authenticated/bookings.tsx:255
+msgid "{0} guests"
+msgstr "{0} ضيوف"
 
-#. js-lingui-explicit-id
-#: src/routes/_authenticated/notifications.tsx:432
-msgid "Worker"
-msgstr "عامل"
+#. placeholder {0}: photos.length
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1124
+msgid "{0} of 5 photos chosen"
+msgstr "تم اختيار {0} من 5 صور"
 
-#. js-lingui-explicit-id
-#: src/routes/_authenticated/notifications.tsx:445
-msgid "UUID 1, UUID 2..."
-msgstr "UUID 1، UUID 2..."
+#. placeholder {0}: worker.assigned_places?.length ?? 0
+#: src/routes/_authenticated/workers.tsx:359
+msgid "{0} places"
+msgstr "{0} أماكن"
 
-#: src/routes/_authenticated/support/index.tsx:255
-msgid " تعذر تحميل بيانات المستخدمين."
-msgstr " تعذر تحميل بيانات المستخدمين."
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:444
+msgid "{count, plural, one {Every day} other {Every # days}}"
+msgstr "{count, plural, one {كل يوم} two {كل يومين} few {كل # أيام} many {كل # يومًا} other {كل # يوم}}"
 
-#. placeholder {0}: field.label
-#: src/components/form.tsx:93
-msgid "{0}"
-msgstr "{0}"
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:448
+msgid "{count, plural, one {Every month} other {Every # months}}"
+msgstr "{count, plural, one {كل شهر} two {كل شهرين} few {كل # أشهر} many {كل # شهرًا} other {كل # شهر}}"
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:446
+msgid "{count, plural, one {Every week} other {Every # weeks}}"
+msgstr "{count, plural, one {كل أسبوع} two {كل أسبوعين} few {كل # أسابيع} many {كل # أسبوعًا} other {كل # أسبوع}}"
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:449
+msgid "{count, plural, one {Every year} other {Every # years}}"
+msgstr "{count, plural, one {كل سنة} two {كل سنتين} few {كل # سنوات} many {كل # سنة} other {كل # سنة}}"
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:531
+msgid "{daysRemaining, plural, one {# day until maintenance} other {# days until maintenance}}"
+msgstr "{daysRemaining, plural, one {بقي يوم واحد على الصيانة} two {بقي يومان على الصيانة} few {بقيت # أيام على الصيانة} many {بقي # يومًا على الصيانة} other {بقي # يوم على الصيانة}}"
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:512
+msgid "{leadDays, plural, one {# day} other {# days}}"
+msgstr "{leadDays, plural, one {يوم واحد} two {يومان} few {# أيام} many {# يومًا} other {# يوم}}"
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:528
+msgid "{overdueDays, plural, one {Overdue by # day} other {Overdue by # days}}"
+msgstr "{overdueDays, plural, one {متأخرة منذ يوم واحد} two {متأخرة منذ يومين} few {متأخرة منذ # أيام} many {متأخرة منذ # يومًا} other {متأخرة منذ # يوم}}"
 
 #. Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ
+#. Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ
+#: src/components/app-shell.tsx:127
 #: src/components/auth-brand-panel.tsx:8
 msgid "A"
 msgstr "أ"
 
-#: src/routes/_authenticated/place/new.tsx:206
-#~ msgid "A three-bedroom chalet with a private pool."
-#~ msgstr "شاليه بثلاث غرف ومسبح خاص."
-
-#: src/components/app-shell.tsx:172
+#: src/components/app-shell.tsx:174
 msgid "Account"
 msgstr "حسابي"
 
-#: src/routes/signup.tsx:225
+#: src/routes/_authenticated/admin/$admin_id.tsx:502
+msgid "Account created"
+msgstr "تاريخ إنشاء الحساب"
+
+#: src/routes/_authenticated/admin/$admin_id.tsx:554
+msgid "Account information"
+msgstr "معلومات الحساب"
+
+#: src/routes/signup.tsx:226
 msgid "Account language"
 msgstr "لغة الحساب"
 
-#~ msgid "Account Status"
-#~ msgstr "حالة الحساب"
+#: src/routes/_authenticated/admin/$admin_id.tsx:451
+msgid "Account status"
+msgstr "حالة الحساب"
 
-#~ msgid "Activate account"
-#~ msgstr "تفعيل الحساب"
+#: src/routes/_authenticated/profile.tsx:109
+msgid "Account Status"
+msgstr "حالة الحساب"
 
-#~ msgid "Activating..."
-#~ msgstr "جارٍ تفعيل الحساب..."
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:729
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:905
+msgid "Actions"
+msgstr "إجراءات التذكرة"
 
-#: src/components/place-shared.tsx:42
-#: src/routes/_authenticated/places.tsx:30
+#: src/routes/account-setup.tsx:33
+msgid "Activate Account"
+msgstr "تفعيل الحساب"
+
+#: src/routes/account-setup.tsx:34
+msgid "Activating Account..."
+msgstr "جارٍ تفعيل الحساب..."
+
+#: src/components/place-shared.tsx:43
+#: src/routes/_authenticated/admin/$admin_id.tsx:464
+#: src/routes/_authenticated/admin/index.tsx:34
+#: src/routes/_authenticated/places.tsx:31
+#: src/routes/_authenticated/profile.tsx:120
+#: src/routes/_authenticated/worker/$worker_id.tsx:474
+#: src/routes/_authenticated/workers.tsx:42
 msgid "Active"
 msgstr "نشط"
+
+#: src/lib/errors.ts:126
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:782
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1071
+msgid "Actual cost"
+msgstr "التكلفة الفعلية"
 
 #: src/components/place-bookings.tsx:377
 msgid "Add a stay to block its dates on the calendar."
 msgstr "أضف إقامة لحجز هذه التواريخ في التقويم."
 
-#: src/routes/_authenticated/place/$place_id.tsx:842
+#: src/routes/_authenticated/place/$place_id.tsx:791
 msgid "Add an asset to start tracking this property."
-msgstr "أضف أصلًا لبدء تتبع هذه الملكية."
+msgstr "أضف أصلًا لبدء تتبع هذا العقار."
 
-#: src/routes/_authenticated/place/$place_id.tsx:805
-#: src/routes/_authenticated/place/asset/new.tsx:153
-#: src/routes/_authenticated/support/new.tsx:51
+#: src/routes/_authenticated/place/$place_id.tsx:754
+#: src/routes/_authenticated/place/asset/new.tsx:119
 msgid "Add asset"
 msgstr "إضافة أصل"
 
@@ -87,232 +133,82 @@ msgstr "إضافة أصل"
 msgid "Add booking"
 msgstr "إضافة حجز"
 
-#: src/routes/_authenticated/content/index.tsx:168
-msgid "Add Content"
-msgstr "اضافة محتوى"
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1096
+msgid "Add completion notes"
+msgstr "أضف ملاحظات الإنجاز"
 
-#: src/routes/_authenticated/place/new.tsx:190
-#: src/routes/_authenticated/places.tsx:123
+#: src/routes/_authenticated/content/index.tsx:169
+msgid "Add Content"
+msgstr "إضافة محتوى"
+
+#: src/routes/_authenticated/finance.tsx:815
+#: src/routes/_authenticated/finance.tsx:978
+msgid "Add expense"
+msgstr "إضافة مصروف"
+
+#: src/routes/_authenticated/place/new.tsx:95
+#: src/routes/_authenticated/places.tsx:151
 msgid "Add place"
 msgstr "إضافة عقار"
-msgid "Add ticket"
-msgstr "رفع تذكرة"
-msgid "subject"
-msgstr "العنوان"
-msgid "description"
-msgstr "الوصف"
-msgid "OPEN"
-msgstr "مفتوحة"
-msgid "RESOLVED"
-msgstr "تم حلها"
-msgid "Add Content"
-msgstr "اضافة محتوى"
-msgid "title"
-msgstr "العنوان"
-msgid "language"
-msgstr "اللغة"
-msgid "slug"
-msgstr "المسار"
-msgid "body"
-msgstr "المحتوى"
-msgid "is_published"
-msgstr "هل ينشر؟"
-
-
-#: src/routes/_authenticated/home.tsx
-msgid "Add property"
-msgstr "إضافة عقار"
-msgid "Out of service"
-msgstr "خارج الخدمة"
-msgid "Needs maintenance"
-msgstr "يحتاج صيانة"
-msgid "Good"
-msgstr "ممتاز"
-
-
-
-msgid "Notifications"
-msgstr "الإشعارات"
-
-msgid "Your notifications"
-msgstr "إشعاراتك"
-
-msgid "Stay updated with your latest activity and announcements."
-msgstr "تابع آخر نشاطاتك والإعلانات الجديدة."
-
-msgid "Unread notifications"
-msgstr "الإشعارات غير المقروءة"
-
-msgid "Send announcement"
-msgstr "إرسال إعلان"
-
-msgid "Send an announcement to users by role or user IDs."
-msgstr "أرسل إعلانًا للمستخدمين حسب الدور أو معرفات المستخدمين."
-
-msgid "Close"
-msgstr "إغلاق"
-
-msgid "Create announcement"
-msgstr "إنشاء إعلان"
-
-msgid "By role"
-msgstr "حسب الدور"
-
-msgid "Specific users"
-msgstr "مستخدمون محددون"
-
-msgid "Recipient role"
-msgstr "دور المستلم"
-
-msgid "Admin"
-msgstr "مدير النظام"
-
-msgid "Manager"
-msgstr "مدير"
-
-msgid "Worker"
-msgstr "عامل"
-
-msgid "User IDs"
-msgstr "معرفات المستخدمين"
-
-msgid "Separate user IDs with commas or new lines. Maximum 1000 users."
-msgstr "افصل معرفات المستخدمين بفواصل أو أسطر جديدة. الحد الأقصى 1000 مستخدم."
-
-msgid "English"
-msgstr "الإنجليزية"
-
-msgid "Arabic"
-msgstr "العربية"
-
-msgid "Title"
-msgstr "العنوان"
-
-msgid "Announcement title"
-msgstr "عنوان الإعلان"
-
-msgid "Message"
-msgstr "الرسالة"
-
-msgid "Write your announcement..."
-msgstr "اكتب إعلانك هنا..."
-
-msgid "Sending..."
-msgstr "جارٍ الإرسال..."
-
-msgid "Inbox"
-msgstr "صندوق الوارد"
-
-msgid "Manage your notifications and stay up to date."
-msgstr "إدارة إشعاراتك ومتابعة آخر المستجدات."
-
-msgid "Refresh"
-msgstr "تحديث"
-
-msgid "All"
-msgstr "الكل"
-
-msgid "Unread"
-msgstr "غير مقروء"
-
-msgid "Read"
-msgstr "مقروء"
-
-msgid "No notifications"
-msgstr "لا توجد إشعارات"
-
-msgid "You don't have any notifications in this category."
-msgstr "ليس لديك أي إشعارات في هذه الفئة."
-
-msgid "Previous"
-msgstr "السابق"
-
-msgid "Next"
-msgstr "التالي"
-
-msgid "Announcement"
-msgstr "إعلان"
-
-msgid "Ticket assigned"
-msgstr "تم إسناد تذكرة"
-
-msgid "Ticket updated"
-msgstr "تم تحديث التذكرة"
-
-msgid "Ticket resolved"
-msgstr "تم حل التذكرة"
-
-msgid "Maintenance reminder"
-msgstr "تذكير بالصيانة"
-
-msgid "Booking created"
-msgstr "تم إنشاء حجز"
-
-msgid "Booking updated"
-msgstr "تم تحديث الحجز"
-
-msgid "Updating..."
-msgstr "جارٍ التحديث..."
-
-msgid "Mark as read"
-msgstr "تحديد كمقروء"
-
-msgid "Please fill in all announcement fields."
-msgstr "يرجى تعبئة جميع حقول الإعلان."
-
-msgid "Enter at least one user ID."
-msgstr "أدخل معرف مستخدم واحدًا على الأقل."
-
-msgid "Maximum 1000 users are allowed."
-msgstr "الحد الأقصى المسموح به هو 1000 مستخدم."
-
-msgid "Failed to send announcement."
-msgstr "فشل إرسال الإعلان."
-
-msgid "Failed to load notifications."
-msgstr "فشل تحميل الإشعارات."
-
-msgid "Failed to update notification."
-msgstr "فشل تحديث الإشعار."
-
-msgid "Admin"
-msgstr "المسؤول"
-msgid "Support"
-msgstr "الدعم"
-msgid "Content"
-msgstr "المحتوى"
-msgid "Notfications"
-msgstr "الاشعارات"
-
-
-
-#: src/routes/_authenticated/support/index.tsx:145
-msgid "Add ticket"
-msgstr "رفع تذكرة"
-
-#: src/routes/_authenticated/worker/new.tsx:113
-msgid "Add worker"
-msgstr "اضافة عامل"
 
 #: src/routes/_authenticated/home.tsx:394
+msgid "Add property"
+msgstr "إضافة عقار"
+
+#: src/components/tickets-section.tsx:135
+#: src/routes/_authenticated/support/index.tsx:116
+msgid "Add ticket"
+msgstr "رفع تذكرة"
+
+#: src/routes/_authenticated/place/$place_id.tsx:887
+#: src/routes/_authenticated/place/$place_id.tsx:940
+#: src/routes/_authenticated/worker/new.tsx:112
+#: src/routes/_authenticated/workers.tsx:128
+#: src/routes/_authenticated/workers.tsx:274
+msgid "Add worker"
+msgstr "إضافة عامل"
+
+#: src/routes/_authenticated/places.tsx:229
+msgid "Add your first place with the Add place button."
+msgstr "أضف أول عقار من زر «إضافة عقار»."
+
+#: src/routes/_authenticated/home.tsx:388
 msgid "Add your first property to see it here."
 msgstr "أضف أول عقار لتظهر هنا."
 
-#: src/routes/_authenticated/place/$place_id.tsx:679
-#: src/routes/_authenticated/place/new.tsx:212
+#: src/routes/_authenticated/workers.tsx:254
+msgid "Add your first worker to start managing your team."
+msgstr "أضف أول عامل للبدء بإدارة فريق العمل."
+
+#: src/lib/errors.ts:85
+#: src/routes/_authenticated/place/$place_id.tsx:411
+#: src/routes/_authenticated/place/$place_id.tsx:606
+#: src/routes/_authenticated/place/new.tsx:117
 msgid "Address"
 msgstr "العنوان"
 
 #: src/components/app-shell.tsx:34
+#: src/routes/_authenticated/admin/$admin_id.tsx:445
+#: src/routes/_authenticated/notifications.tsx:425
+#: src/routes/_authenticated/profile.tsx:124
 msgid "Admin"
-msgstr "مسؤول"
+msgstr "مدير النظام"
 
-#: src/routes/signup.tsx:146
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:456
+msgid "After photos"
+msgstr "صور بعد الصيانة"
+
+#: src/routes/signup.tsx:147
 msgid "Ahmed Hamad"
 msgstr "أحمد حمد"
 
-#: src/routes/_authenticated/notifications.tsx:601
-#: src/routes/_authenticated/places.tsx:29
+#: src/components/tickets-section.tsx:88
+#: src/routes/_authenticated/admin/index.tsx:33
+#: src/routes/_authenticated/content/index.tsx:240
+#: src/routes/_authenticated/finance.tsx:826
+#: src/routes/_authenticated/notifications.tsx:600
+#: src/routes/_authenticated/places.tsx:30
+#: src/routes/_authenticated/workers.tsx:41
 msgid "All"
 msgstr "الكل"
 
@@ -321,11 +217,14 @@ msgstr "الكل"
 msgid "All bookings"
 msgstr "كل الحجوزات"
 
-#: src/routes/_authenticated/finance.tsx:125
-#: src/routes/_authenticated/finance.tsx:128
-#: src/routes/_authenticated/finance.tsx:137
-#~ msgid "All places"
-#~ msgstr "كل العقارات"
+#: src/routes/_authenticated/content/index.tsx:214
+msgid "All languages"
+msgstr "كل اللغات"
+
+#: src/routes/_authenticated/bookings.tsx:137
+#: src/routes/_authenticated/finance.tsx:538
+msgid "All places"
+msgstr "كل العقارات"
 
 #: src/components/auth-brand-panel.tsx:18
 msgid "All your places, their\n"
@@ -335,137 +234,228 @@ msgstr "كل عقاراتك وصيانتها\n"
 "وحجوزاتها في مكان\n"
 "واحد."
 
-#: src/routes/signup.tsx:274
+#: src/routes/_authenticated/place/$place_id.tsx:977
+msgid "All your workers are already assigned to this place."
+msgstr "جميع العمال مسندون لهذا العقار بالفعل."
+
+#: src/routes/signup.tsx:275
 msgid "Already have an account? <0>Sign in</0>"
 msgstr "لديك حساب بالفعل؟ <0>دخول</0>"
 
 #. Brand wordmark, Latin letters only in English
+#: src/components/app-shell.tsx:136
 #: src/components/auth-brand-panel.tsx:13
+#: src/lib/i18n.tsx:40
+#: src/routes/p/$lang/$slug.tsx:51
 msgid "Amlak"
 msgstr "أملاك"
 
-#: src/routes/_authenticated/notifications.tsx:748
+#: src/lib/errors.ts:138
+#: src/routes/_authenticated/finance.tsx:1024
+msgid "Amount"
+msgstr "المبلغ"
+
+#: src/routes/_authenticated/notifications.tsx:744
 msgid "Announcement"
 msgstr "إعلان"
 
-#: src/routes/_authenticated/notifications.tsx:476
-#: src/routes/_authenticated/notifications.tsx:497
+#. placeholder {0}: money(result.recipient_count)
+#: src/routes/_authenticated/notifications.tsx:186
+msgid "Announcement sent successfully to {0} users."
+msgstr "تم إرسال الإعلان بنجاح إلى {0} مستخدم."
+
+#: src/routes/_authenticated/notifications.tsx:475
+#: src/routes/_authenticated/notifications.tsx:496
 msgid "Announcement title"
 msgstr "عنوان الإعلان"
+
+#: src/lib/errors.ts:151
+msgid "another field"
+msgstr "حقل آخر"
 
 #: src/components/place-bookings.tsx:219
 #: src/components/place-bookings.tsx:789
 msgid "Another guest has not checked out yet."
 msgstr "ضيف آخر لم يُغادر بعد."
 
-#: src/components/place-shared.tsx:190
+#: src/lib/errors.ts:175
+msgid "Another guest is staying at the place. Check them out first."
+msgstr "يقيم ضيف آخر في العقار. سجّل خروجه أولًا."
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:579
+msgid "Another team member"
+msgstr "عضو آخر في الفريق"
+
+#: src/components/place-shared.tsx:191
 msgid "Apartment"
 msgstr "شقة"
 
-#: src/routes/_authenticated/home.tsx:277
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:923
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:981
+msgid "Approve ticket"
+msgstr "قبول التذكرة"
+
+#: src/components/place-shared.tsx:270
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:434
+msgid "Approved"
+msgstr "تمت الموافقة"
+
+#: src/routes/_authenticated/tickets.tsx:71
+msgid "Approved tickets assigned to you, the soonest due first."
+msgstr "التذاكر المعتمدة المسندة إليك، الأقرب موعدًا أولًا."
+
+#: src/routes/_authenticated/home.tsx:271
 msgid "Approved:"
 msgstr "تمت الموافقة:"
 
-#: src/routes/_authenticated/notifications.tsx:490
-#: src/routes/_authenticated/worker/new.tsx:210
+#: src/routes/_authenticated/content/$content_id.tsx:448
+#: src/routes/_authenticated/content/index.tsx:215
+#: src/routes/_authenticated/content/index.tsx:381
+#: src/routes/_authenticated/content/new.tsx:54
+#: src/routes/_authenticated/notifications.tsx:489
+#: src/routes/_authenticated/worker/new.tsx:212
 msgid "Arabic"
 msgstr "العربية"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:235
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:243
+#: src/routes/_authenticated/finance.tsx:445
+msgid "Are you sure you want to delete this expense?"
+msgstr "هل أنت متأكد من حذف هذا المصروف؟"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:723
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:753
+#: src/routes/_authenticated/ticket/new.tsx:130
 msgid "Asset"
 msgstr "الأصل"
 
-#: src/routes/_authenticated/place/asset/new.tsx:158
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:231
+msgid "Asset information"
+msgstr "معلومات الأصل"
+
+#: src/components/asset-manage.tsx:169
+#: src/lib/errors.ts:93
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:253
+#: src/routes/_authenticated/place/asset/new.tsx:123
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:756
 msgid "Asset name"
 msgstr "اسم الأصل"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:217
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:184
 msgid "Asset not found"
 msgstr "لم يتم العثور على الأصل"
 
-#: src/routes/_authenticated/place/$place_id.tsx:779
-#: src/routes/_authenticated/place/new.tsx:59
-#: src/routes/_authenticated/places.tsx:38
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:758
+msgid "Asset status"
+msgstr "حالة الأصل"
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:259
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:757
+msgid "Asset type"
+msgstr "نوع الأصل"
+
+#: src/routes/_authenticated/place/$place_id.tsx:663
+#: src/routes/_authenticated/place/$place_id.tsx:728
+#: src/routes/_authenticated/places.tsx:39
 msgid "Assets"
 msgstr "الأصول"
 
-#: src/routes/signup.tsx:205
+#: src/routes/_authenticated/worker/$worker_id.tsx:530
+msgid "Assigned places"
+msgstr "الأماكن المسندة"
+
+#: src/lib/errors.ts:122
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:853
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1001
+msgid "Assignee"
+msgstr "المكلّف"
+
+#: src/routes/signup.tsx:206
 msgid "At least 8 characters"
 msgstr "8 أحرف على الأقل"
 
-#: src/routes/reset-password.tsx:244
+#: src/routes/reset-password.tsx:240
 msgid "At least 8 characters."
 msgstr "8 أحرف على الأقل."
 
+#: src/routes/_authenticated/finance.tsx:1071
+msgid "Attach a receipt (optional)"
+msgstr "إرفاق الإيصال (اختياري)"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:730
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1215
+msgid "Attachments"
+msgstr "الملحقات"
+
+#. placeholder {0}: ticket.attachments.length
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1223
+msgid "Attachments: {0}"
+msgstr "عدد المرفقات: {0}"
+
+#: src/components/asset-manage.tsx:211
+#: src/components/asset-manage.tsx:236
 #: src/components/place-bookings.tsx:636
 #: src/components/place-bookings.tsx:735
 #: src/components/place-bookings.tsx:810
 msgid "Back"
 msgstr "رجوع"
 
-#: src/routes/forgot-password.tsx:197
-#: src/routes/reset-password.tsx:323
+#: src/routes/forgot-password.tsx:189
+#: src/routes/reset-password.tsx:319
 msgid "Back to Login"
 msgstr "العودة إلى تسجيل الدخول"
 
-#~ msgid "Back to sign in"
-#~ msgstr "العودة إلى تسجيل الدخول"
+#: src/routes/_authenticated/support/$support_id.tsx:210
+#: src/routes/_authenticated/support/$support_id.tsx:548
+msgid "Back to support tickets"
+msgstr "العودة إلى تذاكر الدعم"
 
-#: src/routes/_authenticated/place/new.tsx:421
-#~ msgid "Before saving"
-#~ msgstr "قبل الحفظ"
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:455
+msgid "Before photos"
+msgstr "صور قبل الصيانة"
 
-#: src/routes/_authenticated/finance.tsx:54
-#~ msgid "Bills"
-#~ msgstr "فواتير"
-
-#: src/routes/_authenticated/content/new.tsx:71
-msgid "body"
+#: src/lib/errors.ts:105
+#: src/routes/_authenticated/content/new.tsx:56
+msgid "Body"
 msgstr "المحتوى"
 
-#: src/routes/_authenticated/notifications.tsx:758
-msgid "Booking created"
-msgstr "تم إنشاء حجز"
-
-#: src/routes/_authenticated/home.tsx:161
-#~ msgid "Booking data appears here once the bookings service is wired up."
-#~ msgstr "تظهر بيانات الحجوزات هنا فور ربط خدمة الحجوزات."
-
-#: src/routes/_authenticated/notifications.tsx:760
-msgid "Booking updated"
-msgstr "تم تحديث الحجز"
+#: src/routes/_authenticated/finance.tsx:609
+msgid "Booking income in the selected period"
+msgstr "إيرادات الحجوزات خلال الفترة المحددة"
 
 #: src/components/place-bookings.tsx:303
-#: src/routes/_authenticated/home.tsx:247
-#: src/routes/_authenticated/place/$place_id.tsx:751
+#: src/routes/_authenticated/bookings.tsx:117
+#: src/routes/_authenticated/home.tsx:241
+#: src/routes/_authenticated/place/$place_id.tsx:700
 msgid "Bookings"
 msgstr "الحجوزات"
 
-#: src/routes/_authenticated/home.tsx:291
+#: src/routes/_authenticated/home.tsx:285
 msgid "Bookings today"
 msgstr "حجوزات اليوم"
 
-#: src/routes/_authenticated/home.tsx:631
+#: src/routes/_authenticated/home.tsx:627
 msgid "Budget:"
 msgstr "الميزانية:"
 
-#: src/components/place-bookings.tsx:
-#~ msgid "By month"
-#~ msgstr "حسب الشهر"
-
-#: src/routes/_authenticated/notifications.tsx:384
+#: src/routes/_authenticated/notifications.tsx:383
 msgid "By role"
 msgstr "حسب الدور"
 
-#: src/routes/_authenticated/place/$place_id.tsx:620
-#: src/routes/_authenticated/worker/new.tsx:234
+#: src/routes/_authenticated/finance.tsx:1099
+#: src/routes/_authenticated/place/$place_id.tsx:546
+#: src/routes/_authenticated/profile.tsx:100
+#: src/routes/_authenticated/support/$support_id.tsx:434
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1205
+#: src/routes/_authenticated/worker/new.tsx:236
 msgid "Cancel"
 msgstr "إلغاء"
 
 #: src/components/place-bookings.tsx:447
 msgid "Cancel booking"
 msgstr "إلغاء الحجز"
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:549
+msgid "Cancel schedule"
+msgstr "إلغاء الجدولة"
 
 #: src/components/place-bookings.tsx:668
 msgid "Cancel this booking?"
@@ -475,7 +465,8 @@ msgstr "إلغاء هذا الحجز؟"
 msgid "Cancellation reason"
 msgstr "سبب الإلغاء"
 
-#: src/components/place-shared.tsx:171
+#: src/components/place-shared.tsx:172
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:438
 msgid "Cancelled"
 msgstr "ملغى"
 
@@ -483,7 +474,12 @@ msgstr "ملغى"
 msgid "Cancelling…"
 msgstr "جارٍ الإلغاء…"
 
-#: src/components/place-shared.tsx:198
+#: src/lib/errors.ts:140
+#: src/routes/_authenticated/finance.tsx:1011
+msgid "Category"
+msgstr "التصنيف"
+
+#: src/components/place-shared.tsx:199
 msgid "Chalet"
 msgstr "شاليه"
 
@@ -499,6 +495,10 @@ msgstr "تسجيل الوصول"
 msgid "Check out"
 msgstr "تسجيل المغادرة"
 
+#: src/lib/errors.ts:182
+msgid "Check these fields: {names}."
+msgstr "راجع هذه الحقول: {names}."
+
 #: src/components/place-bookings.tsx:763
 msgid "Check this guest in?"
 msgstr "تسجيل وصول الضيف؟"
@@ -507,11 +507,12 @@ msgstr "تسجيل وصول الضيف؟"
 msgid "Check this guest out?"
 msgstr "تسجيل مغادرة الضيف؟"
 
-#: src/routes/forgot-password.tsx:107
+#: src/routes/forgot-password.tsx:99
 msgid "Check your email"
 msgstr "تحقق من بريدك الإلكتروني"
 
 #: src/components/place-bookings.tsx:550
+#: src/lib/errors.ts:130
 msgid "Check-in"
 msgstr "الوصول"
 
@@ -523,23 +524,32 @@ msgstr "لم يحِن موعد الوصول بعد."
 msgid "Check-in opens on"
 msgstr "تسجيل الوصول متاح في"
 
-#: src/routes/_authenticated/home.tsx:306
+#: src/routes/_authenticated/bookings.tsx:169
+msgid "Check-ins today"
+msgstr "تسجيلات الدخول اليوم"
+
+#: src/routes/_authenticated/home.tsx:300
 msgid "Check-ins:"
 msgstr "تسجيلات الوصول:"
 
 #: src/components/place-bookings.tsx:563
+#: src/lib/errors.ts:132
 msgid "Check-out"
 msgstr "المغادرة"
 
-#: src/routes/_authenticated/home.tsx:308
+#: src/routes/_authenticated/bookings.tsx:175
+msgid "Check-outs today"
+msgstr "تسجيلات الخروج اليوم"
+
+#: src/routes/_authenticated/home.tsx:302
 msgid "Check-outs:"
 msgstr "تسجيلات المغادرة:"
 
-#: src/components/place-shared.tsx:147
+#: src/components/place-shared.tsx:148
 msgid "Checked in"
 msgstr "تم تسجيل الوصول"
 
-#: src/components/place-shared.tsx:159
+#: src/components/place-shared.tsx:160
 msgid "Checked out"
 msgstr "تم تسجيل المغادرة"
 
@@ -547,34 +557,110 @@ msgstr "تم تسجيل المغادرة"
 msgid "Choose a check-out date after the check-in date"
 msgstr "اختر تاريخ مغادرة بعد تاريخ الوصول"
 
-#: src/routes/_authenticated/place/asset/new.tsx:51
+#: src/routes/_authenticated/finance.tsx:679
+msgid "Choose a period to see income, expenses and profit."
+msgstr "حدد الفترة الزمنية لعرض الإيرادات والمصروفات والأرباح."
+
+#: src/routes/_authenticated/finance.tsx:532
+#: src/routes/_authenticated/finance.tsx:1002
+#: src/routes/_authenticated/place/asset/new.tsx:38
 msgid "Choose a place"
 msgstr "اختر العقار"
 
-#: src/routes/_authenticated/place/new.tsx:43
-msgid "Choose a place type"
-msgstr "اختر نوع العقار"
+#: src/routes/_authenticated/place/$place_id.tsx:959
+msgid "Choose a worker"
+msgstr "اختر عاملًا"
+
+#: src/routes/_authenticated/place/$place_id.tsx:947
+msgid "Choose a worker (name and ID)"
+msgstr "اختر العامل (الاسم و ID)"
+
+#: src/routes/_authenticated/profile.tsx:102
+msgid "Choose Image"
+msgstr "اختر صورة"
 
 #: src/components/place-bookings.tsx:88
 msgid "Choose the check-in date"
 msgstr "اختر تاريخ الوصول"
 
-#: src/routes/_authenticated/place/$place_id.tsx:673
-#: src/routes/_authenticated/place/new.tsx:211
+#: src/routes/_authenticated/ticket/new.tsx:63
+msgid "Choose the place first"
+msgstr "اختر العقار أولاً"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1010
+msgid "Choose who does the work"
+msgstr "اختر من سينفذ العمل"
+
+#: src/lib/errors.ts:83
+#: src/routes/_authenticated/place/$place_id.tsx:403
+#: src/routes/_authenticated/place/$place_id.tsx:600
+#: src/routes/_authenticated/place/new.tsx:116
 msgid "City"
 msgstr "المدينة"
 
-#: src/routes/_authenticated/finance.tsx:56
-#~ msgid "Cleaning"
-#~ msgstr "تنظيف"
+#: src/routes/_authenticated/finance.tsx:130
+msgid "Cleaning"
+msgstr "تنظيف"
 
-#: src/routes/_authenticated/places.tsx:211
+#: src/routes/_authenticated/admin/index.tsx:245
+#: src/routes/_authenticated/content/index.tsx:314
+#: src/routes/_authenticated/places.tsx:257
+#: src/routes/_authenticated/support/index.tsx:255
+#: src/routes/_authenticated/workers.tsx:266
 msgid "Clear filters"
 msgstr "مسح الفلاتر"
 
-#: src/routes/_authenticated/notifications.tsx:350
+#: src/components/location-picker.tsx:148
+msgid "Click on the map or drag the marker to choose a location."
+msgstr "اضغط على الخريطة أو اسحب العلامة لاختيار الموقع."
+
+#: src/components/ui/dialog.tsx:74
+#: src/components/ui/dialog.tsx:112
+#: src/routes/_authenticated/notifications.tsx:349
+#: src/routes/_authenticated/support/$support_id.tsx:390
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:992
 msgid "Close"
 msgstr "إغلاق"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:963
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:984
+msgid "Complete ticket"
+msgstr "إكمال التذكرة"
+
+#: src/components/place-shared.tsx:282
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:437
+msgid "Completed"
+msgstr "مكتملة"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:832
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:880
+msgid "Completed on"
+msgstr "تاريخ الإنجاز"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:726
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:827
+msgid "Completion"
+msgstr "الإنجاز"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:837
+msgid "Completion notes"
+msgstr "ملاحظات الإنجاز"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1088
+msgid "Completion notes (optional)"
+msgstr "ملاحظات الإنجاز (اختياري)"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:457
+msgid "Completion photos"
+msgstr "صور الإنجاز"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1104
+msgid "Completion photos (1 to 5)"
+msgstr "صور الإنجاز (من 1 إلى 5 صور)"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1153
+msgid "Confirm approval"
+msgstr "تأكيد الموافقة"
 
 #: src/components/place-bookings.tsx:738
 msgid "Confirm cancel"
@@ -588,18 +674,35 @@ msgstr "تأكيد الوصول"
 msgid "Confirm check-out"
 msgstr "تأكيد المغادرة"
 
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1196
+msgid "Confirm completion"
+msgstr "تأكيد الإكمال"
+
 #: src/components/email-verify-panel.tsx:77
 msgid "Confirm email"
 msgstr "تأكيد البريد"
 
-#: src/routes/reset-password.tsx:253
+#: src/routes/reset-password.tsx:249
 msgid "Confirm New Password"
 msgstr "تأكيد كلمة المرور الجديدة"
 
-#~ msgid "Confirm password"
-#~ msgstr "تأكيد كلمة المرور"
+#: src/routes/account-setup.tsx:30
+msgid "Confirm Password"
+msgstr "تأكيد كلمة المرور"
 
-#: src/components/place-shared.tsx:182
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1180
+msgid "Confirm reassignment"
+msgstr "تأكيد إعادة التعيين"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1165
+msgid "Confirm rejection"
+msgstr "تأكيد الرفض"
+
+#: src/routes/_authenticated/support/$support_id.tsx:422
+msgid "Confirm resolution"
+msgstr "تأكيد الحل"
+
+#: src/components/place-shared.tsx:183
 msgid "Confirmed"
 msgstr "مؤكد"
 
@@ -608,15 +711,24 @@ msgid "Confirming…"
 msgstr "جارٍ التأكيد…"
 
 #: src/components/app-shell.tsx:44
+#: src/routes/_authenticated/content/$content_id.tsx:221
+#: src/routes/_authenticated/content/index.tsx:147
 msgid "Content"
 msgstr "المحتوى"
 
-#: src/routes/_authenticated/content/$content_id.tsx:251
+#: src/routes/_authenticated/content/$content_id.tsx:248
 msgid "Content not found"
 msgstr "لم يتم العثور على المحتوى"
 
-#~ msgid "Could not activate your account. Please check the invitation link and try again."
-#~ msgstr "تعذّر تفعيل حسابك. تحقق من رابط الدعوة وحاول مرة أخرى."
+#: src/components/tickets-section.tsx:180
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:449
+msgid "Corrective maintenance"
+msgstr "صيانة تصحيحية"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:724
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:774
+msgid "Costs"
+msgstr "التكاليف"
 
 #: src/components/place-bookings.tsx:719
 msgid "Could not cancel the booking. Please try again."
@@ -626,29 +738,11 @@ msgstr "تعذّر إلغاء الحجز. حاول مرة أخرى."
 msgid "Could not change the booking. Please try again."
 msgstr "تعذّر تغيير حالة الحجز. حاول مرة أخرى."
 
-#: src/routes/signup.tsx:96
-msgid "Could not confirm the email"
-msgstr "تعذر تأكيد البريد"
+#: src/components/location-picker.tsx:108
+msgid "Could not get the address."
+msgstr "تعذر الحصول على العنوان."
 
-#: src/routes/signup.tsx:79
-msgid "Could not create the account"
-msgstr "تعذر إنشاء الحساب"
-
-#: src/routes/_authenticated/worker/new.tsx:90
-msgid "Could not create the worker. Please try again."
-msgstr "تعذر إنشاء العامل. يرجى المحاولة مرة أخرى."
-
-#: src/routes/_authenticated/place/new.tsx:84
-#: src/routes/_authenticated/place/new.tsx:89
-msgid "Could not get your location."
-msgstr "تعذّر الحصول على موقعك."
-
-#: src/routes/signup.tsx:108
-msgid "Could not resend the code"
-msgstr "تعذر إعادة إرسال الرمز"
-
-#: src/routes/_authenticated/place/asset/new.tsx:125
-#: src/routes/_authenticated/place/asset/new.tsx:136
+#: src/routes/_authenticated/place/asset/new.tsx:95
 msgid "Could not save the asset."
 msgstr "تعذّر حفظ الأصل."
 
@@ -656,82 +750,141 @@ msgstr "تعذّر حفظ الأصل."
 msgid "Could not save the booking. Please try again."
 msgstr "تعذّر حفظ الحجز. حاول مرة أخرى."
 
-#: src/routes/_authenticated/place/new.tsx:115
-#: src/routes/_authenticated/place/new.tsx:128
-msgid "Could not save the place."
-msgstr "تعذّر حفظ العقار."
-
-#: src/routes/signin.tsx:53
-msgid "Could not sign in"
-msgstr "تعذر الدخول"
-
-#: src/routes/reset-password.tsx:155
+#: src/routes/reset-password.tsx:149
 msgid "Create a new password for your account. Your password must be at least 8 characters long."
 msgstr "أنشئ كلمة مرور جديدة لحسابك. يجب ألا يقل طول كلمة المرور عن 8 أحرف."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:227
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:132
 msgid "Create a recurring maintenance schedule for an asset."
-msgstr "انشاء جدولة صيانة للأصل"
+msgstr "إنشاء جدولة صيانة للأصل."
 
-#: src/routes/signup.tsx:267
+#: src/routes/signup.tsx:268
 msgid "Create account"
 msgstr "إنشاء الحساب"
 
-#: src/routes/_authenticated/notifications.tsx:352
+#: src/routes/_authenticated/notifications.tsx:351
 msgid "Create announcement"
 msgstr "إنشاء إعلان"
 
-#: src/routes/signup.tsx:133
+#: src/routes/signup.tsx:134
 msgid "Create manager account"
 msgstr "إنشاء حساب مدير"
 
-#~ msgid "Create Schedule"
-#~ msgstr "انشاء جدولة"
-
-#: src/routes/_authenticated/worker/new.tsx:243
+#: src/routes/_authenticated/worker/new.tsx:245
 msgid "Create worker"
-msgstr "انشاء عامل"
+msgstr "إنشاء عامل"
 
-#~ msgid "Create your password to activate your worker account."
-#~ msgstr "أنشئ كلمة المرور لتفعيل حساب العامل."
+#: src/routes/_authenticated/content/index.tsx:301
+msgid "Create your first content page."
+msgstr "ابدأ بإنشاء أول صفحة محتوى."
 
-#~ msgid "Created At"
-#~ msgstr "تاريخ الإنشاء"
+#: src/routes/_authenticated/content/$content_id.tsx:482
+#: src/routes/_authenticated/support/$support_id.tsx:322
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:702
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:865
+msgid "Created"
+msgstr "تاريخ الإنشاء"
 
-#: src/routes/signup.tsx:267
+#: src/routes/_authenticated/profile.tsx:111
+msgid "Created At"
+msgstr "تاريخ الإنشاء"
+
+#: src/routes/signup.tsx:268
 msgid "Creating account…"
 msgstr "جارٍ إنشاء الحساب…"
 
-#: src/routes/_authenticated/place/new.tsx:300
-#~ msgid "Currency"
-#~ msgstr "العملة"
+#: src/routes/_authenticated/place/$place_id.tsx:622
+msgid "Currency"
+msgstr "العملة"
 
-#: src/routes/_authenticated/place/new.tsx:429
-#~ msgid "Currency and time zone are set when the place is created and do not change after."
-#~ msgstr "العملة والمنطقة الزمنية تُحددان عند الإنشاء ولا تتغيران بعدها."
+#: src/routes/_authenticated/place/$place_id.tsx:479
+#: src/routes/_authenticated/place/$place_id.tsx:644
+msgid "Currency and time zone are set when the place is created and cannot be changed."
+msgstr "تُحدَّد العملة والمنطقة الزمنية عند إنشاء العقار ولا يمكن تغييرهما."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:42
+#: src/routes/_authenticated/place/$place_id.tsx:475
+msgid "Currency:"
+msgstr "العملة:"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:454
+msgid "Damage photos"
+msgstr "صور الأضرار"
+
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:28
 msgid "Day"
 msgstr "يوم"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:288
-msgid "Default Assignee ID"
-msgstr "هوية المسؤول (اختياري)"
+#: src/routes/_authenticated/admin/$admin_id.tsx:465
+#: src/routes/_authenticated/admin/index.tsx:37
+#: src/routes/_authenticated/profile.tsx:123
+#: src/routes/_authenticated/worker/$worker_id.tsx:475
+#: src/routes/_authenticated/workers.tsx:44
+msgid "Deactivated"
+msgstr "غير نشط"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:251
-#: src/routes/_authenticated/support/new.tsx:56
-msgid "description"
-msgstr "الوصف"
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:177
+msgid "Default assignee (optional)"
+msgstr "المكلّف الافتراضي (اختياري)"
 
-#: src/routes/_authenticated/place/new.tsx:210
+#: src/routes/_authenticated/finance.tsx:950
+msgid "Delete"
+msgstr "حذف"
+
+#: src/components/asset-manage.tsx:156
+#: src/components/asset-manage.tsx:239
+msgid "Delete asset"
+msgstr "حذف الأصل"
+
+#: src/routes/_authenticated/content/$content_id.tsx:728
+msgid "Delete page"
+msgstr "حذف الصفحة"
+
+#: src/routes/_authenticated/place/$place_id.tsx:322
+msgid "Delete place"
+msgstr "حذف العقار"
+
+#. placeholder {0}: place.place_name
+#: src/routes/_authenticated/place/$place_id.tsx:176
+msgid "Delete the place \"{0}\"? This cannot be undone."
+msgstr "هل أنت متأكد من حذف العقار \"{0}\"؟ لا يمكن التراجع عن هذا الإجراء."
+
+#. placeholder {0}: worker.fullname
+#: src/routes/_authenticated/worker/$worker_id.tsx:152
+msgid "Delete the worker \"{0}\"? This cannot be undone."
+msgstr "هل أنت متأكد من حذف العامل \"{0}\"؟ لا يمكن التراجع عن هذا الإجراء."
+
+#: src/components/asset-manage.tsx:225
+msgid "Delete this asset?"
+msgstr "حذف هذا الأصل؟"
+
+#: src/routes/_authenticated/content/$content_id.tsx:153
+msgid "Delete this page? This cannot be undone."
+msgstr "هل أنت متأكد من حذف هذه الصفحة؟ لا يمكن التراجع عن هذا الإجراء."
+
+#: src/routes/_authenticated/worker/$worker_id.tsx:728
+msgid "Delete worker"
+msgstr "حذف العامل"
+
+#: src/components/asset-manage.tsx:239
+#: src/routes/_authenticated/content/$content_id.tsx:728
+#: src/routes/_authenticated/place/$place_id.tsx:322
+#: src/routes/_authenticated/worker/$worker_id.tsx:728
+msgid "Deleting…"
+msgstr "جارٍ الحذف…"
+
+#: src/lib/errors.ts:112
+#: src/routes/_authenticated/finance.tsx:1050
+#: src/routes/_authenticated/place/$place_id.tsx:422
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:140
+#: src/routes/_authenticated/place/new.tsx:115
+#: src/routes/_authenticated/support/$support_id.tsx:311
+#: src/routes/_authenticated/support/new.tsx:52
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:717
+#: src/routes/_authenticated/ticket/new.tsx:152
 msgid "Description"
 msgstr "الوصف"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:130
-msgid "Description is required"
-msgstr "الوصف مطلوب"
-
-#: src/routes/_authenticated/home.tsx:597
+#: src/routes/_authenticated/home.tsx:593
 msgid "Details"
 msgstr "التفاصيل"
 
@@ -739,57 +892,100 @@ msgstr "التفاصيل"
 msgid "Didn't get the code?"
 msgstr "لم يصلك الرمز؟"
 
-#: src/routes/signin.tsx:139
+#: src/routes/signin.tsx:140
 msgid "Don't have an account? <0>Create manager account</0>"
 msgstr "ليس لديك حساب؟ <0>إنشاء حساب مدير</0>"
 
-#: src/routes/_authenticated/content/new.tsx:78
+#: src/routes/_authenticated/content/$content_id.tsx:372
+#: src/routes/_authenticated/content/index.tsx:390
+#: src/routes/_authenticated/content/new.tsx:64
 msgid "Draft"
 msgstr "مسودة"
 
-#: src/routes/signin.tsx:76
-#: src/routes/signup.tsx:157
+#: src/routes/_authenticated/content/index.tsx:242
+msgid "Drafts"
+msgstr "مسودات"
+
+#. placeholder {0}: dateFormat.format(new Date(ticket.due_date))
+#: src/routes/_authenticated/tickets.tsx:232
+msgid "Due {0}"
+msgstr "الاستحقاق {0}"
+
+#: src/lib/errors.ts:119
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:686
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1022
+msgid "Due date"
+msgstr "تاريخ الاستحقاق"
+
+#: src/routes/_authenticated/finance.tsx:940
+msgid "Edit"
+msgstr "تعديل"
+
+#: src/components/asset-manage.tsx:144
+#: src/components/asset-manage.tsx:163
+msgid "Edit asset"
+msgstr "تعديل الأصل"
+
+#: src/routes/_authenticated/finance.tsx:977
+msgid "Edit expense"
+msgstr "تعديل المصروف"
+
+#: src/routes/_authenticated/profile.tsx:115
+msgid "Edit Personal Information"
+msgstr "تعديل المعلومات الشخصية"
+
+#: src/lib/errors.ts:68
+#: src/routes/_authenticated/admin/$admin_id.tsx:381
+#: src/routes/_authenticated/support/$support_id.tsx:482
+#: src/routes/_authenticated/worker/$worker_id.tsx:406
+#: src/routes/signin.tsx:77
+#: src/routes/signup.tsx:158
 msgid "Email"
 msgstr "البريد الإلكتروني"
 
-#: src/routes/_authenticated/worker/new.tsx:154
+#: src/routes/_authenticated/worker/new.tsx:153
 msgid "Email address"
 msgstr "البريد الإلكتروني"
 
-#: src/routes/forgot-password.tsx:137
+#: src/routes/_authenticated/profile.tsx:107
+#: src/routes/account-setup.tsx:28
+#: src/routes/forgot-password.tsx:129
 msgid "Email Address"
 msgstr "البريد الإلكتروني"
 
-#: src/routes/_authenticated/worker/new.tsx:53
+#: src/routes/_authenticated/admin/$admin_id.tsx:493
+#: src/routes/_authenticated/worker/$worker_id.tsx:485
+msgid "Email confirmed"
+msgstr "تأكيد البريد الإلكتروني"
+
+#: src/routes/_authenticated/worker/new.tsx:54
 msgid "Email is required."
 msgstr "البريد الإلكتروني مطلوب."
 
-#~ msgid "Email Verification"
-#~ msgstr "التحقق من البريد الإلكتروني"
+#: src/routes/_authenticated/admin/$admin_id.tsx:575
+msgid "Email verification"
+msgstr "حالة التحقق من البريد"
 
-#~ msgid "Email Verified At"
-#~ msgstr "تاريخ تأكيد البريد الاكتروني"
+#: src/routes/_authenticated/profile.tsx:110
+msgid "Email Verified At"
+msgstr "تاريخ تأكيد البريد الإلكتروني"
 
-#: src/routes/_authenticated/content/index.tsx:391
-#: src/routes/_authenticated/notifications.tsx:469
-#: src/routes/_authenticated/worker/new.tsx:213
+#: src/routes/_authenticated/content/$content_id.tsx:448
+#: src/routes/_authenticated/content/index.tsx:216
+#: src/routes/_authenticated/content/index.tsx:381
+#: src/routes/_authenticated/content/new.tsx:54
+#: src/routes/_authenticated/notifications.tsx:468
+#: src/routes/_authenticated/worker/new.tsx:215
 msgid "English"
 msgstr "الإنجليزية"
 
-#: src/routes/_authenticated/place/new.tsx:45
-msgid "Enter a city"
-msgstr "أدخل المدينة"
-
-#: src/routes/_authenticated/place/new.tsx:41
-msgid "Enter a place name"
-msgstr "أدخل اسم العقار"
-
-#: src/routes/_authenticated/place/asset/new.tsx:47
+#: src/components/asset-manage.tsx:39
+#: src/routes/_authenticated/place/asset/new.tsx:34
 msgid "Enter a type"
 msgstr "أدخل النوع"
 
-#: src/routes/signin.tsx:38
-#: src/routes/signup.tsx:27
+#: src/routes/signin.tsx:39
+#: src/routes/signup.tsx:28
 msgid "Enter a valid email"
 msgstr "أدخل بريدًا إلكترونيًا صحيحًا"
 
@@ -797,37 +993,30 @@ msgstr "أدخل بريدًا إلكترونيًا صحيحًا"
 msgid "Enter a valid email address"
 msgstr "أدخل بريداً إلكترونياً صحيحاً"
 
-#: src/routes/_authenticated/worker/new.tsx:55
+#: src/routes/_authenticated/worker/new.tsx:56
 msgid "Enter a valid email address."
 msgstr "أدخل عنوان بريد إلكتروني صالحًا."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:136
-msgid "Enter a valid interval"
-msgstr "أدخل فترة زمنية صالحة"
-
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:142
-msgid "Enter a valid number of days"
-msgstr "أدخل عددًا صالحًا من الأيام"
-
-#: src/routes/signup.tsx:29
+#: src/routes/signup.tsx:30
 msgid "Enter a valid phone number"
 msgstr "أدخل رقم جوال صحيحًا"
 
-#: src/routes/_authenticated/worker/new.tsx:61
+#: src/routes/_authenticated/worker/new.tsx:62
 msgid "Enter a valid phone number in E.164 format (e.g. +966501234567)."
 msgstr "أدخل رقم هاتف صالحًا بتنسيق E.164 (مثال: ‎+966501234567)."
 
-#: src/routes/_authenticated/place/new.tsx:47
-msgid "Enter an amount"
-msgstr "أدخل مبلغًا"
-
-#: src/routes/_authenticated/place/asset/new.tsx:45
+#: src/components/asset-manage.tsx:38
+#: src/routes/_authenticated/place/asset/new.tsx:32
 msgid "Enter an asset name"
 msgstr "أدخل اسم الأصل"
 
-#: src/routes/_authenticated/notifications.tsx:517
+#: src/routes/_authenticated/notifications.tsx:516
 msgid "Enter at least one user ID."
 msgstr "أدخل معرف مستخدم واحدًا على الأقل."
+
+#: src/routes/_authenticated/profile.tsx:118
+msgid "Enter phone number"
+msgstr "أدخل رقم الهاتف"
 
 #: src/components/place-bookings.tsx:80
 msgid "Enter the guest name"
@@ -845,150 +1034,210 @@ msgstr "أدخل سبب الإلغاء"
 msgid "Enter the total price"
 msgstr "أدخل السعر الإجمالي"
 
-#: src/routes/_authenticated/worker/new.tsx:140
+#: src/routes/_authenticated/worker/new.tsx:139
 msgid "Enter worker's full name"
 msgstr "أدخل الاسم الكامل للعامل"
 
-#: src/routes/signup.tsx:136
+#: src/routes/signup.tsx:137
 msgid "Enter your details to create your account."
 msgstr "أدخل بياناتك لإنشاء حسابك."
 
-#: src/routes/forgot-password.tsx:93
+#: src/routes/forgot-password.tsx:85
 msgid "Enter your email address and we will send you a link to reset your password."
 msgstr "أدخل بريدك الإلكتروني وسنرسل إليك رابطًا لإعادة تعيين كلمة المرور."
 
-#: src/routes/signin.tsx:70
+#: src/routes/signin.tsx:71
 msgid "Enter your email and password to continue."
 msgstr "أدخل بريدك وكلمة المرور للمتابعة."
 
-#: src/routes/signup.tsx:25
+#: src/routes/_authenticated/profile.tsx:117
+#: src/routes/signup.tsx:26
 msgid "Enter your full name"
 msgstr "أدخل اسمك الكامل"
+
+#: src/routes/account-setup.tsx:31
+msgid "Enter your password"
+msgstr "أدخل كلمة المرور"
+
+#: src/lib/errors.ts:124
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:777
+msgid "Estimated cost"
+msgstr "التكلفة التقديرية"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1036
+msgid "Estimated cost (optional)"
+msgstr "التكلفة التقديرية (اختياري)"
+
+#: src/routes/_authenticated/finance.tsx:803
+msgid "Every expense recorded for your places."
+msgstr "جميع المصروفات المسجلة للعقارات."
 
 #: src/components/place-bookings.tsx:701
 msgid "Example: the guest changed their plans"
 msgstr "مثال: غيّر الضيف خطته"
 
-#: src/routes/_authenticated/finance.tsx:198
-#~ msgid "Expense data appears here once the expenses service is wired up."
-#~ msgstr "تظهر بيانات المصروفات هنا فور ربط خدمة المصروفات."
+#: src/lib/errors.ts:142
+#: src/routes/_authenticated/finance.tsx:1039
+msgid "Expense date"
+msgstr "تاريخ المصروف"
 
-#: src/routes/_authenticated/finance.tsx:117
-#~ msgid "Expenses"
-#~ msgstr "المصروفات"
+#: src/routes/_authenticated/finance.tsx:1055
+msgid "Expense description (optional)"
+msgstr "وصف المصروف (اختياري)"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:211
-msgid "Failed to create maintenance schedule"
-msgstr "فشل إنشاء جدول الصيانة"
+#: src/routes/_authenticated/finance.tsx:797
+msgid "Expense log"
+msgstr "سجل المصروفات"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:111
-msgid "Failed to load assets"
-msgstr "فشل تحميل الأصول"
+#: src/routes/_authenticated/finance.tsx:742
+msgid "Expenses"
+msgstr "المصروفات"
 
-#: src/routes/_authenticated/notifications.tsx:609
+#: src/routes/_authenticated/finance.tsx:761
+msgid "Expenses by category"
+msgstr "المصروفات حسب التصنيف"
+
+#: src/routes/_authenticated/finance.tsx:637
+msgid "Expenses in the selected period"
+msgstr "المصروفات خلال الفترة المحددة"
+
+#: src/routes/_authenticated/finance.tsx:364
+msgid "Failed to load expense details."
+msgstr "تعذر تحميل بيانات المصروف."
+
+#: src/routes/_authenticated/finance.tsx:217
+msgid "Failed to load expenses. Please try again."
+msgstr "تعذر تحميل المصروفات. حاول مرة أخرى."
+
+#: src/routes/_authenticated/finance.tsx:255
+msgid "Failed to load financial report."
+msgstr "تعذر تحميل التقرير المالي."
+
+#: src/routes/_authenticated/notifications.tsx:608
 msgid "Failed to load notifications."
 msgstr "فشل تحميل الإشعارات."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:84
-msgid "Failed to load places"
-msgstr "فشل تحميل الملكيات"
+#: src/routes/_authenticated/finance.tsx:169
+msgid "Failed to load places."
+msgstr "تعذر تحميل قائمة العقارات."
 
-#~ msgid "Failed to load profile"
-#~ msgstr "فشل تحميل الملف الشخصي"
+#: src/routes/_authenticated/profile.tsx:92
+msgid "Failed to load profile."
+msgstr "تعذر تحميل الملف الشخصي."
 
-#: src/routes/_authenticated/notifications.tsx:521
+#: src/routes/_authenticated/notifications.tsx:520
 msgid "Failed to send announcement."
 msgstr "فشل إرسال الإعلان."
 
-#: src/routes/_authenticated/notifications.tsx:611
+#: src/routes/_authenticated/notifications.tsx:610
 msgid "Failed to update notification."
 msgstr "فشل تحديث الإشعار."
+
+#: src/routes/_authenticated/profile.tsx:93
+msgid "Failed to update profile."
+msgstr "تعذر تحديث الملف الشخصي."
+
+#: src/routes/_authenticated/content/$content_id.tsx:110
+msgid "Fill in all the required fields."
+msgstr "يرجى تعبئة جميع الحقول المطلوبة."
 
 #: src/components/place-bookings.tsx:324
 msgid "Filter bookings by month"
 msgstr "تصفية الحجوزات حسب الشهر"
 
-#: src/routes/_authenticated/place/new.tsx
-msgid "Save"
-msgstr: "حفظ"
+#: src/routes/_authenticated/content/index.tsx:209
+msgid "Filter by language"
+msgstr "تصفية حسب اللغة"
 
-#: src/routes/_authenticated/ticket/new.tsx
-msgid "Save"
-msgstr: "حفظ"
+#: src/routes/_authenticated/finance.tsx:519
+msgid "Filter by place"
+msgstr "تصفية حسب العقار"
 
-#: src/routes/_authenticated/worker/new.tsx
-msgid "Add worker"
-msgstr: "اضافة عامل"
-msgid "Create worker"
-msgstr: "انشاء عامل"
-msgid "Preferred language"
-msgstr: "اللغة المفضلة"
-msgid "Email Address"
-msgstr: "البريد"
+#: src/routes/_authenticated/content/index.tsx:235
+msgid "Filter by publishing status"
+msgstr "تصفية حسب حالة النشر"
 
-#: src/routes/_authenticated/place/asset/new.tsx
-msgid "Save"
-msgstr: "حفظ"
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx
-msgid "Save"
-msgstr: "حفظ"
-
-
-#: src/routes/_authenticated/places.tsx:160
+#: src/components/tickets-section.tsx:113
+#: src/routes/_authenticated/admin/index.tsx:151
+#: src/routes/_authenticated/places.tsx:189
+#: src/routes/_authenticated/support/index.tsx:161
+#: src/routes/_authenticated/workers.tsx:172
 msgid "Filter by status"
 msgstr "تصفية حسب الحالة"
 
 #: src/components/app-shell.tsx:24
-#: src/routes/_authenticated/finance.tsx:533
+#: src/routes/_authenticated/finance.tsx:489
+#: src/routes/_authenticated/finance.tsx:493
 msgid "Finance"
 msgstr "المالية"
+
+#: src/routes/_authenticated/finance.tsx:676
+msgid "Financial report"
+msgstr "التقرير المالي"
 
 #: src/components/auth-brand-panel.tsx:21
 msgid "For managers and workers. On mobile and desktop."
 msgstr "للمدراء والعاملين، على الجوال وسطح المكتب."
 
-#: src/routes/signin.tsx:100
+#: src/routes/signin.tsx:101
 msgid "Forgot password?"
 msgstr "نسيت كلمة المرور؟"
 
-#: src/routes/forgot-password.tsx:89
+#: src/routes/forgot-password.tsx:81
 msgid "Forgot Password?"
 msgstr "هل نسيت كلمة المرور؟"
 
-#: src/routes/_authenticated/worker/new.tsx:133
-#: src/routes/signup.tsx:142
+#: src/routes/_authenticated/finance.tsx:686
+msgid "From"
+msgstr "من تاريخ"
+
+#: src/lib/errors.ts:75
+#: src/routes/_authenticated/admin/$admin_id.tsx:372
+#: src/routes/_authenticated/support/$support_id.tsx:477
+#: src/routes/_authenticated/support/$support_id.tsx:495
+#: src/routes/_authenticated/worker/$worker_id.tsx:397
+#: src/routes/_authenticated/worker/new.tsx:132
+#: src/routes/signup.tsx:143
 msgid "Full name"
 msgstr "الاسم الكامل"
 
-#~ msgid "Full Name"
-#~ msgstr "الاسم الكامل"
+#: src/routes/_authenticated/profile.tsx:103
+msgid "Full Name"
+msgstr "الاسم الكامل"
 
-#: src/routes/_authenticated/worker/new.tsx:49
+#: src/routes/_authenticated/profile.tsx:96
+#: src/routes/_authenticated/worker/new.tsx:50
 msgid "Full name is required."
 msgstr "الاسم الكامل مطلوب."
 
-#: src/routes/reset-password.tsx:182
+#: src/components/location-picker.tsx:152
+msgid "Getting the address…"
+msgstr "جارٍ جلب العنوان…"
+
+#: src/routes/account-setup.tsx:42
+#: src/routes/reset-password.tsx:178
 msgid "Go to Login"
 msgstr "الانتقال إلى تسجيل الدخول"
 
-#: src/components/place-shared.tsx:98
-#: src/routes/_authenticated/place/asset/new.tsx:58
+#: src/components/asset-manage.tsx:23
+#: src/components/place-shared.tsx:99
+#: src/routes/_authenticated/place/asset/new.tsx:45
 msgid "Good"
 msgstr "سليم"
 
-#: src/routes/_authenticated/home.tsx:49
+#: src/routes/_authenticated/home.tsx:46
 msgid "Good afternoon"
 msgstr "طاب يومك"
 
-#: src/routes/_authenticated/home.tsx:50
+#: src/routes/_authenticated/home.tsx:47
 msgid "Good evening"
 msgstr "مساء الخير"
 
-#: src/routes/_authenticated/home.tsx:48
+#: src/routes/_authenticated/home.tsx:45
 msgid "Good morning"
 msgstr "صباح الخير"
 
-#: src/routes/_authenticated/home.tsx:448
+#: src/routes/_authenticated/home.tsx:442
 msgid "Good:"
 msgstr "جيد:"
 
@@ -1002,6 +1251,7 @@ msgid "Guest email"
 msgstr "بريد الضيف"
 
 #: src/components/place-bookings.tsx:504
+#: src/lib/errors.ts:77
 msgid "Guest name"
 msgstr "اسم الضيف"
 
@@ -1014,184 +1264,326 @@ msgid "guests"
 msgstr "ضيوف"
 
 #: src/components/place-bookings.tsx:579
+#: src/lib/errors.ts:134
 msgid "Guests"
 msgstr "عدد الضيوف"
 
-#: src/routes/_authenticated/home.tsx:597
+#: src/routes/_authenticated/home.tsx:593
 msgid "Hide details"
 msgstr "إخفاء التفاصيل"
 
-#: src/routes/signin.tsx:117
+#: src/routes/reset-password.tsx:228
+#: src/routes/reset-password.tsx:273
+#: src/routes/signin.tsx:118
 msgid "Hide password"
 msgstr "إخفاء كلمة المرور"
 
+#: src/components/place-shared.tsx:225
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:444
+#: src/routes/_authenticated/ticket/new.tsx:146
+msgid "High"
+msgstr "عالية"
+
 #: src/components/app-shell.tsx:14
+#: src/routes/_authenticated/admin/$admin_id.tsx:168
+#: src/routes/_authenticated/content/$content_id.tsx:213
+#: src/routes/_authenticated/place/$place_id.tsx:263
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:163
+#: src/routes/_authenticated/support/$support_id.tsx:242
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:605
+#: src/routes/_authenticated/ticket/new.tsx:95
+#: src/routes/_authenticated/worker/$worker_id.tsx:227
 msgid "Home"
 msgstr "الرئيسية"
 
-#: src/routes/_authenticated/place/new.tsx:373
-#~ msgid "How it will look in your list"
-#~ msgstr "هكذا سيظهر في قائمتك"
-
-#: src/routes/forgot-password.tsx:111
+#: src/routes/forgot-password.tsx:103
 msgid "If an active account exists for this email address, you will receive a password reset link shortly."
 msgstr "إذا كان هناك حساب نشط مرتبط بهذا البريد الإلكتروني، فستتلقى رابط إعادة تعيين كلمة المرور قريبًا."
 
-#: src/components/place-shared.tsx:84
-#: src/routes/_authenticated/places.tsx:32
+#: src/routes/_authenticated/profile.tsx:95
+msgid "Image size must not exceed 5MB."
+msgstr "يجب ألا يتجاوز حجم الصورة 5 ميجابايت."
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:436
+msgid "In progress"
+msgstr "قيد التنفيذ"
+
+#: src/components/place-shared.tsx:85
+#: src/routes/_authenticated/places.tsx:33
 msgid "Inactive"
 msgstr "غير نشط"
 
-#: src/routes/_authenticated/notifications.tsx:564
+#: src/routes/_authenticated/notifications.tsx:563
 msgid "Inbox"
 msgstr "صندوق الوارد"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:264
+#: src/routes/_authenticated/finance.tsx:733
+msgid "Income"
+msgstr "الإيرادات"
+
+#: src/routes/_authenticated/finance.tsx:665
+msgid "Income minus expenses"
+msgstr "الإيرادات ناقص المصروفات"
+
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:153
 msgid "Interval Unit"
 msgstr "الوحدة"
 
-#~ msgid "Invitation token"
-#~ msgstr "رمز الدعوة"
+#: src/routes/_authenticated/admin/index.tsx:35
+#: src/routes/_authenticated/profile.tsx:121
+#: src/routes/_authenticated/workers.tsx:43
+msgid "Invited"
+msgstr "مدعو"
 
-#: src/routes/_authenticated/content/new.tsx:74
-msgid "is_published"
-msgstr "هل ينشر؟"
+#: src/components/asset-manage.tsx:229
+msgid "Its maintenance schedules stop, and its past tickets stay in the records. An asset with open tickets cannot be deleted."
+msgstr "تتوقف جداول صيانته، وتبقى تذاكره السابقة في السجلات. لا يمكن حذف أصل عليه تذاكر مفتوحة."
+
+#: src/routes/_authenticated/worker/$worker_id.tsx:494
+msgid "Joined"
+msgstr "تاريخ الانضمام"
 
 #: src/components/place-bookings.tsx:707
 msgid "Kept in the booking record."
 msgstr "يُحفظ في سجل الحجز."
 
-#: src/routes/_authenticated/content/new.tsx:69
-msgid "language"
+#: src/lib/errors.ts:108
+#: src/routes/_authenticated/content/new.tsx:54
+msgid "Language"
 msgstr "اللغة"
 
-#~ msgid "Last Updated"
-#~ msgstr "اخر تحديث"
+#: src/routes/_authenticated/admin/$admin_id.tsx:570
+#: src/routes/_authenticated/content/$content_id.tsx:487
+#: src/routes/_authenticated/support/$support_id.tsx:328
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:707
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:870
+msgid "Last updated"
+msgstr "آخر تحديث"
 
-#: src/routes/_authenticated/place/new.tsx:213
+#: src/routes/_authenticated/profile.tsx:112
+msgid "Last Updated"
+msgstr "آخر تحديث"
+
+#: src/routes/_authenticated/content/index.tsx:400
+msgid "Last updated:"
+msgstr "آخر تحديث:"
+
+#: src/lib/errors.ts:87
+#: src/routes/_authenticated/place/$place_id.tsx:445
+#: src/routes/_authenticated/place/new.tsx:118
 msgid "Latitude"
 msgstr "خط العرض"
+
+#: src/routes/_authenticated/profile.tsx:119
+msgid "Leave empty to keep the current picture."
+msgstr "اترك الحقل فارغًا للاحتفاظ بالصورة الحالية."
+
+#: src/routes/_authenticated/finance.tsx:1080
+msgid "Leave it empty to keep the current receipt."
+msgstr "اترك الحقل فارغًا للاحتفاظ بالإيصال الحالي."
 
 #: src/components/place-bookings.tsx:479
 msgid "Load more"
 msgstr "تحميل المزيد"
 
-#: src/routes/_authenticated/home.tsx:303
+#: src/routes/_authenticated/home.tsx:297
 msgid "Loading booking statistics..."
 msgstr "جارٍ تحميل إحصائيات الحجوزات..."
 
-#: src/routes/_authenticated/home.tsx:331
+#: src/routes/_authenticated/home.tsx:325
 msgid "Loading budget statistics..."
 msgstr "جارٍ تحميل إحصائيات الميزانية..."
 
-#~ msgid "Loading profile..."
-#~ msgstr "جارٍ تحميل الملف الشخصي..."
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:541
+msgid "Loading the ticket…"
+msgstr "جاري تحميل تفاصيل التذكرة..."
 
-#: src/routes/_authenticated/home.tsx:274
+#: src/routes/_authenticated/home.tsx:268
 msgid "Loading ticket statistics..."
 msgstr "جارٍ تحميل إحصائيات التذاكر..."
 
-#: src/routes/_authenticated/place/new.tsx:243
-#~ msgid "Location on the map"
-#~ msgstr "الموقع على الخريطة"
+#: src/routes/_authenticated/profile.tsx:91
+msgid "Loading..."
+msgstr "جارٍ التحميل..."
 
-#: src/routes/_authenticated/place/new.tsx:214
+#: src/lib/errors.ts:89
+#: src/routes/_authenticated/place/$place_id.tsx:457
+#: src/routes/_authenticated/place/new.tsx:119
 msgid "Longitude"
 msgstr "خط الطول"
+
+#: src/components/place-shared.tsx:236
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:442
+#: src/routes/_authenticated/ticket/new.tsx:144
+msgid "Low"
+msgstr "منخفضة"
 
 #: src/components/app-shell.tsx:110
 msgid "Main menu"
 msgstr "القائمة الرئيسية"
 
-#: src/components/app-shell.tsx:25
-#: src/routes/_authenticated/finance.tsx:53
-#~ msgid "Maintenance"
-#~ msgstr "الصيانة"
+#: src/routes/_authenticated/finance.tsx:124
+msgid "Maintenance"
+msgstr "الصيانة"
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:530
+msgid "Maintenance is due today"
+msgstr "موعد الصيانة اليوم"
 
 #: src/routes/_authenticated/notifications.tsx:756
+msgid "Maintenance overdue"
+msgstr "صيانة متأخرة"
+
+#: src/routes/_authenticated/notifications.tsx:754
 msgid "Maintenance reminder"
 msgstr "تذكير بالصيانة"
 
-#: src/routes/_authenticated/notifications.tsx:571
+#: src/components/tickets-section.tsx:170
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:641
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:649
+msgid "Maintenance ticket"
+msgstr "تذكرة صيانة"
+
+#: src/routes/_authenticated/finance.tsx:1061
+msgid "Maintenance ticket ID (optional)"
+msgstr "رقم تذكرة الصيانة (اختياري)"
+
+#: src/routes/_authenticated/place/$place_id.tsx:689
+#: src/routes/_authenticated/place/$place_id.tsx:992
+msgid "Maintenance tickets"
+msgstr "تذاكر الصيانة"
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:340
+msgid "Maintenance tickets for this asset"
+msgstr "تذاكر صيانة الأصل"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:671
+msgid "Maintenance type"
+msgstr "نوع الصيانة"
+
+#: src/routes/_authenticated/content/index.tsx:154
+msgid "Manage the site's pages, their text and whether they are published."
+msgstr "إدارة صفحات الموقع ومحتواها وحالة نشرها."
+
+#: src/routes/_authenticated/notifications.tsx:570
 msgid "Manage your notifications and stay up to date."
 msgstr "إدارة إشعاراتك ومتابعة آخر المستجدات."
 
-#~ msgid "Manager"
-#~ msgstr "مدير"
+#: src/routes/_authenticated/notifications.tsx:428
+#: src/routes/_authenticated/profile.tsx:125
+msgid "Manager"
+msgstr "مدير"
 
-#~ msgid "MANAGER"
-#~ msgstr "اداري"
+#: src/routes/_authenticated/admin/$admin_id.tsx:512
+msgid "Manager ID"
+msgstr "معرّف المدير"
 
-#: src/routes/_authenticated/place/new.tsx:256
-#~ msgid "Map to pick the location"
-#~ msgstr "خريطة لاختيار الموقع"
-
-#: src/routes/_authenticated/notifications.tsx:880
+#: src/routes/_authenticated/notifications.tsx:878
 msgid "Mark as read"
 msgstr "تحديد كمقروء"
 
-#: src/routes/_authenticated/notifications.tsx:519
+#: src/routes/_authenticated/notifications.tsx:518
 msgid "Maximum 1000 users are allowed."
 msgstr "الحد الأقصى المسموح به هو 1000 مستخدم."
 
-#: src/routes/_authenticated/notifications.tsx:480
-#: src/routes/_authenticated/notifications.tsx:502
+#: src/components/place-shared.tsx:236
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:443
+#: src/routes/_authenticated/ticket/new.tsx:145
+msgid "Medium"
+msgstr "متوسطة"
+
+#: src/routes/_authenticated/notifications.tsx:479
+#: src/routes/_authenticated/notifications.tsx:501
 msgid "Message"
 msgstr "الرسالة"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:44
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:30
 msgid "Month"
 msgstr "شهر"
 
-#: src/routes/_authenticated/place/$place_id.tsx:685
+#: src/lib/errors.ts:91
+#: src/routes/_authenticated/finance.tsx:560
+#: src/routes/_authenticated/place/$place_id.tsx:433
+#: src/routes/_authenticated/place/$place_id.tsx:612
 msgid "Monthly budget"
 msgstr "الميزانية الشهرية"
 
-#: src/routes/_authenticated/home.tsx:319
-#: src/routes/_authenticated/place/new.tsx:217
+#: src/routes/_authenticated/home.tsx:313
+#: src/routes/_authenticated/place/new.tsx:122
 msgid "Monthly maintenance budget"
 msgstr "ميزانية الصيانة الشهرية"
 
-#~ msgid "My Profile"
-#~ msgstr "الملف الشخصي"
+#: src/components/ui/breadcrumb.tsx:112
+msgid "More"
+msgstr "المزيد"
 
-#: src/components/place-shared.tsx:110
-#: src/routes/_authenticated/place/asset/new.tsx:60
+#: src/routes/_authenticated/profile.tsx:113
+msgid "My Profile"
+msgstr "الملف الشخصي"
+
+#: src/routes/_authenticated/home.tsx:231
+#: src/routes/_authenticated/tickets.tsx:70
+msgid "My tasks"
+msgstr "مهامي"
+
+#: src/components/asset-manage.tsx:25
+#: src/components/place-shared.tsx:111
+#: src/routes/_authenticated/place/asset/new.tsx:47
 msgid "Needs maintenance"
 msgstr "يحتاج صيانة"
 
-#: src/routes/_authenticated/home.tsx:457
+#: src/routes/_authenticated/home.tsx:451
 msgid "Needs maintenance:"
 msgstr "يحتاج إلى صيانة:"
 
-#~ msgid "New password"
-#~ msgstr "كلمة المرور الجديدة"
+#: src/routes/_authenticated/finance.tsx:646
+#: src/routes/_authenticated/finance.tsx:751
+msgid "Net profit"
+msgstr "صافي الربح"
 
-#: src/routes/reset-password.tsx:210
+#: src/routes/_authenticated/content/index.tsx:319
+msgid "New page"
+msgstr "إنشاء صفحة"
+
+#: src/routes/reset-password.tsx:206
 msgid "New Password"
 msgstr "كلمة المرور الجديدة"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:223
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:128
 msgid "New Scheduled Maintenance"
-msgstr "اضافة جدولة صيانة"
+msgstr "إضافة جدولة صيانة"
 
-#: src/routes/_authenticated/notifications.tsx:718
+#: src/routes/_authenticated/support/new.tsx:47
+msgid "New support ticket"
+msgstr "تذكرة دعم جديدة"
+
+#: src/routes/_authenticated/tickets.tsx:205
+msgid "New tickets will show here."
+msgstr "ستظهر التذاكر الجديدة هنا."
+
+#: src/components/pager.tsx:46
+#: src/routes/_authenticated/content/index.tsx:442
+#: src/routes/_authenticated/notifications.tsx:716
 msgid "Next"
 msgstr "التالي"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:275
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:164
 msgid "Next Due Date"
 msgstr "تاريخ الصيانة القادم"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:146
-msgid "Next due date is required"
-msgstr "تاريخ الاستحقاق القادم مطلوب"
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:496
+msgid "Next maintenance"
+msgstr "موعد الصيانة القادمة"
 
-#: src/components/place-bookings.tsx:235
-#~ msgid "Next month"
-#~ msgstr "الشهر التالي"
+#: src/components/location-picker.tsx:104
+msgid "No address was found for this location."
+msgstr "لم يُعثر على عنوان لهذا الموقع."
 
-#: src/routes/_authenticated/place/$place_id.tsx:835
+#: src/components/tickets-section.tsx:175
+msgid "No asset"
+msgstr "الأصل غير محدد"
+
+#: src/routes/_authenticated/place/$place_id.tsx:784
 msgid "No assets yet."
 msgstr "لا أصول بعد."
 
@@ -1203,25 +1595,119 @@ msgstr "لا توجد حجوزات لهذا العقار بعد."
 msgid "No bookings in this month."
 msgstr "لا توجد حجوزات في هذا الشهر."
 
-#: src/routes/_authenticated/finance.tsx:195
-#~ msgid "No expenses recorded for {monthLabel} yet"
-#~ msgstr "لا توجد مصروفات مسجلة لـ {monthLabel} بعد"
+#: src/routes/_authenticated/content/index.tsx:296
+msgid "No content pages yet"
+msgstr "لا توجد صفحات محتوى حتى الآن"
 
-#: src/routes/_authenticated/notifications.tsx:644
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:181
+msgid "No default assignee"
+msgstr "بدون مكلّف افتراضي"
+
+#: src/routes/_authenticated/finance.tsx:872
+msgid "No expenses"
+msgstr "لا توجد مصروفات"
+
+#: src/routes/_authenticated/finance.tsx:875
+msgid "No expenses match the selected filters."
+msgstr "لا توجد مصروفات تطابق خيارات التصفية المحددة."
+
+#: src/routes/_authenticated/finance.tsx:780
+msgid "No financial data in the selected period."
+msgstr "لا توجد بيانات مالية خلال الفترة المحددة."
+
+#: src/routes/_authenticated/bookings.tsx:170
+msgid "No guests arrive today."
+msgstr "لا يصل ضيوف اليوم."
+
+#: src/routes/_authenticated/bookings.tsx:176
+msgid "No guests leave today."
+msgstr "لا يغادر ضيوف اليوم."
+
+#: src/routes/_authenticated/notifications.tsx:643
 msgid "No notifications"
 msgstr "لا توجد إشعارات"
 
-#: src/routes/_authenticated/home.tsx:391
-#: src/routes/_authenticated/places.tsx:196
+#: src/routes/_authenticated/content/index.tsx:295
+msgid "No pages match"
+msgstr "لا توجد صفحات مطابقة"
+
+#: src/routes/_authenticated/admin/index.tsx:332
+#: src/routes/_authenticated/workers.tsx:349
+msgid "No phone number"
+msgstr "لا يوجد رقم"
+
+#: src/routes/_authenticated/places.tsx:242
+msgid "No places match"
+msgstr "لا توجد عقارات مطابقة"
+
+#: src/routes/_authenticated/places.tsx:225
+msgid "No places yet"
+msgstr "لا توجد عقارات بعد"
+
+#: src/routes/_authenticated/home.tsx:385
 msgid "No properties yet"
 msgstr "لا توجد عقارات بعد"
 
-#: src/routes/_authenticated/place/$place_id.tsx:681
+#: src/routes/_authenticated/support/$support_id.tsx:514
+msgid "No reply yet"
+msgstr "لا يوجد رد من الإدارة حتى الآن"
+
+#: src/routes/_authenticated/bookings.tsx:182
+msgid "No stays start in the next {UPCOMING_DAYS} days."
+msgstr "لا توجد إقامات تبدأ خلال الأيام الـ {UPCOMING_DAYS} القادمة."
+
+#: src/routes/_authenticated/support/index.tsx:237
+msgid "No support tickets yet"
+msgstr "لا توجد تذاكر دعم حتى الآن"
+
+#: src/routes/_authenticated/tickets.tsx:114
+msgid "No tickets are waiting for review."
+msgstr "لا توجد تذاكر بانتظار المراجعة."
+
+#: src/routes/_authenticated/support/index.tsx:236
+msgid "No tickets match"
+msgstr "لا توجد تذاكر مطابقة"
+
+#: src/routes/_authenticated/admin/index.tsx:226
+msgid "No users match"
+msgstr "لا يوجد مستخدمون مطابقون"
+
+#: src/routes/_authenticated/admin/index.tsx:227
+msgid "No users yet"
+msgstr "لا يوجد مستخدمون حتى الآن"
+
+#: src/routes/_authenticated/place/$place_id.tsx:906
+msgid "No workers are assigned to this place."
+msgstr "لا يوجد عمال مسندون لهذا العقار."
+
+#: src/routes/_authenticated/workers.tsx:247
+msgid "No workers match"
+msgstr "لا يوجد عمال مطابقون"
+
+#: src/routes/_authenticated/workers.tsx:248
+msgid "No workers yet"
+msgstr "لا يوجد عمال حتى الآن"
+
+#: src/routes/_authenticated/admin/$admin_id.tsx:513
+msgid "None"
+msgstr "لا يوجد"
+
+#: src/routes/_authenticated/admin/$admin_id.tsx:497
+#: src/routes/_authenticated/worker/$worker_id.tsx:489
+msgid "Not confirmed"
+msgstr "غير مؤكد"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:696
+msgid "Not overdue"
+msgstr "غير متأخرة"
+
+#: src/routes/_authenticated/place/$place_id.tsx:608
 msgid "Not set"
 msgstr "غير محددة"
 
-#~ msgid "Not Verified"
-#~ msgstr "لم يتم التحقق"
+#: src/routes/_authenticated/admin/$admin_id.tsx:579
+msgid "Not verified"
+msgstr "لم يتم التحقق"
 
 #: src/components/place-bookings.tsx:609
 msgid "Notes"
@@ -1231,36 +1717,46 @@ msgstr "ملاحظات"
 msgid "Notes are too long"
 msgstr "الملاحظات أطول من الحد المسموح"
 
+#: src/routes/_authenticated/places.tsx:245
+msgid "Nothing matches this search. Clear it to see all places."
+msgstr "لا شيء يطابق هذا البحث. امسحه لترى كل العقارات."
+
 #: src/components/app-shell.tsx:49
-msgid "Notfications"
-msgstr "الاشعارات"
-
-#: src/routes/_authenticated/places.tsx:199
-msgid "Nothing matches this search. Clear it to see all properties."
-msgstr "لا شيء يطابق هذا البحث. امسحه لعرض جميع العقارات."
-
-#: src/routes/_authenticated/notifications.tsx:257
+#: src/routes/_authenticated/notifications.tsx:256
 msgid "Notifications"
 msgstr "الإشعارات"
 
-#: src/routes/signup.tsx:213
+#: src/routes/signup.tsx:214
 msgid "One lowercase letter (a-z)"
 msgstr "حرف إنجليزي صغير (a-z)"
 
-#: src/routes/signup.tsx:217
+#: src/routes/signup.tsx:218
 msgid "One symbol (like ! or @)"
 msgstr "رمز مثل ! أو @"
 
-#: src/routes/signup.tsx:209
+#: src/routes/signup.tsx:210
 msgid "One uppercase letter (A-Z)"
 msgstr "حرف إنجليزي كبير (A-Z)"
 
-#: src/components/place-shared.tsx:66
+#: src/components/tickets-section.tsx:87
+#: src/routes/_authenticated/support/index.tsx:35
+#: src/routes/_authenticated/support/index.tsx:307
+msgid "Open"
+msgstr "مفتوحة"
+
+#: src/components/place-shared.tsx:67
 msgid "OPEN"
 msgstr "مفتوحة"
 
-#: src/routes/_authenticated/place/new.tsx:60
-#: src/routes/_authenticated/places.tsx:39
+#: src/lib/errors.ts:189
+msgid "Open maintenance tickets are in the way. Complete, reject or reassign them first."
+msgstr "توجد تذاكر صيانة مفتوحة تمنع ذلك. أكملها أو ارفضها أو أعد إسنادها أولًا."
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1242
+msgid "Open the full-size photo"
+msgstr "فتح الصورة بالحجم الكامل"
+
+#: src/routes/_authenticated/places.tsx:40
 msgid "Open tickets"
 msgstr "تذاكر مفتوحة"
 
@@ -1268,171 +1764,371 @@ msgstr "تذاكر مفتوحة"
 msgid "Open your email"
 msgstr "افتح بريدك الإلكتروني"
 
-#: src/routes/_authenticated/place/new.tsx:337
-#~ msgid "Optional. In Saudi riyals."
-#~ msgstr "اختياري. بالريال السعودي."
+#: src/routes/_authenticated/finance.tsx:134
+msgid "Other"
+msgstr "أخرى"
 
-#: src/routes/_authenticated/finance.tsx:58
-#~ msgid "Other"
-#~ msgstr "أخرى"
-
-#: src/components/place-shared.tsx:133
-#: src/routes/_authenticated/place/asset/new.tsx:64
+#: src/components/asset-manage.tsx:29
+#: src/components/place-shared.tsx:134
+#: src/routes/_authenticated/place/asset/new.tsx:51
 msgid "Out of service"
 msgstr "خارج الخدمة"
 
-#: src/routes/_authenticated/home.tsx:466
+#: src/routes/_authenticated/home.tsx:460
 msgid "Out of service:"
 msgstr "خارج الخدمة:"
 
-#: src/routes/_authenticated/home.tsx:280
+#: src/components/place-shared.tsx:249
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:694
+msgid "Overdue"
+msgstr "متأخرة"
+
+#: src/routes/_authenticated/home.tsx:274
 msgid "Overdue:"
 msgstr "متأخر:"
 
-#: src/routes/signin.tsx:94
-#: src/routes/signup.tsx:191
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:691
+msgid "Overdue?"
+msgstr "حالة التأخير"
+
+#: src/routes/_authenticated/admin/$admin_id.tsx:446
+msgid "Owner / Manager"
+msgstr "مالك / مدير"
+
+#. placeholder {0}: pagination.page
+#. placeholder {1}: pagination.total_pages
+#. placeholder {2}: pagination.total
+#: src/routes/_authenticated/content/index.tsx:418
+msgid "Page {0} of {1} — {2} pages in total"
+msgstr "صفحة {0} من {1} — إجمالي {2} صفحة"
+
+#: src/components/pager.tsx:35
+msgid "Page {page} of {totalPages}"
+msgstr "صفحة {page} من {totalPages}"
+
+#: src/routes/_authenticated/content/$content_id.tsx:529
+msgid "Page body"
+msgstr "محتوى الصفحة"
+
+#: src/routes/_authenticated/content/$content_id.tsx:229
+msgid "Page details"
+msgstr "تفاصيل الصفحة"
+
+#: src/routes/_authenticated/content/$content_id.tsx:479
+msgid "Page ID"
+msgstr "معرّف الصفحة"
+
+#: src/routes/_authenticated/content/$content_id.tsx:411
+msgid "Page information"
+msgstr "معلومات الصفحة"
+
+#: src/routes/_authenticated/content/$content_id.tsx:445
+msgid "Page language"
+msgstr "لغة الصفحة"
+
+#: src/routes/p/$lang/$slug.tsx:68
+msgid "Page not found"
+msgstr "الصفحة غير موجودة"
+
+#: src/routes/_authenticated/content/$content_id.tsx:454
+msgid "Page slug"
+msgstr "رابط الصفحة (Slug)"
+
+#: src/routes/_authenticated/content/$content_id.tsx:436
+msgid "Page title"
+msgstr "عنوان الصفحة"
+
+#: src/components/pager.tsx:20
+msgid "Pages"
+msgstr "الصفحات"
+
+#: src/lib/errors.ts:70
+#: src/routes/account-setup.tsx:29
+#: src/routes/signin.tsx:95
+#: src/routes/signup.tsx:192
 msgid "Password"
 msgstr "كلمة المرور"
 
-#: src/routes/signin.tsx:39
-#: src/routes/signup.tsx:31
+#: src/routes/signin.tsx:40
+#: src/routes/signup.tsx:32
 msgid "Password does not meet the requirements"
 msgstr "كلمة المرور لا تحقق الشروط"
 
-#: src/routes/reset-password.tsx:114
+#: src/routes/account-setup.tsx:36
+msgid "Password is required."
+msgstr "كلمة المرور مطلوبة."
+
+#: src/routes/account-setup.tsx:37
+#: src/routes/reset-password.tsx:108
 msgid "Password must be at least 8 characters."
 msgstr "يجب ألا تقل كلمة المرور عن 8 أحرف."
 
-#: src/routes/reset-password.tsx:169
+#: src/routes/reset-password.tsx:163
 msgid "Password Reset Successful"
 msgstr "تمت إعادة تعيين كلمة المرور بنجاح"
 
-#: src/routes/reset-password.tsx:117
+#: src/routes/account-setup.tsx:38
+#: src/routes/reset-password.tsx:111
 msgid "Passwords do not match."
 msgstr "كلمتا المرور غير متطابقتين."
 
-#~ msgid "Personal Information"
-#~ msgstr "المعلومات الشخصية"
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:433
+msgid "Pending"
+msgstr "قيد الانتظار"
 
-#: src/routes/_authenticated/worker/new.tsx:177
-#: src/routes/signup.tsx:174
+#: src/routes/_authenticated/admin/index.tsx:36
+msgid "Pending verification"
+msgstr "بانتظار التحقق"
+
+#: src/routes/_authenticated/profile.tsx:122
+msgid "Pending Verification"
+msgstr "بانتظار التحقق"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:727
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:846
+msgid "People"
+msgstr "المسؤولون"
+
+#: src/routes/_authenticated/profile.tsx:116
+msgid "Personal Information"
+msgstr "المعلومات الشخصية"
+
+#: src/lib/errors.ts:73
+#: src/routes/_authenticated/admin/$admin_id.tsx:407
+#: src/routes/_authenticated/support/$support_id.tsx:488
+#: src/routes/_authenticated/worker/$worker_id.tsx:432
+#: src/routes/_authenticated/worker/new.tsx:176
+#: src/routes/signup.tsx:175
 msgid "Phone number"
 msgstr "رقم الجوال"
 
-#~ msgid "Phone Number"
-#~ msgstr "رقم الجوال"
+#: src/routes/_authenticated/profile.tsx:104
+msgid "Phone Number"
+msgstr "رقم الجوال"
 
-#: src/routes/_authenticated/worker/new.tsx:59
+#: src/routes/_authenticated/worker/new.tsx:60
 msgid "Phone number is required."
 msgstr "رقم الهاتف مطلوب."
 
-#: src/routes/_authenticated/place/asset/new.tsx:157
+#: src/lib/errors.ts:116
+msgid "Photos"
+msgstr "الصور"
+
+#: src/routes/_authenticated/ticket/new.tsx:158
+msgid "Photos of the damage"
+msgstr "صور المشكلة"
+
+#: src/routes/_authenticated/bookings.tsx:126
+#: src/routes/_authenticated/finance.tsx:994
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:626
+#: src/routes/_authenticated/ticket/new.tsx:109
+#: src/routes/_authenticated/tickets.tsx:229
 msgid "Place"
 msgstr "العقار"
 
-#: src/routes/_authenticated/place/new.tsx:204
+#: src/routes/_authenticated/place/$place_id.tsx:568
+msgid "Place information"
+msgstr "معلومات العقار"
+
+#: src/lib/errors.ts:79
+#: src/routes/_authenticated/place/$place_id.tsx:387
+#: src/routes/_authenticated/place/new.tsx:109
 msgid "Place name"
 msgstr "اسم العقار"
 
-#: src/routes/_authenticated/place/$place_id.tsx:355
+#: src/routes/_authenticated/place/$place_id.tsx:283
 msgid "Place not found"
 msgstr "لم يتم العثور على العقار"
 
-#: src/routes/_authenticated/place/new.tsx:207
+#: src/lib/errors.ts:81
+#: src/routes/_authenticated/place/$place_id.tsx:395
+#: src/routes/_authenticated/place/new.tsx:112
 msgid "Place type"
 msgstr "نوع العقار"
 
 #: src/components/app-shell.tsx:19
-#: src/routes/_authenticated/places.tsx:110
+#: src/routes/_authenticated/place/$place_id.tsx:268
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:171
+#: src/routes/_authenticated/places.tsx:137
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:613
+#: src/routes/_authenticated/ticket/new.tsx:99
 msgid "Places"
 msgstr "العقارات"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:186
+#: src/routes/_authenticated/places.tsx:231
+msgid "Places your manager assigns you to show here."
+msgstr "تظهر هنا العقارات التي يسندك إليها مديرك."
+
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:103
 msgid "Please enter valid interval and lead days values"
 msgstr "يرجى إدخال قيم صالحة للفترة الزمنية وأيام التنبيه المسبق"
 
-#: src/routes/forgot-password.tsx:159
+#: src/routes/forgot-password.tsx:151
 msgid "Please enter your email address."
 msgstr "يرجى إدخال بريدك الإلكتروني."
 
-#: src/routes/_authenticated/notifications.tsx:515
+#: src/routes/_authenticated/notifications.tsx:514
 msgid "Please fill in all announcement fields."
 msgstr "يرجى تعبئة جميع حقول الإعلان."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:173
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:92
 msgid "Please fill in all required fields"
 msgstr "يرجى تعبئة جميع الحقول المطلوبة"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:122
-msgid "Please select a place"
-msgstr "يرجى اختيار ملكية"
+#: src/routes/_authenticated/profile.tsx:94
+msgid "Please select a valid image."
+msgstr "يرجى اختيار صورة صالحة."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:126
-msgid "Please select an asset"
-msgstr "يرجى اختيار أصل"
-
-#: src/routes/_authenticated/worker/new.tsx:200
+#: src/routes/_authenticated/admin/$admin_id.tsx:470
+#: src/routes/_authenticated/worker/$worker_id.tsx:480
+#: src/routes/_authenticated/worker/new.tsx:199
 msgid "Preferred language"
 msgstr "اللغة المفضلة"
 
-#~ msgid "Preferred Language"
-#~ msgstr "اللغة المفضلة"
+#: src/routes/_authenticated/profile.tsx:105
+msgid "Preferred Language"
+msgstr "اللغة المفضلة"
 
-#: src/routes/_authenticated/notifications.tsx:694
+#: src/components/tickets-section.tsx:181
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:450
+msgid "Preventive maintenance"
+msgstr "صيانة وقائية"
+
+#: src/components/pager.tsx:32
+#: src/routes/_authenticated/content/index.tsx:432
+#: src/routes/_authenticated/notifications.tsx:692
 msgid "Previous"
 msgstr "السابق"
 
-#: src/components/place-bookings.tsx:219
-#~ msgid "Previous month"
-#~ msgstr "الشهر السابق"
+#: src/lib/errors.ts:114
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:676
+#: src/routes/_authenticated/ticket/new.tsx:139
+msgid "Priority"
+msgstr "الأولوية"
 
-#: src/routes/_authenticated/profile:
-#~ msgid "Profile"
-#~ msgstr "الملف الشخصي"
+#: src/routes/_authenticated/profile.tsx:106
+msgid "Profile Picture"
+msgstr "الصورة الشخصية"
 
-#: src/routes/_authenticated/place/$place_id.tsx:667
+#: src/routes/_authenticated/profile.tsx:97
+msgid "Profile updated successfully."
+msgstr "تم تحديث الملف الشخصي بنجاح."
+
+#: src/routes/_authenticated/place/$place_id.tsx:594
 msgid "Property type"
 msgstr "نوع العقار"
 
-#: src/routes/_authenticated/content/new.tsx:77
+#: src/routes/_authenticated/content/$content_id.tsx:372
+#: src/routes/_authenticated/content/$content_id.tsx:625
+#: src/routes/_authenticated/content/index.tsx:241
+#: src/routes/_authenticated/content/index.tsx:390
+#: src/routes/_authenticated/content/new.tsx:63
 msgid "Published"
 msgstr "منشور"
 
-#: src/routes/_authenticated/place/asset/new.tsx:161
+#: src/routes/_authenticated/content/$content_id.tsx:590
+msgid "Publishing"
+msgstr "إعدادات النشر"
+
+#: src/components/asset-manage.tsx:198
+#: src/lib/errors.ts:99
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:271
+#: src/routes/_authenticated/place/asset/new.tsx:126
 msgid "Purchase date"
 msgstr "تاريخ الشراء"
 
-#: src/routes/_authenticated/notifications.tsx:603
-#: src/routes/_authenticated/notifications.tsx:892
+#: src/routes/account-setup.tsx:32
+msgid "Re-enter your password"
+msgstr "أعد إدخال كلمة المرور"
+
+#: src/routes/_authenticated/notifications.tsx:602
+#: src/routes/_authenticated/notifications.tsx:890
 msgid "Read"
 msgstr "مقروء"
 
-#: src/routes/_authenticated/notifications.tsx:413
+#: src/lib/errors.ts:128
+msgid "Reason"
+msgstr "السبب"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:813
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1054
+msgid "Reason for rejection"
+msgstr "سبب الرفض"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:948
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:983
+msgid "Reassign"
+msgstr "إعادة تعيين المكلف"
+
+#: src/routes/_authenticated/notifications.tsx:412
 msgid "Recipient role"
 msgstr "دور المستلم"
 
-#: src/routes/_authenticated/notifications.tsx:592
+#: src/routes/_authenticated/notifications.tsx:591
 msgid "Refresh"
 msgstr "تحديث"
 
-#: src/routes/_authenticated/home.tsx:336
-#: src/routes/_authenticated/home.tsx:641
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:935
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:982
+msgid "Reject ticket"
+msgstr "رفض التذكرة"
+
+#: src/components/place-shared.tsx:276
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:435
+msgid "Rejected"
+msgstr "مرفوضة"
+
+#: src/routes/_authenticated/home.tsx:330
+#: src/routes/_authenticated/home.tsx:637
 msgid "Remaining:"
 msgstr "المتبقي:"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:281
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:508
+msgid "Reminder before"
+msgstr "التنبيه قبل الموعد"
+
+#: src/lib/errors.ts:147
+msgid "Reminder before due date"
+msgstr "التنبيه قبل الموعد"
+
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:170
 msgid "Reminder Before Due Date (Days)"
 msgstr "التذكير قبل"
 
-#: src/routes/_authenticated/place/new.tsx:267
-#~ msgid "Remove location"
-#~ msgstr "إزالة الموقع"
+#: src/lib/errors.ts:145
+msgid "Repeat every"
+msgstr "التكرار"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:257
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:146
 msgid "Repeat Every"
 msgstr "تكرار كل"
 
-#: src/routes/reset-password.tsx:199
+#: src/routes/_authenticated/support/$support_id.tsx:513
+msgid "Reply"
+msgstr "الرد"
+
+#: src/routes/_authenticated/ticket/new.tsx:119
+msgid "Report damage"
+msgstr "رفع تذكرة صيانة"
+
+#: src/routes/_authenticated/ticket/new.tsx:123
+msgid "Report new damage for maintenance"
+msgstr "تسجيل بلاغ صيانة جديد"
+
+#. placeholder {0}: dateFormat.format(new Date(ticket.created_at))
+#: src/routes/_authenticated/tickets.tsx:234
+msgid "Reported {0}"
+msgstr "أُبلغ عنها {0}"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:849
+msgid "Reported by"
+msgstr "مُبلّغ التذكرة"
+
+#: src/routes/_authenticated/tickets.tsx:111
+msgid "Reported damage that needs your approval, newest first."
+msgstr "بلاغات أعطال تحتاج موافقتك، الأحدث أولًا."
+
+#: src/routes/reset-password.tsx:196
 msgid "Request a New Link"
 msgstr "طلب رابط جديد"
 
@@ -1440,151 +2136,239 @@ msgstr "طلب رابط جديد"
 msgid "Resend code"
 msgstr "إعادة إرسال الرمز"
 
-#: src/routes/reset-password.tsx:151
-#: src/routes/reset-password.tsx:310
+#: src/routes/reset-password.tsx:145
+#: src/routes/reset-password.tsx:306
 msgid "Reset Password"
 msgstr "إعادة تعيين كلمة المرور"
 
-#: src/routes/reset-password.tsx:307
+#: src/routes/reset-password.tsx:303
 msgid "Resetting Password..."
 msgstr "جارٍ إعادة تعيين كلمة المرور..."
 
-#: src/components/place-shared.tsx:78
+#: src/routes/_authenticated/support/$support_id.tsx:382
+#: src/routes/_authenticated/support/$support_id.tsx:458
+msgid "Resolve ticket"
+msgstr "حل التذكرة"
+
+#: src/routes/_authenticated/support/index.tsx:36
+#: src/routes/_authenticated/support/index.tsx:307
+msgid "Resolved"
+msgstr "تم حلها"
+
+#: src/components/place-shared.tsx:79
 msgid "RESOLVED"
 msgstr "تم حلها"
 
-#: src/components/place-shared.tsx:194
+#: src/routes/_authenticated/support/$support_id.tsx:518
+msgid "Resolved by"
+msgstr "تم الحل بواسطة"
+
+#: src/routes/_authenticated/support/$support_id.tsx:529
+msgid "Resolved on"
+msgstr "تاريخ الحل"
+
+#: src/components/place-shared.tsx:195
 msgid "Rest house"
 msgstr "استراحة"
 
-#: src/routes/_authenticated/home.tsx:237
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:725
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:791
+msgid "Review"
+msgstr "المراجعة"
+
+#: src/routes/_authenticated/home.tsx:231
 msgid "Review tickets"
 msgstr "مراجعة التذاكر"
 
-#~ msgid "Role"
-#~ msgstr "الصلاحية"
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:794
+msgid "Reviewed by"
+msgstr "تمت المراجعة بواسطة"
 
-#: src/components/place-shared.tsx:196
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:801
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:875
+msgid "Reviewed on"
+msgstr "تاريخ المراجعة"
+
+#: src/routes/_authenticated/admin/$admin_id.tsx:432
+#: src/routes/_authenticated/profile.tsx:108
+msgid "Role"
+msgstr "الصلاحية"
+
+#: src/components/place-shared.tsx:197
 msgid "Room"
 msgstr "غرفة"
 
-#: src/routes/_authenticated/place/new.tsx:302
-#~ msgid "Saudi riyal (SAR)"
-#~ msgstr "ريال سعودي (SAR)"
-
-#: src/components/form.tsx:155
+#: src/components/asset-manage.tsx:214
+#: src/components/form.tsx:145
+#: src/routes/_authenticated/finance.tsx:1111
 msgid "Save"
 msgstr "حفظ"
 
-#: src/routes/_authenticated/place/asset/new.tsx:303
-#~ msgid "Save asset"
-#~ msgstr "حفظ الأصل"
-
-#: src/components/place-bookings.tsx:393
-#~ msgid "Save booking"
-#~ msgstr "حفظ الحجز"
-
-#: src/routes/_authenticated/place/$place_id.tsx:607
+#: src/routes/_authenticated/admin/$admin_id.tsx:660
+#: src/routes/_authenticated/content/$content_id.tsx:714
+#: src/routes/_authenticated/place/$place_id.tsx:533
+#: src/routes/_authenticated/worker/$worker_id.tsx:714
 msgid "Save changes"
 msgstr "حفظ التغييرات"
 
-#: src/routes/_authenticated/place/new.tsx:357
-#~ msgid "Save place"
-#~ msgstr "حفظ العقار"
+#: src/routes/_authenticated/profile.tsx:99
+msgid "Save Changes"
+msgstr "حفظ التغييرات"
 
-#: src/routes/_authenticated/place/$place_id.tsx:605
+#: src/routes/_authenticated/finance.tsx:1110
+#: src/routes/_authenticated/place/$place_id.tsx:531
+#: src/routes/_authenticated/profile.tsx:98
 msgid "Saving..."
 msgstr "جارٍ الحفظ..."
 
+#: src/components/asset-manage.tsx:214
 #: src/components/place-bookings.tsx:641
 #: src/components/place-bookings.tsx:824
+#: src/routes/_authenticated/admin/$admin_id.tsx:660
+#: src/routes/_authenticated/content/$content_id.tsx:714
+#: src/routes/_authenticated/worker/$worker_id.tsx:714
 msgid "Saving…"
 msgstr "جارٍ الحفظ…"
 
-#: src/routes/_authenticated/places.tsx:139
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:393
+msgid "Schedule maintenance"
+msgstr "جدولة صيانة"
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:366
+msgid "Scheduled maintenance"
+msgstr "الصيانة المجدولة"
+
+#: src/routes/_authenticated/admin/index.tsx:128
+#: src/routes/_authenticated/places.tsx:168
+#: src/routes/_authenticated/support/index.tsx:138
+#: src/routes/_authenticated/workers.tsx:149
 msgid "Search"
 msgstr "بحث"
 
-#: src/routes/_authenticated/places.tsx:152
+#: src/routes/_authenticated/workers.tsx:164
+msgid "Search by name, email or phone"
+msgstr "ابحث بالاسم أو البريد الإلكتروني أو الجوال"
+
+#: src/routes/_authenticated/admin/index.tsx:143
+msgid "Search by name, email, phone or ID"
+msgstr "ابحث بالاسم أو البريد الإلكتروني أو الجوال او المعرف"
+
+#: src/routes/_authenticated/places.tsx:181
 msgid "Search by place name or city"
 msgstr "ابحث باسم العقار أو المدينة"
 
-#: src/routes/_authenticated/home.tsx:370
+#: src/routes/_authenticated/support/index.tsx:153
+msgid "Search by subject or description"
+msgstr "ابحث بالموضوع أو الوصف"
+
+#: src/routes/_authenticated/content/index.tsx:201
+msgid "Search by title or slug…"
+msgstr "ابحث بعنوان الصفحة أو الرابط..."
+
+#: src/routes/_authenticated/content/index.tsx:186
+msgid "Search content"
+msgstr "البحث في المحتوى"
+
+#: src/routes/_authenticated/home.tsx:364
 msgid "See all"
 msgstr "عرض الكل"
 
-#: src/routes/_authenticated/notifications.tsx:332
+#: src/routes/_authenticated/finance.tsx:405
+msgid "Select a place and enter a valid amount."
+msgstr "اختر العقار وأدخل مبلغًا صحيحًا."
+
+#: src/components/location-picker.tsx:157
+msgid "Selected address"
+msgstr "العنوان المختار"
+
+#: src/routes/_authenticated/notifications.tsx:331
 msgid "Send an announcement to users by role or user IDs."
 msgstr "أرسل إعلانًا للمستخدمين حسب الدور أو معرفات المستخدمين."
 
-#: src/routes/_authenticated/notifications.tsx:329
-#: src/routes/_authenticated/notifications.tsx:546
+#: src/routes/_authenticated/notifications.tsx:328
+#: src/routes/_authenticated/notifications.tsx:545
 msgid "Send announcement"
 msgstr "إرسال إعلان"
 
-#: src/routes/forgot-password.tsx:185
+#: src/routes/forgot-password.tsx:177
 msgid "Send Reset Link"
 msgstr "إرسال رابط إعادة التعيين"
 
-#: src/routes/_authenticated/worker/new.tsx:239
+#: src/routes/_authenticated/worker/new.tsx:241
 msgid "Sending invitation..."
 msgstr "جارٍ إرسال الدعوة..."
 
-#: src/routes/_authenticated/notifications.tsx:544
-#: src/routes/forgot-password.tsx:182
+#: src/routes/_authenticated/notifications.tsx:543
+#: src/routes/forgot-password.tsx:174
 msgid "Sending..."
 msgstr "جارٍ الإرسال..."
 
-#: src/routes/_authenticated/notifications.tsx:455
+#: src/routes/_authenticated/notifications.tsx:454
 msgid "Separate user IDs with commas or new lines. Maximum 1000 users."
 msgstr "افصل معرفات المستخدمين بفواصل أو أسطر جديدة. الحد الأقصى 1000 مستخدم."
 
-#~ msgid "Set up your account"
-#~ msgstr "إعداد حسابك"
+#: src/routes/account-setup.tsx:26
+msgid "Set Up Your Account"
+msgstr "إعداد حسابك"
 
-#: src/routes/_authenticated/place/new.tsx:304
-#: src/routes/_authenticated/place/new.tsx:314
-#~ msgid "Set when the place is created and cannot change."
-#~ msgstr "تُحدد عند الإنشاء ولا تتغير."
-
-#: src/routes/signin.tsx:117
+#: src/routes/reset-password.tsx:228
+#: src/routes/reset-password.tsx:274
+#: src/routes/signin.tsx:118
 msgid "Show password"
 msgstr "إظهار كلمة المرور"
 
 #. Page title
-#: src/routes/signin.tsx:67
-#: src/routes/signin.tsx:135
+#: src/routes/signin.tsx:68
+#: src/routes/signin.tsx:136
 msgid "Sign in"
 msgstr "دخول"
 
-#: src/components/app-shell.tsx:190
+#: src/components/app-shell.tsx:192
 msgid "Sign out"
 msgstr "تسجيل الخروج"
 
-#: src/routes/signin.tsx:135
+#: src/routes/signin.tsx:136
 msgid "Signing in…"
 msgstr "جارٍ الدخول…"
 
-#: src/routes/_authenticated/content/new.tsx:70
-msgid "slug"
+#: src/lib/errors.ts:103
+#: src/routes/_authenticated/content/new.tsx:55
+msgid "Slug"
 msgstr "المسار"
 
-#: src/routes/forgot-password.tsx:167
-#: src/routes/reset-password.tsx:134
+#: src/lib/errors.ts:180
+msgid "Some fields are not valid."
+msgstr "بعض الحقول غير صحيحة."
+
+#: src/routes/account-setup.tsx:43
+#: src/routes/forgot-password.tsx:159
+#: src/routes/reset-password.tsx:128
 msgid "Something went wrong. Please try again."
 msgstr "حدث خطأ ما. يرجى المحاولة مرة أخرى."
 
-#: src/routes/_authenticated/notifications.tsx:406
+#: src/lib/errors.ts:162
+#: src/lib/errors.ts:208
+msgid "Something went wrong. Try again."
+msgstr "حدث خطأ ما. حاول مرة أخرى."
+
+#: src/routes/_authenticated/notifications.tsx:405
 msgid "Specific users"
 msgstr "مستخدمون محددون"
 
-#: src/routes/_authenticated/home.tsx:334
-#: src/routes/_authenticated/home.tsx:636
+#: src/routes/_authenticated/home.tsx:328
+#: src/routes/_authenticated/home.tsx:632
 msgid "Spent:"
 msgstr "المصروف:"
 
-#: src/routes/_authenticated/place/$place_id.tsx:697
-#: src/routes/_authenticated/place/asset/new.tsx:160
+#: src/components/asset-manage.tsx:181
+#: src/lib/errors.ts:97
+#: src/routes/_authenticated/content/new.tsx:59
+#: src/routes/_authenticated/place/$place_id.tsx:487
+#: src/routes/_authenticated/place/$place_id.tsx:634
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:265
+#: src/routes/_authenticated/place/asset/new.tsx:125
+#: src/routes/_authenticated/support/$support_id.tsx:316
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:681
 msgid "Status"
 msgstr "الحالة"
 
@@ -1593,56 +2377,139 @@ msgstr "الحالة"
 msgid "Stay"
 msgstr "الإقامة"
 
-#: src/routes/_authenticated/notifications.tsx:273
+#: src/routes/_authenticated/notifications.tsx:272
 msgid "Stay updated with your latest activity and announcements."
 msgstr "تابع آخر نشاطاتك والإعلانات الجديدة."
 
-#: src/routes/_authenticated/support/new.tsx:55
-msgid "subject"
-msgstr "العنوان"
+#: src/lib/errors.ts:110
+#: src/routes/_authenticated/support/$support_id.tsx:306
+#: src/routes/_authenticated/support/new.tsx:51
+msgid "Subject"
+msgstr "عنوان التذكرة"
 
-#: src/routes/_authenticated/home.tsx:179
-#~ msgid "Summed from your places' monthly budgets."
-#~ msgstr "مجموع ميزانيات عقاراتك الشهرية."
-
-#: src/routes/_authenticated/finance.tsx:57
-#~ msgid "Supplies"
-#~ msgstr "مستلزمات"
+#: src/routes/_authenticated/finance.tsx:132
+msgid "Supplies"
+msgstr "مستلزمات"
 
 #: src/components/app-shell.tsx:39
 msgid "Support"
 msgstr "الدعم"
 
-#: src/routes/_authenticated/finance.tsx:55
-#~ msgid "Taxes"
-#~ msgstr "ضرائب"
+#: src/routes/_authenticated/support/$support_id.tsx:370
+#: src/routes/_authenticated/support/$support_id.tsx:398
+#: src/routes/_authenticated/support/$support_id.tsx:507
+msgid "Support reply"
+msgstr "رد الإدارة"
 
-#: src/routes/_authenticated/place/new.tsx:126
+#: src/routes/_authenticated/support/$support_id.tsx:524
+msgid "Support team"
+msgstr "فريق الدعم"
+
+#: src/routes/_authenticated/support/$support_id.tsx:292
+msgid "Support ticket"
+msgstr "تذكرة دعم"
+
+#: src/routes/_authenticated/notifications.tsx:758
+msgid "Support ticket resolved"
+msgstr "حُلّت تذكرة الدعم"
+
+#: src/routes/_authenticated/support/$support_id.tsx:251
+#: src/routes/_authenticated/support/index.tsx:98
+msgid "Support tickets"
+msgstr "تذاكر الدعم"
+
+#: src/routes/_authenticated/finance.tsx:128
+msgid "Taxes"
+msgstr "ضرائب"
+
+#: src/lib/errors.ts:185
 msgid "That place name is already taken."
 msgstr "اسم العقار مستخدم بالفعل."
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:297
+msgid "The asset's place"
+msgstr "العقار المرتبط بالأصل"
 
 #: src/components/email-verify-panel.tsx:61
 msgid "The code is valid for 10 minutes."
 msgstr "الرمز صالح لمدة 10 دقائق."
 
-#~ msgid "The invitation link is invalid, expired, or has already been used."
-#~ msgstr "رابط الدعوة غير صحيح أو منتهي الصلاحية أو سبق استخدامه."
+#: src/lib/errors.ts:198
+msgid "The email or password is not correct."
+msgstr "البريد الإلكتروني أو كلمة المرور غير صحيحة."
 
-#: src/routes/_authenticated/place/new.tsx:438
-#~ msgid "The monthly budget is visible to you only; workers never see it."
-#~ msgstr "الميزانية الشهرية تظهر لك وحدك، ولا يراها العمّال."
+#: src/lib/errors.ts:172
+msgid "The guest cannot check in before the check-in date."
+msgstr "لا يمكن تسجيل دخول الضيف قبل تاريخ الوصول."
 
-#: src/routes/_authenticated/place/asset/new.tsx:49
+#: src/routes/account-setup.tsx:35
+msgid "The invitation link is invalid or missing required information."
+msgstr "رابط الدعوة غير صالح أو لا يحتوي على البيانات المطلوبة."
+
+#: src/components/location-picker.tsx:49
+msgid "The map is not available: the TomTom key is missing."
+msgstr "الخريطة غير متاحة: مفتاح TomTom غير موجود."
+
+#: src/routes/_authenticated/content/$content_id.tsx:689
+msgid "The page was updated."
+msgstr "تم تحديث الصفحة بنجاح."
+
+#: src/components/asset-manage.tsx:42
+#: src/routes/_authenticated/place/asset/new.tsx:36
 msgid "The purchase date cannot be in the future."
 msgstr "تاريخ الشراء لا يمكن أن يكون في المستقبل."
 
-#: src/routes/reset-password.tsx:111
+#: src/routes/reset-password.tsx:105
 msgid "The reset link is invalid or incomplete."
 msgstr "رابط إعادة التعيين غير صالح أو غير مكتمل."
 
-#: src/routes/reset-password.tsx:121
+#: src/routes/reset-password.tsx:115
 msgid "The reset link is invalid, expired, or already used."
 msgstr "رابط إعادة التعيين غير صالح أو منتهي الصلاحية أو سبق استخدامه."
+
+#: src/routes/_authenticated/content/$content_id.tsx:116
+msgid "The slug can only have lowercase English letters, numbers and hyphens (-)."
+msgstr "الرابط يجب أن يحتوي على أحرف إنجليزية صغيرة وأرقام وشرطة (-) فقط."
+
+#: src/routes/_authenticated/content/$content_id.tsx:474
+msgid "The slug format is not valid."
+msgstr "صيغة الرابط غير صحيحة."
+
+#: src/routes/_authenticated/admin/$admin_id.tsx:635
+msgid "The user was updated."
+msgstr "تم تحديث بيانات المستخدم بنجاح."
+
+#: src/routes/_authenticated/place/$place_id.tsx:227
+msgid "The worker was added to the place."
+msgstr "تمت إضافة العامل إلى العقار بنجاح."
+
+#: src/routes/_authenticated/worker/$worker_id.tsx:690
+msgid "The worker was updated."
+msgstr "تم تحديث بيانات العامل بنجاح."
+
+#: src/routes/_authenticated/admin/index.tsx:233
+msgid "There are no users to show."
+msgstr "لا يوجد مستخدمون لعرضهم حالياً."
+
+#: src/lib/errors.ts:200
+msgid "This account is not active."
+msgstr "هذا الحساب غير مفعّل."
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:342
+msgid "This asset has no maintenance tickets."
+msgstr "لا توجد تذاكر صيانة لهذا الأصل."
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:341
+msgid "This asset has no open tickets."
+msgstr "لا توجد تذاكر مفتوحة لهذا الأصل."
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:425
+msgid "This asset has no scheduled maintenance."
+msgstr "لا توجد صيانة دورية مجدولة لهذا الأصل."
+
+#: src/components/asset-manage.tsx:125
+msgid "This asset has open maintenance tickets. Complete or reject them first."
+msgstr "على هذا الأصل تذاكر صيانة مفتوحة. أكملها أو ارفضها أولًا."
 
 #: src/components/place-bookings.tsx:718
 msgid "This booking can no longer be cancelled."
@@ -1652,124 +2519,243 @@ msgstr "لم يعد بإمكانك إلغاء هذا الحجز."
 msgid "This booking can no longer be moved to another state."
 msgstr "لم يعد بإمكانه تغيير حالته."
 
-#: src/routes/reset-password.tsx:190
+#: src/lib/errors.ts:194
+msgid "This clashes with the current data. Reload the page and try again."
+msgstr "هذا يتعارض مع البيانات الحالية. أعد تحميل الصفحة وحاول مرة أخرى."
+
+#: src/lib/errors.ts:187
+msgid "This email is already registered."
+msgstr "هذا البريد الإلكتروني مسجّل بالفعل."
+
+#: src/routes/p/$lang/$slug.tsx:71
+msgid "This page does not exist or is not published."
+msgstr "هذه الصفحة غير موجودة أو غير منشورة."
+
+#: src/routes/reset-password.tsx:185
 msgid "This password reset link is invalid or incomplete. Please request a new reset link."
 msgstr "رابط إعادة تعيين كلمة المرور غير صالح أو غير مكتمل. يرجى طلب رابط جديد."
 
+#: src/lib/errors.ts:192
+msgid "This place has current or upcoming stays."
+msgstr "في هذا العقار إقامات حالية أو قادمة."
+
+#: src/routes/_authenticated/place/$place_id.tsx:994
+msgid "This place has no maintenance tickets."
+msgstr "لا توجد تذاكر صيانة لهذا العقار."
+
+#: src/routes/_authenticated/place/$place_id.tsx:993
+msgid "This place has no open tickets."
+msgstr "لا توجد تذاكر مفتوحة لهذا العقار."
+
+#: src/lib/errors.ts:186
+msgid "This slug is already used in this language."
+msgstr "هذا المسار مستخدم بالفعل في هذه اللغة."
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:766
+msgid "This ticket has no asset."
+msgstr "لا توجد بيانات للأصل أو لم يتم تحديد أصل لهذه التذكرة."
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1307
+msgid "This ticket has no attachments."
+msgstr "لا توجد مرفقات لهذه التذكرة."
+
+#: src/routes/_authenticated/worker/$worker_id.tsx:624
+msgid "This worker has no assigned places."
+msgstr "لا توجد أماكن مسندة لهذا العامل."
+
 #: src/components/place-bookings.tsx:627
 msgid "Those dates are already booked for this property."
-msgstr "هذه التواريخ محجوزة بالفعل لهذه الملكية."
+msgstr "هذه التواريخ محجوزة بالفعل لهذا العقار."
 
-#: src/routes/_authenticated/home.tsx:103
-#~ msgid "Ticket and booking activity appears here once those services are wired up."
-#~ msgstr "نشاط التذاكر والحجوزات يظهر هنا فور ربط هذه الخدمات."
-
-#: src/routes/_authenticated/places.tsx:219
-msgid "Ticket and worker counts appear once those services are wired up."
-msgstr "تظهر أعداد التذاكر والعمّال عندما تُربط هذه الخدمات."
-
-#: src/routes/_authenticated/notifications.tsx:750
+#: src/routes/_authenticated/notifications.tsx:748
 msgid "Ticket assigned"
 msgstr "تم إسناد تذكرة"
 
-#: src/routes/_authenticated/home.tsx:149
-#~ msgid "Ticket data appears here once the maintenance service is wired up."
-#~ msgstr "تظهر بيانات التذاكر هنا فور ربط خدمة الصيانة."
-
-#: src/routes/_authenticated/notifications.tsx:754
-msgid "Ticket resolved"
-msgstr "تم حل التذكرة"
-
 #: src/routes/_authenticated/notifications.tsx:752
-msgid "Ticket updated"
-msgstr "تم تحديث التذكرة"
+msgid "Ticket completed"
+msgstr "اكتملت التذكرة"
 
-#: src/routes/_authenticated/home.tsx:262
+#: src/routes/_authenticated/support/$support_id.tsx:257
+msgid "Ticket details"
+msgstr "تفاصيل التذكرة"
+
+#: src/routes/_authenticated/support/$support_id.tsx:300
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:668
+msgid "Ticket information"
+msgstr "معلومات التذكرة"
+
+#: src/routes/_authenticated/support/$support_id.tsx:204
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:554
+msgid "Ticket not found"
+msgstr "التذكرة غير موجودة"
+
+#: src/routes/_authenticated/support/$support_id.tsx:353
+#: src/routes/_authenticated/support/$support_id.tsx:469
+msgid "Ticket owner"
+msgstr "صاحب التذكرة"
+
+#: src/routes/_authenticated/notifications.tsx:750
+msgid "Ticket rejected"
+msgstr "رُفضت التذكرة"
+
+#: src/routes/_authenticated/notifications.tsx:746
+msgid "Ticket submitted"
+msgstr "تذكرة جديدة"
+
+#: src/routes/_authenticated/home.tsx:256
 msgid "Tickets waiting for your review"
 msgstr "تذاكر بانتظار مراجعتك"
 
-#: src/routes/_authenticated/place/new.tsx:310
-#~ msgid "Time zone"
-#~ msgstr "المنطقة الزمنية"
+#: src/routes/_authenticated/support/index.tsx:243
+msgid "Tickets you open show here."
+msgstr "تظهر هنا التذاكر التي تفتحها."
 
-#: src/routes/_authenticated/place/$place_id.tsx:691
+#: src/routes/_authenticated/place/$place_id.tsx:477
+msgid "Time zone:"
+msgstr "المنطقة الزمنية:"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:728
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:862
+msgid "Timeline"
+msgstr "السجل الزمني"
+
+#: src/routes/_authenticated/place/$place_id.tsx:628
 msgid "Timezone"
 msgstr "المنطقة الزمنية"
 
-#: src/routes/_authenticated/content/new.tsx:68
-msgid "title"
-msgstr "العنوان"
-
-#: src/routes/_authenticated/notifications.tsx:473
-#: src/routes/_authenticated/notifications.tsx:494
+#: src/lib/errors.ts:101
+#: src/routes/_authenticated/content/new.tsx:53
+#: src/routes/_authenticated/notifications.tsx:472
+#: src/routes/_authenticated/notifications.tsx:493
 msgid "Title"
 msgstr "العنوان"
 
-#: src/routes/_authenticated/home.tsx:213
+#: src/routes/_authenticated/finance.tsx:697
+msgid "To"
+msgstr "إلى تاريخ"
+
+#: src/routes/_authenticated/home.tsx:195
+#: src/routes/_authenticated/home.tsx:207
 msgid "Today"
 msgstr "اليوم"
 
-#: src/routes/forgot-password.tsx:161
+#: src/routes/_authenticated/bookings.tsx:120
+msgid "Today's arrivals and departures, and stays starting in the next {UPCOMING_DAYS} days."
+msgstr "وصول ومغادرة اليوم، والإقامات التي تبدأ خلال الأيام الـ {UPCOMING_DAYS} القادمة."
+
+#: src/lib/errors.ts:206
+msgid "Too many attempts. Wait a little and try again."
+msgstr "محاولات كثيرة. انتظر قليلًا ثم حاول مرة أخرى."
+
+#: src/routes/forgot-password.tsx:153
 msgid "Too many requests. Please try again later."
 msgstr "عدد كبير جدًا من الطلبات. يرجى المحاولة لاحقًا."
+
+#: src/routes/_authenticated/finance.tsx:581
+msgid "Total budget for the selected places"
+msgstr "إجمالي الميزانية للعقارات المحددة"
+
+#: src/routes/_authenticated/finance.tsx:618
+msgid "Total expenses"
+msgstr "إجمالي المصروفات"
+
+#: src/routes/_authenticated/finance.tsx:590
+msgid "Total income"
+msgstr "إجمالي الإيرادات"
 
 #: src/components/place-bookings.tsx:593
 #: src/components/place-bookings.tsx:688
 #: src/components/place-bookings.tsx:778
+#: src/lib/errors.ts:136
 msgid "Total price"
 msgstr "السعر الإجمالي"
 
-#: src/components/place-bookings.tsx:404
-#~ msgid "Try again in a moment."
-#~ msgstr "أعد المحاولة بعد قليل."
+#: src/routes/_authenticated/finance.tsx:497
+msgid "Track expenses and budgets for your places."
+msgstr "متابعة المصروفات والميزانيات الخاصة بالعقارات."
 
-#: src/routes/forgot-password.tsx:127
+#: src/routes/forgot-password.tsx:119
 msgid "Try another email"
 msgstr "جرّب بريدًا إلكترونيًا آخر"
 
-#: src/routes/_authenticated/place/asset/new.tsx:159
+#: src/routes/_authenticated/content/index.tsx:300
+msgid "Try another search or other filters."
+msgstr "جرّب تغيير البحث أو الفلاتر المحددة."
+
+#: src/routes/_authenticated/admin/index.tsx:232
+#: src/routes/_authenticated/support/index.tsx:242
+#: src/routes/_authenticated/workers.tsx:253
+msgid "Try other search words or another filter."
+msgstr "جرّب كلمات بحث أخرى أو فلترًا آخر."
+
+#: src/components/asset-manage.tsx:175
+#: src/lib/errors.ts:95
+#: src/routes/_authenticated/place/asset/new.tsx:124
 msgid "Type"
 msgstr "النوع"
 
-#: src/routes/forgot-password.tsx:163
-#: src/routes/reset-password.tsx:128
+#: src/routes/account-setup.tsx:39
+msgid "Unable to activate your account. The link may be invalid, expired, or already used."
+msgstr "تعذر تفعيل الحساب. قد يكون الرابط خاطئاً أو منتهياً أو مستخدماً."
+
+#: src/routes/forgot-password.tsx:155
+#: src/routes/reset-password.tsx:122
 msgid "Unable to connect to the server. Please try again."
 msgstr "تعذر الاتصال بالخادم. يرجى المحاولة مرة أخرى."
 
-#: src/components/place-shared.tsx:54
-#: src/components/place-shared.tsx:122
-#: src/routes/_authenticated/place/asset/new.tsx:62
-#: src/routes/_authenticated/places.tsx:31
+#: src/components/asset-manage.tsx:27
+#: src/components/place-shared.tsx:55
+#: src/components/place-shared.tsx:123
+#: src/routes/_authenticated/place/asset/new.tsx:49
+#: src/routes/_authenticated/places.tsx:32
 msgid "Under maintenance"
 msgstr "تحت الصيانة"
 
-#: src/routes/_authenticated/notifications.tsx:602
+#: src/routes/_authenticated/notifications.tsx:601
+#: src/routes/_authenticated/notifications.tsx:826
 msgid "Unread"
 msgstr "غير مقروء"
 
-#: src/routes/_authenticated/notifications.tsx:295
+#: src/routes/_authenticated/notifications.tsx:294
 msgid "Unread notifications"
 msgstr "الإشعارات غير المقروءة"
 
-#~ msgid "Update Profile"
-#~ msgstr "تحديث الملف الشخصي"
+#: src/routes/_authenticated/content/$content_id.tsx:634
+msgid "Unticking this makes the page a draft."
+msgstr "إلغاء التحديد يحوّل الصفحة إلى مسودة."
 
-#: src/routes/_authenticated/place/$place_id.tsx:435
+#: src/routes/_authenticated/bookings.tsx:181
+msgid "Upcoming"
+msgstr "القادمة"
+
+#: src/routes/_authenticated/place/$place_id.tsx:306
+msgid "Update place"
+msgstr "تحديث العقار"
+
+#: src/routes/_authenticated/profile.tsx:101
+msgid "Update Profile"
+msgstr "تحديث الملف الشخصي"
+
+#: src/routes/_authenticated/place/$place_id.tsx:363
 msgid "Update property"
-msgstr "تحديث الملكية"
+msgstr "تحديث العقار"
 
-#~ msgid "Updated At"
-#~ msgstr "تاريخ التحديث"
-
-#: src/routes/_authenticated/notifications.tsx:878
+#: src/routes/_authenticated/notifications.tsx:876
 msgid "Updating..."
 msgstr "جارٍ التحديث..."
 
-#: src/routes/_authenticated/place/new.tsx:279
-#~ msgid "Use my current location"
-#~ msgstr "استخدام موقعي الحالي"
+#. placeholder {0}: date(attachment.created_at)
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1275
+msgid "Uploaded: {0}"
+msgstr "تاريخ الرفع: {0}"
 
-#: src/routes/_authenticated/worker/new.tsx:205
+#: src/components/place-shared.tsx:225
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:445
+#: src/routes/_authenticated/ticket/new.tsx:147
+msgid "Urgent"
+msgstr "عاجلة"
+
+#: src/routes/_authenticated/worker/new.tsx:207
 msgid "Use my preferred language"
 msgstr "استخدام لغتي المفضلة"
 
@@ -1781,37 +2767,131 @@ msgstr "استخدم الصيغة الدولية، مثل +966512345678"
 msgid "Use the international phone format"
 msgstr "استخدم الصيغة الدولية للرقم"
 
-#: src/routes/_authenticated/notifications.tsx:439
+#: src/routes/_authenticated/admin/$admin_id.tsx:184
+msgid "User details"
+msgstr "تفاصيل المستخدم"
+
+#: src/routes/_authenticated/admin/$admin_id.tsx:507
+msgid "User ID"
+msgstr "معرّف المستخدم"
+
+#: src/routes/_authenticated/notifications.tsx:438
 msgid "User IDs"
 msgstr "معرفات المستخدمين"
+
+#: src/routes/_authenticated/admin/$admin_id.tsx:347
+msgid "User information"
+msgstr "معلومات المستخدم"
 
 #: src/routes/_authenticated/admin/$admin_id.tsx:204
 msgid "User not found"
 msgstr "لم يتم العثور على المستخدم"
 
+#: src/routes/_authenticated/admin/$admin_id.tsx:176
+#: src/routes/_authenticated/admin/index.tsx:106
+msgid "Users"
+msgstr "المستخدمون"
+
+#: src/routes/_authenticated/finance.tsx:126
+msgid "Utilities"
+msgstr "الفواتير"
+
+#: src/routes/_authenticated/notifications.tsx:444
+msgid "UUID 1, UUID 2..."
+msgstr "UUID 1، UUID 2..."
+
 #: src/components/email-verify-panel.tsx:47
+#: src/lib/errors.ts:149
 msgid "Verification code"
 msgstr "رمز التحقق"
 
-#~ msgid "Verified"
-#~ msgstr "تم التحقق"
+#: src/routes/_authenticated/admin/$admin_id.tsx:578
+msgid "Verified"
+msgstr "تم التحقق"
 
-#~ msgid "View your account information."
-#~ msgstr "بيانات حسابك الشحصي"
+#: src/lib/errors.ts:169
+msgid "Verify your email first — we sent a 6-digit code."
+msgstr "أكّد بريدك الإلكتروني أولًا، فقد أرسلنا رمزًا من 6 أرقام."
 
-#: src/components/place-shared.tsx:192
+#: src/routes/_authenticated/admin/index.tsx:344
+#: src/routes/_authenticated/content/index.tsx:403
+#: src/routes/_authenticated/support/index.tsx:337
+#: src/routes/_authenticated/workers.tsx:400
+msgid "View details"
+msgstr "عرض التفاصيل"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1294
+msgid "View full size"
+msgstr "عرض الصورة بالحجم الكامل"
+
+#: src/routes/_authenticated/finance.tsx:927
+msgid "View receipt"
+msgstr "عرض الإيصال"
+
+#: src/routes/_authenticated/profile.tsx:114
+msgid "View your account information."
+msgstr "بيانات حسابك الشخصي"
+
+#: src/components/place-shared.tsx:193
 msgid "Villa"
 msgstr "فيلا"
 
-#: src/routes/_authenticated/place/new.tsx:290
-#~ msgid "We ask for location only when you tap the button, and we never track workers."
-#~ msgstr "نطلب إذن الموقع فقط عند الضغط على الزر، ولا نتتبع العمّال."
+#: src/components/place-shared.tsx:264
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:432
+#: src/routes/_authenticated/tickets.tsx:110
+msgid "Waiting for review"
+msgstr "بانتظار المراجعة"
+
+#: src/lib/errors.ts:204
+msgid "We could not find it. It may have been deleted."
+msgstr "لم نعثر عليه. ربما حُذف."
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:211
+msgid "We could not load the asset."
+msgstr "تعذر تحميل بيانات الأصل."
 
 #: src/components/place-bookings.tsx:355
 msgid "We could not load the bookings for this property."
-msgstr "تعذّر تحميل حجوزات هذه الملكية."
+msgstr "تعذّر تحميل حجوزات هذا العقار."
 
-#: src/routes/_authenticated/place/$place_id.tsx:408
+#: src/routes/_authenticated/bookings.tsx:155
+msgid "We could not load the bookings for:"
+msgstr "تعذر تحميل الحجوزات لـ:"
+
+#: src/routes/_authenticated/finance.tsx:860
+msgid "We could not load the expenses"
+msgstr "تعذر تحميل المصروفات"
+
+#: src/routes/_authenticated/content/$content_id.tsx:279
+msgid "We could not load the page."
+msgstr "تعذر تحميل بيانات الصفحة."
+
+#: src/routes/_authenticated/support/index.tsx:226
+msgid "We could not load the support tickets."
+msgstr "تعذر تحميل تذاكر الدعم."
+
+#: src/routes/_authenticated/support/$support_id.tsx:109
+msgid "We could not load the ticket. Try again."
+msgstr "تعذر تحميل بيانات التذكرة. حاول مرة أخرى."
+
+#: src/components/tickets-section.tsx:146
+#: src/routes/_authenticated/tickets.tsx:188
+msgid "We could not load the tickets."
+msgstr "تعذر تحميل التذاكر."
+
+#: src/routes/_authenticated/admin/index.tsx:216
+msgid "We could not load the users."
+msgstr "تعذر تحميل بيانات المستخدمين."
+
+#: src/routes/_authenticated/workers.tsx:237
+msgid "We could not load the workers."
+msgstr "تعذر تحميل بيانات العمال."
+
+#: src/routes/p/$lang/$slug.tsx:58
+msgid "We could not load this page. Try again later."
+msgstr "تعذر تحميل هذه الصفحة. حاول لاحقًا."
+
+#: src/routes/_authenticated/place/$place_id.tsx:336
 msgid "We could not load this property."
 msgstr "لم نتمكن من تحميل هذا العقار."
 
@@ -1819,455 +2899,144 @@ msgstr "لم نتمكن من تحميل هذا العقار."
 msgid "We could not load this user."
 msgstr "تعذر تحميل بيانات هذا المستخدم."
 
-#: src/routes/_authenticated/worker/$worker_id.tsx:307
+#: src/routes/_authenticated/worker/$worker_id.tsx:287
 msgid "We could not load this worker."
 msgstr "تعذر تحميل بيانات هذا العامل."
 
-msgid "Support Ticket"
-msgstr "تذاكر الدعم"
-
-#: src/routes/_authenticated/home.tsx:383
-#: src/routes/_authenticated/places.tsx:188
+#: src/routes/_authenticated/bookings.tsx:149
+#: src/routes/_authenticated/home.tsx:377
+#: src/routes/_authenticated/places.tsx:217
 msgid "We could not load your places."
 msgstr "تعذّر تحميل عقاراتك."
-
-#: src/routes/_authenticated//asset/maintenance/new
-msgid "New Scheduled Maintenance"
-msgstr "اضافة جدولة صيانة"
-msgid "Create a recurring maintenance schedule for an asset."
-msgstr "انشاء جدولة صيانة للأصل"
-msgid "Asset"
-msgstr "الأصل"
-msgid "Repeat Every"
-msgstr "تكرار كل"
-msgid "Interval Unit"
-msgstr "الوحدة"
-msgid "Next Due Date"
-msgstr "تاريخ الصيانة القادم"
-msgid "Reminder Before Due Date (Days)"
-msgstr "التذكير قبل"
-msgid "Default Assignee ID"
-msgstr "هوية المسؤول (اختياري)"
-msgid "Create Schedule"
-msgstr "انشاء جدولة"
-
-#: src/routes/_authenticated/profile
-
-msgid ""
-msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
-"Language: ar\n"
-
-msgid "Profile"
-msgstr "الملف الشخصي"
-
-msgid "My Profile"
-msgstr "الملف الشخصي"
-
-msgid "View your account information."
-msgstr "بيانات حسابك الشحصي"
-
-msgid "MANAGER"
-msgstr "اداري"
-
-msgid "WORKER"
-msgstr "عامل"
-
-msgid "Personal Information"
-msgstr "المعلومات الشخصية"
-
-msgid "Update Profile"
-msgstr "تحديث الملف الشخصي"
-
-msgid "Full Name"
-msgstr "الاسم الكامل"
-
-msgid "Email Address"
-msgstr "البريد الإلكتروني"
-
-msgid "Phone Number"
-msgstr "رقم الجوال"
-
-msgid "Role"
-msgstr "الصلاحية"
-
-msgid "Account Status"
-msgstr "حالة الحساب"
-
-msgid "Preferred Language"
-msgstr "اللغة المفضلة"
-
-msgid "Email Verification"
-msgstr "التحقق من البريد الإلكتروني"
-
-msgid "Verified"
-msgstr "تم التحقق"
-
-msgid "Not Verified"
-msgstr "لم يتم التحقق"
-
-msgid "Created At"
-msgstr "تاريخ الإنشاء"
-
-msgid "Updated At"
-msgstr "تاريخ التحديث"
-
-msgid "Active"
-msgstr "نشط"
-
-msgid "Inactive"
-msgstr "غير نشط"
-
-msgid "Manager"
-msgstr "مدير"
-
-msgid "Admin"
-msgstr "مسؤول"
-
-msgid "Worker"
-msgstr "عامل"
-
-msgid "Arabic"
-msgstr "العربية"
-
-msgid "English"
-msgstr "الإنجليزية"
-
-msgid "Loading profile..."
-msgstr "جارٍ تحميل الملف الشخصي..."
-
-msgid "Failed to load profile"
-msgstr "فشل تحميل الملف الشخصي"
-
-msgid "Email Verified At"
-msgstr "تاريخ تأكيد البريد الاكتروني"
-
-msgid "Last Updated"
-msgstr "اخر تحديث"
 
 #: src/components/email-verify-panel.tsx:35
 msgid "We sent a 6-digit code to <0>{email}</0>."
 msgstr "أرسلنا رمزًا مكوّنًا من 6 أرقام إلى <0>{email}</0>."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:43
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:29
 msgid "Week"
 msgstr "أسبوع"
 
-#: src/components/place-bookings.tsx:
-#~ msgid "Why is this stay being cancelled?"
-#~ msgstr "لماذا تم إلغاء هذه الإقامة؟"
+#: src/routes/account-setup.tsx:27
+msgid "Welcome! Create a password to activate your account and get started."
+msgstr "مرحباً بك! أنشئ كلمة مرور لتفعيل حسابك والبدء باستخدام النظام."
 
-#~ msgid "Worker"
-#~ msgstr "عامل"
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1061
+msgid "Why is this ticket rejected?"
+msgstr "اكتب سبب رفض التذكرة"
 
-#~ msgid "WORKER"
-#~ msgstr "عامل"
+#: src/routes/_authenticated/admin/$admin_id.tsx:447
+#: src/routes/_authenticated/notifications.tsx:431
+#: src/routes/_authenticated/profile.tsx:126
+msgid "Worker"
+msgstr "عامل"
 
-#: src/routes/_authenticated/worker/$worker_id.tsx:269
+#: src/routes/_authenticated/worker/$worker_id.tsx:378
+msgid "Worker information"
+msgstr "معلومات العامل"
+
+#: src/routes/_authenticated/worker/$worker_id.tsx:249
 msgid "Worker not found"
 msgstr "لم يتم العثور على العامل"
 
+#: src/routes/_authenticated/worker/$worker_id.tsx:457
+msgid "Worker status"
+msgstr "حالة العامل"
+
 #: src/components/app-shell.tsx:29
-#: src/routes/_authenticated/place/new.tsx:61
-#: src/routes/_authenticated/places.tsx:40
-#: src/routes/_authenticated/worker/$worker_id.tsx:288
+#: src/routes/_authenticated/place/$place_id.tsx:677
+#: src/routes/_authenticated/place/$place_id.tsx:870
+#: src/routes/_authenticated/places.tsx:41
+#: src/routes/_authenticated/worker/$worker_id.tsx:232
+#: src/routes/_authenticated/worker/$worker_id.tsx:268
+#: src/routes/_authenticated/workers.tsx:112
 msgid "Workers"
 msgstr "العمّال"
 
-#: src/routes/signin.tsx:147
+#: src/routes/signin.tsx:148
 msgid "Workers sign in with the invite sent by their manager."
 msgstr "العامل يدخل بالدعوة التي تصله من مديره."
 
-#: src/routes/_authenticated/notifications.tsx:483
-#: src/routes/_authenticated/notifications.tsx:505
+#: src/routes/_authenticated/support/$support_id.tsx:422
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1152
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1164
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1179
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1195
+msgid "Working…"
+msgstr "جاري التنفيذ..."
+
+#: src/routes/_authenticated/support/new.tsx:27
+msgid "Write a subject and a description."
+msgstr "اكتب الموضوع والوصف."
+
+#: src/routes/_authenticated/support/$support_id.tsx:404
+msgid "Write the reply and how it was solved…"
+msgstr "اكتب رد الإدارة وتفاصيل الحل..."
+
+#: src/routes/_authenticated/notifications.tsx:482
+#: src/routes/_authenticated/notifications.tsx:504
 msgid "Write your announcement..."
 msgstr "اكتب إعلانك هنا..."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:45
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:31
 msgid "Year"
 msgstr "سنة"
 
-#: src/routes/_authenticated/place/new.tsx:435
-#~ msgid "You add assets and assign workers from the place page once it is saved."
-#~ msgstr "تضيف الأصول وتعيّن العمّال من صفحة العقار بعد حفظه."
+#: src/routes/_authenticated/support/$support_id.tsx:496
+#: src/routes/_authenticated/support/$support_id.tsx:523
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:578
+msgid "You"
+msgstr "أنت"
+
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:63
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:585
+msgid "You (owner)"
+msgstr "أنت (المالك)"
+
+#: src/routes/_authenticated/ticket/new.tsx:67
+msgid "You can add up to 5 photos"
+msgstr "يمكنك إضافة 5 صور كحد أقصى"
+
+#: src/routes/account-setup.tsx:41
+msgid "You can now log in using your email and password."
+msgstr "يمكنك الآن تسجيل الدخول باستخدام بريدك الإلكتروني وكلمة المرور."
 
 #: src/components/email-verify-panel.tsx:84
 msgid "You can request a new code in"
 msgstr "يمكنك طلب رمز جديد خلال"
 
-#: src/routes/_authenticated/notifications.tsx:652
+#: src/lib/errors.ts:202
+msgid "You do not have permission to do this."
+msgstr "ليست لديك صلاحية للقيام بهذا."
+
+#: src/routes/_authenticated/notifications.tsx:651
 msgid "You don't have any notifications in this category."
 msgstr "ليس لديك أي إشعارات في هذه الفئة."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:158
-msgid "You must be logged in"
-msgstr "يجب تسجيل الدخول"
+#: src/routes/_authenticated/tickets.tsx:74
+msgid "You have no open tasks."
+msgstr "لا توجد لديك مهام مفتوحة."
 
-#~ msgid "Your account is now active. You can sign in."
-#~ msgstr "تم تفعيل حسابك بنجاح. يمكنك تسجيل الدخول الآن."
+#: src/routes/_authenticated/bookings.tsx:162
+msgid "You have no places yet."
+msgstr "لا توجد لديك عقارات بعد."
 
-#: src/routes/_authenticated/notifications.tsx:265
+#: src/routes/account-setup.tsx:40
+msgid "Your account has been activated successfully!"
+msgstr "تم تفعيل حسابك بنجاح!"
+
+#: src/routes/_authenticated/notifications.tsx:264
 msgid "Your notifications"
 msgstr "إشعاراتك"
 
-#: src/routes/reset-password.tsx:173
+#: src/routes/reset-password.tsx:167
 msgid "Your password has been changed successfully. Please log in again using your new password."
 msgstr "تم تغيير كلمة المرور بنجاح. يرجى تسجيل الدخول مرة أخرى باستخدام كلمة المرور الجديدة."
 
-#: src/routes/_authenticated/home.tsx:360
+#: src/routes/_authenticated/home.tsx:354
 msgid "Your places"
 msgstr "عقاراتك"
 
-#: src/components/place-bookings.tsx:468
-msgid "Add booking"
-msgstr "إضافة حجز"
-
-#: src/components/place-bookings.tsx:211
-msgid "Back"
-msgstr "رجوع"
-
-#: src/components/place-shared.tsx:147
-msgid "Cancelled"
-msgstr "ملغى"
-
-#: src/components/place-bookings.tsx:305
-msgid "Check-in"
-msgstr "الوصول"
-
-#: src/components/place-bookings.tsx:318
-msgid "Check-out"
-msgstr "المغادرة"
-
-#: src/components/place-shared.tsx:123
-msgid "Checked in"
-msgstr "تم تسجيل الوصول"
-
-#: src/components/place-shared.tsx:135
-msgid "Checked out"
-msgstr "تم تسجيل المغادرة"
-
-#: src/components/place-bookings.tsx:246
-msgid "Close"
-msgstr "إغلاق"
-
-#: src/components/place-shared.tsx:158
-msgid "Confirmed"
-msgstr "مؤكد"
-
-#: src/components/place-bookings.tsx:168
-msgid "Could not save the booking. Please try again."
-msgstr "تعذّر حفظ الحجز. حاول مرة أخرى."
-
-#: src/components/place-bookings.tsx:288
-msgid "Guest email"
-msgstr "بريد الضيف"
-
-#: src/components/place-bookings.tsx:261
-msgid "Guest name"
-msgstr "اسم الضيف"
-
-#: src/components/place-bookings.tsx:274
-msgid "Guest phone"
-msgstr "هاتف الضيف"
-
-#: src/components/place-bookings.tsx:439
-msgid "guests"
-msgstr "ضيوف"
-
-#: src/components/place-bookings.tsx:335
-msgid "Guests"
-msgstr "عدد الضيوف"
-
-#: src/components/place-bookings.tsx:235
-msgid "Next month"
-msgstr "الشهر التالي"
-
-#: src/components/place-bookings.tsx:416
-msgid "No bookings in this month."
-msgstr "لا توجد حجوزات في هذا الشهر."
-
-#: src/components/place-bookings.tsx:364
-msgid "Notes"
-msgstr "ملاحظات"
-
-#: src/components/place-bookings.tsx:219
-msgid "Previous month"
-msgstr "الشهر السابق"
-
-#: src/components/place-bookings.tsx:393
-msgid "Save booking"
-msgstr "حفظ الحجز"
-
-#: src/components/place-bookings.tsx:390
-msgid "Saving…"
-msgstr "جارٍ الحفظ…"
-
-#: src/components/place-bookings.tsx:167
-msgid "Those dates are already booked for this property."
-msgstr "هذه التواريخ محجوزة بالفعل لهذه الملكية."
-
-#: src/components/place-bookings.tsx:349
-msgid "Total price"
-msgstr "السعر الإجمالي"
-
-#: src/components/place-bookings.tsx:404
-msgid "Try again in a moment."
-msgstr "أعد المحاولة بعد قليل."
-
-#: src/components/place-bookings.tsx:401
-msgid "We could not load the bookings for this property."
-msgstr "تعذّر تحميل حجوزات هذه الملكية."
-
-#: src/components/place-bookings.tsx
-msgid "Enter the guest name"
-msgstr "أدخل اسم الضيف"
-
-#: src/components/place-bookings.tsx
-msgid "Use the international phone format"
-msgstr "استخدم الصيغة الدولية للرقم"
-
-#: src/components/place-bookings.tsx
-msgid "Enter a valid email address"
-msgstr "أدخل بريداً إلكترونياً صحيحاً"
-
-#: src/components/place-bookings.tsx
-msgid "Enter the number of guests"
-msgstr "أدخل عدد الضيوف"
-
-#: src/components/place-bookings.tsx
-msgid "Choose the check-in date"
-msgstr "اختر تاريخ الوصول"
-
-#: src/components/place-bookings.tsx
-msgid "Choose a check-out date after the check-in date"
-msgstr "اختر تاريخ مغادرة بعد تاريخ الوصول"
-
-#: src/components/place-bookings.tsx
-msgid "Enter the total price"
-msgstr "أدخل السعر الإجمالي"
-
-#: src/components/place-bookings.tsx
-msgid "Notes are too long"
-msgstr "الملاحظات أطول من الحد المسموح"
-
-#: src/components/place-bookings.tsx
-msgid "All bookings"
-msgstr "كل الحجوزات"
-
-#: src/components/place-bookings.tsx
-msgid "By month"
-msgstr "حسب الشهر"
-
-#: src/components/place-bookings.tsx
-msgid "Cancel booking"
-msgstr "إلغاء الحجز"
-
-#: src/components/place-bookings.tsx
-msgid "Cancellation reason"
-msgstr "سبب الإلغاء"
-
-#: src/components/place-bookings.tsx
-msgid "Confirm cancel"
-msgstr "تأكيد الإلغاء"
-
-#: src/components/place-bookings.tsx
-msgid "Could not cancel the booking. Please try again."
-msgstr "تعذّر إلغاء الحجز. حاول مرة أخرى."
-
-#: src/components/place-bookings.tsx
-msgid "Enter the reason for the cancellation"
-msgstr "أدخل سبب الإلغاء"
-
-#: src/components/place-bookings.tsx
-msgid "Load more"
-msgstr "تحميل المزيد"
-
-#: src/components/place-bookings.tsx
-msgid "No bookings for this property yet."
-msgstr "لا توجد حجوزات لهذا العقار بعد."
-
-#: src/components/place-bookings.tsx
-msgid "This booking can no longer be cancelled."
-msgstr "لم يعد بإمكانك إلغاء هذا الحجز."
-#: src/components/place-bookings.tsx
-msgid "Filter bookings by month"
-msgstr "تصفية الحجوزات حسب الشهر"
-
-#: src/components/place-bookings.tsx
-msgid "Add a stay to block its dates on the calendar."
-msgstr "أضف إقامة لحجز هذه التواريخ في التقويم."
-
-#: src/components/place-bookings.tsx
-msgid "Cancel this booking?"
-msgstr "إلغاء هذا الحجز؟"
-
-#: src/components/place-bookings.tsx
-msgid "Cancelling…"
-msgstr "جارٍ الإلغاء…"
-
-#: src/components/place-bookings.tsx
-msgid "Use the international format, e.g. +966512345678"
-msgstr "استخدم الصيغة الدولية، مثل +966512345678"
-
-#: src/components/place-bookings.tsx
-msgid "Guest"
-msgstr "الضيف"
-
-#: src/components/place-bookings.tsx
-msgid "Stay"
-msgstr "الإقامة"
-
-#: src/components/place-bookings.tsx
-msgid "Why is this stay being cancelled?"
-msgstr "لماذا تم إلغاء هذه الإقامة؟"
-
-#: src/components/place-bookings.tsx
-msgid "Kept in the booking record."
-msgstr "يُحفظ في سجل الحجز."
-
-#: src/components/place-bookings.tsx
-msgid "Example: the guest changed their plans"
-msgstr "مثال: غيّر الضيف خطته"
-
-#: src/components/place-bookings.tsx
-msgid "Check in"
-msgstr "تسجيل الوصول"
-
-#: src/components/place-bookings.tsx
-msgid "Check out"
-msgstr "تسجيل المغادرة"
-
-#: src/components/place-bookings.tsx
-msgid "Another guest has not checked out yet."
-msgstr "ضيف آخر لم يُغادر بعد."
-
-#: src/components/place-bookings.tsx
-msgid "This booking can no longer be moved to another state."
-msgstr "لم يعد بإمكانه تغيير حالته."
-#: src/components/place-bookings.tsx
-msgid "Check-in opens on"
-msgstr "تسجيل الوصول متاح في"
-
-#: src/components/place-bookings.tsx
-msgid "Check this guest in?"
-msgstr "تسجيل وصول الضيف؟"
-
-#: src/components/place-bookings.tsx
-msgid "Check this guest out?"
-msgstr "تسجيل مغادرة الضيف؟"
-
-#: src/components/place-bookings.tsx
-msgid "Confirm check-in"
-msgstr "تأكيد الوصول"
-
-#: src/components/place-bookings.tsx
-msgid "Confirm check-out"
-msgstr "تأكيد المغادرة"
-
-#: src/components/place-bookings.tsx
-msgid "Check-in has not opened for this stay yet."
-msgstr "لم يحِن موعد الوصول بعد."
-
-#: src/components/place-bookings.tsx
-msgid "Could not change the booking. Please try again."
-msgstr "تعذّر تغيير حالة الحجز. حاول مرة أخرى."
+#: src/lib/errors.ts:196
+msgid "Your session has ended. Sign in again."
+msgstr "انتهت جلستك. سجّل الدخول مرة أخرى."

@@ -2,6 +2,8 @@
 import { useEffect, useState, type ReactNode } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
+import { LANGUAGE_NAMES } from "@/lib/i18n"
+import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 import {
   Check,
@@ -16,6 +18,7 @@ import {
 import { useAuth } from "@/lib/auth"
 import { getUserById, updateUser, type UserResponse } from "@/lib/api"
 import { S } from "@/lib/dom-style"
+import { errorMessage } from "@/lib/errors"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -117,9 +120,7 @@ function UserDetailPage() {
     } catch (error) {
       console.error("Update user error:", error)
       setSaveError(
-        error instanceof Error
-          ? error.message
-          : "Failed to update user",
+        errorMessage(error),
       )
     } finally {
       setSaving(false)
@@ -131,7 +132,6 @@ function UserDetailPage() {
 
   return (
     <div
-      dir="rtl"
       style={S(`
         width: 100%;
         max-width: 1000px;
@@ -165,7 +165,7 @@ function UserDetailPage() {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink render={<a href="/" />}>
-                  الرئيسية
+                  <Trans>Home</Trans>
                 </BreadcrumbLink>
               </BreadcrumbItem>
 
@@ -173,7 +173,7 @@ function UserDetailPage() {
 
               <BreadcrumbItem>
                 <BreadcrumbLink render={<a href="/admin" />}>
-                  المستخدمون
+                  <Trans>Users</Trans>
                 </BreadcrumbLink>
               </BreadcrumbItem>
 
@@ -181,7 +181,7 @@ function UserDetailPage() {
 
               <BreadcrumbItem>
                 <BreadcrumbPage>
-                  تفاصيل المستخدم
+                  <Trans>User details</Trans>
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
@@ -344,7 +344,7 @@ function UserDetailPage() {
                 `)}
               >
                 <UserRound size={18} />
-                معلومات المستخدم
+                <Trans>User information</Trans>
               </CardTitle>
             </CardHeader>
 
@@ -369,7 +369,7 @@ function UserDetailPage() {
                     gap: 18px;
                   `)}
                 >
-                  <FormField label="الاسم الكامل" htmlFor="fullname">
+                  <FormField label={t`Full name`} htmlFor="fullname">
                     <Input
                       id="fullname"
                       value={fullname}
@@ -378,7 +378,7 @@ function UserDetailPage() {
                     />
                   </FormField>
 
-                  <FormField label="البريد الإلكتروني" htmlFor="email">
+                  <FormField label={t`Email`} htmlFor="email">
                     <div style={S("position: relative")}>
                       <Mail
                         size={16}
@@ -397,14 +397,14 @@ function UserDetailPage() {
                         className="am-input"
                         style={S(`
                           padding-inline-start: 36px;
-                          text-align: right;
+                          text-align: match-parent;
                           opacity: 0.75;
                         `)}
                       />
                     </div>
                   </FormField>
 
-                  <FormField label="رقم الجوال" htmlFor="phone">
+                  <FormField label={t`Phone number`} htmlFor="phone">
                     <div style={S("position: relative")}>
                       <Phone
                         size={16}
@@ -423,13 +423,13 @@ function UserDetailPage() {
                         className="am-input"
                         style={S(`
                           padding-inline-start: 36px;
-                          text-align: right;
+                          text-align: match-parent;
                         `)}
                       />
                     </div>
                   </FormField>
 
-                  <FormField label="دور المستخدم" htmlFor="role">
+                  <FormField label={t`Role`} htmlFor="role">
                     <select
                       id="role"
                       value={role}
@@ -442,13 +442,13 @@ function UserDetailPage() {
                         background: #fff;
                       `)}
                     >
-                      <option value="ADMIN">مدير النظام</option>
-                      <option value="MANAGER">مالك / مدير</option>
-                      <option value="WORKER">عامل</option>
+                      <option value="ADMIN"><Trans>Admin</Trans></option>
+                      <option value="MANAGER"><Trans>Owner / Manager</Trans></option>
+                      <option value="WORKER"><Trans>Worker</Trans></option>
                     </select>
                   </FormField>
 
-                  <FormField label="حالة الحساب" htmlFor="status">
+                  <FormField label={t`Account status`} htmlFor="status">
                     <select
                       id="status"
                       value={status}
@@ -461,13 +461,13 @@ function UserDetailPage() {
                         background: #fff;
                       `)}
                     >
-                      <option value="ACTIVE">نشط</option>
-                      <option value="DEACTIVATED">غير نشط</option>
+                      <option value="ACTIVE"><Trans>Active</Trans></option>
+                      <option value="DEACTIVATED"><Trans>Deactivated</Trans></option>
                     </select>
                   </FormField>
 
                   <FormField
-                    label="اللغة المفضلة"
+                    label={t`Preferred language`}
                     htmlFor="preferred_language"
                   >
                     <select
@@ -484,33 +484,33 @@ function UserDetailPage() {
                         background: #fff;
                       `)}
                     >
-                      <option value="ar">العربية</option>
-                      <option value="en">English</option>
+                      <option value="ar">{LANGUAGE_NAMES.ar}</option>
+                      <option value="en">{LANGUAGE_NAMES.en}</option>
                     </select>
                   </FormField>
 
                   <InfoField
-                    label="تأكيد البريد الإلكتروني"
+                    label={t`Email confirmed`}
                     value={
                       user.email_verified_at
                         ? formattedDate(user.email_verified_at)
-                        : "غير مؤكد"
+                        : t`Not confirmed`
                     }
                   />
 
                   <InfoField
-                    label="تاريخ إنشاء الحساب"
+                    label={t`Account created`}
                     value={formattedDate(user.created_at)}
                   />
 
                   <InfoField
-                    label="معرّف المستخدم"
+                    label={t`User ID`}
                     value={user.id}
                   />
 
                   <InfoField
-                    label="معرّف المدير"
-                    value={user.manager_id ?? "لا يوجد"}
+                    label={t`Manager ID`}
+                    value={user.manager_id ?? t`None`}
                   />
                 </div>
               )}
@@ -551,7 +551,7 @@ function UserDetailPage() {
                 `)}
               >
                 <Shield size={18} />
-                معلومات الحساب
+                <Trans>Account information</Trans>
               </CardTitle>
             </CardHeader>
 
@@ -567,16 +567,16 @@ function UserDetailPage() {
                   `)}
                 >
                   <InfoField
-                    label="آخر تحديث"
+                    label={t`Last updated`}
                     value={formattedDate(user.updated_at)}
                   />
 
                   <InfoField
-                    label="حالة التحقق من البريد"
+                    label={t`Email verification`}
                     value={
                       user.email_verified_at
-                        ? "تم التحقق"
-                        : "لم يتم التحقق"
+                        ? t`Verified`
+                        : t`Not verified`
                     }
                   />
                 </div>
@@ -632,7 +632,7 @@ function UserDetailPage() {
                 `)}
               >
                 <Check size={16} />
-                تم تحديث بيانات المستخدم بنجاح.
+                <Trans>The user was updated.</Trans>
               </p>
             )}
 
@@ -657,7 +657,7 @@ function UserDetailPage() {
                 `)}
               >
                 <Save size={16} />
-                {saving ? "جارٍ الحفظ..." : "حفظ التغييرات"}
+                {saving ? t`Saving…` : t`Save changes`}
               </Button>
             </div>
           </div>

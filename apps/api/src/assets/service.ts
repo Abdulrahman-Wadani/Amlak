@@ -1,9 +1,10 @@
-import type {
-	Asset,
-	CreateAssetInput,
-	ListAssetsQuery,
-	Paginated,
-	UpdateAssetInput,
+import {
+	type Asset,
+	type CreateAssetInput,
+	type ListAssetsQuery,
+	OPEN_TICKET_STATUSES,
+	type Paginated,
+	type UpdateAssetInput,
 } from "@amlak/shared";
 import { auditLog } from "../audit.ts";
 import type { AuthUser } from "../auth/tokens.ts";
@@ -86,7 +87,7 @@ export async function deleteAsset(
 		const openTickets = await tx.maintenanceTicket.findMany({
 			where: {
 				asset_id: asset.id,
-				status: { in: ["PENDING_REVIEW", "APPROVED"] },
+				status: { in: OPEN_TICKET_STATUSES },
 			},
 			select: { id: true },
 		});

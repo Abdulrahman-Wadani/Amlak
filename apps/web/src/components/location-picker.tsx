@@ -4,9 +4,12 @@ import { TomTomConfig } from "@tomtom-org/maps-sdk/core"
 import { TomTomMap } from "@tomtom-org/maps-sdk/map"
 import { reverseGeocode } from "@tomtom-org/maps-sdk/services"
 import { Marker } from "maplibre-gl"
+import { t } from "@lingui/core/macro"
+import { Trans } from "@lingui/react/macro"
+import { i18n } from "@lingui/core"
 import "maplibre-gl/dist/maplibre-gl.css"
 
-interface LocationData {
+export interface LocationData {
   latitude: number
   longitude: number
   address: string
@@ -43,13 +46,14 @@ export default function LocationPicker({
     const apiKey = import.meta.env.VITE_TOMTOM_API_KEY
 
     if (!apiKey) {
-      setError("TomTom API key is missing")
+      setError(t`The map is not available: the TomTom key is missing.`)
       return
     }
 
     TomTomConfig.instance.put({
       apiKey,
-      language: "en-US",
+      // Street and place names on the map follow the interface language.
+      language: i18n.locale === "ar" ? "ar" : "en-US",
     })
 
     const map = new TomTomMap({
@@ -97,11 +101,11 @@ export default function LocationPicker({
         })
 
         if (!fullAddress) {
-          setError("No address was found for this location")
+          setError(t`No address was found for this location.`)
         }
       } catch (err) {
         if (active) {
-          setError("Could not retrieve the address")
+          setError(t`Could not get the address.`)
           console.error(err)
         }
       } finally {
@@ -141,16 +145,16 @@ export default function LocationPicker({
       />
 
       <p className="text-sm text-muted-foreground">
-        Click on the map or drag the marker to select a location.
+        <Trans>Click on the map or drag the marker to choose a location.</Trans>
       </p>
 
       {loading && (
-        <p className="text-sm">Getting address...</p>
+        <p className="text-sm"><Trans>Getting the address…</Trans></p>
       )}
 
       {selectedAddress && (
         <div className="rounded-md border p-3">
-          <p className="text-sm font-semibold">Selected address</p>
+          <p className="text-sm font-semibold"><Trans>Selected address</Trans></p>
           <p className="text-sm">{selectedAddress}</p>
         </div>
       )}

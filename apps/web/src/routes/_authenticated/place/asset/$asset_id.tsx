@@ -3,18 +3,19 @@ import { useEffect, useState } from "react"
 import {
   Link,
   createFileRoute,
+  useNavigate,
   useParams,
 } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
+import { plural, t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
-import type { Asset, Place } from "@amlak/shared"
+import type { Asset, Place, Schedule } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { cn } from "cn"
 import { buttonVariants,Button } from "@/components/ui/button"
 import {
   getAssetById,
   getPlace,
-  getTicketsForPlace,
   getScheduledMaintenancesForAsset,handleCancelSchedule
 } from "@/lib/api"
 import { S } from "@/lib/dom-style"
@@ -24,31 +25,18 @@ import {
   CalendarDays,
   MapPin,
   Wrench,
-  AlertTriangle,
   Plus
 } from "lucide-react"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardAction,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
 import {
   AssetStatusBadge,
-  StatusBadge,
 } from "@/components/place-shared"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import Form from "@/components/form"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { AssetManage } from "@/components/asset-manage"
+import { TicketsSection } from "@/components/tickets-section"
+import { todayIn } from "@/lib/dates"
+import { errorMessage } from "@/lib/errors"
 
 
 export const Route = createFileRoute("/_authenticated/place/asset/$asset_id")({
@@ -61,15 +49,16 @@ function AssetDetailPage() {
   })
 
   const { i18n } = useLingui()
-  const { accessToken } = useAuth()
+  const { accessToken, user } = useAuth()
+  const navigate = useNavigate()
 
   const [asset, setAsset] = useState<Asset | null>(null)
   const [place, setPlace] = useState<Place | null>(null)
-  const [tickets, setTickets] = useState<
-    Awaited<ReturnType<typeof getTicketsForPlace>> | null
-  >(null)
-  const [scheduledMaintenances, setScheduledMaintenances] = useState<any[]>([])
+  const [scheduledMaintenances, setScheduledMaintenances] = useState<Schedule[]>([])
   const [scheduledLoading, setScheduledLoading] = useState(true)
+  // Bumped after a schedule is cancelled, to load the list again.
+  const [schedulesVersion, setSchedulesVersion] = useState(0)
+  const [cancelError, setCancelError] = useState("")
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
@@ -94,7 +83,20 @@ function AssetDetailPage() {
   }
 
   loadScheduledMaintenances()
-}, [accessToken, asset_id])
+}, [accessToken, asset_id, schedulesVersion])
+
+  async function cancelSchedule(scheduleId: string) {
+    if (!accessToken) return
+    setCancelError("")
+    try {
+      await handleCancelSchedule(accessToken, scheduleId)
+      setSchedulesVersion((version) => version + 1)
+    } catch (error) {
+      setCancelError(
+        errorMessage(error),
+      )
+    }
+  }
 
   useEffect(() => {
     if (!accessToken) return
@@ -109,20 +111,12 @@ function AssetDetailPage() {
 
         setAsset(assetData)
 
-        // Load the property associated with this asset.
-        const [placeData, placeTickets] = await Promise.all([
-          getPlace(accessToken!, assetData.place_id),
-          getTicketsForPlace(accessToken!, assetData.place_id),
-        ])
+        // Load the place this asset belongs to.
+        const placeData = await getPlace(accessToken!, assetData.place_id)
 
         if (!alive) return
 
         setPlace(placeData)
-
-        // Show only tickets belonging to this asset.
-        setTickets(
-          placeTickets.filter((ticket) => ticket.asset_id === asset_id)
-        )
       } catch (error) {
         console.error("Failed to load asset:", error)
         if (alive) setFailed(true)
@@ -140,32 +134,6 @@ function AssetDetailPage() {
     i18n.locale === "ar" ? "ar" : "en",
     { dateStyle: "medium" }
   )
-const referrer = document.referrer
-
-const placeId = referrer
-  ? new URL(referrer).pathname.split("/").filter(Boolean).pop()
-  : undefined
-  const ticketLabels: Record<string, string> = {
-    CORRECTIVE: "صيانة تصحيحية",
-    PREVENTIVE: "صيانة وقائية",
-    LOW: "منخفضة",
-    MEDIUM: "متوسطة",
-    HIGH: "عالية",
-    URGENT: "عاجلة",
-    PENDING: "معلقة",
-    SUBMITTED: "مرسلة",
-    UNDER_REVIEW: "قيد المراجعة",
-    APPROVED: "مقبولة",
-    REJECTED: "مرفوضة",
-    IN_PROGRESS: "قيد التنفيذ",
-    COMPLETED: "مكتملة",
-    CANCELLED: "ملغاة",
-  }
-
-  function getTicketLabel(value: string) {
-    return ticketLabels[value] ?? value
-  }
-
   function formatDate(value: string | null | undefined) {
     if (!value) return "—"
 
@@ -177,7 +145,6 @@ const placeId = referrer
   return (
     <center>
     <div
-      dir="rtl"
       style={S(
         "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 900px"
       )}
@@ -193,7 +160,7 @@ const placeId = referrer
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink render={<a href="/" />}>
-                  الرئيسية
+                  <Trans>Home</Trans>
                 </BreadcrumbLink>
               </BreadcrumbItem>
 
@@ -201,7 +168,7 @@ const placeId = referrer
 
               <BreadcrumbItem>
                 <BreadcrumbLink render={<a href="/places" />}>
-                  العقارات
+                  <Trans>Places</Trans>
                 </BreadcrumbLink>
               </BreadcrumbItem>
             </BreadcrumbList>
@@ -219,13 +186,29 @@ const placeId = referrer
                 <Skeleton style={S("width: 220px; height: 28px")} />
               ))}
           </h1>
+
+          {asset && accessToken && user?.role === "MANAGER" && (
+            <AssetManage
+              key={asset.updated_at}
+              token={accessToken}
+              asset={asset}
+              today={todayIn(place?.timezone ?? "Asia/Riyadh")}
+              onUpdated={setAsset}
+              onDeleted={() =>
+                void navigate({
+                  to: "/place/$place_id",
+                  params: { place_id: asset.place_id },
+                })
+              }
+            />
+          )}
         </div>
       </div>
 
       {failed && (
         <Card style={S("padding: 18px; border: 1px solid var(--border)")}>
           <p style={S("color: var(--muted-foreground); margin: 0")}>
-            تعذر تحميل بيانات الأصل.
+            <Trans>We could not load the asset.</Trans>
           </p>
         </Card>
       )}
@@ -245,7 +228,7 @@ const placeId = referrer
               )}
             >
               <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-                <Trans>معلومات الأصل</Trans>
+                <Trans>Asset information</Trans>
               </CardTitle>
             </CardHeader>
 
@@ -267,25 +250,25 @@ const placeId = referrer
                   )}
                 >
                   <InfoItem
-                    label="اسم الأصل"
+                    label={t`Asset name`}
                     icon={<Building2 size={16} />}
                     value={asset.name}
                   />
 
                   <InfoItem
-                    label="نوع الأصل"
+                    label={t`Asset type`}
                     icon={<Wrench size={16} />}
                     value={asset.type}
                   />
 
                   <InfoItem
-                    label="الحالة"
+                    label={t`Status`}
                     icon={<span />}
                     value={<AssetStatusBadge status={asset.status} />}
                   />
 
                   <InfoItem
-                    label="تاريخ الشراء"
+                    label={t`Purchase date`}
                     icon={<CalendarDays size={16} />}
                     value={
                       asset.purchase_date
@@ -311,7 +294,7 @@ const placeId = referrer
               )}
             >
               <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-                <Trans>الملكية المرتبطة بالأصل</Trans>
+                <Trans>The asset's place</Trans>
               </CardTitle>
             </CardHeader>
 
@@ -342,112 +325,23 @@ const placeId = referrer
                     </span>
                   </div>
 
-                  <ArrowRight size={17} />
+                  <ArrowRight size={17} className="rtl:rotate-180" />
                 </Link>
               )}
             </CardContent>
           </Card>
 
           {/* Maintenance Tickets */}
-          <Card
-            className="am-lift"
-            style={S(
-              "padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0"
-            )}
-          >
-            <CardHeader
-              style={S(
-                "padding: 18px 20px; border-bottom: 1px solid var(--border)"
-              )}
-            >
-              <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-                تذاكر صيانة الأصل
-                {tickets !== null && (
-                  <span
-                    style={S(
-                      "margin-inline-start: 8px; font-size: 12px; color: var(--muted-foreground)"
-                    )}
-                  >
-                    {tickets.length}
-                  </span>
-                )}
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent style={S("padding: 20px")}>
-              {tickets === null ? (
-                <div style={S("display: flex; flex-direction: column; gap: 10px")}>
-                  <Skeleton style={S("height: 70px")} />
-                  <Skeleton style={S("height: 70px")} />
-                </div>
-              ) : tickets.length === 0 ? (
-                <div
-                  style={S(
-                    "display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 32px 16px; text-align: center"
-                  )}
-                >
-                  <AlertTriangle
-                    size={28}
-                    style={S("color: var(--muted-foreground)")}
-                  />
-                  <p
-                    style={S(
-                      "font-size: 14px; color: var(--muted-foreground); margin: 0"
-                    )}
-                  >
-                    لا توجد تذاكر صيانة لهذا الأصل.
-                  </p>
-                </div>
-              ) : (
-                <div style={S("display: flex; flex-direction: column; gap: 10px")}>
-                  {tickets.map((ticket) => (
-                    <Link
-                      key={ticket.id}
-                      to="/ticket/$ticket_id"
-                      params={{ ticket_id: ticket.id }}
-                      className="am-lift"
-                      style={S(
-                        "display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px; border: 1px solid var(--border); background: var(--card); text-decoration: none; color: inherit"
-                      )}
-                    >
-                      <div
-                        style={S(
-                          "display: flex; flex-direction: column; gap: 6px; min-width: 0"
-                        )}
-                      >
-                        <strong style={S("font-size: 14px")}>
-                          {ticket.description || "تذكرة صيانة"}
-                        </strong>
-
-                        <span
-                          style={S(
-                            "font-size: 12px; color: var(--muted-foreground)"
-                          )}
-                        >
-                          {getTicketLabel(ticket.ticket_type)}
-                          {" · "}
-                          الأولوية: {getTicketLabel(ticket.priority)}
-                        </span>
-
-                        <span
-                          style={S(
-                            "font-size: 12px; color: var(--muted-foreground)"
-                          )}
-                        >
-                          تاريخ الإنشاء: {formatDate(ticket.created_at)}
-                        </span>
-                      </div>
-
-                      <div style={S("display: flex; align-items: center; gap: 10px")}>
-                        <StatusBadge status={String(ticket.status)} />
-                        <ArrowRight size={17} />
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {asset && accessToken && (
+            <TicketsSection
+              token={accessToken}
+              placeId={asset.place_id}
+              assetId={asset.id}
+              title={<Trans>Maintenance tickets for this asset</Trans>}
+              emptyOpen={<Trans>This asset has no open tickets.</Trans>}
+              emptyAll={<Trans>This asset has no maintenance tickets.</Trans>}
+            />
+          )}
 
 {/* Scheduled Maintenances */}
 {/* Scheduled Maintenances */}
@@ -469,7 +363,7 @@ const placeId = referrer
     >
       <div style={S("display: flex; align-items: center; gap: 10px")}>
         <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-          <Trans>الصيانة المجدولة</Trans>
+          <Trans>Scheduled maintenance</Trans>
         </CardTitle>
 
         <span
@@ -496,12 +390,17 @@ const placeId = referrer
         )}
       >
         <Plus size={16} />
-        <Trans>جدولة صيانة</Trans>
+        <Trans>Schedule maintenance</Trans>
       </Link>
     </div>
   </CardHeader>
 
   <CardContent style={S("padding: 20px")}>
+  {cancelError && (
+    <p role="alert" style={S("margin: 0 0 12px; color: var(--destructive); font-size: 13px")}>
+      {cancelError}
+    </p>
+  )}
   {scheduledLoading ? (
     <div style={S("display: flex; flex-direction: column; gap: 12px")}>
       <Skeleton style={S("height: 100px")} />
@@ -523,7 +422,7 @@ const placeId = referrer
           "font-size: 14px; color: var(--muted-foreground); margin: 0"
         )}
       >
-        <Trans>لا توجد صيانة دورية مجدولة لهذا الأصل.</Trans>
+        <Trans>This asset has no scheduled maintenance.</Trans>
       </p>
     </div>
   ) : (
@@ -539,12 +438,17 @@ const placeId = referrer
             (1000 * 60 * 60 * 24)
         )
 
-        const intervalUnitLabels: Record<string, string> = {
-          DAY: "يوم",
-          WEEK: "أسبوع",
-          MONTH: "شهر",
-          YEAR: "سنة",
-        }
+        const count = maintenance.interval_count
+        const repeats =
+          maintenance.interval_unit === "DAY"
+            ? plural(count, { one: "Every day", other: "Every # days" })
+            : maintenance.interval_unit === "WEEK"
+              ? plural(count, { one: "Every week", other: "Every # weeks" })
+              : maintenance.interval_unit === "MONTH"
+                ? plural(count, { one: "Every month", other: "Every # months" })
+                : plural(count, { one: "Every year", other: "Every # years" })
+        const leadDays = maintenance.lead_days
+        const overdueDays = Math.abs(daysRemaining)
 
         return (
           <div
@@ -569,10 +473,7 @@ const placeId = referrer
                     "font-size: 12px; color: var(--muted-foreground)"
                   )}
                 >
-                  <Trans>تتكرر كل</Trans>{" "}
-                  {maintenance.interval_count}{" "}
-                  {intervalUnitLabels[maintenance.interval_unit] ??
-                    maintenance.interval_unit}
+                  {repeats}
                 </span>
               </div>
 
@@ -592,7 +493,7 @@ const placeId = referrer
                 <span
                   style={S("font-size: 11px; color: var(--muted-foreground)")}
                 >
-                  <Trans>موعد الصيانة القادمة</Trans>
+                  <Trans>Next maintenance</Trans>
                 </span>
 
                 <strong style={S("font-size: 13px")}>
@@ -604,11 +505,11 @@ const placeId = referrer
                 <span
                   style={S("font-size: 11px; color: var(--muted-foreground)")}
                 >
-                  <Trans>التنبيه قبل الموعد</Trans>
+                  <Trans>Reminder before</Trans>
                 </span>
 
                 <strong style={S("font-size: 13px")}>
-                  {maintenance.lead_days} <Trans>يوم</Trans>
+                  {plural(leadDays, { one: "# day", other: "# days" })}
                 </strong>
               </div>
             </div>
@@ -624,10 +525,10 @@ const placeId = referrer
               )}
             >
               {daysRemaining < 0
-                ? `متأخرة منذ ${Math.abs(daysRemaining)} يوم`
+                ? plural(overdueDays, { one: "Overdue by # day", other: "Overdue by # days" })
                 : daysRemaining === 0
-                  ? "موعد الصيانة اليوم"
-                  : `متبقي ${daysRemaining} يوم على الصيانة`}
+                  ? t`Maintenance is due today`
+                  : plural(daysRemaining, { one: "# day until maintenance", other: "# days until maintenance" })}
             </div>
 
             {/* Cancel Schedule */}
@@ -640,12 +541,12 @@ const placeId = referrer
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => handleCancelSchedule(accessToken,maintenance.id)}
+                onClick={() => void cancelSchedule(maintenance.id)}
                 style={S(
                   "color: var(--destructive); border-color: var(--destructive)"
                 )}
               >
-                <Trans>إلغاء الجدولة</Trans>
+                <Trans>Cancel schedule</Trans>
               </Button>
             </div>
           </div>

@@ -1,13 +1,24 @@
 
+import { authFetch } from "./http"
+import { apiError, readApiError } from "./errors"
 import type { BookingInput } from "./validators"
 import type {
   Asset,
   CreateAssetInput,
+  CreateSupportTicketInput,
   CreatePlaceInput,
   Expense,
   ExpenseCategory,
   Place,
-  WorkerResponse,
+  PlaceStatus,
+  PlaceWorker,
+  Schedule,
+  SupportTicket,
+  Ticket,
+  TicketStatus,
+  UpdateAssetInput,
+  User,
+  Worker,
 } from "@amlak/shared"
 
 // API response types
@@ -45,48 +56,59 @@ function unwrapResponse<T>(response: unknown): T {
   return response as T
 }
 
+export interface Pagination {
+  page: number
+  page_size: number
+  total: number
+  total_pages: number
+}
+
+/** A list endpoint's page: the rows and the pagination the API sends. */
+export interface PageOf<T> {
+  data: T[]
+  pagination: Pagination
+}
+
+/** GET a paginated list and keep its pagination (apiRequest drops it). */
+export async function apiPage<T>(path: string, token: string): Promise<PageOf<T>> {
+  const res = await authFetch(path, token)
+  const body = (await res.json().catch(() => null)) as PageOf<T> | null
+  if (!res.ok) throw apiError(res.status, body)
+  if (!body || !Array.isArray(body.data) || !body.pagination) {
+    throw new Error(`${path} returned no list`)
+  }
+  return body
+}
+
+/**
+ * Every page of a list, for screens that sort by a field the API does not
+ * order by. Stops after `maxPages` pages of 100.
+ */
+export async function apiAllPages<T>(
+  path: string,
+  token: string,
+  maxPages = 20,
+): Promise<T[]> {
+  const join = path.includes("?") ? "&" : "?"
+  const rows: T[] = []
+  for (let page = 1; page <= maxPages; page++) {
+    const result = await apiPage<T>(`${path}${join}page=${page}&page_size=100`, token)
+    rows.push(...result.data)
+    if (page >= result.pagination.total_pages) break
+  }
+  return rows
+}
+
 export async function apiRequest<T>(
   path: string,
   token: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const res = await fetch(`/api/v1${path}`, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...(options.body
-        ? { "Content-Type": "application/json" }
-        : {}),
-      ...options.headers,
-    },
-    credentials: "same-origin",
-  })
+  const res = await authFetch(path, token, options)
 
   const response: unknown = await res.json().catch(() => null)
 
-  if (!res.ok) {
-    const message =
-      response &&
-      typeof response === "object" &&
-      "message" in response
-        ? String((response as { message: unknown }).message)
-        : `${path} failed with ${res.status}`
-
-    const error = new Error(message) as Error & {
-      code?: string
-      details?: Record<string, unknown>
-    }
-    error.code =
-      response && typeof response === "object" && "code" in response
-        ? String((response as { code: unknown }).code)
-        : ""
-    error.details =
-      response && typeof response === "object" && "details" in response
-        ? (response as { details?: Record<string, unknown> }).details
-        : undefined
-
-    throw error
-  }
+  if (!res.ok) throw apiError(res.status, response)
 
   return unwrapResponse<T>(response)
 }
@@ -157,39 +179,75 @@ export async function createAsset(
   return asset
 }
 
-// Create place
-export class PlaceNameTakenError extends Error {}
+export function updateAsset(
+  token: string,
+  assetId: string,
+  input: UpdateAssetInput,
+): Promise<Asset> {
+  return apiRequest<Asset>(`/assets/${assetId}`, token, {
+    method: "PUT",
+    body: JSON.stringify(input),
+  })
+}
 
+export async function deleteAsset(token: string, assetId: string): Promise<void> {
+  const response = await authFetch(`/assets/${assetId}`, token, {
+    method: "DELETE",
+  })
+  if (!response.ok) throw await readApiError(response)
+}
+
+// Tickets
+export interface TicketListQuery {
+  status?: TicketStatus
+  assignee_id?: string
+  place_id?: string
+  asset_id?: string
+  /** newest (the default): last created first. due_date: soonest due first, none last. */
+  sort?: "newest" | "due_date"
+  /** true: PENDING_REVIEW and APPROVED, as the dashboard's open_tickets; false: the rest. */
+  open?: boolean
+}
+
+export function ticketQuery(query: TicketListQuery): string {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    // Booleans are sent as "true" or "false"; empty values are left out.
+    if (value !== undefined && value !== "") params.set(key, String(value))
+  }
+  return params.toString()
+}
+
+/** One page of tickets, in the order `query.sort` asks for. */
+export function listTickets(
+  token: string,
+  query: TicketListQuery,
+  page: number,
+  pageSize = 20,
+): Promise<PageOf<Ticket>> {
+  const params = ticketQuery(query)
+  return apiPage<Ticket>(
+    `/tickets?${params}${params ? "&" : ""}page=${page}&page_size=${pageSize}`,
+    token,
+  )
+}
+
+
+// Create place. A taken name is a 409 CONFLICT with details.fields.place_name.
 export async function createPlace(
   token: string,
   input: CreatePlaceInput,
 ): Promise<Place> {
-  try {
-    const place = await apiRequest<Place | string>(
-      "/places",
-      token,
-      {
-        method: "POST",
-        body: JSON.stringify(input),
-      },
-    )
+  const place = await apiRequest<Place>("/places", token, {
+    method: "POST",
+    body: JSON.stringify(input),
+  })
 
-    if (typeof place === "string") {
-      throw new PlaceNameTakenError(place)
-    }
-
-    if (!place || typeof place.id !== "string") {
-      throw new Error("place not created")
-    }
-
-    return normalizePlace(place)
-  } catch (error) {
-    if (error instanceof PlaceNameTakenError) {
-      throw error
-    }
-
-    throw error
+  if (!place || typeof place.id !== "string") {
+    throw new Error("place not created")
   }
+
+  return normalizePlace(place)
 }
 
 // shortcut: packages/shared has no bookings.ts on this branch; when it lands,
@@ -246,6 +304,19 @@ export async function getBookingsForPlace(
   })
 }
 
+/** Every booking of a place that overlaps the window (pages of 100). */
+export function listAllBookingsForPlace(
+  token: string,
+  placeId: string,
+  window: BookingWindow,
+): Promise<Booking[]> {
+  const query = new URLSearchParams({ from: window.from, to: window.to })
+  return apiAllPages<Booking>(
+    `/places/${placeId}/bookings?${query.toString()}`,
+    token,
+  )
+}
+
 export async function createBooking(
   token: string,
   placeId: string,
@@ -280,11 +351,28 @@ export function cancelBooking(
   })
 }
 
+/** The workers assigned to a place (Manager only), at most 100. */
+export function getPlaceWorkers(
+  token: string,
+  placeId: string,
+): Promise<PlaceWorker[]> {
+  return apiRequest<PlaceWorker[]>(
+    `/places/${placeId}/workers?page_size=100`,
+    token,
+  ).then((data) => {
+    if (!Array.isArray(data)) {
+      throw new Error("/places/{placeId}/workers returned no list")
+    }
+
+    return data
+  })
+}
+
 // Workers
 export function getWorkers(
   token: string,
-): Promise<WorkerResponse[]> {
-  return apiRequest<WorkerResponse[]>("/workers", token).then(
+): Promise<Worker[]> {
+  return apiRequest<Worker[]>("/workers", token).then(
     (data) => {
       if (!Array.isArray(data)) {
         throw new Error("/workers returned no list")
@@ -298,8 +386,8 @@ export function getWorkers(
 export function getWorkerById(
   token: string,
   id: string,
-): Promise<WorkerResponse> {
-  return apiRequest<WorkerResponse>(`/workers/${id}`, token).then(
+): Promise<Worker> {
+  return apiRequest<Worker>(`/workers/${id}`, token).then(
     (data) => {
       if (!data || typeof data.id !== "string") {
         throw new Error("worker not found")
@@ -318,8 +406,8 @@ export async function createWorker(
     phone: string
     preferred_language?: "ar" | "en"
   },
-): Promise<WorkerResponse> {
-  const worker = await apiRequest<WorkerResponse>(
+): Promise<Worker> {
+  const worker = await apiRequest<Worker>(
     "/workers",
     accessToken,
     {
@@ -345,12 +433,11 @@ export async function updatePlace(
     city: string
     address: string | null
     description: string | null
-    monthly_maintenance_budget: number
+    monthly_maintenance_budget: number | null
     latitude: number | null
     longitude: number | null
-    currency: string
-    timezone: string
-    status: "ACTIVE" | "INACTIVE"
+    status: PlaceStatus
+    // No currency or timezone: the API sets them at creation only.
   },
 ): Promise<Place> {
   const place = await apiRequest<Place>(
@@ -373,20 +460,13 @@ export async function deleteWorker(
   token: string,
   workerId: string
 ): Promise<void> {
-  const response = await fetch(`/api/v1/workers/${workerId}`, {
+  const response = await authFetch(`/workers/${workerId}`, token, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   })
 
   const result = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    throw new Error(
-      result?.message ?? `Delete failed (${response.status})`
-    )
-  }
+  if (!response.ok) throw apiError(response.status, result)
 }
 
 export async function getAssetById(
@@ -404,32 +484,13 @@ export async function getAssetById(
   )
 }
 
-export async function getTicketsForPlace(
-  token: string,
-  placeId: string,
-) {
-  const response = await fetch(`/api/v1/tickets?place_id=${placeId}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    credentials: "same-origin",
-  }).then((res) => res.json())
-
-  return response.data;
-}
-
 export async function getTicketById(
   token: string,
   ticketId: string,
 ) {
-  const response = await fetch(`/api/v1/tickets/${ticketId}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    credentials: "same-origin",
-  }).then((res) => res.json())
+  const response = await authFetch(`/tickets/${ticketId}`, token).then((res) =>
+    res.json(),
+  )
 
   return response;
 }
@@ -512,27 +573,14 @@ async function expenseMultipartRequest<T>(
     formData.append("receipt", input.receipt)
   }
 
-  const response = await fetch(`/api/v1${path}`, {
+  const response = await authFetch(path, token, {
     method,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     body: formData,
-    credentials: "same-origin",
   })
 
   const result: unknown = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    const message =
-      result &&
-      typeof result === "object" &&
-      "message" in result
-        ? String(result.message)
-        : `Expense request failed (${response.status})`
-
-    throw new Error(message)
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   return unwrapResponse<T>(result)
 }
@@ -627,21 +675,11 @@ export async function deleteExpense(
   token: string,
   expenseId: string,
 ): Promise<void> {
-  const response = await fetch(`/api/v1/expenses/${expenseId}`, {
+  const response = await authFetch(`/expenses/${expenseId}`, token, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    credentials: "same-origin",
   })
 
-  if (!response.ok) {
-    const result = await response.json().catch(() => null)
-
-    throw new Error(
-      result?.message || `Failed to delete expense (${response.status})`,
-    )
-  }
+  if (!response.ok) throw await readApiError(response)
 }
 
 export async function getFinancialReport(
@@ -702,27 +740,14 @@ export async function createTicket(
     formData.append("photos", photo)
   }
 
-  const res = await fetch(`/api/v1/places/${placeId}/tickets`, {
+  const res = await authFetch(`/places/${placeId}/tickets`, token, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     body: formData,
-    credentials: "same-origin",
   })
 
   const response: unknown = await res.json().catch(() => null)
 
-  if (!res.ok) {
-    const message =
-      response &&
-      typeof response === "object" &&
-      "message" in response
-        ? String((response as { message: unknown }).message)
-        : `Create ticket failed with ${res.status}`
-
-    throw new Error(message)
-  }
+  if (!res.ok) throw apiError(res.status, response)
 
   return unwrapResponse(response)
 }
@@ -731,7 +756,7 @@ export async function createTicket(
 export interface ApproveTicketInput {
   assignee_id: string;
   due_date: string;
-  estimated_cost: number;
+  estimated_cost?: number;
 }
 
 export interface RejectTicketInput {
@@ -757,25 +782,14 @@ async function ticketRequest<T>(
 ): Promise<T> {
   const isFormData = body instanceof FormData;
 
-  const response = await fetch(
-    `/api/v1/tickets/${ticketId}/${action}`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      },
-      body: isFormData ? body : JSON.stringify(body),
-    },
-  );
+  const response = await authFetch(`/tickets/${ticketId}/${action}`, token, {
+    method: "POST",
+    body: isFormData ? body : JSON.stringify(body),
+  });
 
-  const result = await response.json();
+  const result = await response.json().catch(() => null);
 
-  if (!response.ok) {
-    throw new Error(
-      result.message || result.error || `Failed to ${action} ticket`,
-    );
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   return result as T;
 }
@@ -850,11 +864,11 @@ export async function completeTicket(
 
 
 
-export async function getScheduledMaintenancesForAsset(
+export function getScheduledMaintenancesForAsset(
   token: string,
   assetId: string,
-) {
-  return apiRequest(`/assets/${assetId}/maintenance-schedules`, token)
+): Promise<Schedule[]> {
+  return apiRequest<Schedule[]>(`/assets/${assetId}/maintenance-schedules`, token)
 }
 
 
@@ -874,32 +888,18 @@ export async function createMaintenanceSchedule(
   assetId: string,
   input: CreateMaintenanceScheduleInput
 ) {
-  const response = await fetch(
-    `/api/v1/assets/${assetId}/maintenance-schedules`,
+  const response = await authFetch(
+    `/assets/${assetId}/maintenance-schedules`,
+    token,
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      credentials: "same-origin",
       body: JSON.stringify(input),
     }
   )
 
   const data: unknown = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    const message =
-      typeof data === "object" &&
-      data !== null &&
-      "message" in data &&
-      typeof data.message === "string"
-        ? data.message
-        : "Failed to create maintenance schedule"
-
-    throw new Error(message)
-  }
+  if (!response.ok) throw apiError(response.status, data)
 
   return data
 }
@@ -908,29 +908,13 @@ export async function handleCancelSchedule(
   token: string,
   scheduleId: string
 ) {
-  const response = await fetch(
-    `/api/v1/maintenance-schedules/${scheduleId}`,
-    {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: "same-origin",
-    }
+  const response = await authFetch(
+    `/maintenance-schedules/${scheduleId}`,
+    token,
+    { method: "DELETE" }
   )
-  if (!response.ok) {
-    const data: unknown = await response.json().catch(() => null)
-    const message =
-      typeof data === "object" &&
-      data !== null &&
-      "message" in data &&
-      typeof data.message === "string"
-        ? data.message
-        : "Failed to cancel maintenance schedule"
-
-    throw new Error(message)
-  }
-  return document.location.reload()
+  if (!response.ok) throw await readApiError(response)
+  // 204: the schedule is stopped. The caller refreshes its list.
 }
 
 
@@ -953,28 +937,22 @@ export async function updateProfile(
     formData.append("picture", data.picture)
   }
 
-  const response = await fetch("/api/v1/users/me", {
+  const response = await authFetch("/users/me", accessToken, {
     method: "PUT",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
     body: formData,
   })
 
-  if (!response.ok) {
-    const result = await response.json().catch(() => null)
-    throw new Error(result?.message || "Failed to update profile")
-  }
+  if (!response.ok) throw await readApiError(response)
 
   return response.json()
 }
 
-export async function getProfile(token: string) {
-  return apiRequest('/users/me', token)
+export function getProfile(token: string): Promise<User> {
+  return apiRequest<User>("/users/me", token)
 }
 
-export async function getUsers(token: string){
-  return apiRequest('/users', token)
+export function getUsers(token: string): Promise<User[]> {
+  return apiRequest<User[]>("/users", token)
 }
 
 export type UserResponse = {
@@ -1005,25 +983,14 @@ export async function getUserById(
   accessToken: string,
   userId: string,
 ): Promise<UserResponse> {
-  const response = await fetch(`/api/v1/users/${userId}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
+  const response = await authFetch(`/users/${userId}`, accessToken)
 
   const result = (await response.json().catch(() => null)) as
     | UserApiResponse
     | UserResponse
     | null
 
-  if (!response.ok) {
-    throw new Error(
-      result && "message" in result
-        ? result.message
-        : `Failed to get user (${response.status})`,
-    )
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   if (!result) {
     throw new Error("Invalid user response")
@@ -1050,12 +1017,8 @@ export async function updateUser(
   userId: string,
   payload: UpdateUserInput,
 ): Promise<UserResponse> {
-  const response = await fetch(`/api/v1/users/${userId}`, {
+  const response = await authFetch(`/users/${userId}`, accessToken, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
     body: JSON.stringify(payload),
   })
 
@@ -1064,13 +1027,7 @@ export async function updateUser(
     | UserResponse
     | null
 
-  if (!response.ok) {
-    throw new Error(
-      result && "message" in result
-        ? result.message
-        : `Failed to update user (${response.status})`,
-    )
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   if (!result) {
     throw new Error("Invalid update response")
@@ -1081,31 +1038,22 @@ export async function updateUser(
     : (result as UserResponse)
 }
 
-export async function getSupportTicket(token:string){
-  return apiRequest('/support-tickets',token)
+export async function getSupportTicket(token: string) {
+  return apiRequest<SupportTicket[]>("/support-tickets", token)
 }
 
-type createSpTicket = {
-  subject:string,
-  description:string
-}
-export async function createSupportTicket(token:string,input:[]){
-  const res = await fetch('/api/v1/support-tickets',
-    {
-      method:"POST",
-      headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+export function createSupportTicket(
+  token: string,
+  input: CreateSupportTicketInput,
+): Promise<SupportTicket> {
+  return apiRequest<SupportTicket>("/support-tickets", token, {
+    method: "POST",
     body: JSON.stringify(input),
-    }
-  )
-  return res
+  })
 }
 
-
-export async function getSupportTicketById(token:string,ticket:string){
-  return apiRequest(`/support-tickets/${ticket}`,token)
+export function getSupportTicketById(token: string, ticketId: string): Promise<SupportTicket> {
+  return apiRequest<SupportTicket>(`/support-tickets/${ticketId}`, token)
 }
 
 export async function resolveSupportTicket(
@@ -1113,23 +1061,18 @@ export async function resolveSupportTicket(
   ticketId: string,
   admin_response: string
 ) {
-  const response = await fetch(
-    `/api/v1/support-tickets/${ticketId}/resolve`,
+  const response = await authFetch(
+    `/support-tickets/${ticketId}/resolve`,
+    token,
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ admin_response }),
     }
   );
 
-  const result = await response.json();
+  const result = await response.json().catch(() => null);
 
-  if (!response.ok) {
-    throw new Error(result.message || result.error || "Failed to resolve ticket");
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   return result;
 }
@@ -1194,30 +1137,42 @@ export async function getContents(
   if (params.page) query.set("page", String(params.page))
   if (params.page_size) query.set("page_size", String(params.page_size))
 
-  const response = await fetch(
-    `/api/v1/content${query.size ? `?${query.toString()}` : ""}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: "same-origin",
-    },
+  const response = await authFetch(
+    `/content${query.size ? `?${query.toString()}` : ""}`,
+    token,
   )
 
   const result = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    throw new Error(
-      result?.message || `Failed to get content (${response.status})`,
-    )
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   if (!result || !Array.isArray(result.data) || !result.pagination) {
     throw new Error("Invalid content list response")
   }
 
   return result
+}
+
+/**
+ * A published page by language and slug, for visitors who are not signed
+ * in, so no token. Resolves with null when there is no such page.
+ */
+export async function getPublicContent(
+  language: ContentLanguage,
+  slug: string,
+): Promise<WebContent | null> {
+  const query = new URLSearchParams({ language, slug })
+  const response = await fetch(`/api/v1/content?${query.toString()}`, {
+    credentials: "same-origin",
+  })
+  const result = (await response.json().catch(() => null)) as
+    | ContentListResponse
+    | null
+  if (!response.ok) throw apiError(response.status, result)
+  if (!result || !Array.isArray(result.data)) {
+    throw new Error("/content returned no list")
+  }
+  return result.data.find((page) => page.slug === slug) ?? null
 }
 
 export async function getContentById(
@@ -1260,21 +1215,11 @@ export async function deleteContent(
   token: string,
   contentId: string,
 ): Promise<void> {
-  const response = await fetch(`/api/v1/content/${contentId}`, {
+  const response = await authFetch(`/content/${contentId}`, token, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    credentials: "same-origin",
   })
 
-  if (!response.ok) {
-    const result = await response.json().catch(() => null)
-
-    throw new Error(
-      result?.message || `Failed to delete content (${response.status})`,
-    )
-  }
+  if (!response.ok) throw await readApiError(response)
 }
 
 
@@ -1319,6 +1264,17 @@ export interface DashboardResponse {
   }
 }
 
+/** Every place's dashboard row, in pages of 100 (one request for up to 100 places). */
+export function getDashboardRows(token: string): Promise<DashboardPlace[]> {
+  return apiAllPages<DashboardPlace>("/dashboard", token)
+}
+
+/** How many workers are assigned to a place (Manager only). Reads only the total. */
+export async function countPlaceWorkers(token: string, placeId: string): Promise<number> {
+  const result = await apiPage<PlaceWorker>(`/places/${placeId}/workers?page_size=1`, token)
+  return result.pagination.total
+}
+
 export async function getDashboard(
   token: string,
   params?: {
@@ -1333,22 +1289,14 @@ export async function getDashboard(
   if (params?.page) query.set("page", String(params.page))
   if (params?.page_size) query.set("page_size", String(params.page_size))
 
-  const response = await fetch(
-    `/api/v1/dashboard${query.toString() ? `?${query.toString()}` : ""}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }
+  const response = await authFetch(
+    `/dashboard${query.toString() ? `?${query.toString()}` : ""}`,
+    token,
   )
 
-  const result = await response.json()
+  const result = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    throw new Error(result.message || "Failed to fetch dashboard")
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   return result
 }
@@ -1407,21 +1355,14 @@ export async function getNotifications(
     query.set("page_size", String(params.page_size))
   }
 
-  const response = await fetch(
-    `/api/v1/notifications${query.toString() ? `?${query}` : ""}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+  const response = await authFetch(
+    `/notifications${query.toString() ? `?${query}` : ""}`,
+    token,
   )
 
-  const result = await response.json()
+  const result = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    throw new Error(result.message || "Failed to fetch notifications")
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   return result
 }
@@ -1430,21 +1371,15 @@ export async function markNotificationAsRead(
   token: string,
   notificationId: string
 ): Promise<Notification> {
-  const response = await fetch(
-    `/api/v1/notifications/${notificationId}/read`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+  const response = await authFetch(
+    `/notifications/${notificationId}/read`,
+    token,
+    { method: "POST" }
   )
 
-  const result = await response.json()
+  const result = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    throw new Error(result.message || "Failed to mark notification as read")
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   return result
 }
@@ -1453,20 +1388,14 @@ export async function sendAnnouncement(
   token: string,
   input: SendAnnouncementInput
 ): Promise<{ recipient_count: number }> {
-  const response = await fetch("/api/v1/notifications", {
+  const response = await authFetch("/notifications", token, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(input),
   })
 
-  const result = await response.json()
+  const result = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    throw new Error(result.message || "Failed to send announcement")
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   return result
 }

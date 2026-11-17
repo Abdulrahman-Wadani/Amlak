@@ -1,7 +1,8 @@
 
 import { useState, type FormEvent } from "react"
-import { createFileRoute } from "@tanstack/react-router"
+import { Link, createFileRoute } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
 import {
   LockKeyhole,
   CheckCircle2,
@@ -11,7 +12,9 @@ import {
   ArrowLeft,
 } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { errorMessage, readApiError } from "@/lib/errors"
 import { Input } from "@/components/ui/input"
 import {
   Card,
@@ -88,16 +91,7 @@ function ResetPasswordPage() {
         return
       }
 
-      let message = "Something went wrong. Please try again."
-
-      try {
-        const data = await response.json()
-        message = data.message || message
-      } catch {
-        // The response may not contain JSON.
-      }
-
-      setError(message)
+      setError(errorMessage(await readApiError(response)))
     } catch {
       setError("Unable to connect to the server. Please try again.")
     } finally {
@@ -177,11 +171,12 @@ function ResetPasswordPage() {
                   </p>
                 </div>
 
-                <Button asChild className="h-11 w-full">
-                  <a href="/signin">
-                    <Trans>Go to Login</Trans>
-                  </a>
-                </Button>
+                <Link
+                  to="/signin"
+                  className={cn(buttonVariants(), "h-11 w-full")}
+                >
+                  <Trans>Go to Login</Trans>
+                </Link>
               </div>
             ) : !email || !token ? (
               <div className="space-y-5 text-center">
@@ -194,11 +189,12 @@ function ResetPasswordPage() {
                   </p>
                 </div>
 
-                <Button asChild variant="outline" className="w-full">
-                  <a href="/forgot-password">
-                    <Trans>Request a New Link</Trans>
-                  </a>
-                </Button>
+                <Link
+                  to="/forgot-password"
+                  className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+                >
+                  <Trans>Request a New Link</Trans>
+                </Link>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
@@ -229,7 +225,7 @@ function ResetPasswordPage() {
                       onClick={() => setShowPassword((prev) => !prev)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       aria-label={
-                        showPassword ? "Hide password" : "Show password"
+                        showPassword ? t`Hide password` : t`Show password`
                       }
                     >
                       {showPassword ? (
@@ -274,8 +270,8 @@ function ResetPasswordPage() {
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       aria-label={
                         showConfirmPassword
-                          ? "Hide password"
-                          : "Show password"
+                          ? t`Hide password`
+                          : t`Show password`
                       }
                     >
                       {showConfirmPassword ? (
@@ -319,7 +315,7 @@ function ResetPasswordPage() {
                   href="/signin"
                   className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
                   <Trans>Back to Login</Trans>
                 </a>
               </div>

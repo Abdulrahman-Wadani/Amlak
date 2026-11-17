@@ -5,6 +5,7 @@ import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
 import { signInInput } from "@/lib/validators"
 import { useAuth } from "@/lib/auth"
+import { errorMessage } from "@/lib/errors"
 import { AuthBrandPanel } from "@/components/auth-brand-panel"
 import { Button } from "@/components/ui/button"
 import { FieldError } from "@/components/ui/field"
@@ -50,7 +51,7 @@ function SignIn() {
         void navigate({ to: "/home" })
       })
       .catch((err: unknown) => {
-        setFormError(err instanceof Error ? err.message : t`Could not sign in`)
+        setFormError(errorMessage(err))
       })
       .finally(() => {
         setLoading(false)

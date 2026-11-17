@@ -1,20 +1,16 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Link, createFileRoute } from "@tanstack/react-router"
-import {
-  CircleAlert,
-  MapPin,
-  Plus,
-  Search,
-  UserRound,
-  Phone,
-} from "lucide-react"
+import { CircleAlert, Search, UserRound, Phone } from "lucide-react"
 
+import type { User } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
+import { t } from "@lingui/core/macro"
+import { Trans } from "@lingui/react/macro"
 import { getUsers } from "@/lib/api"
 import { S } from "@/lib/dom-style"
 
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -26,48 +22,19 @@ import {
 } from "@/components/ui/empty"
 
 import { StatusBadge } from "@/components/place-shared"
-import { cn } from "cn"
 import "@/styles/motion.css"
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: UsersPage,
 })
 
-type UserStatus =
-  | "ACTIVE"
-  | "INVITED"
-  | "PENDING_VERIFICATION"
-  | "DEACTIVATED"
-
-type UserRole = "ADMIN" | "MANAGER" | "WORKER"
-
-interface AssignedPlace {
-  id: string
-  place_name: string
-}
-
-interface Users {
-  id: string
-  fullname: string
-  email: string
-  phone: string | null
-  picture_url: string | null
-  role: UserRole
-  status: UserStatus
-  preferred_language: "ar" | "en"
-  email_verified_at: string | null
-  manager_id: string | null
-  created_at: string
-  updated_at: string
-  assigned_places?: AssignedPlace[]
-}
-
+// Labels are components so they translate at render, not at import.
 const TABS = [
-  { key: "ALL", label: "الكل" },
-  { key: "ACTIVE", label: "نشط" },
-  { key: "INVITED", label: "الدعوات" },
-  { key: "PENDING_VERIFICATION", label: "بانتظار التحقق" },
-  { key: "DEACTIVATED", label: "غير نشط" },
+  { key: "ALL", label: <Trans>All</Trans> },
+  { key: "ACTIVE", label: <Trans>Active</Trans> },
+  { key: "INVITED", label: <Trans>Invited</Trans> },
+  { key: "PENDING_VERIFICATION", label: <Trans>Pending verification</Trans> },
+  { key: "DEACTIVATED", label: <Trans>Deactivated</Trans> },
 ] as const
 
 type TabKey = (typeof TABS)[number]["key"]
@@ -75,7 +42,7 @@ type TabKey = (typeof TABS)[number]["key"]
 function UsersPage() {
   const { accessToken } = useAuth()
 
-  const [users, setUsers] = useState<Users[] | null>(null)
+  const [users, setUsers] = useState<User[] | null>(null)
   const [error, setError] = useState(false)
   const [query, setQuery] = useState("")
   const [tab, setTab] = useState<TabKey>("ALL")
@@ -125,7 +92,6 @@ function UsersPage() {
 
   return (
     <div
-      dir="rtl"
       style={S(
         "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px",
       )}
@@ -137,7 +103,7 @@ function UsersPage() {
         )}
       >
         <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-          المستخدمون
+          <Trans>Users</Trans>
         </h1>
 
       </div>
@@ -159,7 +125,7 @@ function UsersPage() {
               "position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)",
             )}
           >
-            بحث
+            <Trans>Search</Trans>
           </Label>
 
           <Search
@@ -174,7 +140,7 @@ function UsersPage() {
             type="search"
             className="am-input"
             style={S("padding-inline-start: 44px")}
-            placeholder="ابحث بالاسم أو البريد الإلكتروني أو الجوال او المعرف"
+            placeholder={t`Search by name, email, phone or ID`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -182,7 +148,7 @@ function UsersPage() {
 
         <div
           role="group"
-          aria-label="تصفية حسب الحالة"
+          aria-label={t`Filter by status`}
           style={S("display: flex; gap: 8px; flex-wrap: wrap")}
         >
           {TABS.map((item) => (
@@ -247,7 +213,7 @@ function UsersPage() {
             aria-hidden="true"
             className="size-3.5 shrink-0"
           />
-          تعذر تحميل بيانات المستخدمين.
+          <Trans>We could not load the users.</Trans>
         </p>
       )}
 
@@ -257,14 +223,14 @@ function UsersPage() {
           <EmptyHeader>
             <EmptyTitle>
               {query || tab !== "ALL"
-                ? "لا يوجد مستخدمون مطابقون"
-                : "لا يوجد مستخدمون حتى الآن"}
+                ? t`No users match`
+                : t`No users yet`}
             </EmptyTitle>
 
             <EmptyDescription>
               {query || tab !== "ALL"
-                ? "جرّب تغيير كلمات البحث أو الفلتر المحدد."
-                : "لا يوجد مستخدمون لعرضهم حالياً."}
+                ? t`Try other search words or another filter.`
+                : t`There are no users to show.`}
             </EmptyDescription>
 
             {query || tab !== "ALL" ? (
@@ -276,7 +242,7 @@ function UsersPage() {
                   setTab("ALL")
                 }}
               >
-                مسح الفلاتر
+                <Trans>Clear filters</Trans>
               </Button>
             ) : null}
           </EmptyHeader>
@@ -293,8 +259,8 @@ function UsersPage() {
           {visible.map((user) => (
             <Link
               key={user.id}
-              to="/admin/$worker_id"
-              params={{ worker_id: user.id }}
+              to="/admin/$admin_id"
+              params={{ admin_id: user.id }}
               className="am-lift"
               style={S(
                 "display: flex; flex-direction: column; gap: 10px; padding: 14px; min-height: 150px; text-decoration: none; color: inherit; background: #fff; border: 1px solid var(--border); box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.08)",
@@ -324,12 +290,11 @@ function UsersPage() {
                   </div>
 
                   <div
-                    dir="ltr"
                     style={S(
-                      "margin-top: 3px; text-align: right; font-size: 11px; color: var(--muted-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
+                      "margin-top: 3px; font-size: 11px; color: var(--muted-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
                     )}
                   >
-                    {user.email}
+                    <bdi dir="ltr">{user.email}</bdi>
                   </div>
                 </div>
               </div>
@@ -364,50 +329,11 @@ function UsersPage() {
                 >
                   <Phone size={12} />
                   <span dir="ltr">
-                    {user.phone || "لا يوجد رقم"}
+                    {user.phone || t`No phone number`}
                   </span>
                 </span>
 
-                <span
-                  style={S(
-                    "display: flex; align-items: center; gap: 4px; flex-shrink: 0",
-                  )}
-                >
-                  <MapPin size={12} />
-                  {user.assigned_places?.length ?? 0} أماكن
-                </span>
               </div>
-
-              {/* Assigned Places */}
-              {user.assigned_places &&
-                user.assigned_places.length > 0 && (
-                  <div
-                    style={S(
-                      "display: flex; flex-wrap: wrap; gap: 5px",
-                    )}
-                  >
-                    {user.assigned_places.slice(0, 2).map((place) => (
-                      <span
-                        key={place.id}
-                        style={S(
-                          "max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 4px 7px; background: var(--muted); color: var(--muted-foreground); font-size: 10px",
-                        )}
-                      >
-                        {place.place_name}
-                      </span>
-                    ))}
-
-                    {user.assigned_places.length > 2 && (
-                      <span
-                        style={S(
-                          "padding: 4px 7px; background: var(--muted); color: var(--muted-foreground); font-size: 10px",
-                        )}
-                      >
-                        +{user.assigned_places.length - 2}
-                      </span>
-                    )}
-                  </div>
-                )}
 
               {/* Footer */}
               <div
@@ -415,8 +341,8 @@ function UsersPage() {
                   "margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 650; color: var(--muted-foreground)",
                 )}
               >
-                عرض التفاصيل
-                <span aria-hidden="true">←</span>
+                <Trans>View details</Trans>
+                <span aria-hidden="true" className="inline-block rtl:rotate-180">→</span>
               </div>
             </Link>
           ))}

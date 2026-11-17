@@ -2,35 +2,22 @@
 import { useEffect, useState } from "react"
 import { Link, createFileRoute, useNavigate, useParams } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 import type { Asset, Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
+import { authFetch } from "@/lib/http"
 import {
   getPlace,
   getPlaceAssets,
   getWorkers,
   updatePlace,
-  getTicketsForPlace,
 } from "@/lib/api"
 import { S } from "@/lib/dom-style"
+import { apiError, errorMessage } from "@/lib/errors"
 import { buttonVariants, Button } from "@/components/ui/button"
 import { cn } from "cn"
-import {
-  ArrowRight,
-  Building2,
-  CalendarDays,
-  MapPin,
-  Plus,
-  Wallet,
-  Clock3,
-  Pencil,
-  Save,
-  X,
-  Trash2,
-  Users,
-  Wrench,
-  AlertTriangle,
-} from "lucide-react"
+import { Building2, CalendarDays, Coins, MapPin, Plus, Wallet, Clock3, Pencil, Save, X, Trash2, Users, Wrench } from "lucide-react"
 import {
   Card,
   CardAction,
@@ -40,19 +27,13 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { PlaceBookings } from "@/components/place-bookings"
+import { TicketsSection } from "@/components/tickets-section"
 import {
   AssetStatusBadge,
   StatusBadge,
   TypeLabel,
 } from "@/components/place-shared"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 
 export const Route = createFileRoute("/_authenticated/place/$place_id")({
   component: PlaceDetailPage,
@@ -81,13 +62,14 @@ function PlaceDetailPage() {
   })
 
   const { i18n } = useLingui()
-  const { accessToken } = useAuth()
+  const { accessToken, user } = useAuth()
+  // Editing, deleting and the assets and workers sections are for Managers.
+  const isManager = user?.role === "MANAGER"
   const navigate = useNavigate()
 
   const [place, setPlace] = useState<Place | null>(null)
   const [assets, setAssets] = useState<Asset[] | null>(null)
   const [workers, setWorkers] = useState<Worker[] | null>(null)
-  const [tickets, setTickets] = useState<Awaited<ReturnType<typeof getTicketsForPlace>> | null>(null)
   const [failed, setFailed] = useState(false)
   const [activeSection, setActiveSection] = useState<"assets" | "workers" | "tickets" | "bookings" | null>(null)
 
@@ -117,24 +99,21 @@ function PlaceDetailPage() {
       .then((list) => alive && setAssets(list))
       .catch(() => alive && setAssets([]))
 
-    getWorkers(accessToken)
-      .then((list) => alive && setWorkers(list))
-      .catch((error) => {
-        console.error("Failed to load workers:", error)
-        if (alive) setWorkers([])
-      })
+    // GET /workers is Manager-only; Workers do not see the workers section.
+    if (isManager) {
+      getWorkers(accessToken)
+        .then((list) => alive && setWorkers(list))
+        .catch((error) => {
+          console.error("Failed to load workers:", error)
+          if (alive) setWorkers([])
+        })
+    }
 
-  getTicketsForPlace(accessToken, place_id)
-  .then((list) => alive && setTickets(list))
-  .catch((error) => {
-    console.error("Failed to load maintenance tickets:", error)
-    if (alive) setTickets([])
-  })
 
     return () => {
       alive = false
     }
-  }, [accessToken, place_id])
+  }, [accessToken, place_id, isManager])
 
   const money = new Intl.NumberFormat(
     i18n.locale === "ar" ? "ar" : "en"
@@ -144,48 +123,6 @@ function PlaceDetailPage() {
     i18n.locale === "ar" ? "ar" : "en",
     { dateStyle: "medium" }
   )
-const ticketLabels: Record<string, string> = {
-  CORRECTIVE: "صيانة تصحيحية",
-  PREVENTIVE: "صيانة وقائية",
-
-  LOW: "منخفضة",
-  MEDIUM: "متوسطة",
-  HIGH: "عالية",
-  URGENT: "عاجلة",
-
-  PENDING: "معلقة",
-  SUBMITTED: "مرسلة",
-  UNDER_REVIEW: "قيد المراجعة",
-  APPROVED: "مقبولة",
-  REJECTED: "مرفوضة",
-  IN_PROGRESS: "قيد التنفيذ",
-  COMPLETED: "مكتملة",
-  CANCELLED: "ملغاة",
-}
-
-function getTicketLabel(value: string) {
-  return ticketLabels[value] ?? value
-}
-
-function formatTicketDate(value: string | null | undefined) {
-  if (!value) return "—"
-
-  return day.format(
-    new Date(value.length === 10 ? `${value}T00:00:00` : value)
-  )
-}
-
-function getAssetForTicket(assetId: string | null) {
-  if (!assetId || !assets) return null
-
-  return assets.find((asset) => asset.id === assetId) ?? null
-}
-function getWorkerName(userId: string | null | undefined) {
-  if (!userId || !workers) return "—"
-
-  return workers.find((worker) => worker.id === userId)?.fullname ?? "—"
-}
-
 
   function openEditForm() {
     if (!place) return
@@ -196,11 +133,9 @@ function getWorkerName(userId: string | null | undefined) {
       city: place.city,
       address: place.address,
       description: place.description,
-      monthly_maintenance_budget: place.monthly_maintenance_budget,
+      monthly_maintenance_budget: place.monthly_maintenance_budget ?? null,
       latitude: place.latitude,
       longitude: place.longitude,
-      currency: place.currency,
-      timezone: place.timezone,
       status: place.status,
     })
 
@@ -227,9 +162,7 @@ function getWorkerName(userId: string | null | undefined) {
       setEditing(false)
     } catch (error) {
       setUpdateError(
-        error instanceof Error
-          ? error.message
-          : "Failed to update property"
+        errorMessage(error)
       )
     } finally {
       setSaving(false)
@@ -240,7 +173,7 @@ function getWorkerName(userId: string | null | undefined) {
     if (!accessToken || !place || deleting) return
 
     const confirmed = window.confirm(
-      `هل أنت متأكد من حذف الملكية "${place.place_name}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+      t`Delete the place "${place.place_name}"? This cannot be undone.`,
     )
     if (!confirmed) return
 
@@ -248,29 +181,29 @@ function getWorkerName(userId: string | null | undefined) {
       setDeleting(true)
       setDeleteError("")
 
-      const response = await fetch(`/api/v1/places/${place_id}`, {
+      const response = await authFetch(`/places/${place_id}`, accessToken, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${accessToken}` },
       })
       const result = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(result?.message ?? `Delete failed (${response.status})`)
+        throw apiError(response.status, result)
       }
 
       await navigate({ to: "/places" })
     } catch (error) {
       console.error("Delete place error:", error)
       setDeleteError(
-        error instanceof Error ? error.message : "Failed to delete property",
+        errorMessage(error),
       )
     } finally {
       setDeleting(false)
     }
   }
 
-  async function handleAddWorker(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
+  // Used by the add-worker form and by the header button.
+  async function handleAddWorker(e?: React.SyntheticEvent) {
+    e?.preventDefault()
     if (!accessToken || !selectedWorkerId || addingWorker) return
 
     try {
@@ -278,28 +211,24 @@ function getWorkerName(userId: string | null | undefined) {
       setWorkerError("")
       setWorkerSuccess("")
 
-      const response = await fetch(`/api/v1/places/${place_id}/workers`, {
+      const response = await authFetch(`/places/${place_id}/workers`, accessToken, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({ worker_id: selectedWorkerId }),
       })
       const result = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(result?.message ?? `Assign failed (${response.status})`)
+        throw apiError(response.status, result)
       }
 
       const refreshedWorkers = await getWorkers(accessToken)
       setWorkers(refreshedWorkers)
       setSelectedWorkerId("")
-      setWorkerSuccess("تمت إضافة العامل إلى الملكية بنجاح.")
+      setWorkerSuccess(t`The worker was added to the place.`)
     } catch (error) {
       console.error("Assign worker error:", error)
       setWorkerError(
-        error instanceof Error ? error.message : "Failed to assign worker",
+        errorMessage(error),
       )
     } finally {
       setAddingWorker(false)
@@ -309,7 +238,6 @@ function getWorkerName(userId: string | null | undefined) {
   return (
     <center>
     <div
-      dir="rtl"
       style={S(
         "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 80%"
       )}
@@ -332,12 +260,12 @@ function getWorkerName(userId: string | null | undefined) {
             <Breadcrumb>
   <BreadcrumbList>
     <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/" />}>الرئيسية</BreadcrumbLink>
+      <BreadcrumbLink render={<a href="/" />}><Trans>Home</Trans></BreadcrumbLink>
     </BreadcrumbItem>
     <BreadcrumbSeparator />
     <BreadcrumbItem>
       <BreadcrumbLink render={<a href="/places" />}>
-        العقارات
+        <Trans>Places</Trans>
       </BreadcrumbLink>
     </BreadcrumbItem>
   </BreadcrumbList>
@@ -364,7 +292,7 @@ function getWorkerName(userId: string | null | undefined) {
             "display: flex; align-items: center; gap: 8px; flex-wrap: wrap"
           )}
         >
-          {place && (
+          {place && isManager && (
             <button
               type="button"
               id="update"
@@ -375,11 +303,11 @@ function getWorkerName(userId: string | null | undefined) {
               )}
             >
               <Pencil size={16} />
-              <Trans>تحديث الملكية</Trans>
+              <Trans>Update place</Trans>
             </button>
           )}
 
-          {place && (
+          {place && isManager && (
             <button
               type="button"
               onClick={handleDelete}
@@ -391,7 +319,7 @@ function getWorkerName(userId: string | null | undefined) {
               )}
             >
               <Trash2 size={16} />
-              {deleting ? "جارٍ الحذف..." : "حذف الملكية"}
+              {deleting ? t`Deleting…` : t`Delete place`}
             </button>
           )}
 
@@ -456,7 +384,7 @@ function getWorkerName(userId: string | null | undefined) {
                   )}
                 >
                   <EditField
-                    label="اسم الملك"
+                    label={t`Place name`}
                     value={editForm.place_name}
                     onChange={(value) =>
                       setEditForm({ ...editForm, place_name: value })
@@ -464,7 +392,7 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="نوع الملك"
+                    label={t`Place type`}
                     value={editForm.place_type}
                     onChange={(value) =>
                       setEditForm({ ...editForm, place_type: value })
@@ -472,7 +400,7 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="المدينة"
+                    label={t`City`}
                     value={editForm.city}
                     onChange={(value) =>
                       setEditForm({ ...editForm, city: value })
@@ -480,7 +408,7 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="العنوان"
+                    label={t`Address`}
                     value={editForm.address ?? ""}
                     onChange={(value) =>
                       setEditForm({
@@ -491,7 +419,7 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="الوصف"
+                    label={t`Description`}
                     value={editForm.description ?? ""}
                     onChange={(value) =>
                       setEditForm({
@@ -502,9 +430,9 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="الميزانية الشهرية"
+                    label={t`Monthly budget`}
                     type="number"
-                    value={String(editForm.monthly_maintenance_budget)}
+                    value={editForm.monthly_maintenance_budget?.toString() ?? ""}
                     onChange={(value) =>
                       setEditForm({
                         ...editForm,
@@ -514,7 +442,7 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="خط العرض"
+                    label={t`Latitude`}
                     type="number"
                     value={editForm.latitude?.toString() ?? ""}
                     onChange={(value) =>
@@ -526,7 +454,7 @@ function getWorkerName(userId: string | null | undefined) {
                   />
 
                   <EditField
-                    label="حط الطول"  
+                    label={t`Longitude`}
                     type="number"
                     value={editForm.longitude?.toString() ?? ""}
                     onChange={(value) =>
@@ -537,28 +465,26 @@ function getWorkerName(userId: string | null | undefined) {
                     }
                   />
 
-                  <EditField
-                    label="العملة"
-                    value={editForm.currency}
-                    onChange={(value) =>
-                      setEditForm({ ...editForm, currency: value })
-                    }
-                  />
-
-                  <EditField
-                    label="التوقيت"
-                    value={editForm.timezone}
-                    onChange={(value) =>
-                      setEditForm({ ...editForm, timezone: value })
-                    }
-                  />
+                  {/* The API cannot change these after creation, so they are shown, not edited. */}
+                  <p
+                    data-testid="place-fixed-settings"
+                    style={S(
+                      "grid-column: 1 / -1; margin: 0; font-size: 13px; color: var(--muted-foreground)"
+                    )}
+                  >
+                    <Trans>Currency:</Trans> <bdi dir="ltr">{place?.currency}</bdi>
+                    {" · "}
+                    <Trans>Time zone:</Trans> <bdi dir="ltr">{place?.timezone}</bdi>
+                    {" — "}
+                    <Trans>Currency and time zone are set when the place is created and cannot be changed.</Trans>
+                  </p>
 
                   <label
                     style={S(
                       "display: flex; flex-direction: column; gap: 7px; font-size: 13px; font-weight: 600"
                     )}
                   >
-                    <Trans>الحالة</Trans>
+                    <Trans>Status</Trans>
 
                     <select
                       value={String(editForm.status)}
@@ -639,7 +565,7 @@ function getWorkerName(userId: string | null | undefined) {
               <CardTitle
                 style={S("font-size: 17px; font-weight: 750")}
               >
-                <Trans>معلومات الملكية</Trans>
+                <Trans>Place information</Trans>
               </CardTitle>
             </CardHeader>
 
@@ -658,6 +584,7 @@ function getWorkerName(userId: string | null | undefined) {
                   ))}
                 </div>
               ) : (
+                <>
                 <div
                   style={S(
                     "display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px"
@@ -684,13 +611,23 @@ function getWorkerName(userId: string | null | undefined) {
                   <InfoItem
                     label={<Trans>Monthly budget</Trans>}
                     icon={<Wallet size={16} />}
-                    value={`${money.format(place.monthly_maintenance_budget)} ${place.currency}`}
+                    value={
+                      place.monthly_maintenance_budget == null
+                        ? "—"
+                        : `${money.format(place.monthly_maintenance_budget)} ${place.currency}`
+                    }
+                  />
+
+                  <InfoItem
+                    label={<Trans>Currency</Trans>}
+                    icon={<Coins size={16} />}
+                    value={<bdi dir="ltr">{place.currency}</bdi>}
                   />
 
                   <InfoItem
                     label={<Trans>Timezone</Trans>}
                     icon={<Clock3 size={16} />}
-                    value={place.timezone}
+                    value={<bdi dir="ltr">{place.timezone}</bdi>}
                   />
 
                   <InfoItem
@@ -699,11 +636,20 @@ function getWorkerName(userId: string | null | undefined) {
                     value={<StatusBadge status={String(place.status)} />}
                   />
                 </div>
+                <p
+                  style={S(
+                    "margin: 12px 0 0; font-size: 13px; color: var(--muted-foreground)"
+                  )}
+                >
+                  <Trans>Currency and time zone are set when the place is created and cannot be changed.</Trans>
+                </p>
+                </>
               )}
             </CardContent>
           </Card>
 
           <div style={S("display: flex; gap: 10px; flex-wrap: wrap; align-items: center")}>
+            {isManager && (
             <Button
               type="button"
               id="assets"
@@ -714,8 +660,10 @@ function getWorkerName(userId: string | null | undefined) {
               style={S("height: 40px; padding: 0 16px; gap: 8px")}
             >
               <Building2 size={16} />
-              الأصول
+              <Trans>Assets</Trans>
             </Button>
+            )}
+            {isManager && (
             <Button
               type="button"
               variant={activeSection === "workers" ? "default" : "outline"}
@@ -726,8 +674,9 @@ function getWorkerName(userId: string | null | undefined) {
               style={S("height: 40px; padding: 0 16px; gap: 8px")}
             >
               <Users size={16} />
-              العمال
+              <Trans>Workers</Trans>
             </Button>
+            )}
             <Button
               type="button"
               variant={activeSection === "tickets" ? "default" : "outline"}
@@ -737,7 +686,7 @@ function getWorkerName(userId: string | null | undefined) {
               style={S("height: 40px; padding: 0 16px; gap: 8px")}
             >
               <Wrench size={16} />
-              تذاكر الصيانة
+              <Trans>Maintenance tickets</Trans>
             </Button>
             <Button
               type="button"
@@ -918,7 +867,7 @@ function getWorkerName(userId: string | null | undefined) {
 >
   <CardTitle style={S("font-size: 17px; font-weight: 750")}>
     <Users size={17} style={S("display: inline; vertical-align: middle; margin-inline-end: 7px")} />
-    العمال
+    <Trans>Workers</Trans>
     {workers !== null && (
       <span style={S("margin-inline-start: 8px; font-size: 12px; font-weight: 600; color: var(--muted-foreground); border: 1px solid var(--border); padding: 2px 8px")}>
         {workers.filter((worker) => isWorkerAssignedToPlace(worker, place_id)).length}
@@ -935,7 +884,7 @@ function getWorkerName(userId: string | null | undefined) {
     onClick={handleAddWorker}
   >
     <Plus size={16} />
-    إضافة عامل
+    <Trans>Add worker</Trans>
   </Button>
 </CardHeader>
 
@@ -954,7 +903,7 @@ function getWorkerName(userId: string | null | undefined) {
                       )}
                     >
                       <Users size={26} style={S("color: var(--muted-foreground)")} />
-                      <p style={S("font-size: 14px; font-weight: 650; margin: 0")}>لا يوجد عمال مسندون لهذه الملكية.</p>
+                      <p style={S("font-size: 14px; font-weight: 650; margin: 0")}><Trans>No workers are assigned to this place.</Trans></p>
                     </div>
                   ) : (
                     <div
@@ -988,14 +937,14 @@ function getWorkerName(userId: string | null | undefined) {
                   )}
 
                   <div style={S("border-top: 1px solid var(--border); padding-top: 18px")}>
-                    <h3 style={S("font-size: 14px; font-weight: 700; margin: 0 0 12px")}>إضافة عامل</h3>
+                    <h3 style={S("font-size: 14px; font-weight: 700; margin: 0 0 12px")}><Trans>Add worker</Trans></h3>
                     <form
   id="add-worker-form"
   onSubmit={handleAddWorker}
   style={S("display: flex; align-items: end; gap: 10px; flex-wrap: wrap")}
 >
                       <label style={S("display: flex; flex-direction: column; gap: 7px; flex: 1; min-width: 220px; font-size: 13px; font-weight: 600")}>
-                        <span>اختر العامل (الاسم و ID)</span>
+                        <span><Trans>Choose a worker (name and ID)</Trans></span>
                         <select
                           value={selectedWorkerId}
                           onChange={(e) => {
@@ -1007,7 +956,7 @@ function getWorkerName(userId: string | null | undefined) {
                           required
                           style={S("height: 40px; padding: 0 10px; border: 1px solid var(--border); background: var(--card); min-width: 0")}
                         >
-                          <option value="">اختر عاملًا</option>
+                          <option value=""><Trans>Choose a worker</Trans></option>
                           {workers
                             .filter((worker) => !isWorkerAssignedToPlace(worker, place_id))
                             .map((worker) => (
@@ -1025,7 +974,7 @@ function getWorkerName(userId: string | null | undefined) {
                       <p style={S("color: var(--primary); font-size: 13px; margin: 10px 0 0")}>{workerSuccess}</p>
                     )}
                     {workers.filter((worker) => !isWorkerAssignedToPlace(worker, place_id)).length === 0 && (
-                      <p style={S("color: var(--muted-foreground); font-size: 12px; margin: 10px 0 0")}>جميع العمال مسندون لهذه الملكية بالفعل.</p>
+                      <p style={S("color: var(--muted-foreground); font-size: 12px; margin: 10px 0 0")}><Trans>All your workers are already assigned to this place.</Trans></p>
                     )}
                   </div>
                 </>
@@ -1035,102 +984,20 @@ function getWorkerName(userId: string | null | undefined) {
 
           )}
 
-          {activeSection === "tickets" && (
-<Card
-  className="am-lift"
-  style={S("padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0")}
->
-  <CardHeader
-    style={S("padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px")}
-  >
-    <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-      تذاكر الصيانة
-      {tickets !== null && (
-        <span style={S("margin-inline-start: 8px; font-size: 12px; color: var(--muted-foreground)")}>
-          {tickets.length}
-        </span>
-      )}
-    </CardTitle>
-    <CardAction>
-                <Link
-                  to="/ticket/new"
-                  search={{ place_id }}
-                  className={cn(
-                    buttonVariants({ variant: "outline", size: "sm" }),
-                    "am-btn"
-                  )}
-                  style={S(
-                    "height: 38px; padding: 0 12px; gap: 6px; white-space: nowrap"
-                  )}
-                >
-                  <Plus size={16} />
-                  <Trans>أضافة تذكرة</Trans>
-                </Link>
-    </CardAction>
-  </CardHeader>
-
-  <CardContent style={S("padding: 20px")}>
-    {tickets === null ? (
-      <Skeleton style={S("height: 70px")} />
-    ) : tickets.length === 0 ? (
-      <p style={S("text-align: center; color: var(--muted-foreground); font-size: 14px")}>
-        لا توجد تذاكر صيانة لهذه الملكية.
-      </p>
-    ) : (
-      <div style={S("display: flex; flex-direction: column; gap: 10px")}>
-        {tickets.map((ticket) => {
-          const asset = assets?.find((a) => a.id === ticket.asset_id)
-
-          return (
-            <Link
-              key={ticket.id}
-              to="/ticket/$ticket_id"
-              params={{ ticket_id: ticket.id }}
-              className="am-lift"
-              style={S(
-                "display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px; border: 1px solid var(--border); background: var(--card); text-decoration: none; color: inherit"
-              )}
-            >
-              <div style={S("display: flex; flex-direction: column; gap: 6px; min-width: 0")}>
-                <strong style={S("font-size: 14px")}>
-                  {ticket.description || "تذكرة صيانة"}
-                </strong>
-
-                <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-                  {asset?.name ?? "الأصل غير محدد"}
-                  {" · "}
-                  {ticket.ticket_type === "CORRECTIVE"
-                    ? "صيانة تصحيحية"
-                    : "صيانة وقائية"}
-                </span>
-
-                <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-                  الأولوية: {ticket.priority}
-                </span>
-              </div>
-
-              <div style={S("display: flex; align-items: center; gap: 10px")}>
-                <StatusBadge status={String(ticket.status)} />
-                <ArrowRight size={17} />
-              </div>
-            </Link>
-          )
-        })}
-      </div>
-    )}
-  </CardContent>
-</Card>          )}
+          {activeSection === "tickets" && accessToken && (
+            <TicketsSection
+              token={accessToken}
+              placeId={place_id}
+              assets={assets}
+              title={<Trans>Maintenance tickets</Trans>}
+              emptyOpen={<Trans>This place has no open tickets.</Trans>}
+              emptyAll={<Trans>This place has no maintenance tickets.</Trans>}
+              showAddTicket
+            />
+          )}
 
         </>
       )}
-      {
-        ["assets", "worker", "update", "remove"].forEach((id) => {
-  const element = document.getElementById(id)
-  if (useAuth().user.role != "MANAGER") {
-    element.style.display = "none"
-  }
-})
-      }
     </div>
     </center>
   )

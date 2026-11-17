@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 import type { Expense, ExpenseCategory, Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
@@ -16,24 +17,9 @@ import {
   type ExpenseInput,
 } from "@/lib/api"
 import { S } from "@/lib/dom-style"
+import { errorMessage } from "@/lib/errors"
 
-import {
-  Wallet,
-  Building2,
-  CalendarDays,
-  Receipt,
-  Filter,
-  TrendingDown,
-  TrendingUp,
-  FileText,
-  AlertCircle,
-  Plus,
-  Pencil,
-  Trash2,
-  X,
-  Save,
-  BarChart3,
-} from "lucide-react"
+import { Wallet, Building2, CalendarDays, Receipt, TrendingDown, TrendingUp, FileText, AlertCircle, Plus, Pencil, Trash2, X, Save, BarChart3 } from "lucide-react"
 
 import {
   Card,
@@ -59,15 +45,6 @@ const CATEGORIES: ExpenseCategory[] = [
   "OTHER",
 ]
 
-const CATEGORY_LABELS: Record<ExpenseCategory, string> = {
-  MAINTENANCE: "الصيانة",
-  UTILITIES: "الفواتير",
-  TAXES: "الضرائب",
-  CLEANING: "النظافة",
-  SUPPLIES: "المستلزمات",
-  OTHER: "أخرى",
-}
-
 function localDate(date: Date) {
   const year = date.getFullYear()
   const month = String(date.getMonth() + 1).padStart(2, "0")
@@ -79,7 +56,6 @@ function FinancePage() {
   const { i18n } = useLingui()
   const { accessToken } = useAuth()
 
-  const isArabic = i18n.locale === "ar"
 
   const [places, setPlaces] = useState<Place[]>([])
   const [expenses, setExpenses] = useState<Expense[]>([])
@@ -125,17 +101,17 @@ function FinancePage() {
     receipt: null,
   })
 
-  const money = new Intl.NumberFormat(isArabic ? "ar" : "en", {
+  const money = new Intl.NumberFormat(i18n.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })
 
-  const dayFormatter = new Intl.DateTimeFormat(isArabic ? "ar" : "en", {
+  const dayFormatter = new Intl.DateTimeFormat(i18n.locale, {
     dateStyle: "medium",
   })
 
   const monthLabel = new Intl.DateTimeFormat(
-    isArabic ? "ar" : "en",
+    i18n.locale,
     {
       month: "long",
       year: "numeric",
@@ -143,19 +119,20 @@ function FinancePage() {
   ).format(today)
 
   function categoryLabel(value: ExpenseCategory) {
-    if (!isArabic) {
-      const labels: Record<ExpenseCategory, string> = {
-        MAINTENANCE: "Maintenance",
-        UTILITIES: "Utilities",
-        TAXES: "Taxes",
-        CLEANING: "Cleaning",
-        SUPPLIES: "Supplies",
-        OTHER: "Other",
-      }
-      return labels[value]
+    switch (value) {
+      case "MAINTENANCE":
+        return t`Maintenance`
+      case "UTILITIES":
+        return t`Utilities`
+      case "TAXES":
+        return t`Taxes`
+      case "CLEANING":
+        return t`Cleaning`
+      case "SUPPLIES":
+        return t`Supplies`
+      case "OTHER":
+        return t`Other`
     }
-
-    return CATEGORY_LABELS[value]
   }
 
   function getPlaceName(placeId: string) {
@@ -189,9 +166,7 @@ function FinancePage() {
         console.error(error)
         if (alive) {
           setPlacesError(
-            isArabic
-              ? "تعذر تحميل قائمة الملكيات."
-              : "Failed to load places.",
+            t`Failed to load places.`,
           )
         }
       })
@@ -239,9 +214,7 @@ function FinancePage() {
         if (alive) {
           setExpenses([])
           setExpensesError(
-            isArabic
-              ? "تعذر تحميل المصروفات. حاول مرة أخرى."
-              : "Failed to load expenses. Please try again.",
+            t`Failed to load expenses. Please try again.`,
           )
         }
       } finally {
@@ -279,9 +252,7 @@ function FinancePage() {
         if (alive) {
           setReport(null)
           setReportError(
-            isArabic
-              ? "تعذر تحميل التقرير المالي."
-              : "Failed to load financial report.",
+            t`Failed to load financial report.`,
           )
         }
       } finally {
@@ -390,9 +361,7 @@ function FinancePage() {
     } catch (error) {
       console.error(error)
       window.alert(
-        isArabic
-          ? "تعذر تحميل بيانات المصروف."
-          : "Failed to load expense details.",
+        t`Failed to load expense details.`,
       )
     } finally {
       setFormLoading(false)
@@ -433,9 +402,7 @@ function FinancePage() {
 
     if (!form.place_id || !Number.isFinite(amount) || amount <= 0) {
       setFormError(
-        isArabic
-          ? "اختر الملكية وأدخل مبلغًا صحيحًا."
-          : "Select a place and enter a valid amount.",
+        t`Select a place and enter a valid amount.`,
       )
       return
     }
@@ -464,11 +431,7 @@ function FinancePage() {
     } catch (error) {
       console.error(error)
       setFormError(
-        error instanceof Error
-          ? error.message
-          : isArabic
-            ? "تعذر حفظ المصروف."
-            : "Failed to save expense.",
+        errorMessage(error),
       )
     } finally {
       setFormLoading(false)
@@ -479,9 +442,7 @@ function FinancePage() {
     if (!accessToken) return
 
     const confirmed = window.confirm(
-      isArabic
-        ? "هل أنت متأكد من حذف هذا المصروف؟"
-        : "Are you sure you want to delete this expense?",
+      t`Are you sure you want to delete this expense?`,
     )
 
     if (!confirmed) return
@@ -492,11 +453,7 @@ function FinancePage() {
     } catch (error) {
       console.error(error)
       window.alert(
-        error instanceof Error
-          ? error.message
-          : isArabic
-            ? "تعذر حذف المصروف."
-            : "Failed to delete expense.",
+        errorMessage(error),
       )
     }
   }
@@ -512,7 +469,6 @@ function FinancePage() {
   return (
     <center>
     <div
-      dir="rtl"
       style={S(
         "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 1100px",
       )}
@@ -534,11 +490,11 @@ function FinancePage() {
           </div>
 
           <h1 style={S("font-size: 28px; font-weight: 800; margin: 0; line-height: 1.3")}>
-            <Trans>الإدارة المالية</Trans>
+            <Trans>Finance</Trans>
           </h1>
 
           <p style={S("font-size: 13px; color: var(--muted-foreground); margin: 0")}>
-            <Trans>متابعة المصروفات والميزانيات الخاصة بالملكيات.</Trans>
+            <Trans>Track expenses and budgets for your places.</Trans>
           </p>
         </div>
 
@@ -560,7 +516,7 @@ function FinancePage() {
               size={17}
               style={S("display: inline; vertical-align: middle; margin-inline-end: 7px")}
             />
-            <Trans>تصفية حسب الملكية</Trans>
+            <Trans>Filter by place</Trans>
           </CardTitle>
         </CardHeader>
 
@@ -573,13 +529,13 @@ function FinancePage() {
             </p>
           ) : (
             <label style={labelStyle}>
-              <span><Trans>اختر الملكية</Trans></span>
+              <span><Trans>Choose a place</Trans></span>
               <select
                 value={placeFilter}
                 onChange={(event) => setPlaceFilter(event.target.value)}
                 style={{ ...inputStyle, maxWidth: 420 }}
               >
-                <option value="ALL"><Trans>جميع الملكيات</Trans></option>
+                <option value="ALL"><Trans>All places</Trans></option>
                 {places.map((place) => (
                   <option key={place.id} value={place.id}>
                     {place.place_name}
@@ -601,7 +557,7 @@ function FinancePage() {
           <CardContent style={S("padding: 20px; display: flex; flex-direction: column; gap: 14px")}>
             <div style={S("display: flex; align-items: center; justify-content: space-between; gap: 10px")}>
               <span style={S("font-size: 13px; color: var(--muted-foreground); font-weight: 600")}>
-                <Trans>الميزانية الشهرية</Trans>
+                <Trans>Monthly budget</Trans>
               </span>
               <Wallet size={19} style={S("color: var(--primary)")} />
             </div>
@@ -611,7 +567,7 @@ function FinancePage() {
             ) : (
               Object.entries(budgetByCurrency).length > 0 ? (
                 Object.entries(budgetByCurrency).map(([currency, amount]) => (
-                  <div key={currency} style={S("font-size: 21px; font-weight: 800; direction: ltr; text-align: right")}>
+                  <div key={currency} style={S("font-size: 21px; font-weight: 800; direction: ltr; text-align: match-parent")}>
                     {formatMoney(amount)}{" "}
                     <span style={S("font-size: 12px; color: var(--muted-foreground)")}>{currency}</span>
                   </div>
@@ -622,7 +578,7 @@ function FinancePage() {
             )}
 
             <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-              <Trans>إجمالي الميزانية للملكيات المحددة</Trans>
+              <Trans>Total budget for the selected places</Trans>
             </span>
           </CardContent>
         </Card>
@@ -631,7 +587,7 @@ function FinancePage() {
           <CardContent style={S("padding: 20px; display: flex; flex-direction: column; gap: 14px")}>
             <div style={S("display: flex; align-items: center; justify-content: space-between; gap: 10px")}>
               <span style={S("font-size: 13px; color: var(--muted-foreground); font-weight: 600")}>
-                <Trans>إجمالي الإيرادات</Trans>
+                <Trans>Total income</Trans>
               </span>
               <TrendingUp size={19} style={S("color: var(--primary)")} />
             </div>
@@ -640,7 +596,7 @@ function FinancePage() {
               <Skeleton style={S("height: 30px; width: 150px")} />
             ) : selectedReportTotals.length ? (
               selectedReportTotals.map((item) => (
-                <div key={item.currency} style={S("font-size: 21px; font-weight: 800; direction: ltr; text-align: right")}>
+                <div key={item.currency} style={S("font-size: 21px; font-weight: 800; direction: ltr; text-align: match-parent")}>
                   {formatMoney(item.total_income)}{" "}
                   <span style={S("font-size: 12px; color: var(--muted-foreground)")}>{item.currency}</span>
                 </div>
@@ -650,7 +606,7 @@ function FinancePage() {
             )}
 
             <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-              <Trans>إيرادات الحجوزات خلال الفترة المحددة</Trans>
+              <Trans>Booking income in the selected period</Trans>
             </span>
           </CardContent>
         </Card>
@@ -659,7 +615,7 @@ function FinancePage() {
           <CardContent style={S("padding: 20px; display: flex; flex-direction: column; gap: 14px")}>
             <div style={S("display: flex; align-items: center; justify-content: space-between; gap: 10px")}>
               <span style={S("font-size: 13px; color: var(--muted-foreground); font-weight: 600")}>
-                <Trans>إجمالي المصروفات</Trans>
+                <Trans>Total expenses</Trans>
               </span>
               <TrendingDown size={19} style={S("color: var(--destructive)")} />
             </div>
@@ -668,7 +624,7 @@ function FinancePage() {
               <Skeleton style={S("height: 30px; width: 150px")} />
             ) : selectedReportTotals.length ? (
               selectedReportTotals.map((item) => (
-                <div key={item.currency} style={S("font-size: 21px; font-weight: 800; direction: ltr; text-align: right")}>
+                <div key={item.currency} style={S("font-size: 21px; font-weight: 800; direction: ltr; text-align: match-parent")}>
                   {formatMoney(item.total_expenses)}{" "}
                   <span style={S("font-size: 12px; color: var(--muted-foreground)")}>{item.currency}</span>
                 </div>
@@ -678,7 +634,7 @@ function FinancePage() {
             )}
 
             <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-              <Trans>المصروفات خلال الفترة المحددة</Trans>
+              <Trans>Expenses in the selected period</Trans>
             </span>
           </CardContent>
         </Card>
@@ -687,7 +643,7 @@ function FinancePage() {
           <CardContent style={S("padding: 20px; display: flex; flex-direction: column; gap: 14px")}>
             <div style={S("display: flex; align-items: center; justify-content: space-between; gap: 10px")}>
               <span style={S("font-size: 13px; color: var(--muted-foreground); font-weight: 600")}>
-                <Trans>صافي الربح</Trans>
+                <Trans>Net profit</Trans>
               </span>
               <BarChart3 size={19} style={S("color: var(--primary)")} />
             </div>
@@ -696,7 +652,7 @@ function FinancePage() {
               <Skeleton style={S("height: 30px; width: 150px")} />
             ) : selectedReportTotals.length ? (
               selectedReportTotals.map((item) => (
-                <div key={item.currency} style={S("font-size: 21px; font-weight: 800; direction: ltr; text-align: right")}>
+                <div key={item.currency} style={S("font-size: 21px; font-weight: 800; direction: ltr; text-align: match-parent")}>
                   {formatMoney(item.profit)}{" "}
                   <span style={S("font-size: 12px; color: var(--muted-foreground)")}>{item.currency}</span>
                 </div>
@@ -706,7 +662,7 @@ function FinancePage() {
             )}
 
             <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-              <Trans>الإيرادات ناقص المصروفات</Trans>
+              <Trans>Income minus expenses</Trans>
             </span>
           </CardContent>
         </Card>
@@ -717,17 +673,17 @@ function FinancePage() {
         <CardHeader style={S("padding: 18px 20px; border-bottom: 1px solid var(--border); gap: 5px")}>
           <CardTitle style={S("font-size: 17px; font-weight: 750")}>
             <BarChart3 size={17} style={S("display: inline; vertical-align: middle; margin-inline-end: 7px")} />
-            <Trans>التقرير المالي</Trans>
+            <Trans>Financial report</Trans>
           </CardTitle>
           <p style={S("font-size: 12px; color: var(--muted-foreground); margin: 0")}>
-            <Trans>حدد الفترة الزمنية لعرض الإيرادات والمصروفات والأرباح.</Trans>
+            <Trans>Choose a period to see income, expenses and profit.</Trans>
           </p>
         </CardHeader>
 
         <CardContent style={S("padding: 20px; display: flex; flex-direction: column; gap: 18px")}>
           <div style={S("display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px")}>
             <label style={labelStyle}>
-              <span><Trans>من تاريخ</Trans></span>
+              <span><Trans>From</Trans></span>
               <input
                 type="date"
                 value={from}
@@ -738,7 +694,7 @@ function FinancePage() {
             </label>
 
             <label style={labelStyle}>
-              <span><Trans>إلى تاريخ</Trans></span>
+              <span><Trans>To</Trans></span>
               <input
                 type="date"
                 value={to}
@@ -774,27 +730,27 @@ function FinancePage() {
                   <div style={S("display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px")}>
                     <div>
                       <div style={S("font-size: 11px; color: var(--muted-foreground)")}>
-                        <Trans>الإيرادات</Trans>
+                        <Trans>Income</Trans>
                       </div>
-                      <div style={S("font-size: 15px; font-weight: 750; direction: ltr; text-align: right")}>
+                      <div style={S("font-size: 15px; font-weight: 750; direction: ltr; text-align: match-parent")}>
                         {formatMoney(place.total_income)}
                       </div>
                     </div>
 
                     <div>
                       <div style={S("font-size: 11px; color: var(--muted-foreground)")}>
-                        <Trans>المصروفات</Trans>
+                        <Trans>Expenses</Trans>
                       </div>
-                      <div style={S("font-size: 15px; font-weight: 750; direction: ltr; text-align: right")}>
+                      <div style={S("font-size: 15px; font-weight: 750; direction: ltr; text-align: match-parent")}>
                         {formatMoney(place.total_expenses)}
                       </div>
                     </div>
 
                     <div>
                       <div style={S("font-size: 11px; color: var(--muted-foreground)")}>
-                        <Trans>صافي الربح</Trans>
+                        <Trans>Net profit</Trans>
                       </div>
-                      <div style={S("font-size: 15px; font-weight: 750; direction: ltr; text-align: right")}>
+                      <div style={S("font-size: 15px; font-weight: 750; direction: ltr; text-align: match-parent")}>
                         {formatMoney(place.profit)}
                       </div>
                     </div>
@@ -802,7 +758,7 @@ function FinancePage() {
 
                   <div style={S("border-top: 1px solid var(--border); padding-top: 10px")}>
                     <div style={S("font-size: 12px; font-weight: 700; margin-bottom: 9px")}>
-                      <Trans>المصروفات حسب التصنيف</Trans>
+                      <Trans>Expenses by category</Trans>
                     </div>
                     <div style={S("display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px")}>
                       {CATEGORIES.map((item) => (
@@ -821,7 +777,7 @@ function FinancePage() {
           ) : (
             !reportLoading && (
               <p style={S("font-size: 13px; color: var(--muted-foreground); text-align: center; padding: 20px")}>
-                <Trans>لا توجد بيانات مالية خلال الفترة المحددة.</Trans>
+                <Trans>No financial data in the selected period.</Trans>
               </p>
             )
           )}
@@ -838,13 +794,13 @@ function FinancePage() {
           <div style={S("display: flex; flex-direction: column; gap: 5px")}>
             <CardTitle style={S("font-size: 17px; font-weight: 750")}>
               <Receipt size={17} style={S("display: inline; vertical-align: middle; margin-inline-end: 7px")} />
-              <Trans>سجل المصروفات</Trans>
+              <Trans>Expense log</Trans>
               <span style={S("margin-inline-start: 8px; font-size: 12px; font-weight: 600; color: var(--muted-foreground); border: 1px solid var(--border); padding: 2px 8px")}>
                 {filteredExpenses.length}
               </span>
             </CardTitle>
             <p style={S("font-size: 12px; color: var(--muted-foreground); margin: 0")}>
-              <Trans>جميع المصروفات المسجلة للملكيات.</Trans>
+              <Trans>Every expense recorded for your places.</Trans>
             </p>
           </div>
 
@@ -856,7 +812,7 @@ function FinancePage() {
             style={S("height: 36px; padding: 0 13px; display: flex; align-items: center; gap: 7px; border: 1px solid var(--border); background: var(--card); color: var(--foreground); font-size: 12px; font-weight: 650; opacity: 1")}
           >
             <Plus size={15} />
-            <Trans>إضافة مصروف</Trans>
+            <Trans>Add expense</Trans>
           </button>
         </CardHeader>
 
@@ -867,7 +823,7 @@ function FinancePage() {
               const active = category === item
               const label =
                 item === "ALL"
-                  ? isArabic ? "الكل" : "All"
+                  ? t`All`
                   : categoryLabel(item)
 
               return (
@@ -901,7 +857,7 @@ function FinancePage() {
             <div style={S("display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 32px 16px; border: 1px dashed var(--border); text-align: center")}>
               <AlertCircle size={28} style={S("color: var(--destructive)")} />
               <p style={S("font-size: 14px; font-weight: 650; margin: 0")}>
-                <Trans>تعذر تحميل المصروفات</Trans>
+                <Trans>We could not load the expenses</Trans>
               </p>
               <p style={S("font-size: 13px; color: var(--muted-foreground); margin: 0")}>
                 {expensesError}
@@ -913,10 +869,10 @@ function FinancePage() {
             <div style={S("display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 36px 16px; border: 1px dashed var(--border); text-align: center")}>
               <FileText size={28} style={S("color: var(--muted-foreground)")} />
               <p style={S("font-size: 14px; font-weight: 650; margin: 0")}>
-                <Trans>لا توجد مصروفات</Trans>
+                <Trans>No expenses</Trans>
               </p>
               <p style={S("font-size: 13px; color: var(--muted-foreground); margin: 0")}>
-                <Trans>لا توجد مصروفات تطابق خيارات التصفية المحددة.</Trans>
+                <Trans>No expenses match the selected filters.</Trans>
               </p>
             </div>
           )}
@@ -941,7 +897,7 @@ function FinancePage() {
                     <Receipt size={17} style={S("color: var(--muted-foreground); flex-shrink: 0")} />
                   </div>
 
-                  <div style={S("font-size: 20px; font-weight: 800; direction: ltr; text-align: right")}>
+                  <div style={S("font-size: 20px; font-weight: 800; direction: ltr; text-align: match-parent")}>
                     {formatMoney(Number(expense.amount))}
                     <span style={S("font-size: 11px; font-weight: 600; color: var(--muted-foreground); margin-inline-start: 5px")}>
                       {getPlaceCurrency(expense.place_id)}
@@ -968,7 +924,7 @@ function FinancePage() {
                         style={S("height: 34px; display: flex; align-items: center; justify-content: center; gap: 7px; border: 1px solid var(--border); color: var(--foreground); font-size: 12px; text-decoration: none")}
                       >
                         <FileText size={14} />
-                        <Trans>عرض الإيصال</Trans>
+                        <Trans>View receipt</Trans>
                       </a>
                     )}
 
@@ -981,7 +937,7 @@ function FinancePage() {
                         style={S("height: 34px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--border); background: var(--card); color: var(--foreground); font-size: 12px")}
                       >
                         <Pencil size={13} />
-                        <Trans>تعديل</Trans>
+                        <Trans>Edit</Trans>
                       </button>
 
                       <button
@@ -991,7 +947,7 @@ function FinancePage() {
                         style={S("height: 34px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--border); background: var(--card); color: var(--destructive); font-size: 12px")}
                       >
                         <Trash2 size={13} />
-                        <Trans>حذف</Trans>
+                        <Trans>Delete</Trans>
                       </button>
                     </div>
                   </div>
@@ -1018,8 +974,8 @@ function FinancePage() {
             <div style={S("display: flex; align-items: center; justify-content: space-between; gap: 12px")}>
               <h2 style={S("font-size: 18px; font-weight: 800; margin: 0")}>
                 {editingId
-                  ? isArabic ? "تعديل المصروف" : "Edit expense"
-                  : isArabic ? "إضافة مصروف" : "Add expense"}
+                  ? t`Edit expense`
+                  : t`Add expense`}
               </h2>
 
               <button
@@ -1035,7 +991,7 @@ function FinancePage() {
 
             <form onSubmit={handleSaveExpense} style={S("display: flex; flex-direction: column; gap: 14px")}>
               <label style={labelStyle}>
-                <span><Trans>الملكية</Trans></span>
+                <span><Trans>Place</Trans></span>
                 <select
                   value={form.place_id}
                   onChange={(event) => setForm({ ...form, place_id: event.target.value })}
@@ -1043,7 +999,7 @@ function FinancePage() {
                   disabled={!!editingId}
                   style={inputStyle}
                 >
-                  <option value=""><Trans>اختر الملكية</Trans></option>
+                  <option value=""><Trans>Choose a place</Trans></option>
                   {places.map((place) => (
                     <option key={place.id} value={place.id}>{place.place_name}</option>
                   ))}
@@ -1052,7 +1008,7 @@ function FinancePage() {
 
               <div style={S("display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px")}>
                 <label style={labelStyle}>
-                  <span><Trans>التصنيف</Trans></span>
+                  <span><Trans>Category</Trans></span>
                   <select
                     value={form.category}
                     onChange={(event) => setForm({ ...form, category: event.target.value as ExpenseCategory })}
@@ -1065,7 +1021,7 @@ function FinancePage() {
                 </label>
 
                 <label style={labelStyle}>
-                  <span><Trans>المبلغ</Trans></span>
+                  <span><Trans>Amount</Trans></span>
                   <input
                     type="number"
                     min="0.01"
@@ -1080,7 +1036,7 @@ function FinancePage() {
               </div>
 
               <label style={labelStyle}>
-                <span><Trans>تاريخ المصروف</Trans></span>
+                <span><Trans>Expense date</Trans></span>
                 <input
                   type="date"
                   required
@@ -1091,18 +1047,18 @@ function FinancePage() {
               </label>
 
               <label style={labelStyle}>
-                <span><Trans>الوصف</Trans></span>
+                <span><Trans>Description</Trans></span>
                 <textarea
                   value={form.description}
                   onChange={(event) => setForm({ ...form, description: event.target.value })}
                   rows={3}
-                  placeholder={isArabic ? "وصف المصروف (اختياري)" : "Expense description (optional)"}
+                  placeholder={t`Expense description (optional)`}
                   style={S("width: 100%; min-width: 0; padding: 10px 11px; border: 1px solid var(--border); background: var(--card); color: var(--foreground); font-size: 13px; resize: vertical")}
                 />
               </label>
 
               <label style={labelStyle}>
-                <span><Trans>رقم تذكرة الصيانة (اختياري)</Trans></span>
+                <span><Trans>Maintenance ticket ID (optional)</Trans></span>
                 <input
                   value={form.ticket_id}
                   onChange={(event) => setForm({ ...form, ticket_id: event.target.value })}
@@ -1112,7 +1068,7 @@ function FinancePage() {
               </label>
 
               <label style={labelStyle}>
-                <span><Trans>إرفاق الإيصال (اختياري)</Trans></span>
+                <span><Trans>Attach a receipt (optional)</Trans></span>
                 <input
                   type="file"
                   accept="image/*,.pdf"
@@ -1121,7 +1077,7 @@ function FinancePage() {
                 />
                 {editingId && (
                   <span style={S("font-size: 11px; color: var(--muted-foreground)")}>
-                    <Trans>اترك الحقل فارغًا للاحتفاظ بالإيصال الحالي.</Trans>
+                    <Trans>Leave it empty to keep the current receipt.</Trans>
                   </span>
                 )}
               </label>
@@ -1140,7 +1096,7 @@ function FinancePage() {
                   className="am-btn"
                   style={S("height: 38px; padding: 0 14px; border: 1px solid var(--border); background: var(--card); color: var(--foreground); font-size: 12px")}
                 >
-                  <Trans>إلغاء</Trans>
+                  <Trans>Cancel</Trans>
                 </button>
 
                 <button
@@ -1151,8 +1107,8 @@ function FinancePage() {
                 >
                   <Save size={14} />
                   {formLoading
-                    ? isArabic ? "جارٍ الحفظ..." : "Saving..."
-                    : isArabic ? "حفظ" : "Save"}
+                    ? t`Saving...`
+                    : t`Save`}
                 </button>
               </div>
             </form>

@@ -1,4 +1,5 @@
 
+import { errorMessage, readApiError } from "@/lib/errors"
 import { useState, type FormEvent } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
@@ -59,16 +60,7 @@ function ForgotPasswordPage() {
         return
       }
 
-      let message = "Something went wrong. Please try again."
-
-      try {
-        const data = await response.json()
-        message = data.message || message
-      } catch {
-        // The response may not contain JSON.
-      }
-
-      setError(message)
+      setError(errorMessage(await readApiError(response)))
     } catch {
       setError("Unable to connect to the server. Please try again.")
     } finally {
@@ -193,7 +185,7 @@ function ForgotPasswordPage() {
                 href="/signin"
                 className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
                 <Trans>Back to Login</Trans>
               </a>
             </div>

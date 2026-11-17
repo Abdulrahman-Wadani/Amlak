@@ -6,10 +6,11 @@ import {
   useNavigate,
 } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
-import type { WorkerResponse } from "@amlak/shared"
+import type { Worker } from "@amlak/shared"
 import {
-  ArrowRight,
+  ArrowLeft,
   Check,
   CircleAlert,
   Mail,
@@ -21,10 +22,12 @@ import {
 } from "lucide-react"
 
 import { useAuth } from "@/lib/auth"
+import { authFetch } from "@/lib/http"
 import { getWorkerById } from "@/lib/api"
 import { S } from "@/lib/dom-style"
 import { buttonVariants, Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { apiError, errorMessage } from "@/lib/errors"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -34,14 +37,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 
 import { StatusBadge } from "@/components/place-shared"
 import "@/styles/motion.css"
@@ -58,7 +54,7 @@ function WorkerDetailPage() {
   const { i18n } = useLingui()
   const { accessToken } = useAuth()
 
-  const [worker, setWorker] = useState<WorkerResponse | null>(null)
+  const [worker, setWorker] = useState<Worker | null>(null)
   const [failed, setFailed] = useState(false)
 
   const [saving, setSaving] = useState(false)
@@ -115,21 +111,15 @@ function WorkerDetailPage() {
     }
 
     try {
-      const response = await fetch(`/api/v1/workers/${worker.id}`, {
+      const response = await authFetch(`/workers/${worker.id}`, accessToken, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
         body: JSON.stringify(payload),
       })
 
       const result = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(
-          result?.message ?? `Update failed (${response.status})`,
-        )
+        throw apiError(response.status, result)
       }
 
       setWorker((previous) =>
@@ -137,8 +127,8 @@ function WorkerDetailPage() {
           ? {
               ...previous,
               fullname,
-              phone: phone || null,
-              status: status as WorkerResponse["status"],
+              phone,
+              status: status as Worker["status"],
             }
           : previous,
       )
@@ -147,9 +137,7 @@ function WorkerDetailPage() {
     } catch (error) {
       console.error("Update worker error:", error)
       setSaveError(
-        error instanceof Error
-          ? error.message
-          : "Failed to update worker",
+        errorMessage(error),
       )
     } finally {
       setSaving(false)
@@ -161,7 +149,7 @@ function WorkerDetailPage() {
     if (!accessToken || !worker || deleting) return
 
     const confirmed = window.confirm(
-      `هل أنت متأكد من حذف العامل "${worker.fullname}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+      t`Delete the worker "${worker.fullname}"? This cannot be undone.`,
     )
 
     if (!confirmed) return
@@ -171,28 +159,21 @@ function WorkerDetailPage() {
     setSaveError("")
 
     try {
-      const response = await fetch(`/api/v1/workers/${worker.id}`, {
+      const response = await authFetch(`/workers/${worker.id}`, accessToken, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
       })
 
       const result = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(
-          result?.message ?? `Delete failed (${response.status})`,
-        )
+        throw apiError(response.status, result)
       }
 
       await navigate({ to: "/workers" })
     } catch (error) {
       console.error("Delete worker error:", error)
       setDeleteError(
-        error instanceof Error
-          ? error.message
-          : "Failed to delete worker",
+        errorMessage(error),
       )
     } finally {
       setDeleting(false)
@@ -204,7 +185,6 @@ function WorkerDetailPage() {
 
   return (
     <div
-      dir="rtl"
       style={S(`
         width: 100%;
         max-width: 1000px;
@@ -244,12 +224,12 @@ function WorkerDetailPage() {
 <Breadcrumb>
   <BreadcrumbList>
     <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/" />}>الرئيسية</BreadcrumbLink>
+      <BreadcrumbLink render={<a href="/" />}><Trans>Home</Trans></BreadcrumbLink>
     </BreadcrumbItem>
     <BreadcrumbSeparator />
     <BreadcrumbItem>
       <BreadcrumbLink render={<a href="/workers" />}>
-        العمال
+        <Trans>Workers</Trans>
       </BreadcrumbLink>
     </BreadcrumbItem>
   </BreadcrumbList>
@@ -284,7 +264,7 @@ function WorkerDetailPage() {
             gap: 8px;
           `)}
         >
-          <ArrowRight size={16} />
+          <ArrowLeft size={16} className="rtl:rotate-180" />
           <Trans>Workers</Trans>
         </Link>
       </div>
@@ -354,7 +334,7 @@ function WorkerDetailPage() {
               <div
                 dir="ltr"
                 style={S(`
-                  text-align: right;
+                  text-align: match-parent;
                   margin-top: 5px;
                   font-size: 13px;
                   color: var(--muted-foreground);
@@ -395,7 +375,7 @@ function WorkerDetailPage() {
                 `)}
               >
                 <UserRound size={18} />
-                معلومات العامل
+                <Trans>Worker information</Trans>
               </CardTitle>
             </CardHeader>
 
@@ -414,7 +394,7 @@ function WorkerDetailPage() {
                     gap: 18px;
                   `)}
                 >
-                  <FormField label="الاسم الكامل" htmlFor="fullname">
+                  <FormField label={t`Full name`} htmlFor="fullname">
                     <Input
                       id="fullname"
                       value={fullname}
@@ -423,7 +403,7 @@ function WorkerDetailPage() {
                     />
                   </FormField>
 
-                  <FormField label="البريد الإلكتروني" htmlFor="email">
+                  <FormField label={t`Email`} htmlFor="email">
                     <div style={S("position: relative")}>
                       <Mail
                         size={16}
@@ -442,14 +422,14 @@ function WorkerDetailPage() {
                         className="am-input"
                         style={S(`
                           padding-inline-start: 36px;
-                          text-align: right;
+                          text-align: match-parent;
                           opacity: 0.75;
                         `)}
                       />
                     </div>
                   </FormField>
 
-                  <FormField label="رقم الجوال" htmlFor="phone">
+                  <FormField label={t`Phone number`} htmlFor="phone">
                     <div style={S("position: relative")}>
                       <Phone
                         size={16}
@@ -468,13 +448,13 @@ function WorkerDetailPage() {
                         className="am-input"
                         style={S(`
                           padding-inline-start: 36px;
-                          text-align: right;
+                          text-align: match-parent;
                         `)}
                       />
                     </div>
                   </FormField>
 
-                  <FormField label="حالة العامل" htmlFor="status">
+                  <FormField label={t`Worker status`} htmlFor="status">
                     <select
                       id="status"
                       value={status}
@@ -491,27 +471,27 @@ function WorkerDetailPage() {
                             {status}
                           </option>
                         )}
-                      <option value="ACTIVE">نشط</option>
-                      <option value="DEACTIVATED">غير نشط</option>
+                      <option value="ACTIVE"><Trans>Active</Trans></option>
+                      <option value="DEACTIVATED"><Trans>Deactivated</Trans></option>
                     </select>
                   </FormField>
 
                   <InfoField
-                    label="اللغة المفضلة"
+                    label={t`Preferred language`}
                     value={worker.preferred_language}
                   />
 
                   <InfoField
-                    label="تأكيد البريد الإلكتروني"
+                    label={t`Email confirmed`}
                     value={
                       worker.email_verified_at
                         ? formattedDate(worker.email_verified_at)
-                        : "غير مؤكد"
+                        : t`Not confirmed`
                     }
                   />
 
                   <InfoField
-                    label="تاريخ الانضمام"
+                    label={t`Joined`}
                     value={formattedDate(worker.created_at)}
                   />
                 </div>
@@ -547,7 +527,7 @@ function WorkerDetailPage() {
                 `)}
               >
                 <MapPin size={18} />
-                الأماكن المسندة
+                <Trans>Assigned places</Trans>
 
                 {worker && (
                   <span
@@ -584,7 +564,7 @@ function WorkerDetailPage() {
                 >
                   {worker.assigned_places.map((place) => (
                     <div
-                      key={place.id}
+                      key={place.place_id}
                       style={S(`
                         display: flex;
                         align-items: center;
@@ -641,7 +621,7 @@ function WorkerDetailPage() {
                 >
                   <MapPin size={24} />
                   <p style={S("margin: 0; font-size: 13px")}>
-                    لا توجد أماكن مسندة لهذا العامل.
+                    <Trans>This worker has no assigned places.</Trans>
                   </p>
                 </div>
               )}
@@ -707,7 +687,7 @@ function WorkerDetailPage() {
                 `)}
               >
                 <Check size={16} />
-                تم تحديث بيانات العامل بنجاح.
+                <Trans>The worker was updated.</Trans>
               </p>
             )}
 
@@ -731,7 +711,7 @@ function WorkerDetailPage() {
                 `)}
               >
                 <Save size={16} />
-                {saving ? "جارٍ الحفظ..." : "حفظ التغييرات"}
+                {saving ? t`Saving…` : t`Save changes`}
               </Button>
 
               <Button
@@ -745,7 +725,7 @@ function WorkerDetailPage() {
                 `)}
               >
                 <Trash2 size={16} />
-                {deleting ? "جارٍ الحذف..." : "حذف العامل"}
+                {deleting ? t`Deleting…` : t`Delete worker`}
               </Button>
             </div>
           </div>

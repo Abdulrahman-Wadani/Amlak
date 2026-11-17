@@ -2,8 +2,10 @@
 import { useEffect, useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
+import { useLingui } from "@lingui/react"
 import {
-  ArrowRight,
+  ArrowLeft,
   CalendarDays,
   CircleAlert,
   Mail,
@@ -24,6 +26,7 @@ import {
 } from "@/lib/api"
 
 import { S } from "@/lib/dom-style"
+import { errorMessage } from "@/lib/errors"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { StatusBadge } from "@/components/place-shared"
@@ -57,7 +60,10 @@ export const Route = createFileRoute(
 
 function SupportTicketDetailPage() {
   const { support_id } = Route.useParams()
-  const { accessToken } = useAuth()
+  const { accessToken, user: me } = useAuth()
+  const { i18n } = useLingui()
+  // Only an Admin may read other users (GET /users/{id}) and resolve tickets.
+  const isAdmin = me?.role === "ADMIN"
   const [ticket, setTicket] = useState<SupportTicket | null>(null)
   const [user, setUser] = useState<TicketUser | null>(null)
   const [loading, setLoading] = useState(true)
@@ -72,6 +78,9 @@ const [resolveError, setResolveError] = useState<string | null>(null);
 
     let alive = true
 
+    // Captured here: inside the async function TypeScript forgets the check above.
+    const token = accessToken
+
     async function loadTicket() {
       setLoading(true)
       setError("")
@@ -79,29 +88,25 @@ const [resolveError, setResolveError] = useState<string | null>(null);
       setUser(null)
 
       try {
-        const ticketData = await getSupportTicketById(
-          accessToken,
-          support_id,
-        )
+        const ticketData = await getSupportTicketById(token, support_id)
 
         if (!alive) return
 
         setTicket(ticketData)
 
-        try {
-          const userData = await getUserById(
-            accessToken,
-            ticketData.user_id,
-          )
+        if (isAdmin) {
+          try {
+            const userData = await getUserById(token, ticketData.user_id)
 
-          if (alive && userData) {
-            setUser(userData)
+            if (alive && userData) {
+              setUser(userData)
+            }
+          } catch {
           }
-        } catch {
         }
       } catch {
         if (alive) {
-          setError("تعذر تحميل بيانات التذكرة. حاول مرة أخرى.")
+          setError(t`We could not load the ticket. Try again.`)
         }
       } finally {
         if (alive) setLoading(false)
@@ -113,7 +118,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
     return () => {
       alive = false
     }
-  }, [accessToken, support_id])
+  }, [accessToken, support_id, isAdmin])
 
   const formatDate = (date: string | null) => {
     if (!date) return "—"
@@ -122,13 +127,13 @@ const [resolveError, setResolveError] = useState<string | null>(null);
 
     if (Number.isNaN(parsedDate.getTime())) return "—"
 
-    return new Intl.DateTimeFormat("ar-SA", {
+    return new Intl.DateTimeFormat(i18n.locale, {
       dateStyle: "medium",
       timeStyle: "short",
     }).format(parsedDate)
   }
 
-  // نفس تنسيقات حقول الإدخال المستخدمة في صفحة الصيانة
+  // Same field styles as the maintenance page
   const fieldStyle = S(
     "width:100%; min-height:40px; padding:9px 12px; border:1px solid var(--border); background:var(--background); color:var(--foreground)",
   )
@@ -162,7 +167,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
       adminResponse.trim()
     )
 
-    // جلب بيانات التذكرة بعد تحديثها من السيرفر
+    // Load the ticket again after the update
     const updatedTicket = await getSupportTicketById(
       accessToken,
       support_id
@@ -173,7 +178,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
     setAdminResponse("")
   } catch (err) {
     setResolveError(
-      err instanceof Error ? err.message : "تعذر حل التذكرة"
+      errorMessage(err)
     )
   } finally {
     setResolving(false)
@@ -196,13 +201,13 @@ const [resolveError, setResolveError] = useState<string | null>(null);
         >
           <CircleAlert size={36} color="var(--destructive)" />
           <p style={S(`color:var(--destructive); font-size:14px;`)}>
-            {error || "التذكرة غير موجودة"}
+            {error || t`Ticket not found`}
           </p>
           <Link
-            to="/_authenticated/support"
+            to="/support"
             style={S(`color:var(--primary); font-size:14px; text-decoration:underline;`)}
           >
-            العودة إلى تذاكر الدعم
+            <Trans>Back to support tickets</Trans>
           </Link>
         </div>
       </PageContainer>
@@ -233,23 +238,23 @@ const [resolveError, setResolveError] = useState<string | null>(null);
             color:var(--muted-foreground);
           `)}
         >
-          <Link to="/_authenticated/support" className="hover:underline">
-            <Trans>الرئيسية</Trans>
+          <Link to="/support" className="hover:underline">
+            <Trans>Home</Trans>
           </Link>
 
           <span>/</span>
 
           <Link
-            to="/_authenticated/support"
+            to="/support"
             className="hover:underline"
           >
-            <Trans>تذاكر الدعم</Trans>
+            <Trans>Support tickets</Trans>
           </Link>
 
           <span>/</span>
 
           <span style={S(`color:var(--foreground);`)}>
-            <Trans>تفاصيل التذكرة</Trans>
+            <Trans>Ticket details</Trans>
           </span>
         </div>
         {/* Header */}
@@ -284,7 +289,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
           <StatusBadge status={ticket.status} />
 
           <p style={S(`font-size:13px; color:var(--muted-foreground);`)}>
-            <Trans>تذكرة دعم</Trans>
+            <Trans>Support ticket</Trans>
           </p>
         </div>
         {/* Ticket information */}
@@ -292,35 +297,35 @@ const [resolveError, setResolveError] = useState<string | null>(null);
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TicketIcon size={18} />
-              <Trans>معلومات التذكرة</Trans>
+              <Trans>Ticket information</Trans>
             </CardTitle>
           </CardHeader>
 
           <CardContent className="space-y-5">
             <InfoField
-              label="عنوان التذكرة"
+              label={t`Subject`}
               value={ticket.subject}
             />
 
             <InfoField
-              label="وصف المشكلة"
+              label={t`Description`}
               value={ticket.description}
             />
 
             <InfoField
-              label="حالة التذكرة"
+              label={t`Status`}
               value={ticket.status}
               badge
             />
 
             <InfoField
-              label="تاريخ الإنشاء"
+              label={t`Created`}
               value={formatDate(ticket.created_at)}
               icon={<CalendarDays size={16} />}
             />
 
             <InfoField
-              label="آخر تحديث"
+              label={t`Last updated`}
               value={formatDate(ticket.updated_at)}
               icon={<CalendarDays size={16} />}
             />
@@ -328,8 +333,8 @@ const [resolveError, setResolveError] = useState<string | null>(null);
         </Card>
 <div style={S("display:flex; flex-direction:column; gap:16px; width:100%")}>
 
-  {/* أزرار إظهار الأقسام */}
-  <div style={S("display:flex;flex-direction:row;direction:rtl;justify-content:flex-start;align-items:center;gap:10px;flex-wrap:wrap;width:100%;")}>
+  {/* Buttons that show each section */}
+  <div style={S("display:flex;flex-direction:row;justify-content:flex-start;align-items:center;gap:10px;flex-wrap:wrap;width:100%;")}>
 
     <Button
       type="button"
@@ -345,7 +350,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
       style={S("height:40px; padding:0 16px; gap:8px")}
     >
       <UserRound size={16} />
-      <Trans>صاحب التذكرة</Trans>
+      <Trans>Ticket owner</Trans>
     </Button>
 
     <Button
@@ -362,19 +367,19 @@ const [resolveError, setResolveError] = useState<string | null>(null);
       style={S("height:40px; padding:0 16px; gap:8px")}
     >
       <MessageSquare size={16} />
-      <Trans>رد الإدارة</Trans>
+      <Trans>Support reply</Trans>
     </Button>
 
   </div>
 
-  {/* نموذج حل التذكرة */}
+  {/* Resolve form */}
   {showResolveForm && (
     <div
       style={S("padding:18px; border:1px solid var(--border); background:var(--card); display:flex; flex-direction:column; gap:16px; width:100%")}
     >
       <div style={S("display:flex; align-items:center; justify-content:space-between; gap:12px")}>
         <strong style={S("font-size:15px")}>
-          <Trans>حل التذكرة</Trans>
+          <Trans>Resolve ticket</Trans>
         </strong>
 
         <Button
@@ -382,7 +387,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
           size="icon"
           onClick={() => setShowResolveForm(false)}
           disabled={resolving}
-          aria-label="إغلاق"
+          aria-label={t`Close`}
         >
           <X size={17} />
         </Button>
@@ -390,13 +395,13 @@ const [resolveError, setResolveError] = useState<string | null>(null);
 
       <div>
         <label style={labelStyle}>
-          <Trans>رد الإدارة</Trans>
+          <Trans>Support reply</Trans>
         </label>
 
         <textarea
           value={adminResponse}
           onChange={(event) => setAdminResponse(event.target.value)}
-          placeholder="اكتب رد الإدارة وتفاصيل الحل..."
+          placeholder={t`Write the reply and how it was solved…`}
           rows={4}
           disabled={resolving}
           style={{ ...fieldStyle, resize: "vertical" }}
@@ -414,7 +419,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
           onClick={handleResolve}
           disabled={resolving || !adminResponse.trim()}
         >
-          {resolving ? "جاري التنفيذ..." : "تأكيد الحل"}
+          {resolving ? t`Working…` : t`Confirm resolution`}
         </Button>
 
         <Button
@@ -426,17 +431,18 @@ const [resolveError, setResolveError] = useState<string | null>(null);
           }}
           disabled={resolving}
         >
-          إلغاء
+          <Trans>Cancel</Trans>
         </Button>
       </div>
     </div>
   )}
 
-  {/* زر حل التذكرة دائماً في الأسفل */}
+  {/* Resolve button, always at the bottom */}
+  {isAdmin && ticket.status === "OPEN" && !showResolveForm && (
   <div
   style={S(`
     display:flex;
-    direction:rtl;
+    
     justify-content:center;
     width:100%;
   `)}
@@ -445,17 +451,14 @@ const [resolveError, setResolveError] = useState<string | null>(null);
     type="button"
     variant="default"
     id="solvebutton"
-    onClick={() => {
-        setShowResolveForm(!showResolveForm);
-        const element = document.getElementById("solvebutton");
-        element.style.display = "none"
-    }}
+    onClick={() => setShowResolveForm(true)}
     style={S("height:42px; padding:0 20px; gap:8px")}
   >
     <CheckCircle size={17} />
-    <Trans>حل التذكرة</Trans>
+    <Trans>Resolve ticket</Trans>
   </Button>
 </div>
+  )}
 
 </div>
         {/* Ticket owner */}
@@ -463,7 +466,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserRound size={18} />
-              <Trans>صاحب التذكرة</Trans>
+              <Trans>Ticket owner</Trans>
             </CardTitle>
           </CardHeader>
 
@@ -471,26 +474,26 @@ const [resolveError, setResolveError] = useState<string | null>(null);
             {user ? (
               <>
                 <InfoField
-                  label="الاسم الكامل"
+                  label={t`Full name`}
                   value={user.fullname || "—"}
                 />
 
                 <InfoField
-                  label="البريد الإلكتروني"
+                  label={t`Email`}
                   value={user.email || "—"}
                   icon={<Mail size={16} />}
                 />
 
                 <InfoField
-                  label="رقم الجوال"
+                  label={t`Phone number`}
                   value={user.phone || "—"}
                   icon={<Phone size={16} />}
                 />
               </>
             ) : (
               <InfoField
-                label="معرّف المستخدم"
-                value={ticket.user_id}
+                label={t`Full name`}
+                value={ticket.user_id === me?.id ? t`You` : "—"}
               />
             )}
           </CardContent>
@@ -501,23 +504,29 @@ const [resolveError, setResolveError] = useState<string | null>(null);
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageSquare size={18} />
-              <Trans>رد الإدارة</Trans>
+              <Trans>Support reply</Trans>
             </CardTitle>
           </CardHeader>
 
           <CardContent className="space-y-5">
             <InfoField
-              label="الرد"
-              value={ticket.admin_response || "لا يوجد رد من الإدارة حتى الآن"}
+              label={t`Reply`}
+              value={ticket.admin_response || t`No reply yet`}
             />
 
             <InfoField
-              label="تم الحل بواسطة"
-              value={ticket.resolved_by || "—"}
+              label={t`Resolved by`}
+              value={
+                !ticket.resolved_by
+                  ? "—"
+                  : ticket.resolved_by === me?.id
+                    ? t`You`
+                    : t`Support team`
+              }
             />
 
             <InfoField
-              label="تاريخ الحل"
+              label={t`Resolved on`}
               value={formatDate(ticket.resolved_at)}
               icon={<CheckCircle2 size={16} />}
             />
@@ -525,7 +534,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
         </Card>
 
         <Link
-          to="/_authenticated/support"
+          to="/support"
           style={S(`
             display:flex;
             align-items:center;
@@ -535,8 +544,8 @@ const [resolveError, setResolveError] = useState<string | null>(null);
             text-decoration:none;
           `)}
         >
-          <ArrowRight size={16} />
-          <Trans>العودة إلى تذاكر الدعم</Trans>
+          <ArrowLeft size={16} className="rtl:rotate-180" />
+          <Trans>Back to support tickets</Trans>
         </Link>
       </div>
     </PageContainer>
@@ -546,7 +555,6 @@ const [resolveError, setResolveError] = useState<string | null>(null);
 function PageContainer({ children }: { children: React.ReactNode }) {
   return (
     <div
-      dir="rtl"
       style={S(`
         width:100%;
         max-width:1000px;

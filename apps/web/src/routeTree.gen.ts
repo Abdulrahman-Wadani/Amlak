@@ -22,7 +22,6 @@ import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/h
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedPlacesRouteImport } from './routes/_authenticated/places'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
-import { Route as AuthenticatedTestRouteImport } from './routes/_authenticated/test'
 import { Route as AuthenticatedTicketsRouteImport } from './routes/_authenticated/tickets'
 import { Route as AuthenticatedWorkersRouteImport } from './routes/_authenticated/workers'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
@@ -39,6 +38,7 @@ import { Route as AuthenticatedTicketTicket_idRouteImport } from './routes/_auth
 import { Route as AuthenticatedTicketNewRouteImport } from './routes/_authenticated/ticket/new'
 import { Route as AuthenticatedWorkerWorker_idRouteImport } from './routes/_authenticated/worker/$worker_id'
 import { Route as AuthenticatedWorkerNewRouteImport } from './routes/_authenticated/worker/new'
+import { Route as PLangSlugRouteImport } from './routes/p/$lang/$slug'
 import { Route as AuthenticatedPlaceAssetAsset_idRouteImport } from './routes/_authenticated/place/asset/$asset_id'
 import { Route as AuthenticatedPlaceAssetNewRouteImport } from './routes/_authenticated/place/asset/new'
 import { Route as AuthenticatedPlaceAssetMaintenanceNewRouteImport } from './routes/_authenticated/place/asset/maintenance/new'
@@ -106,11 +106,6 @@ const AuthenticatedPlacesRoute = AuthenticatedPlacesRouteImport.update({
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedTestRoute = AuthenticatedTestRouteImport.update({
-  id: '/test',
-  path: '/test',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedTicketsRoute = AuthenticatedTicketsRouteImport.update({
@@ -201,6 +196,11 @@ const AuthenticatedWorkerNewRoute = AuthenticatedWorkerNewRouteImport.update({
   path: '/worker/new',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const PLangSlugRoute = PLangSlugRouteImport.update({
+  id: '/p/$lang/$slug',
+  path: '/p/$lang/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedPlaceAssetAsset_idRoute =
   AuthenticatedPlaceAssetAsset_idRouteImport.update({
     id: '/place/asset/$asset_id',
@@ -233,7 +233,6 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/places': typeof AuthenticatedPlacesRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/test': typeof AuthenticatedTestRoute
   '/tickets': typeof AuthenticatedTicketsRoute
   '/workers': typeof AuthenticatedWorkersRoute
   '/admin/$admin_id': typeof AuthenticatedAdminAdmin_idRoute
@@ -247,6 +246,7 @@ export interface FileRoutesByFullPath {
   '/ticket/new': typeof AuthenticatedTicketNewRoute
   '/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
   '/worker/new': typeof AuthenticatedWorkerNewRoute
+  '/p/$lang/$slug': typeof PLangSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/content/': typeof AuthenticatedContentIndexRoute
   '/support/': typeof AuthenticatedSupportIndexRoute
@@ -267,7 +267,6 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/places': typeof AuthenticatedPlacesRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/test': typeof AuthenticatedTestRoute
   '/tickets': typeof AuthenticatedTicketsRoute
   '/workers': typeof AuthenticatedWorkersRoute
   '/admin/$admin_id': typeof AuthenticatedAdminAdmin_idRoute
@@ -281,6 +280,7 @@ export interface FileRoutesByTo {
   '/ticket/new': typeof AuthenticatedTicketNewRoute
   '/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
   '/worker/new': typeof AuthenticatedWorkerNewRoute
+  '/p/$lang/$slug': typeof PLangSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/content': typeof AuthenticatedContentIndexRoute
   '/support': typeof AuthenticatedSupportIndexRoute
@@ -303,7 +303,6 @@ export interface FileRoutesById {
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/places': typeof AuthenticatedPlacesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
-  '/_authenticated/test': typeof AuthenticatedTestRoute
   '/_authenticated/tickets': typeof AuthenticatedTicketsRoute
   '/_authenticated/workers': typeof AuthenticatedWorkersRoute
   '/_authenticated/admin/$admin_id': typeof AuthenticatedAdminAdmin_idRoute
@@ -317,6 +316,7 @@ export interface FileRoutesById {
   '/_authenticated/ticket/new': typeof AuthenticatedTicketNewRoute
   '/_authenticated/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
   '/_authenticated/worker/new': typeof AuthenticatedWorkerNewRoute
+  '/p/$lang/$slug': typeof PLangSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/content/': typeof AuthenticatedContentIndexRoute
   '/_authenticated/support/': typeof AuthenticatedSupportIndexRoute
@@ -339,7 +339,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/places'
     | '/profile'
-    | '/test'
     | '/tickets'
     | '/workers'
     | '/admin/$admin_id'
@@ -353,6 +352,7 @@ export interface FileRouteTypes {
     | '/ticket/new'
     | '/worker/$worker_id'
     | '/worker/new'
+    | '/p/$lang/$slug'
     | '/admin/'
     | '/content/'
     | '/support/'
@@ -373,7 +373,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/places'
     | '/profile'
-    | '/test'
     | '/tickets'
     | '/workers'
     | '/admin/$admin_id'
@@ -387,6 +386,7 @@ export interface FileRouteTypes {
     | '/ticket/new'
     | '/worker/$worker_id'
     | '/worker/new'
+    | '/p/$lang/$slug'
     | '/admin'
     | '/content'
     | '/support'
@@ -408,7 +408,6 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications'
     | '/_authenticated/places'
     | '/_authenticated/profile'
-    | '/_authenticated/test'
     | '/_authenticated/tickets'
     | '/_authenticated/workers'
     | '/_authenticated/admin/$admin_id'
@@ -422,6 +421,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ticket/new'
     | '/_authenticated/worker/$worker_id'
     | '/_authenticated/worker/new'
+    | '/p/$lang/$slug'
     | '/_authenticated/admin/'
     | '/_authenticated/content/'
     | '/_authenticated/support/'
@@ -438,6 +438,7 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
+  PLangSlugRoute: typeof PLangSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -531,13 +532,6 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/test': {
-      id: '/_authenticated/test'
-      path: '/test'
-      fullPath: '/test'
-      preLoaderRoute: typeof AuthenticatedTestRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/tickets': {
@@ -652,6 +646,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWorkerNewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/p/$lang/$slug': {
+      id: '/p/$lang/$slug'
+      path: '/p/$lang/$slug'
+      fullPath: '/p/$lang/$slug'
+      preLoaderRoute: typeof PLangSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/place/asset/$asset_id': {
       id: '/_authenticated/place/asset/$asset_id'
       path: '/place/asset/$asset_id'
@@ -683,7 +684,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPlacesRoute: typeof AuthenticatedPlacesRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
-  AuthenticatedTestRoute: typeof AuthenticatedTestRoute
   AuthenticatedTicketsRoute: typeof AuthenticatedTicketsRoute
   AuthenticatedWorkersRoute: typeof AuthenticatedWorkersRoute
   AuthenticatedAdminAdmin_idRoute: typeof AuthenticatedAdminAdmin_idRoute
@@ -712,7 +712,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPlacesRoute: AuthenticatedPlacesRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
-  AuthenticatedTestRoute: AuthenticatedTestRoute,
   AuthenticatedTicketsRoute: AuthenticatedTicketsRoute,
   AuthenticatedWorkersRoute: AuthenticatedWorkersRoute,
   AuthenticatedAdminAdmin_idRoute: AuthenticatedAdminAdmin_idRoute,
@@ -747,6 +746,7 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
+  PLangSlugRoute: PLangSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

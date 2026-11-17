@@ -10,6 +10,7 @@ import {
 } from "react"
 
 import { i18n, type Messages } from "@lingui/core"
+import { msg } from "@lingui/core/macro"
 import { I18nProvider } from "@lingui/react"
 import type { Language } from "@amlak/shared"
 
@@ -17,6 +18,15 @@ import { messages as enMessages } from "@/locales/en.po"
 import { messages as arMessages } from "@/locales/ar.po"
 
 const LANG_KEY = "amlak.lang"
+
+/**
+ * Each language's name in that language, for language pickers. They are not
+ * translated: a reader looks for their own language by its own name.
+ */
+export const LANGUAGE_NAMES: Record<Language, string> = {
+  ar: "العربية",
+  en: "English",
+}
 
 const catalogs: Record<Language, Messages> = {
   en: enMessages,
@@ -26,6 +36,8 @@ const catalogs: Record<Language, Messages> = {
 function activate(lang: Language) {
   i18n.load(lang, catalogs[lang])
   i18n.activate(lang)
+  // The tab title is the brand, written in the interface language.
+  document.title = i18n._(msg`Amlak`)
 }
 
 function readInitialLang(): Language {
@@ -33,6 +45,10 @@ function readInitialLang(): Language {
 
   return saved === "en" || saved === "ar" ? saved : "ar"
 }
+
+// Activate the saved language now, before anything renders, so `t` and
+// <Trans> always have a locale (on the first render too).
+activate(readInitialLang())
 
 type LangContextValue = {
   lang: Language
