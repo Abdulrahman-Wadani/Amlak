@@ -8,6 +8,7 @@ import {
 } from "react"
 
 import { useNavigate } from "@tanstack/react-router"
+import { t } from "@lingui/core/macro"
 import type { Language, User } from "@amlak/shared"
 import { rememberAccessToken, setSessionHandlers } from "@/lib/http"
 import { useLanguage } from "@/lib/i18n"
@@ -79,10 +80,10 @@ function failureMessage(data: unknown): string {
     d.code === "ACCOUNT_NOT_ACTIVE" &&
     d.details?.reason === "EMAIL_NOT_VERIFIED"
   ) {
-    return "Verify your email first — we sent a 6-digit code."
+    return t`Verify your email first — we sent a 6-digit code.`
   }
 
-  return d.message ?? "Something went wrong. Try again."
+  return d.message ?? t`Something went wrong. Try again.`
 }
 
 async function call(path: string, body?: unknown): Promise<unknown> {

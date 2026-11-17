@@ -6,10 +6,11 @@ import {
   useNavigate,
 } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 import type { Worker } from "@amlak/shared"
 import {
-  ArrowRight,
+  ArrowLeft,
   Check,
   CircleAlert,
   Mail,
@@ -158,7 +159,7 @@ function WorkerDetailPage() {
     if (!accessToken || !worker || deleting) return
 
     const confirmed = window.confirm(
-      `هل أنت متأكد من حذف العامل "${worker.fullname}"؟ لا يمكن التراجع عن هذا الإجراء.`,
+      t`Delete the worker "${worker.fullname}"? This cannot be undone.`,
     )
 
     if (!confirmed) return
@@ -198,7 +199,6 @@ function WorkerDetailPage() {
 
   return (
     <div
-      dir="rtl"
       style={S(`
         width: 100%;
         max-width: 1000px;
@@ -238,12 +238,12 @@ function WorkerDetailPage() {
 <Breadcrumb>
   <BreadcrumbList>
     <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/" />}>الرئيسية</BreadcrumbLink>
+      <BreadcrumbLink render={<a href="/" />}><Trans>Home</Trans></BreadcrumbLink>
     </BreadcrumbItem>
     <BreadcrumbSeparator />
     <BreadcrumbItem>
       <BreadcrumbLink render={<a href="/workers" />}>
-        العمال
+        <Trans>Workers</Trans>
       </BreadcrumbLink>
     </BreadcrumbItem>
   </BreadcrumbList>
@@ -278,7 +278,7 @@ function WorkerDetailPage() {
             gap: 8px;
           `)}
         >
-          <ArrowRight size={16} />
+          <ArrowLeft size={16} className="rtl:rotate-180" />
           <Trans>Workers</Trans>
         </Link>
       </div>
@@ -348,7 +348,7 @@ function WorkerDetailPage() {
               <div
                 dir="ltr"
                 style={S(`
-                  text-align: right;
+                  text-align: match-parent;
                   margin-top: 5px;
                   font-size: 13px;
                   color: var(--muted-foreground);
@@ -389,7 +389,7 @@ function WorkerDetailPage() {
                 `)}
               >
                 <UserRound size={18} />
-                معلومات العامل
+                <Trans>Worker information</Trans>
               </CardTitle>
             </CardHeader>
 
@@ -408,7 +408,7 @@ function WorkerDetailPage() {
                     gap: 18px;
                   `)}
                 >
-                  <FormField label="الاسم الكامل" htmlFor="fullname">
+                  <FormField label={t`Full name`} htmlFor="fullname">
                     <Input
                       id="fullname"
                       value={fullname}
@@ -417,7 +417,7 @@ function WorkerDetailPage() {
                     />
                   </FormField>
 
-                  <FormField label="البريد الإلكتروني" htmlFor="email">
+                  <FormField label={t`Email`} htmlFor="email">
                     <div style={S("position: relative")}>
                       <Mail
                         size={16}
@@ -436,14 +436,14 @@ function WorkerDetailPage() {
                         className="am-input"
                         style={S(`
                           padding-inline-start: 36px;
-                          text-align: right;
+                          text-align: match-parent;
                           opacity: 0.75;
                         `)}
                       />
                     </div>
                   </FormField>
 
-                  <FormField label="رقم الجوال" htmlFor="phone">
+                  <FormField label={t`Phone number`} htmlFor="phone">
                     <div style={S("position: relative")}>
                       <Phone
                         size={16}
@@ -462,13 +462,13 @@ function WorkerDetailPage() {
                         className="am-input"
                         style={S(`
                           padding-inline-start: 36px;
-                          text-align: right;
+                          text-align: match-parent;
                         `)}
                       />
                     </div>
                   </FormField>
 
-                  <FormField label="حالة العامل" htmlFor="status">
+                  <FormField label={t`Worker status`} htmlFor="status">
                     <select
                       id="status"
                       value={status}
@@ -485,27 +485,27 @@ function WorkerDetailPage() {
                             {status}
                           </option>
                         )}
-                      <option value="ACTIVE">نشط</option>
-                      <option value="DEACTIVATED">غير نشط</option>
+                      <option value="ACTIVE"><Trans>Active</Trans></option>
+                      <option value="DEACTIVATED"><Trans>Deactivated</Trans></option>
                     </select>
                   </FormField>
 
                   <InfoField
-                    label="اللغة المفضلة"
+                    label={t`Preferred language`}
                     value={worker.preferred_language}
                   />
 
                   <InfoField
-                    label="تأكيد البريد الإلكتروني"
+                    label={t`Email confirmed`}
                     value={
                       worker.email_verified_at
                         ? formattedDate(worker.email_verified_at)
-                        : "غير مؤكد"
+                        : t`Not confirmed`
                     }
                   />
 
                   <InfoField
-                    label="تاريخ الانضمام"
+                    label={t`Joined`}
                     value={formattedDate(worker.created_at)}
                   />
                 </div>
@@ -541,7 +541,7 @@ function WorkerDetailPage() {
                 `)}
               >
                 <MapPin size={18} />
-                الأماكن المسندة
+                <Trans>Assigned places</Trans>
 
                 {worker && (
                   <span
@@ -635,7 +635,7 @@ function WorkerDetailPage() {
                 >
                   <MapPin size={24} />
                   <p style={S("margin: 0; font-size: 13px")}>
-                    لا توجد أماكن مسندة لهذا العامل.
+                    <Trans>This worker has no assigned places.</Trans>
                   </p>
                 </div>
               )}
@@ -701,7 +701,7 @@ function WorkerDetailPage() {
                 `)}
               >
                 <Check size={16} />
-                تم تحديث بيانات العامل بنجاح.
+                <Trans>The worker was updated.</Trans>
               </p>
             )}
 
@@ -725,7 +725,7 @@ function WorkerDetailPage() {
                 `)}
               >
                 <Save size={16} />
-                {saving ? "جارٍ الحفظ..." : "حفظ التغييرات"}
+                {saving ? t`Saving…` : t`Save changes`}
               </Button>
 
               <Button
@@ -739,7 +739,7 @@ function WorkerDetailPage() {
                 `)}
               >
                 <Trash2 size={16} />
-                {deleting ? "جارٍ الحذف..." : "حذف العامل"}
+                {deleting ? t`Deleting…` : t`Delete worker`}
               </Button>
             </div>
           </div>

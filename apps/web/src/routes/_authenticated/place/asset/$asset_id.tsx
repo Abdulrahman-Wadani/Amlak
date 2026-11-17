@@ -7,7 +7,7 @@ import {
   useParams,
 } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
-import { t } from "@lingui/core/macro"
+import { plural, t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 import type { Asset, Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
@@ -166,25 +166,19 @@ const referrer = document.referrer
 const placeId = referrer
   ? new URL(referrer).pathname.split("/").filter(Boolean).pop()
   : undefined
-  const ticketLabels: Record<string, string> = {
-    CORRECTIVE: "صيانة تصحيحية",
-    PREVENTIVE: "صيانة وقائية",
-    LOW: "منخفضة",
-    MEDIUM: "متوسطة",
-    HIGH: "عالية",
-    URGENT: "عاجلة",
-    PENDING: "معلقة",
-    SUBMITTED: "مرسلة",
-    UNDER_REVIEW: "قيد المراجعة",
-    APPROVED: "مقبولة",
-    REJECTED: "مرفوضة",
-    IN_PROGRESS: "قيد التنفيذ",
-    COMPLETED: "مكتملة",
-    CANCELLED: "ملغاة",
-  }
-
   function getTicketLabel(value: string) {
-    return ticketLabels[value] ?? value
+    switch (value) {
+      case "LOW":
+        return t`Low`
+      case "MEDIUM":
+        return t`Medium`
+      case "HIGH":
+        return t`High`
+      case "URGENT":
+        return t`Urgent`
+      default:
+        return value
+    }
   }
 
   function formatDate(value: string | null | undefined) {
@@ -198,7 +192,6 @@ const placeId = referrer
   return (
     <center>
     <div
-      dir="rtl"
       style={S(
         "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 900px"
       )}
@@ -214,7 +207,7 @@ const placeId = referrer
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink render={<a href="/" />}>
-                  الرئيسية
+                  <Trans>Home</Trans>
                 </BreadcrumbLink>
               </BreadcrumbItem>
 
@@ -222,7 +215,7 @@ const placeId = referrer
 
               <BreadcrumbItem>
                 <BreadcrumbLink render={<a href="/places" />}>
-                  العقارات
+                  <Trans>Places</Trans>
                 </BreadcrumbLink>
               </BreadcrumbItem>
             </BreadcrumbList>
@@ -262,7 +255,7 @@ const placeId = referrer
       {failed && (
         <Card style={S("padding: 18px; border: 1px solid var(--border)")}>
           <p style={S("color: var(--muted-foreground); margin: 0")}>
-            تعذر تحميل بيانات الأصل.
+            <Trans>We could not load the asset.</Trans>
           </p>
         </Card>
       )}
@@ -282,7 +275,7 @@ const placeId = referrer
               )}
             >
               <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-                <Trans>معلومات الأصل</Trans>
+                <Trans>Asset information</Trans>
               </CardTitle>
             </CardHeader>
 
@@ -304,25 +297,25 @@ const placeId = referrer
                   )}
                 >
                   <InfoItem
-                    label="اسم الأصل"
+                    label={t`Asset name`}
                     icon={<Building2 size={16} />}
                     value={asset.name}
                   />
 
                   <InfoItem
-                    label="نوع الأصل"
+                    label={t`Asset type`}
                     icon={<Wrench size={16} />}
                     value={asset.type}
                   />
 
                   <InfoItem
-                    label="الحالة"
+                    label={t`Status`}
                     icon={<span />}
                     value={<AssetStatusBadge status={asset.status} />}
                   />
 
                   <InfoItem
-                    label="تاريخ الشراء"
+                    label={t`Purchase date`}
                     icon={<CalendarDays size={16} />}
                     value={
                       asset.purchase_date
@@ -348,7 +341,7 @@ const placeId = referrer
               )}
             >
               <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-                <Trans>الملكية المرتبطة بالأصل</Trans>
+                <Trans>The asset's place</Trans>
               </CardTitle>
             </CardHeader>
 
@@ -379,7 +372,7 @@ const placeId = referrer
                     </span>
                   </div>
 
-                  <ArrowRight size={17} />
+                  <ArrowRight size={17} className="rtl:rotate-180" />
                 </Link>
               )}
             </CardContent>
@@ -398,7 +391,7 @@ const placeId = referrer
               )}
             >
               <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-                تذاكر صيانة الأصل
+                <Trans>Maintenance tickets for this asset</Trans>
                 {tickets !== null && (
                   <span
                     style={S(
@@ -432,7 +425,7 @@ const placeId = referrer
                       "font-size: 14px; color: var(--muted-foreground); margin: 0"
                     )}
                   >
-                    لا توجد تذاكر صيانة لهذا الأصل.
+                    <Trans>This asset has no maintenance tickets.</Trans>
                   </p>
                 </div>
               ) : (
@@ -453,7 +446,7 @@ const placeId = referrer
                         )}
                       >
                         <strong style={S("font-size: 14px")}>
-                          {ticket.description || "تذكرة صيانة"}
+                          {ticket.description || t`Maintenance ticket`}
                         </strong>
 
                         <span
@@ -463,7 +456,7 @@ const placeId = referrer
                         >
                           {getTicketLabel(ticket.ticket_type)}
                           {" · "}
-                          الأولوية: {getTicketLabel(ticket.priority)}
+                          <Trans>Priority: {getTicketLabel(ticket.priority)}</Trans>
                         </span>
 
                         <span
@@ -471,13 +464,13 @@ const placeId = referrer
                             "font-size: 12px; color: var(--muted-foreground)"
                           )}
                         >
-                          تاريخ الإنشاء: {formatDate(ticket.created_at)}
+                          <Trans>Created: {formatDate(ticket.created_at)}</Trans>
                         </span>
                       </div>
 
                       <div style={S("display: flex; align-items: center; gap: 10px")}>
                         <StatusBadge status={String(ticket.status)} />
-                        <ArrowRight size={17} />
+                        <ArrowRight size={17} className="rtl:rotate-180" />
                       </div>
                     </Link>
                   ))}
@@ -506,7 +499,7 @@ const placeId = referrer
     >
       <div style={S("display: flex; align-items: center; gap: 10px")}>
         <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-          <Trans>الصيانة المجدولة</Trans>
+          <Trans>Scheduled maintenance</Trans>
         </CardTitle>
 
         <span
@@ -533,7 +526,7 @@ const placeId = referrer
         )}
       >
         <Plus size={16} />
-        <Trans>جدولة صيانة</Trans>
+        <Trans>Schedule maintenance</Trans>
       </Link>
     </div>
   </CardHeader>
@@ -565,7 +558,7 @@ const placeId = referrer
           "font-size: 14px; color: var(--muted-foreground); margin: 0"
         )}
       >
-        <Trans>لا توجد صيانة دورية مجدولة لهذا الأصل.</Trans>
+        <Trans>This asset has no scheduled maintenance.</Trans>
       </p>
     </div>
   ) : (
@@ -581,12 +574,17 @@ const placeId = referrer
             (1000 * 60 * 60 * 24)
         )
 
-        const intervalUnitLabels: Record<string, string> = {
-          DAY: "يوم",
-          WEEK: "أسبوع",
-          MONTH: "شهر",
-          YEAR: "سنة",
-        }
+        const count = maintenance.interval_count
+        const repeats =
+          maintenance.interval_unit === "DAY"
+            ? plural(count, { one: "Every day", other: "Every # days" })
+            : maintenance.interval_unit === "WEEK"
+              ? plural(count, { one: "Every week", other: "Every # weeks" })
+              : maintenance.interval_unit === "MONTH"
+                ? plural(count, { one: "Every month", other: "Every # months" })
+                : plural(count, { one: "Every year", other: "Every # years" })
+        const leadDays = maintenance.lead_days
+        const overdueDays = Math.abs(daysRemaining)
 
         return (
           <div
@@ -611,10 +609,7 @@ const placeId = referrer
                     "font-size: 12px; color: var(--muted-foreground)"
                   )}
                 >
-                  <Trans>تتكرر كل</Trans>{" "}
-                  {maintenance.interval_count}{" "}
-                  {intervalUnitLabels[maintenance.interval_unit] ??
-                    maintenance.interval_unit}
+                  {repeats}
                 </span>
               </div>
 
@@ -634,7 +629,7 @@ const placeId = referrer
                 <span
                   style={S("font-size: 11px; color: var(--muted-foreground)")}
                 >
-                  <Trans>موعد الصيانة القادمة</Trans>
+                  <Trans>Next maintenance</Trans>
                 </span>
 
                 <strong style={S("font-size: 13px")}>
@@ -646,11 +641,11 @@ const placeId = referrer
                 <span
                   style={S("font-size: 11px; color: var(--muted-foreground)")}
                 >
-                  <Trans>التنبيه قبل الموعد</Trans>
+                  <Trans>Reminder before</Trans>
                 </span>
 
                 <strong style={S("font-size: 13px")}>
-                  {maintenance.lead_days} <Trans>يوم</Trans>
+                  {plural(leadDays, { one: "# day", other: "# days" })}
                 </strong>
               </div>
             </div>
@@ -666,10 +661,10 @@ const placeId = referrer
               )}
             >
               {daysRemaining < 0
-                ? `متأخرة منذ ${Math.abs(daysRemaining)} يوم`
+                ? plural(overdueDays, { one: "Overdue by # day", other: "Overdue by # days" })
                 : daysRemaining === 0
-                  ? "موعد الصيانة اليوم"
-                  : `متبقي ${daysRemaining} يوم على الصيانة`}
+                  ? t`Maintenance is due today`
+                  : plural(daysRemaining, { one: "# day until maintenance", other: "# days until maintenance" })}
             </div>
 
             {/* Cancel Schedule */}
@@ -687,7 +682,7 @@ const placeId = referrer
                   "color: var(--destructive); border-color: var(--destructive)"
                 )}
               >
-                <Trans>إلغاء الجدولة</Trans>
+                <Trans>Cancel schedule</Trans>
               </Button>
             </div>
           </div>

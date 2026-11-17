@@ -2,6 +2,7 @@
 import { useState, type FormEvent } from "react"
 import { Link, createFileRoute } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
 import {
   LockKeyhole,
   CheckCircle2,
@@ -232,7 +233,7 @@ function ResetPasswordPage() {
                       onClick={() => setShowPassword((prev) => !prev)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       aria-label={
-                        showPassword ? "Hide password" : "Show password"
+                        showPassword ? t`Hide password` : t`Show password`
                       }
                     >
                       {showPassword ? (
@@ -277,8 +278,8 @@ function ResetPasswordPage() {
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       aria-label={
                         showConfirmPassword
-                          ? "Hide password"
-                          : "Show password"
+                          ? t`Hide password`
+                          : t`Show password`
                       }
                     >
                       {showConfirmPassword ? (
@@ -322,7 +323,7 @@ function ResetPasswordPage() {
                   href="/signin"
                   className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  <ArrowLeft className="h-4 w-4" />
+                  <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
                   <Trans>Back to Login</Trans>
                 </a>
               </div>

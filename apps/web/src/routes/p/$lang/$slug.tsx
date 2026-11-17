@@ -48,7 +48,7 @@ function PublicContentPage() {
         )}
       >
         <Link to="/" style={S("font-size: 19px; font-weight: 800; text-decoration: none; color: var(--foreground)")}>
-          Amlak
+          <Trans>Amlak</Trans>
         </Link>
       </header>
 

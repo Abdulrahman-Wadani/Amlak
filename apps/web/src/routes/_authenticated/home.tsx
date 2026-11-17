@@ -12,6 +12,7 @@ import {
   LogOut,
 } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 import type { Place } from "@amlak/shared"
 import { storedUser, useAuth } from "@/lib/auth"
@@ -201,7 +202,7 @@ function HomePage() {
     >
       {/* Welcome section */}
       <section
-        aria-label="today"
+        aria-label={t`Today`}
         className="am-rise"
         style={S(
           "background: var(--foreground); color: #fff; padding: 32px; display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: flex-end; justify-content: space-between; box-sizing: border-box"

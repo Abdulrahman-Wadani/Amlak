@@ -48,13 +48,6 @@ const PRIORITIES: TicketPriority[] = [
   "URGENT",
 ]
 
-const priorityLabels: Record<TicketPriority, string> = {
-  LOW: "منخفضة",
-  MEDIUM: "متوسطة",
-  HIGH: "عالية",
-  URGENT: "عاجلة",
-}
-
 function AddTicket() {
   const { accessToken } = useAuth()
   const navigate = useNavigate()
@@ -131,7 +124,7 @@ const [assets, setAssets] = useState<Asset[]>([])
     const selected = Array.from(e.target.files ?? [])
 
     if (selected.length > 5) {
-      setPhotoError("يمكنك إضافة 5 صور كحد أقصى")
+      setPhotoError(t`You can add up to 5 photos`)
       setPhotos([])
       e.target.value = ""
       return
@@ -161,12 +154,12 @@ const [assets, setAssets] = useState<Asset[]>([])
   setPhotoError("")
 
   if (!selectedPlaceId) {
-    setFormError("اختر العقار أولاً")
+    setFormError(t`Choose the place first`)
     return
   }
 
   if (selectedPhotos.length > 5) {
-    setPhotoError("يمكنك إضافة 5 صور كحد أقصى")
+    setPhotoError(t`You can add up to 5 photos`)
     return
   }
 
@@ -190,7 +183,7 @@ const [assets, setAssets] = useState<Asset[]>([])
     setFormError(
       error instanceof Error
         ? error.message
-        : "تعذر إنشاء تذكرة الصيانة",
+        : t`Could not create the maintenance ticket`,
     )
   } finally {
     setLoading(false)
@@ -199,7 +192,6 @@ const [assets, setAssets] = useState<Asset[]>([])
 
   return (
     <div
-      dir="rtl"
       style={S(
         "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 720px; width: 100%",
       )}
@@ -207,11 +199,11 @@ const [assets, setAssets] = useState<Asset[]>([])
 <Breadcrumb>
   <BreadcrumbList>
   <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/" />}>الرئيسية</BreadcrumbLink>
+      <BreadcrumbLink render={<a href="/" />}><Trans>Home</Trans></BreadcrumbLink>
     </BreadcrumbItem>
     <BreadcrumbSeparator />
     <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/places" />}>العقارات</BreadcrumbLink>
+      <BreadcrumbLink render={<a href="/places" />}><Trans>Places</Trans></BreadcrumbLink>
     </BreadcrumbItem>
     <BreadcrumbSeparator />
     <BreadcrumbItem>
@@ -231,18 +223,18 @@ const [assets, setAssets] = useState<Asset[]>([])
 <center>
       <div style={S("display:flex; flex-direction:column; gap:6px")}>
         <h1 style={S("font-size:30px; font-weight:800; margin:0")}>
-          <Trans>رفع تذكرة صيانة</Trans>
+          <Trans>Report damage</Trans>
         </h1>
 
         <p style={S("font-size:14px; color:var(--muted-foreground); margin:0")}>
-          تسجيل بلاغ صيانة جديد
+          <Trans>Report new damage for maintenance</Trans>
         </p>
       </div>
         <Form
   fields={[
     {
       name: "placeId",
-      label: "العقار",
+      label: t`Place`,
       type: "select",
       required: true,
       defaultValue: place_id,
@@ -250,7 +242,7 @@ const [assets, setAssets] = useState<Asset[]>([])
     },
     {
       name: "assetId",
-      label: "الأصل",
+      label: t`Asset`,
       type: "select",
       options: assets.map((asset) => ({
         value: asset.id,
@@ -259,26 +251,26 @@ const [assets, setAssets] = useState<Asset[]>([])
     },
     {
       name: "priority",
-      label: "الأولوية",
+      label: t`Priority`,
       type: "select",
       required: true,
       defaultValue: "MEDIUM",
       options: [
-        { value: "LOW", label: "منخفضة" },
-        { value: "MEDIUM", label: "متوسطة" },
-        { value: "HIGH", label: "عالية" },
-        { value: "URGENT", label: "عاجلة" },
+        { value: "LOW", label: t`Low` },
+        { value: "MEDIUM", label: t`Medium` },
+        { value: "HIGH", label: t`High` },
+        { value: "URGENT", label: t`Urgent` },
       ],
     },
     {
       name: "description",
-      label: "وصف المشكلة",
+      label: t`Description`,
       type: "text",
       required: true,
     },
     {
       name: "photos",
-      label: "صور المشكلة",
+      label: t`Photos of the damage`,
       type: "file",
       accept: "image/*",
       multiple: true,

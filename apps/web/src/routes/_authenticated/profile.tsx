@@ -2,9 +2,9 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
 import { Trans } from "@lingui/react/macro"
-import { i18n } from "@lingui/core"
+import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
-import { useLanguage } from "@/lib/i18n"
+import { LANGUAGE_NAMES, useLanguage } from "@/lib/i18n"
 import {
   UserRound,
   Mail,
@@ -51,12 +51,6 @@ interface ProfileForm {
   preferred_language: string
   picture: File | null
 }
-export function changeLanguage(language: "ar" | "en") {
-  i18n.activate(language)
-
-  document.documentElement.lang = language
-  document.documentElement.dir = language === "ar" ? "rtl" : "ltr"
-}
 function formatDate(value: string | null, locale: string) {
   if (!value) return "—"
 
@@ -75,7 +69,6 @@ function ProfilePage() {
   const { i18n } = useLingui()
   const { lang, setLang } = useLanguage()
 
-  const isArabic = lang === "ar"
   const locale = lang
 
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -97,42 +90,42 @@ function ProfilePage() {
   const [preview, setPreview] = useState<string | null>(null)
 
   const messages = {
-    loading: isArabic ? "جارٍ التحميل..." : "Loading...",
-    failedLoad: isArabic ? "تعذر تحميل الملف الشخصي." : "Failed to load profile.",
-    failedUpdate: isArabic ? "تعذر تحديث الملف الشخصي." : "Failed to update profile.",
-    invalidImage: isArabic ? "يرجى اختيار صورة صالحة." : "Please select a valid image.",
-    imageTooLarge: isArabic ? "يجب ألا يتجاوز حجم الصورة 5 ميجابايت." : "Image size must not exceed 5MB.",
-    fullNameRequired: isArabic ? "الاسم الكامل مطلوب." : "Full name is required.",
-    updated: isArabic ? "تم تحديث الملف الشخصي بنجاح." : "Profile updated successfully.",
-    saving: isArabic ? "جارٍ الحفظ..." : "Saving...",
-    save: isArabic ? "حفظ التغييرات" : "Save Changes",
-    cancel: isArabic ? "إلغاء" : "Cancel",
-    edit: isArabic ? "تعديل الملف الشخصي" : "Update Profile",
-    chooseImage: isArabic ? "اختر صورة" : "Choose Image",
-    fullName: isArabic ? "الاسم الكامل" : "Full Name",
-    phone: isArabic ? "رقم الهاتف" : "Phone Number",
-    language: isArabic ? "اللغة المفضلة" : "Preferred Language",
-    picture: isArabic ? "الصورة الشخصية" : "Profile Picture",
-    email: isArabic ? "البريد الإلكتروني" : "Email Address",
-    role: isArabic ? "الصلاحية" : "Role",
-    status: isArabic ? "حالة الحساب" : "Account Status",
-    verified: isArabic ? "تاريخ التحقق من البريد" : "Email Verified At",
-    created: isArabic ? "تاريخ إنشاء الحساب" : "Created At",
-    updatedAt: isArabic ? "آخر تحديث" : "Last Updated",
-    myProfile: isArabic ? "ملفي الشخصي" : "My Profile",
-    description: isArabic ? "عرض معلومات حسابك الشخصية." : "View your account information.",
-    editInfo: isArabic ? "تعديل المعلومات الشخصية" : "Edit Personal Information",
-    personalInfo: isArabic ? "المعلومات الشخصية" : "Personal Information",
-    enterName: isArabic ? "أدخل اسمك الكامل" : "Enter your full name",
-    enterPhone: isArabic ? "أدخل رقم الهاتف" : "Enter phone number",
-    leaveImage: isArabic ? "اترك الحقل فارغًا للاحتفاظ بالصورة الحالية." : "Leave empty to keep the current picture.",
-    active: isArabic ? "نشط" : "Active",
-    invited: isArabic ? "مدعو" : "Invited",
-    pending: isArabic ? "بانتظار التحقق" : "Pending Verification",
-    deactivated: isArabic ? "معطل" : "Deactivated",
-    admin: isArabic ? "مدير النظام" : "Admin",
-    manager: isArabic ? "مالك" : "Manager",
-    worker: isArabic ? "عامل" : "Worker",
+    loading: t`Loading...`,
+    failedLoad: t`Failed to load profile.`,
+    failedUpdate: t`Failed to update profile.`,
+    invalidImage: t`Please select a valid image.`,
+    imageTooLarge: t`Image size must not exceed 5MB.`,
+    fullNameRequired: t`Full name is required.`,
+    updated: t`Profile updated successfully.`,
+    saving: t`Saving...`,
+    save: t`Save Changes`,
+    cancel: t`Cancel`,
+    edit: t`Update Profile`,
+    chooseImage: t`Choose Image`,
+    fullName: t`Full Name`,
+    phone: t`Phone Number`,
+    language: t`Preferred Language`,
+    picture: t`Profile Picture`,
+    email: t`Email Address`,
+    role: t`Role`,
+    status: t`Account Status`,
+    verified: t`Email Verified At`,
+    created: t`Created At`,
+    updatedAt: t`Last Updated`,
+    myProfile: t`My Profile`,
+    description: t`View your account information.`,
+    editInfo: t`Edit Personal Information`,
+    personalInfo: t`Personal Information`,
+    enterName: t`Enter your full name`,
+    enterPhone: t`Enter phone number`,
+    leaveImage: t`Leave empty to keep the current picture.`,
+    active: t`Active`,
+    invited: t`Invited`,
+    pending: t`Pending Verification`,
+    deactivated: t`Deactivated`,
+    admin: t`Admin`,
+    manager: t`Manager`,
+    worker: t`Worker`,
   }
 
   function translateStatus(value: string) {
@@ -167,12 +160,6 @@ function ProfilePage() {
         setError("")
 
         const data = await getProfile(accessToken)
-
-        if (!alive) return
-
-        if (data.preferred_language === "ar" || data.preferred_language === "en") {
-          setLang(data.preferred_language)
-        }
 
         if (!alive) return
 
@@ -342,7 +329,7 @@ function ProfilePage() {
 
   if (loading) {
     return (
-      <div dir={isArabic ? "rtl" : "ltr"} style={S("padding: 40px 48px 56px")}>
+      <div style={S("padding: 40px 48px 56px")}>
         <Skeleton style={S("height: 36px; width: 220px; margin-bottom: 24px")} />
         <Skeleton style={S("height: 180px; margin-bottom: 20px")} />
         <Skeleton style={S("height: 300px")} />
@@ -352,7 +339,7 @@ function ProfilePage() {
 
   if (error && !profile) {
     return (
-      <div dir={isArabic ? "rtl" : "ltr"} style={S("padding: 40px 48px 56px")}>
+      <div style={S("padding: 40px 48px 56px")}>
         <div style={S("color: var(--destructive); font-size: 14px")}>
           {error}
         </div>
@@ -407,7 +394,6 @@ function ProfilePage() {
 
   return (
     <div
-      dir={isArabic ? "rtl" : "ltr"}
       style={S("padding: 40px 48px 56px; width: 100%; box-sizing: border-box")}
     >
       <div style={S("margin-bottom: 28px")}>
@@ -552,8 +538,8 @@ function ProfilePage() {
                   onChange={(e) => handleChange("preferred_language", e.target.value)}
                   style={S("padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--background); color: var(--foreground)")}
                 >
-                  <option value="en">English</option>
-                  <option value="ar">العربية</option>
+                  <option value="en">{LANGUAGE_NAMES.en}</option>
+                  <option value="ar">{LANGUAGE_NAMES.ar}</option>
                 </select>
               </div>
 

@@ -193,7 +193,7 @@ function ForgotPasswordPage() {
                 href="/signin"
                 className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
                 <Trans>Back to Login</Trans>
               </a>
             </div>

@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react"
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 import {
   Check,
@@ -105,13 +106,13 @@ function ContentDetailsPage() {
     setSaveSuccess(false)
 
     if (!title.trim() || !slug.trim() || !body.trim()) {
-      setSaveError("يرجى تعبئة جميع الحقول المطلوبة.")
+      setSaveError(t`Fill in all the required fields.`)
       return
     }
 
     if (!slugIsValid) {
       setSaveError(
-        "الرابط يجب أن يحتوي على أحرف إنجليزية صغيرة وأرقام وشرطة (-) فقط.",
+        t`The slug can only have lowercase English letters, numbers and hyphens (-).`,
       )
       return
     }
@@ -139,7 +140,7 @@ function ContentDetailsPage() {
       setSaveError(
         error instanceof Error
           ? error.message
-          : "تعذر حفظ التعديلات.",
+          : t`Could not save the changes.`,
       )
     } finally {
       setSaving(false)
@@ -150,7 +151,7 @@ function ContentDetailsPage() {
     if (!accessToken || !content || saving || deleting) return
 
     const confirmed = window.confirm(
-      "هل أنت متأكد من حذف هذه الصفحة؟ لا يمكن التراجع عن هذا الإجراء.",
+      t`Delete this page? This cannot be undone.`,
     )
 
     if (!confirmed) return
@@ -168,7 +169,7 @@ function ContentDetailsPage() {
       setSaveError(
         error instanceof Error
           ? error.message
-          : "تعذر حذف الصفحة.",
+          : t`Could not delete the page.`,
       )
     } finally {
       setDeleting(false)
@@ -180,7 +181,6 @@ function ContentDetailsPage() {
 
   return (
     <div
-      dir="rtl"
       style={S(`
         width: 100%;
         max-width: 1000px;
@@ -213,7 +213,7 @@ function ContentDetailsPage() {
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink render={<a href="/" />}>
-                  الرئيسية
+                  <Trans>Home</Trans>
                 </BreadcrumbLink>
               </BreadcrumbItem>
 
@@ -221,7 +221,7 @@ function ContentDetailsPage() {
 
               <BreadcrumbItem>
                 <BreadcrumbLink render={<a href="/content/" />}>
-                  المحتوى
+                  <Trans>Content</Trans>
                 </BreadcrumbLink>
               </BreadcrumbItem>
 
@@ -229,7 +229,7 @@ function ContentDetailsPage() {
 
               <BreadcrumbItem>
                 <BreadcrumbPage>
-                  تفاصيل الصفحة
+                  <Trans>Page details</Trans>
                 </BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
@@ -279,7 +279,7 @@ function ContentDetailsPage() {
           `)}
         >
           <CircleAlert size={18} />
-          تعذر تحميل بيانات الصفحة.
+          <Trans>We could not load the page.</Trans>
         </div>
       )}
 
@@ -372,7 +372,7 @@ function ContentDetailsPage() {
                 ) : (
                   <EyeOff size={14} />
                 )}
-                {content.is_published ? "منشورة" : "مسودة"}
+                {content.is_published ? t`Published` : t`Draft`}
               </span>
             )}
           </div>
@@ -411,7 +411,7 @@ function ContentDetailsPage() {
                 `)}
               >
                 <FileText size={18} />
-                معلومات الصفحة
+                <Trans>Page information</Trans>
               </CardTitle>
             </CardHeader>
 
@@ -436,7 +436,7 @@ function ContentDetailsPage() {
                     gap: 18px;
                   `)}
                 >
-                  <FormField label="عنوان الصفحة" htmlFor="content-title">
+                  <FormField label={t`Page title`} htmlFor="content-title">
                     <Input
                       id="content-title"
                       value={title}
@@ -445,16 +445,16 @@ function ContentDetailsPage() {
                     />
                   </FormField>
 
-                  <FormField label="لغة الصفحة" htmlFor="content-language">
+                  <FormField label={t`Page language`} htmlFor="content-language">
                     <Input
                       id="content-language"
-                      value={content.language === "ar" ? "العربية" : "English"}
+                      value={content.language === "ar" ? t`Arabic` : t`English`}
                       disabled
                       className="am-input"
                     />
                   </FormField>
 
-                  <FormField label="رابط الصفحة (Slug)" htmlFor="content-slug">
+                  <FormField label={t`Page slug`} htmlFor="content-slug">
                     <Input
                       id="content-slug"
                       value={slug}
@@ -474,20 +474,20 @@ function ContentDetailsPage() {
                           color: var(--destructive);
                         `)}
                       >
-                        صيغة الرابط غير صحيحة.
+                        <Trans>The slug format is not valid.</Trans>
                       </span>
                     )}
                   </FormField>
 
-                  <InfoField label="معرّف الصفحة" value={content.id} />
+                  <InfoField label={t`Page ID`} value={content.id} />
 
                   <InfoField
-                    label="تاريخ الإنشاء"
+                    label={t`Created`}
                     value={formattedDate(content.created_at)}
                   />
 
                   <InfoField
-                    label="آخر تحديث"
+                    label={t`Last updated`}
                     value={formattedDate(content.updated_at)}
                   />
                 </div>
@@ -529,7 +529,7 @@ function ContentDetailsPage() {
                 `)}
               >
                 <FileText size={18} />
-                محتوى الصفحة
+                <Trans>Page body</Trans>
               </CardTitle>
             </CardHeader>
 
@@ -590,7 +590,7 @@ function ContentDetailsPage() {
                 `)}
               >
                 <Globe size={18} />
-                إعدادات النشر
+                <Trans>Publishing</Trans>
               </CardTitle>
             </CardHeader>
 
@@ -625,7 +625,7 @@ function ContentDetailsPage() {
                   `)}
                 >
                   <span style={S("font-size: 13px; font-weight: 700")}>
-                    الصفحة منشورة
+                    <Trans>Published</Trans>
                   </span>
 
                   <span
@@ -634,7 +634,7 @@ function ContentDetailsPage() {
                       color: var(--muted-foreground);
                     `)}
                   >
-                    إلغاء التحديد يحوّل الصفحة إلى مسودة.
+                    <Trans>Unticking this makes the page a draft.</Trans>
                   </span>
                 </span>
               </label>
@@ -689,7 +689,7 @@ function ContentDetailsPage() {
                 `)}
               >
                 <Check size={16} />
-                تم تحديث الصفحة بنجاح.
+                <Trans>The page was updated.</Trans>
               </p>
             )}
 
@@ -714,7 +714,7 @@ function ContentDetailsPage() {
                 `)}
               >
                 <Save size={16} />
-                {saving ? "جارٍ الحفظ..." : "حفظ التغييرات"}
+                {saving ? t`Saving…` : t`Save changes`}
               </Button>
 
               <Button
@@ -728,7 +728,7 @@ function ContentDetailsPage() {
                 `)}
               >
                 <Trash2 size={16} />
-                {deleting ? "جارٍ الحذف..." : "حذف الصفحة"}
+                {deleting ? t`Deleting…` : t`Delete page`}
               </Button>
             </div>
           </div>

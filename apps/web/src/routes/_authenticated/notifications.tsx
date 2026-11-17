@@ -15,6 +15,7 @@ import {
   AlertCircle,
 } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 import { useAuth } from "@/lib/auth"
 import {
@@ -182,9 +183,7 @@ function NotificationsPage() {
       })
 
       setAnnouncementSuccess(
-        isArabic
-          ? `تم إرسال الإعلان بنجاح إلى ${money(result.recipient_count)} مستخدم.`
-          : `Announcement sent successfully to ${money(result.recipient_count)} users.`
+        t`Announcement sent successfully to ${money(result.recipient_count)} users.`
       )
 
       setTitleEn("")
@@ -423,13 +422,13 @@ function NotificationsPage() {
                     )}
                   >
                     <option value="ADMIN">
-                      {i18n._("Admin")}
+                      {t`Admin`}
                     </option>
                     <option value="MANAGER">
-                      {i18n._("Manager")}
+                      {t`Manager`}
                     </option>
                     <option value="WORKER">
-                      {i18n._("Worker")}
+                      {t`Worker`}
                     </option>
                   </select>
                 </div>
@@ -442,7 +441,7 @@ function NotificationsPage() {
                   <textarea
                     value={userIds}
                     onChange={(event) => setUserIds(event.target.value)}
-                    placeholder={i18n._("UUID 1, UUID 2...")}
+                    placeholder={t`UUID 1, UUID 2...`}
                     rows={3}
                     style={S(
                       "width: 100%; box-sizing: border-box; padding: 12px; resize: vertical; background: var(--background); color: var(--foreground); border: 1px solid var(--border); outline: none; font: inherit; font-size: 14px"
@@ -663,7 +662,6 @@ function NotificationsPage() {
               <NotificationCard
                 key={notification.id}
                 notification={notification}
-                locale={locale}
                 formatDate={formatDate}
                 reading={readingId === notification.id}
                 onMarkRead={() => handleMarkAsRead(notification.id)}
@@ -729,35 +727,35 @@ function NotificationsPage() {
 
 function NotificationCard({
   notification,
-  locale,
   formatDate,
   reading,
   onMarkRead,
 }: {
   notification: Notification
-  locale: string
   formatDate: (date: string) => string
   reading: boolean
   onMarkRead: () => void
 }) {
-  const isArabic = locale === "ar"
 
   const notificationTypeLabel = (type: string) => {
     switch (type) {
+      // The types the API sends (NOTIFICATION_TYPES in @amlak/shared).
       case "ANNOUNCEMENT":
         return <Trans>Announcement</Trans>
+      case "TICKET_SUBMITTED":
+        return <Trans>Ticket submitted</Trans>
       case "TICKET_ASSIGNED":
         return <Trans>Ticket assigned</Trans>
-      case "TICKET_UPDATED":
-        return <Trans>Ticket updated</Trans>
-      case "TICKET_RESOLVED":
-        return <Trans>Ticket resolved</Trans>
+      case "TICKET_REJECTED":
+        return <Trans>Ticket rejected</Trans>
+      case "TICKET_COMPLETED":
+        return <Trans>Ticket completed</Trans>
       case "MAINTENANCE_REMINDER":
         return <Trans>Maintenance reminder</Trans>
-      case "BOOKING_CREATED":
-        return <Trans>Booking created</Trans>
-      case "BOOKING_UPDATED":
-        return <Trans>Booking updated</Trans>
+      case "MAINTENANCE_OVERDUE":
+        return <Trans>Maintenance overdue</Trans>
+      case "SUPPORT_RESOLVED":
+        return <Trans>Support ticket resolved</Trans>
       default:
         return type.replaceAll("_", " ")
     }
@@ -825,7 +823,7 @@ function NotificationCard({
                   style={S(
                     "width: 7px; height: 7px; border-radius: 50%; background: var(--info-700)"
                   )}
-                  title={isArabic ? "غير مقروء" : "Unread"}
+                  title={t`Unread`}
                 />
               )}
             </div>

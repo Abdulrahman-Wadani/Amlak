@@ -46,7 +46,7 @@ const NAV: NavItem[] = [
   },
   {
     to: "/notifications",
-    label: <Trans>Notfications</Trans>,
+    label: <Trans>Notifications</Trans>,
     d: "",
   },
 ]
@@ -124,14 +124,16 @@ else{
               "width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: var(--foreground); color: var(--card); font-family: var(--font-sans); font-size: 14px; font-weight: 800; line-height: 1"
             )}
           >
-            A
+            <Trans comment="Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ">
+              A
+            </Trans>
           </span>
           <span
             style={S(
               "font-family: var(--font-sans); font-size: 19px; font-weight: 800; line-height: 1; color: var(--foreground)"
             )}
           >
-            Amlak
+            <Trans>Amlak</Trans>
           </span>
         </Link>
 
