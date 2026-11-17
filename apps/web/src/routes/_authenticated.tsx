@@ -24,5 +24,5 @@ function ManagerLayout() {
   }, [user, navigate])
   if (!user) return null
   // For roles will be fixed later
-  return <AppShell role="manager" />
+  return <AppShell role={user.role} />
 }

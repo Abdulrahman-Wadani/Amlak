@@ -13,7 +13,7 @@ import {
   getTicketsForPlace,
 } from "@/lib/api"
 import { S } from "@/lib/dom-style"
-import { buttonVariants } from "@/components/ui/button"
+import { buttonVariants, Button } from "@/components/ui/button"
 import { cn } from "cn"
 import {
   ArrowRight,
@@ -39,6 +39,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { PlaceBookings } from "@/components/place-bookings"
 import {
   AssetStatusBadge,
   StatusBadge,
@@ -88,6 +89,7 @@ function PlaceDetailPage() {
   const [workers, setWorkers] = useState<Worker[] | null>(null)
   const [tickets, setTickets] = useState<Awaited<ReturnType<typeof getTicketsForPlace>> | null>(null)
   const [failed, setFailed] = useState(false)
+  const [activeSection, setActiveSection] = useState<"assets" | "workers" | "tickets" | "bookings" | null>(null)
 
 
   const [deleting, setDeleting] = useState(false)
@@ -305,13 +307,13 @@ function getWorkerName(userId: string | null | undefined) {
   }
 
   return (
+    <center>
     <div
       dir="rtl"
       style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 900px"
+        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 80%"
       )}
     >
-      {/* Header */}
       <div
         style={S(
           "display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px"
@@ -321,7 +323,6 @@ function getWorkerName(userId: string | null | undefined) {
           style={S(
             "display: flex; flex-direction: column; gap: 6px; min-width: 0"
           )}
-          style={S("height: 40px; padding: 0 16px; gap: 8px")}
         >
           <div
             style={S(
@@ -366,6 +367,7 @@ function getWorkerName(userId: string | null | undefined) {
           {place && (
             <button
               type="button"
+              id="update"
               onClick={openEditForm}
               className="am-btn"
               style={S(
@@ -381,6 +383,7 @@ function getWorkerName(userId: string | null | undefined) {
             <button
               type="button"
               onClick={handleDelete}
+              id="remove"
               disabled={deleting || saving}
               className="am-btn"
               style={S(
@@ -415,7 +418,6 @@ function getWorkerName(userId: string | null | undefined) {
 
       {!failed && (
         <>
-          {/* Update property form */}
           {editing && editForm && (
             <Card
               style={S(
@@ -435,6 +437,7 @@ function getWorkerName(userId: string | null | undefined) {
 
                 <button
                   type="button"
+                  id="update"
                   onClick={() => setEditing(false)}
                   disabled={saving}
                   style={S(
@@ -622,7 +625,6 @@ function getWorkerName(userId: string | null | undefined) {
             </Card>
           )}
 
-          {/* Property information */}
           <Card
             className="am-lift"
             style={S(
@@ -701,7 +703,60 @@ function getWorkerName(userId: string | null | undefined) {
             </CardContent>
           </Card>
 
-          {/* Assets */}
+          <div style={S("display: flex; gap: 10px; flex-wrap: wrap; align-items: center")}>
+            <Button
+              type="button"
+              id="assets"
+              variant={activeSection === "assets" ? "default" : "outline"}
+              size="sm"
+              className="am-btn"
+              onClick={() => setActiveSection(activeSection === "assets" ? null : "assets")}
+              style={S("height: 40px; padding: 0 16px; gap: 8px")}
+            >
+              <Building2 size={16} />
+              الأصول
+            </Button>
+            <Button
+              type="button"
+              variant={activeSection === "workers" ? "default" : "outline"}
+              size="sm"
+              id="worker"
+              className="am-btn"
+              onClick={() => setActiveSection(activeSection === "workers" ? null : "workers")}
+              style={S("height: 40px; padding: 0 16px; gap: 8px")}
+            >
+              <Users size={16} />
+              العمال
+            </Button>
+            <Button
+              type="button"
+              variant={activeSection === "tickets" ? "default" : "outline"}
+              size="sm"
+              className="am-btn"
+              onClick={() => setActiveSection(activeSection === "tickets" ? null : "tickets")}
+              style={S("height: 40px; padding: 0 16px; gap: 8px")}
+            >
+              <Wrench size={16} />
+              تذاكر الصيانة
+            </Button>
+            <Button
+              type="button"
+              variant={activeSection === "bookings" ? "default" : "outline"}
+              size="sm"
+              className="am-btn"
+              onClick={() => setActiveSection(activeSection === "bookings" ? null : "bookings")}
+              style={S("height: 40px; padding: 0 16px; gap: 8px")}
+            >
+              <CalendarDays size={16} />
+              <Trans>Bookings</Trans>
+            </Button>
+          </div>
+
+          {activeSection === "bookings" && (
+            <PlaceBookings placeId={place_id} />
+          )}
+
+          {activeSection === "assets" && (
           <Card
             className="am-lift"
             style={S(
@@ -847,7 +902,9 @@ function getWorkerName(userId: string | null | undefined) {
             </CardContent>
           </Card>
 
-          {/* Workers */}
+          )}
+
+          {activeSection === "workers" && (
           <Card
             className="am-lift"
             style={S(
@@ -855,24 +912,32 @@ function getWorkerName(userId: string | null | undefined) {
             )}
           >
             <CardHeader
-              style={S(
-                "padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px"
-              )}
-            >
-              <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-                <Users size={17} style={S("display: inline; vertical-align: middle; margin-inline-end: 7px")} />
-                العمال
-                {workers !== null && (
-                  <span
-                    style={S(
-                      "margin-inline-start: 8px; font-size: 12px; font-weight: 600; color: var(--muted-foreground); border: 1px solid var(--border); padding: 2px 8px"
-                    )}
-                  >
-                    {workers.filter((worker) => isWorkerAssignedToPlace(worker, place_id)).length}
-                  </span>
-                )}
-              </CardTitle>
-            </CardHeader>
+  style={S(
+    "padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px"
+  )}
+>
+  <CardTitle style={S("font-size: 17px; font-weight: 750")}>
+    <Users size={17} style={S("display: inline; vertical-align: middle; margin-inline-end: 7px")} />
+    العمال
+    {workers !== null && (
+      <span style={S("margin-inline-start: 8px; font-size: 12px; font-weight: 600; color: var(--muted-foreground); border: 1px solid var(--border); padding: 2px 8px")}>
+        {workers.filter((worker) => isWorkerAssignedToPlace(worker, place_id)).length}
+      </span>
+    )}
+  </CardTitle>
+
+  <Button
+    type="button"
+    variant="outline"
+    size="sm"
+    className={cn(buttonVariants({ variant: "outline", size: "sm" }), "am-btn")}
+    style={S("height: 38px; padding: 0 12px; gap: 6px; white-space: nowrap")}
+    onClick={handleAddWorker}
+  >
+    <Plus size={16} />
+    إضافة عامل
+  </Button>
+</CardHeader>
 
             <CardContent style={S("padding: 20px; display: flex; flex-direction: column; gap: 18px")}>
               {workers === null ? (
@@ -925,9 +990,10 @@ function getWorkerName(userId: string | null | undefined) {
                   <div style={S("border-top: 1px solid var(--border); padding-top: 18px")}>
                     <h3 style={S("font-size: 14px; font-weight: 700; margin: 0 0 12px")}>إضافة عامل</h3>
                     <form
-                      onSubmit={handleAddWorker}
-                      style={S("display: flex; align-items: end; gap: 10px; flex-wrap: wrap")}
-                    >
+  id="add-worker-form"
+  onSubmit={handleAddWorker}
+  style={S("display: flex; align-items: end; gap: 10px; flex-wrap: wrap")}
+>
                       <label style={S("display: flex; flex-direction: column; gap: 7px; flex: 1; min-width: 220px; font-size: 13px; font-weight: 600")}>
                         <span>اختر العامل (الاسم و ID)</span>
                         <select
@@ -951,15 +1017,6 @@ function getWorkerName(userId: string | null | undefined) {
                             ))}
                         </select>
                       </label>
-                      <button
-                        type="submit"
-                        disabled={!selectedWorkerId || addingWorker}
-                        className="am-btn am-solid"
-                        style={S("height: 40px; padding: 0 16px; display: flex; align-items: center; gap: 7px; white-space: nowrap; opacity: addingWorker ? .6 : 1")}
-                      >
-                        <Plus size={16} />
-                        {addingWorker ? "جارٍ الإضافة..." : "إضافة العامل"}
-                      </button>
                     </form>
                     {workerError && (
                       <p style={S("color: var(--destructive); font-size: 13px; margin: 10px 0 0")}>{workerError}</p>
@@ -976,13 +1033,15 @@ function getWorkerName(userId: string | null | undefined) {
             </CardContent>
           </Card>
 
-       {/* Maintenance Tickets */}
+          )}
+
+          {activeSection === "tickets" && (
 <Card
   className="am-lift"
   style={S("padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0")}
 >
   <CardHeader
-    style={S("padding: 18px 20px; border-bottom: 1px solid var(--border)")}
+    style={S("padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px")}
   >
     <CardTitle style={S("font-size: 17px; font-weight: 750")}>
       تذاكر الصيانة
@@ -991,7 +1050,8 @@ function getWorkerName(userId: string | null | undefined) {
           {tickets.length}
         </span>
       )}
-      <CardAction>
+    </CardTitle>
+    <CardAction>
                 <Link
                   to="/ticket/new"
                   search={{ place_id }}
@@ -1006,8 +1066,7 @@ function getWorkerName(userId: string | null | undefined) {
                   <Plus size={16} />
                   <Trans>أضافة تذكرة</Trans>
                 </Link>
-              </CardAction>
-    </CardTitle>
+    </CardAction>
   </CardHeader>
 
   <CardContent style={S("padding: 20px")}>
@@ -1060,11 +1119,20 @@ function getWorkerName(userId: string | null | undefined) {
       </div>
     )}
   </CardContent>
-</Card>
+</Card>          )}
 
         </>
       )}
+      {
+        ["assets", "worker", "update", "remove"].forEach((id) => {
+  const element = document.getElementById(id)
+  if (useAuth().user.role != "MANAGER") {
+    element.style.display = "none"
+  }
+})
+      }
     </div>
+    </center>
   )
 }
 

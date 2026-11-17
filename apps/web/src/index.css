@@ -10,6 +10,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --text-caption: 13px;
+  --text-caption--line-height: 20px;
   --font-heading: var(--font-sans);
   --font-sans: "Archivo Variable", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;

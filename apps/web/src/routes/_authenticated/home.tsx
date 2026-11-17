@@ -6,12 +6,20 @@ import {
   ChevronUp,
   Ticket,
   Wallet,
+  Wrench,
+  AlertTriangle,
+  CheckCircle2,
+  LogOut,
 } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
 import { useLingui } from "@lingui/react"
 import type { Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
-import { getPlaces } from "@/lib/api"
+import {
+  getPlaces,
+  getDashboard,
+  type DashboardPlace,
+} from "@/lib/api"
 import { S } from "@/lib/dom-style"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "cn"
@@ -32,7 +40,6 @@ import {
 import { StatusBadge, TypeLabel } from "@/components/place-shared"
 import "@/styles/motion.css"
 
-
 export const Route = createFileRoute("/_authenticated/home")({
   component: HomePage,
 })
@@ -46,34 +53,142 @@ function greeting(hour: number): ReactNode {
 function HomePage() {
   const { i18n } = useLingui()
   const { user, accessToken } = useAuth()
+
   const [places, setPlaces] = useState<Place[] | null>(null)
-  const [error, setError] = useState(false)
+  const [dashboard, setDashboard] = useState<DashboardPlace[] | null>(null)
+
+  const [placesError, setPlacesError] = useState(false)
+  const [dashboardError, setDashboardError] = useState(false)
+
   const [now] = useState(() => new Date())
+
+  const isWorker = String(user?.role ?? "").toUpperCase() === "WORKER"
 
   useEffect(() => {
     if (!accessToken) return
+
     let alive = true
+
+    Promise.all([
+      getPlaces(accessToken),
+      getDashboard(accessToken),
+    ])
+      .then(([placesResult, dashboardResult]) => {
+        if (!alive) return
+
+        setPlaces(placesResult)
+        setDashboard(dashboardResult.data)
+      })
+      .catch(() => {
+        if (!alive) return
+      })
+
     getPlaces(accessToken)
-      .then((list) => alive && setPlaces(list))
-      .catch(() => alive && setError(true))
+      .then((result) => {
+        if (alive) setPlaces(result)
+      })
+      .catch(() => {
+        if (alive) setPlacesError(true)
+      })
+
+    getDashboard(accessToken)
+      .then((result) => {
+        if (alive) setDashboard(result.data)
+      })
+      .catch(() => {
+        if (alive) setDashboardError(true)
+      })
+
     return () => {
       alive = false
     }
   }, [accessToken])
+  if (useAuth().user.role == 'ADMIN'){
+  document.location.href="/admin"
+  }
+
 
   const locale = i18n.locale === "ar" ? "ar" : "en"
+
   const today = new Intl.DateTimeFormat(locale, {
     weekday: "long",
     day: "numeric",
     month: "long",
   }).format(now)
-  const money = (n: number) => new Intl.NumberFormat(locale).format(n)
 
-  const budgetTotal = useMemo(
-    () => (places ?? []).reduce((sum, p) => sum + p.monthly_maintenance_budget, 0),
-    [places]
+  const money = (n: number) =>
+    new Intl.NumberFormat(locale).format(n)
+
+  const stats = useMemo(() => {
+    const rows = dashboard ?? []
+
+    const pendingTickets = rows.reduce(
+      (sum, p) => sum + (p.open_tickets?.PENDING_REVIEW ?? 0),
+      0
+    )
+
+    const approvedTickets = rows.reduce(
+      (sum, p) => sum + (p.open_tickets?.APPROVED ?? 0),
+      0
+    )
+
+    const overdueTickets = rows.reduce(
+      (sum, p) => sum + (p.open_tickets?.overdue ?? 0),
+      0
+    )
+
+    const checkIns = rows.reduce(
+      (sum, p) => sum + (p.today?.check_ins ?? 0),
+      0
+    )
+
+    const checkOuts = rows.reduce(
+      (sum, p) => sum + (p.today?.check_outs ?? 0),
+      0
+    )
+
+    const budgets = rows
+      .map((p) => p.maintenance_budget)
+      .filter((budget) => budget !== null)
+
+    const budgetTotal = budgets.reduce(
+      (sum, budget) => sum + (budget?.budget ?? 0),
+      0
+    )
+
+    const budgetSpent = budgets.reduce(
+      (sum, budget) => sum + (budget?.spent ?? 0),
+      0
+    )
+
+    const budgetRemaining = budgets.reduce(
+      (sum, budget) => sum + (budget?.remaining ?? 0),
+      0
+    )
+
+    const currency = budgets[0]?.currency ?? "SAR"
+
+    return {
+      pendingTickets,
+      approvedTickets,
+      overdueTickets,
+      checkIns,
+      checkOuts,
+      bookings: checkIns + checkOuts,
+      budgetTotal,
+      budgetSpent,
+      budgetRemaining,
+      currency,
+    }
+  }, [dashboard])
+
+  const dashboardLoading = dashboard === null && !dashboardError
+  const placesLoading = places === null && !placesError
+
+  const dashboardByPlace = useMemo(
+    () => new Map((dashboard ?? []).map((p) => [p.place_id, p])),
+    [dashboard]
   )
-  const currency = places?.[0]?.currency ?? "SAR"
 
   return (
     <div
@@ -81,11 +196,12 @@ function HomePage() {
         "max-width: 1240px; margin-inline: auto; padding: 28px 40px 56px; display: flex; flex-direction: column; gap: 24px; box-sizing: border-box"
       )}
     >
+      {/* Welcome section */}
       <section
         aria-label="today"
         className="am-rise"
         style={S(
-          "background: var(--foreground); color: #fff; padding: 32px; box-shadow: 4px 4px 0 var(--warn); display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: flex-end; justify-content: space-between; box-sizing: border-box"
+          "background: var(--foreground); color: #fff; padding: 32px; display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: flex-end; justify-content: space-between; box-sizing: border-box"
         )}
       >
         <div
@@ -96,35 +212,34 @@ function HomePage() {
           <span style={S("font-size: 14px; color: var(--info-200)")}>
             <Trans>Today</Trans>, {today}
           </span>
-          <p style={S("margin: 0; font-size: 28px; font-weight: 700; line-height: 1.35")}>
+
+          <p
+            style={S(
+              "margin: 0; font-size: 28px; font-weight: 700; line-height: 1.35"
+            )}
+          >
             {greeting(now.getHours())}, {user?.fullname}
           </p>
+
           <span style={S("font-size: 14px; color: var(--info-200)")}>
-            <Trans>
-              Ticket and booking activity appears here once those services are
-              wired up.
-            </Trans>
+            
           </span>
         </div>
+
         <div style={S("display: flex; flex-wrap: wrap; gap: 10px")}>
           <Link
             to="/tickets"
-            className={cn(
-              buttonVariants(),
-              "am-btn"
-            )}
+            className={cn(buttonVariants(), "am-btn")}
             style={S(
               "height: 44px; padding: 0 16px; background: #fff; color: var(--foreground); border: 1px solid #fff; font-size: 15px; font-weight: 600"
             )}
           >
             <Trans>Review tickets</Trans>
           </Link>
+
           <Link
             to="/bookings"
-            className={cn(
-              buttonVariants({ variant: "outline" }),
-              "am-btn"
-            )}
+            className={cn(buttonVariants({ variant: "outline" }), "am-btn")}
             style={S(
               "height: 44px; padding: 0 16px; background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.45); font-size: 15px; font-weight: 600"
             )}
@@ -134,9 +249,10 @@ function HomePage() {
         </div>
       </section>
 
+      {/* Statistics */}
       <div
         style={S(
-          "display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; align-items: start"
+          "display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; align-items: stretch"
         )}
       >
         <StatCard
@@ -144,49 +260,96 @@ function HomePage() {
           iconBg="var(--warn-50)"
           iconFg="var(--warn)"
           title={<Trans>Tickets waiting for your review</Trans>}
-          value="—"
+          value={
+            dashboardLoading ? (
+              <Skeleton style={S("height: 40px; width: 100px")} />
+            ) : dashboardError ? (
+              "—"
+            ) : (
+              money(stats.pendingTickets)
+            )
+          }
           note={
-            <Trans>
-              Ticket data appears here once the maintenance service is wired up.
-            </Trans>
+            dashboardLoading ? (
+              <Trans>Loading ticket statistics...</Trans>
+            ) : (
+              <span>
+                <Trans>Approved:</Trans> {money(stats.approvedTickets)}
+                {" · "}
+                <span style={S("color: var(--danger)")}>
+                  <Trans>Overdue:</Trans> {money(stats.overdueTickets)}
+                </span>
+              </span>
+            )
           }
         />
+
         <StatCard
           icon={<CalendarDays size={20} />}
           iconBg="var(--info-50)"
           iconFg="var(--info-700)"
           title={<Trans>Bookings today</Trans>}
-          value="—"
-          note={
-            <Trans>
-              Booking data appears here once the bookings service is wired up.
-            </Trans>
-          }
-        />
-        <StatCard
-          icon={<Wallet size={20} />}
-          iconBg="var(--good-50)"
-          iconFg="var(--good)"
-          title={<Trans>Monthly maintenance budget</Trans>}
           value={
-            loading(places, error) ? (
-              <Skeleton style={S("height: 40px; width: 140px")} />
+            dashboardLoading ? (
+              <Skeleton style={S("height: 40px; width: 100px")} />
+            ) : dashboardError ? (
+              "—"
             ) : (
-              `${money(budgetTotal)} ${currency}`
+              money(stats.bookings)
             )
           }
           note={
-            <Trans>
-              Summed from your places' monthly budgets.
-            </Trans>
+            dashboardLoading ? (
+              <Trans>Loading booking statistics...</Trans>
+            ) : (
+              <span>
+                <Trans>Check-ins:</Trans> {money(stats.checkIns)}
+                {" · "}
+                <Trans>Check-outs:</Trans> {money(stats.checkOuts)}
+              </span>
+            )
           }
-        >
-          {places !== null && places.length > 0 && (
-            <BudgetDetails places={places} money={money} currency={currency} />
-          )}
-        </StatCard>
+        />
+
+        {!isWorker && (
+          <StatCard
+            icon={<Wallet size={20} />}
+            iconBg="var(--good-50)"
+            iconFg="var(--good)"
+            title={<Trans>Monthly maintenance budget</Trans>}
+            value={
+              dashboardLoading ? (
+                <Skeleton style={S("height: 40px; width: 140px")} />
+              ) : dashboardError ? (
+                "—"
+              ) : (
+                `${money(stats.budgetTotal)} ${stats.currency}`
+              )
+            }
+            note={
+              dashboardLoading ? (
+                <Trans>Loading budget statistics...</Trans>
+              ) : (
+                <span>
+                  <Trans>Spent:</Trans> {money(stats.budgetSpent)} {stats.currency}
+                  {" · "}
+                  <Trans>Remaining:</Trans> {money(stats.budgetRemaining)}{" "}
+                  {stats.currency}
+                </span>
+              )
+            }
+          >
+            {dashboard !== null && dashboard.length > 0 && (
+              <BudgetDetails
+                dashboard={dashboard}
+                money={money}
+              />
+            )}
+          </StatCard>
+        )}
       </div>
 
+      {/* Places */}
       <section>
         <div
           style={S(
@@ -196,6 +359,7 @@ function HomePage() {
           <h2 style={S("font-size: 16px; font-weight: 700; margin: 0")}>
             <Trans>Your places</Trans>
           </h2>
+
           <Link
             to="/places"
             className={cn(
@@ -207,20 +371,20 @@ function HomePage() {
           </Link>
         </div>
 
-        {loading(places, error) && (
+        {placesLoading && (
           <div style={S("display: flex; flex-direction: column; gap: 10px")}>
-            <Skeleton style={S("height: 96px")} />
-            <Skeleton style={S("height: 96px")} />
+            <Skeleton style={S("height: 120px")} />
+            <Skeleton style={S("height: 120px")} />
           </div>
         )}
 
-        {error && (
+        {placesError && (
           <p style={S("color: var(--muted-foreground)")}>
             <Trans>We could not load your places.</Trans>
           </p>
         )}
 
-        {places !== null && places.length === 0 && !error && (
+        {places !== null && places.length === 0 && !placesError && (
           <Empty style={S("padding: 32px")}>
             <EmptyHeader>
               <EmptyTitle>
@@ -231,10 +395,7 @@ function HomePage() {
               </EmptyDescription>
               <Link
                 to="/places"
-                className={cn(
-                  buttonVariants({ size: "sm" }),
-                  "am-btn"
-                )}
+                className={cn(buttonVariants({ size: "sm" }), "am-btn")}
               >
                 <Trans>Add property</Trans>
               </Link>
@@ -243,42 +404,96 @@ function HomePage() {
         )}
 
         <div style={S("display: flex; flex-direction: column; gap: 10px")}>
-          {(places ?? []).map((p) => (
-            <Link
-              key={p.id}
-              to="/place/$place_id"
-              params={{ place_id: p.id }}
-              className="am-lift"
-              style={S(
-                "display: flex; align-items: center; justify-content: space-between; gap: 16px; background: var(--card); border: 1px solid var(--border); padding: 14px 18px; text-decoration: none; color: inherit; box-shadow: 2px 2px 0 rgba(27,36,48,0.10)"
-              )}
-            >
-              <span style={S("display: flex; flex-direction: column; gap: 2px; min-width: 0")}>
-                <span style={S("font-size: 16px; font-weight: 700")}>{p.place_name}</span>
-                <span style={S("font-size: 13px; color: var(--muted-foreground)")}>
-                  <TypeLabel type={p.place_type} />, {p.city}
-                </span>
-              </span>
-              <span style={S("display: flex; align-items: center; gap: 14px; flex: none")}>
+          {(places ?? []).map((p) => {
+            const dashboardPlace = dashboardByPlace.get(p.id)
+
+            return (
+              <Link
+                key={p.id}
+                to="/place/$place_id"
+                params={{ place_id: p.id }}
+                className="am-lift"
+                style={S(
+                  "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; background: var(--card); border: 1px solid var(--border); padding: 16px 18px; text-decoration: none; color: inherit; box-shadow: 2px 2px 0 rgba(27,36,48,0.10)"
+                )}
+              >
                 <span
                   style={S(
-                    "font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 14px"
+                    "display: flex; flex-direction: column; gap: 4px; min-width: 0"
                   )}
                 >
-                  {money(p.monthly_maintenance_budget)} {p.currency}
+                  <span style={S("font-size: 16px; font-weight: 700")}>
+                    {p.place_name}
+                  </span>
+
+                  <span
+                    style={S(
+                      "font-size: 13px; color: var(--muted-foreground)"
+                    )}
+                  >
+                    <TypeLabel type={p.place_type} />, {p.city}
+                  </span>
+
+                  {dashboardPlace && (
+                    <span
+                      style={S(
+                        "display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; font-size: 12px; color: var(--muted-foreground)"
+                      )}
+                    >
+                      <span>
+                        <CheckCircle2
+                          size={13}
+                          style={{ display: "inline", verticalAlign: "middle" }}
+                        />{" "}
+                        <Trans>Good:</Trans>{" "}
+                        {money(dashboardPlace.assets?.GOOD ?? 0)}
+                      </span>
+
+                      <span>
+                        <Wrench
+                          size={13}
+                          style={{ display: "inline", verticalAlign: "middle" }}
+                        />{" "}
+                        <Trans>Needs maintenance:</Trans>
+                        {money(dashboardPlace.assets?.NEEDS_MAINTENANCE ?? 0)}
+                      </span>
+
+                      <span>
+                        <AlertTriangle
+                          size={13}
+                          style={{ display: "inline", verticalAlign: "middle" }}
+                        />{" "}
+                        <Trans>Out of service:</Trans>
+                        {money(dashboardPlace.assets?.OUT_OF_SERVICE ?? 0)}
+                      </span>
+                    </span>
+                  )}
                 </span>
-                <StatusBadge status={p.status} />
-              </span>
-            </Link>
-          ))}
+
+                <span
+                  style={S(
+                    "display: flex; align-items: center; flex-wrap: wrap; gap: 14px; flex: none"
+                  )}
+                >
+                  {!isWorker && (
+                    <span
+                      style={S(
+                        "font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 14px"
+                      )}
+                    >
+                      {money(p.monthly_maintenance_budget)} {p.currency}
+                    </span>
+                  )}
+
+                  <StatusBadge status={p.status} />
+                </span>
+              </Link>
+            )
+          })}
         </div>
       </section>
     </div>
   )
-}
-
-function loading(places: Place[] | null, error: boolean): boolean {
-  return places === null && !error
 }
 
 function StatCard({
@@ -311,9 +526,14 @@ function StatCard({
             "display: flex; align-items: center; justify-content: space-between; gap: 12px"
           )}
         >
-          <CardTitle style={S("font-size: 15px; font-weight: 500; color: #5B636E")}>
+          <CardTitle
+            style={S(
+              "font-size: 15px; font-weight: 500; color: #5B636E"
+            )}
+          >
             {title}
           </CardTitle>
+
           <span
             aria-hidden="true"
             style={S(
@@ -323,6 +543,7 @@ function StatCard({
             {icon}
           </span>
         </div>
+
         <span
           style={S(
             "font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 40px; font-weight: 700; line-height: 1.15"
@@ -330,27 +551,35 @@ function StatCard({
         >
           {value}
         </span>
+
         <CardDescription style={S("font-size: 14px; color: #5B636E")}>
           {note}
         </CardDescription>
       </CardHeader>
+
       {children && (
-        <CardContent style={S("padding: 0")}>{children}</CardContent>
+        <CardContent style={S("padding: 0")}>
+          {children}
+        </CardContent>
       )}
     </Card>
   )
 }
-
 function BudgetDetails({
-  places,
+  dashboard,
   money,
-  currency,
 }: {
-  places: Place[]
+  dashboard: DashboardPlace[]
   money: (n: number) => string
-  currency: string
 }) {
   const [open, setOpen] = useState(false)
+  
+
+
+  const placesWithBudget = dashboard.filter(
+    (p) => p.maintenance_budget !== null
+  )
+
   return (
     <>
       <Button
@@ -368,6 +597,7 @@ function BudgetDetails({
         {open ? <Trans>Hide details</Trans> : <Trans>Details</Trans>}
         {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </Button>
+        
       {open && (
         <div
           id="budget-details"
@@ -376,25 +606,46 @@ function BudgetDetails({
             "display: flex; flex-direction: column; border-top: 1px solid var(--border); padding-top: 8px"
           )}
         >
-          {places.map((p) => (
-            <div
-              key={p.id}
-              style={S(
-                "display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; font-size: 14px"
-              )}
-            >
-              <span style={S("min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap")}>
-                {p.place_name}
-              </span>
-              <span
+          {placesWithBudget.map((p) => {
+            const budget = p.maintenance_budget
+
+            if (!budget) return null
+
+            return (
+              <div
+                key={p.place_id}
                 style={S(
-                  "font-family: var(--font-mono); font-variant-numeric: tabular-nums; flex: none"
+                  "display: flex; flex-direction: column; gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px"
                 )}
               >
-                {money(p.monthly_maintenance_budget)} {currency}
-              </span>
-            </div>
-          ))}
+                <span style={S("font-weight: 600")}>
+                  {p.place_name}
+                </span>
+
+                <div
+                  style={S(
+                    "display: flex; flex-wrap: wrap; gap: 12px; color: var(--muted-foreground)"
+                  )}
+                >
+                  <span>
+                    <Trans>Budget:</Trans>{" "}
+                    {money(budget.budget)} {budget.currency}
+                  </span>
+
+                  <span>
+                    <Trans>Spent:</Trans>{" "}
+                    {money(budget.spent)} {budget.currency}
+                  </span>
+
+                  <span>
+                    <Trans>Remaining:</Trans>{" "}
+                    {money(budget.remaining)} {budget.currency}
+                  </span>
+                </div>
+              </div>
+            )
+          })}
+          
         </div>
       )}
     </>
