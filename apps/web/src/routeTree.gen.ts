@@ -22,7 +22,6 @@ import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/h
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedPlacesRouteImport } from './routes/_authenticated/places'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
-import { Route as AuthenticatedTestRouteImport } from './routes/_authenticated/test'
 import { Route as AuthenticatedTicketsRouteImport } from './routes/_authenticated/tickets'
 import { Route as AuthenticatedWorkersRouteImport } from './routes/_authenticated/workers'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
@@ -106,11 +105,6 @@ const AuthenticatedPlacesRoute = AuthenticatedPlacesRouteImport.update({
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedTestRoute = AuthenticatedTestRouteImport.update({
-  id: '/test',
-  path: '/test',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedTicketsRoute = AuthenticatedTicketsRouteImport.update({
@@ -233,7 +227,6 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/places': typeof AuthenticatedPlacesRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/test': typeof AuthenticatedTestRoute
   '/tickets': typeof AuthenticatedTicketsRoute
   '/workers': typeof AuthenticatedWorkersRoute
   '/admin/$admin_id': typeof AuthenticatedAdminAdmin_idRoute
@@ -267,7 +260,6 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/places': typeof AuthenticatedPlacesRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/test': typeof AuthenticatedTestRoute
   '/tickets': typeof AuthenticatedTicketsRoute
   '/workers': typeof AuthenticatedWorkersRoute
   '/admin/$admin_id': typeof AuthenticatedAdminAdmin_idRoute
@@ -303,7 +295,6 @@ export interface FileRoutesById {
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/places': typeof AuthenticatedPlacesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
-  '/_authenticated/test': typeof AuthenticatedTestRoute
   '/_authenticated/tickets': typeof AuthenticatedTicketsRoute
   '/_authenticated/workers': typeof AuthenticatedWorkersRoute
   '/_authenticated/admin/$admin_id': typeof AuthenticatedAdminAdmin_idRoute
@@ -339,7 +330,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/places'
     | '/profile'
-    | '/test'
     | '/tickets'
     | '/workers'
     | '/admin/$admin_id'
@@ -373,7 +363,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/places'
     | '/profile'
-    | '/test'
     | '/tickets'
     | '/workers'
     | '/admin/$admin_id'
@@ -408,7 +397,6 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications'
     | '/_authenticated/places'
     | '/_authenticated/profile'
-    | '/_authenticated/test'
     | '/_authenticated/tickets'
     | '/_authenticated/workers'
     | '/_authenticated/admin/$admin_id'
@@ -531,13 +519,6 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/test': {
-      id: '/_authenticated/test'
-      path: '/test'
-      fullPath: '/test'
-      preLoaderRoute: typeof AuthenticatedTestRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/tickets': {
@@ -683,7 +664,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPlacesRoute: typeof AuthenticatedPlacesRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
-  AuthenticatedTestRoute: typeof AuthenticatedTestRoute
   AuthenticatedTicketsRoute: typeof AuthenticatedTicketsRoute
   AuthenticatedWorkersRoute: typeof AuthenticatedWorkersRoute
   AuthenticatedAdminAdmin_idRoute: typeof AuthenticatedAdminAdmin_idRoute
@@ -712,7 +692,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPlacesRoute: AuthenticatedPlacesRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
-  AuthenticatedTestRoute: AuthenticatedTestRoute,
   AuthenticatedTicketsRoute: AuthenticatedTicketsRoute,
   AuthenticatedWorkersRoute: AuthenticatedWorkersRoute,
   AuthenticatedAdminAdmin_idRoute: AuthenticatedAdminAdmin_idRoute,
