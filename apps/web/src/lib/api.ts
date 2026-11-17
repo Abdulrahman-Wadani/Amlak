@@ -801,3 +801,340 @@ export async function resolveSupportTicket(
 
   return result;
 }
+
+
+export type ContentLanguage = "ar" | "en"
+
+export interface WebContent {
+  id: string
+  author_id: string
+  title: string
+  language: ContentLanguage
+  slug: string
+  body: string
+  is_published: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ContentPagination {
+  page: number
+  page_size: number
+  total: number
+  total_pages: number
+}
+
+export interface ContentListResponse {
+  data: WebContent[]
+  pagination: ContentPagination
+}
+
+export interface GetContentsParams {
+  language?: ContentLanguage
+  slug?: string
+  page?: number
+  page_size?: number
+}
+
+export interface CreateContentInput {
+  title: string
+  language: ContentLanguage
+  slug: string
+  body: string
+  is_published?: boolean
+}
+
+export interface UpdateContentInput {
+  title?: string
+  slug?: string
+  body?: string
+  is_published?: boolean
+}
+
+export async function getContents(
+  token: string,
+  params: GetContentsParams = {},
+): Promise<ContentListResponse> {
+  const query = new URLSearchParams()
+
+  if (params.language) query.set("language", params.language)
+  if (params.slug) query.set("slug", params.slug)
+  if (params.page) query.set("page", String(params.page))
+  if (params.page_size) query.set("page_size", String(params.page_size))
+
+  const response = await fetch(
+    `/api/v1/content${query.size ? `?${query.toString()}` : ""}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "same-origin",
+    },
+  )
+
+  const result = await response.json().catch(() => null)
+
+  if (!response.ok) {
+    throw new Error(
+      result?.message || `Failed to get content (${response.status})`,
+    )
+  }
+
+  if (!result || !Array.isArray(result.data) || !result.pagination) {
+    throw new Error("Invalid content list response")
+  }
+
+  return result
+}
+
+export async function getContentById(
+  token: string,
+  contentId: string,
+): Promise<WebContent> {
+  return apiRequest<WebContent>(`/content/${contentId}`, token).then(
+    (content) => {
+      if (!content || typeof content.id !== "string") {
+        throw new Error("Content not found")
+      }
+
+      return content
+    },
+  )
+}
+
+export async function createContent(
+  token: string,
+  input: CreateContentInput,
+): Promise<WebContent> {
+  return apiRequest<WebContent>("/content", token, {
+    method: "POST",
+    body: JSON.stringify(input),
+  })
+}
+
+export async function updateContent(
+  token: string,
+  contentId: string,
+  input: UpdateContentInput,
+): Promise<WebContent> {
+  return apiRequest<WebContent>(`/content/${contentId}`, token, {
+    method: "PUT",
+    body: JSON.stringify(input),
+  })
+}
+
+export async function deleteContent(
+  token: string,
+  contentId: string,
+): Promise<void> {
+  const response = await fetch(`/api/v1/content/${contentId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    credentials: "same-origin",
+  })
+
+  if (!response.ok) {
+    const result = await response.json().catch(() => null)
+
+    throw new Error(
+      result?.message || `Failed to delete content (${response.status})`,
+    )
+  }
+}
+
+
+export interface DashboardPlace {
+  place_id: string
+  place_name: string
+  status: string
+
+  assets: {
+    GOOD: number
+    NEEDS_MAINTENANCE: number
+    UNDER_MAINTENANCE: number
+    OUT_OF_SERVICE: number
+  }
+
+  open_tickets: {
+    PENDING_REVIEW: number
+    APPROVED: number
+    overdue: number
+  }
+
+  today: {
+    check_ins: number
+    check_outs: number
+  }
+
+  maintenance_budget: {
+    currency: string
+    budget: number
+    spent: number
+    remaining: number
+  } | null
+}
+
+export interface DashboardResponse {
+  data: DashboardPlace[]
+  pagination: {
+    page: number
+    page_size: number
+    total: number
+    total_pages: number
+  }
+}
+
+export async function getDashboard(
+  token: string,
+  params?: {
+    place_id?: string
+    page?: number
+    page_size?: number
+  }
+): Promise<DashboardResponse> {
+  const query = new URLSearchParams()
+
+  if (params?.place_id) query.set("place_id", params.place_id)
+  if (params?.page) query.set("page", String(params.page))
+  if (params?.page_size) query.set("page_size", String(params.page_size))
+
+  const response = await fetch(
+    `/api/v1/dashboard${query.toString() ? `?${query.toString()}` : ""}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  )
+
+  const result = await response.json()
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to fetch dashboard")
+  }
+
+  return result
+}
+
+
+export interface Notification {
+  id: string
+  type: string
+  title: string
+  message: string
+  is_read: boolean
+  sender_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface NotificationsResponse {
+  data: Notification[]
+  pagination: {
+    page: number
+    page_size: number
+    total: number
+    total_pages: number
+  }
+  unread_count: number
+}
+
+export interface SendAnnouncementInput {
+  role?: "ADMIN" | "MANAGER" | "WORKER"
+  user_ids?: string[]
+  title_en: string
+  message_en: string
+  title_ar: string
+  message_ar: string
+}
+
+export async function getNotifications(
+  token: string,
+  params?: {
+    is_read?: boolean
+    page?: number
+    page_size?: number
+  }
+): Promise<NotificationsResponse> {
+  const query = new URLSearchParams()
+
+  if (params?.is_read !== undefined) {
+    query.set("is_read", String(params.is_read))
+  }
+
+  if (params?.page !== undefined) {
+    query.set("page", String(params.page))
+  }
+
+  if (params?.page_size !== undefined) {
+    query.set("page_size", String(params.page_size))
+  }
+
+  const response = await fetch(
+    `/api/v1/notifications${query.toString() ? `?${query}` : ""}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  )
+
+  const result = await response.json()
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to fetch notifications")
+  }
+
+  return result
+}
+
+export async function markNotificationAsRead(
+  token: string,
+  notificationId: string
+): Promise<Notification> {
+  const response = await fetch(
+    `/api/v1/notifications/${notificationId}/read`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  )
+
+  const result = await response.json()
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to mark notification as read")
+  }
+
+  return result
+}
+
+export async function sendAnnouncement(
+  token: string,
+  input: SendAnnouncementInput
+): Promise<{ recipient_count: number }> {
+  const response = await fetch("/api/v1/notifications", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  })
+
+  const result = await response.json()
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to send announcement")
+  }
+
+  return result
+}

@@ -39,6 +39,16 @@ const NAV: NavItem[] = [
     label: <Trans>الدعم</Trans>,
     d: "M9 8a3.5 3.5 0 1 0 0-0M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6",
   },
+  {
+    to: "/content",
+    label: <Trans>المحتوى</Trans>,
+    d: "",
+  },
+  {
+    to: "/notifications",
+    label: <Trans>الاشعارات</Trans>,
+    d: "",
+  },
 ]
 
 const NAV_STYLE =
@@ -65,10 +75,31 @@ function Icon({ d, children }: { d?: string; children?: ReactNode }) {
   )
 }
 
-export function AppShell({ role }: { role: "manager" | "worker" | "admin" }) {
+export function AppShell({ role }: { role: "MANAGER" | "WORKER" | "ADMIN" }) {
   useLingui() // subscribe so strings refresh on language flip
   const { user, logout } = useAuth()
   void role
+  let visibleNAV: NavItem[] = NAV
+
+if (role === "ADMIN") {
+  visibleNAV = NAV.filter(
+    (item) =>
+      !["/home", "/places", "/finance", "/workers"].includes(item.to)
+  )
+}
+else if(role == "WORKER"){
+  visibleNAV = NAV.filter(
+    (item) =>
+      !["/home", "/finance","/workers","/admin","/content",].includes(item.to)
+  )
+}
+else{
+  visibleNAV = NAV.filter(
+    (item) =>
+      !["/admin","/content",].includes(item.to)
+  )
+}
+
   return (
     <div
       style={S(
@@ -109,7 +140,7 @@ export function AppShell({ role }: { role: "manager" | "worker" | "admin" }) {
             "display: flex; align-items: center; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none"
           )}
         >
-          {NAV.map((item) => (
+          {visibleNAV.map((item) => (
             <Link
               key={item.to}
               to={item.to}

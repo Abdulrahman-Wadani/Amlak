@@ -24,6 +24,9 @@ import { Route as AuthenticatedTicketsRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedWorkersRouteImport } from './routes/_authenticated/workers'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminAdmin_idRouteImport } from './routes/_authenticated/admin/$admin_id'
+import { Route as AuthenticatedContentIndexRouteImport } from './routes/_authenticated/content/index'
+import { Route as AuthenticatedContentContent_idRouteImport } from './routes/_authenticated/content/$content_id'
+import { Route as AuthenticatedContentNewRouteImport } from './routes/_authenticated/content/new'
 import { Route as AuthenticatedPlacePlace_idRouteImport } from './routes/_authenticated/place/$place_id'
 import { Route as AuthenticatedPlaceNewRouteImport } from './routes/_authenticated/place/new'
 import { Route as AuthenticatedSupportIndexRouteImport } from './routes/_authenticated/support/index'
@@ -113,6 +116,23 @@ const AuthenticatedAdminAdmin_idRoute =
     path: '/admin/$admin_id',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedContentIndexRoute =
+  AuthenticatedContentIndexRouteImport.update({
+    id: '/content/',
+    path: '/content/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedContentContent_idRoute =
+  AuthenticatedContentContent_idRouteImport.update({
+    id: '/content/$content_id',
+    path: '/content/$content_id',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedContentNewRoute = AuthenticatedContentNewRouteImport.update({
+  id: '/content/new',
+  path: '/content/new',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedPlacePlace_idRoute =
   AuthenticatedPlacePlace_idRouteImport.update({
     id: '/place/$place_id',
@@ -196,6 +216,8 @@ export interface FileRoutesByFullPath {
   '/tickets': typeof AuthenticatedTicketsRoute
   '/workers': typeof AuthenticatedWorkersRoute
   '/admin/$admin_id': typeof AuthenticatedAdminAdmin_idRoute
+  '/content/$content_id': typeof AuthenticatedContentContent_idRoute
+  '/content/new': typeof AuthenticatedContentNewRoute
   '/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
   '/place/new': typeof AuthenticatedPlaceNewRoute
   '/support/$support_id': typeof AuthenticatedSupportSupport_idRoute
@@ -205,6 +227,7 @@ export interface FileRoutesByFullPath {
   '/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
   '/worker/new': typeof AuthenticatedWorkerNewRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/content/': typeof AuthenticatedContentIndexRoute
   '/support/': typeof AuthenticatedSupportIndexRoute
   '/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
@@ -224,6 +247,8 @@ export interface FileRoutesByTo {
   '/tickets': typeof AuthenticatedTicketsRoute
   '/workers': typeof AuthenticatedWorkersRoute
   '/admin/$admin_id': typeof AuthenticatedAdminAdmin_idRoute
+  '/content/$content_id': typeof AuthenticatedContentContent_idRoute
+  '/content/new': typeof AuthenticatedContentNewRoute
   '/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
   '/place/new': typeof AuthenticatedPlaceNewRoute
   '/support/$support_id': typeof AuthenticatedSupportSupport_idRoute
@@ -233,6 +258,7 @@ export interface FileRoutesByTo {
   '/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
   '/worker/new': typeof AuthenticatedWorkerNewRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/content': typeof AuthenticatedContentIndexRoute
   '/support': typeof AuthenticatedSupportIndexRoute
   '/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
@@ -254,6 +280,8 @@ export interface FileRoutesById {
   '/_authenticated/tickets': typeof AuthenticatedTicketsRoute
   '/_authenticated/workers': typeof AuthenticatedWorkersRoute
   '/_authenticated/admin/$admin_id': typeof AuthenticatedAdminAdmin_idRoute
+  '/_authenticated/content/$content_id': typeof AuthenticatedContentContent_idRoute
+  '/_authenticated/content/new': typeof AuthenticatedContentNewRoute
   '/_authenticated/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
   '/_authenticated/place/new': typeof AuthenticatedPlaceNewRoute
   '/_authenticated/support/$support_id': typeof AuthenticatedSupportSupport_idRoute
@@ -263,6 +291,7 @@ export interface FileRoutesById {
   '/_authenticated/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
   '/_authenticated/worker/new': typeof AuthenticatedWorkerNewRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/content/': typeof AuthenticatedContentIndexRoute
   '/_authenticated/support/': typeof AuthenticatedSupportIndexRoute
   '/_authenticated/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/_authenticated/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
@@ -284,6 +313,8 @@ export interface FileRouteTypes {
     | '/tickets'
     | '/workers'
     | '/admin/$admin_id'
+    | '/content/$content_id'
+    | '/content/new'
     | '/place/$place_id'
     | '/place/new'
     | '/support/$support_id'
@@ -293,6 +324,7 @@ export interface FileRouteTypes {
     | '/worker/$worker_id'
     | '/worker/new'
     | '/admin/'
+    | '/content/'
     | '/support/'
     | '/place/asset/$asset_id'
     | '/place/asset/new'
@@ -312,6 +344,8 @@ export interface FileRouteTypes {
     | '/tickets'
     | '/workers'
     | '/admin/$admin_id'
+    | '/content/$content_id'
+    | '/content/new'
     | '/place/$place_id'
     | '/place/new'
     | '/support/$support_id'
@@ -321,6 +355,7 @@ export interface FileRouteTypes {
     | '/worker/$worker_id'
     | '/worker/new'
     | '/admin'
+    | '/content'
     | '/support'
     | '/place/asset/$asset_id'
     | '/place/asset/new'
@@ -341,6 +376,8 @@ export interface FileRouteTypes {
     | '/_authenticated/tickets'
     | '/_authenticated/workers'
     | '/_authenticated/admin/$admin_id'
+    | '/_authenticated/content/$content_id'
+    | '/_authenticated/content/new'
     | '/_authenticated/place/$place_id'
     | '/_authenticated/place/new'
     | '/_authenticated/support/$support_id'
@@ -350,6 +387,7 @@ export interface FileRouteTypes {
     | '/_authenticated/worker/$worker_id'
     | '/_authenticated/worker/new'
     | '/_authenticated/admin/'
+    | '/_authenticated/content/'
     | '/_authenticated/support/'
     | '/_authenticated/place/asset/$asset_id'
     | '/_authenticated/place/asset/new'
@@ -470,6 +508,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAdmin_idRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/content/': {
+      id: '/_authenticated/content/'
+      path: '/content'
+      fullPath: '/content/'
+      preLoaderRoute: typeof AuthenticatedContentIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/content/$content_id': {
+      id: '/_authenticated/content/$content_id'
+      path: '/content/$content_id'
+      fullPath: '/content/$content_id'
+      preLoaderRoute: typeof AuthenticatedContentContent_idRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/content/new': {
+      id: '/_authenticated/content/new'
+      path: '/content/new'
+      fullPath: '/content/new'
+      preLoaderRoute: typeof AuthenticatedContentNewRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/place/$place_id': {
       id: '/_authenticated/place/$place_id'
       path: '/place/$place_id'
@@ -568,6 +627,8 @@ interface AuthenticatedRouteChildren {
   AuthenticatedTicketsRoute: typeof AuthenticatedTicketsRoute
   AuthenticatedWorkersRoute: typeof AuthenticatedWorkersRoute
   AuthenticatedAdminAdmin_idRoute: typeof AuthenticatedAdminAdmin_idRoute
+  AuthenticatedContentContent_idRoute: typeof AuthenticatedContentContent_idRoute
+  AuthenticatedContentNewRoute: typeof AuthenticatedContentNewRoute
   AuthenticatedPlacePlace_idRoute: typeof AuthenticatedPlacePlace_idRoute
   AuthenticatedPlaceNewRoute: typeof AuthenticatedPlaceNewRoute
   AuthenticatedSupportSupport_idRoute: typeof AuthenticatedSupportSupport_idRoute
@@ -577,6 +638,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedWorkerWorker_idRoute: typeof AuthenticatedWorkerWorker_idRoute
   AuthenticatedWorkerNewRoute: typeof AuthenticatedWorkerNewRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedContentIndexRoute: typeof AuthenticatedContentIndexRoute
   AuthenticatedSupportIndexRoute: typeof AuthenticatedSupportIndexRoute
   AuthenticatedPlaceAssetAsset_idRoute: typeof AuthenticatedPlaceAssetAsset_idRoute
   AuthenticatedPlaceAssetNewRoute: typeof AuthenticatedPlaceAssetNewRoute
@@ -594,6 +656,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedTicketsRoute: AuthenticatedTicketsRoute,
   AuthenticatedWorkersRoute: AuthenticatedWorkersRoute,
   AuthenticatedAdminAdmin_idRoute: AuthenticatedAdminAdmin_idRoute,
+  AuthenticatedContentContent_idRoute: AuthenticatedContentContent_idRoute,
+  AuthenticatedContentNewRoute: AuthenticatedContentNewRoute,
   AuthenticatedPlacePlace_idRoute: AuthenticatedPlacePlace_idRoute,
   AuthenticatedPlaceNewRoute: AuthenticatedPlaceNewRoute,
   AuthenticatedSupportSupport_idRoute: AuthenticatedSupportSupport_idRoute,
@@ -603,6 +667,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedWorkerWorker_idRoute: AuthenticatedWorkerWorker_idRoute,
   AuthenticatedWorkerNewRoute: AuthenticatedWorkerNewRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  AuthenticatedContentIndexRoute: AuthenticatedContentIndexRoute,
   AuthenticatedSupportIndexRoute: AuthenticatedSupportIndexRoute,
   AuthenticatedPlaceAssetAsset_idRoute: AuthenticatedPlaceAssetAsset_idRoute,
   AuthenticatedPlaceAssetNewRoute: AuthenticatedPlaceAssetNewRoute,

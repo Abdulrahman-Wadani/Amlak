@@ -366,6 +366,7 @@ function getWorkerName(userId: string | null | undefined) {
           {place && (
             <button
               type="button"
+              id="update"
               onClick={openEditForm}
               className="am-btn"
               style={S(
@@ -381,6 +382,7 @@ function getWorkerName(userId: string | null | undefined) {
             <button
               type="button"
               onClick={handleDelete}
+              id="remove"
               disabled={deleting || saving}
               className="am-btn"
               style={S(
@@ -434,6 +436,7 @@ function getWorkerName(userId: string | null | undefined) {
 
                 <button
                   type="button"
+                  id="update"
                   onClick={() => setEditing(false)}
                   disabled={saving}
                   style={S(
@@ -702,6 +705,7 @@ function getWorkerName(userId: string | null | undefined) {
           <div style={S("display: flex; gap: 10px; flex-wrap: wrap; align-items: center")}>
             <Button
               type="button"
+              id="assets"
               variant={activeSection === "assets" ? "default" : "outline"}
               size="sm"
               className="am-btn"
@@ -715,6 +719,7 @@ function getWorkerName(userId: string | null | undefined) {
               type="button"
               variant={activeSection === "workers" ? "default" : "outline"}
               size="sm"
+              id="worker"
               className="am-btn"
               onClick={() => setActiveSection(activeSection === "workers" ? null : "workers")}
               style={S("height: 40px; padding: 0 16px; gap: 8px")}
@@ -1102,6 +1107,14 @@ function getWorkerName(userId: string | null | undefined) {
 
         </>
       )}
+      {
+        ["assets", "worker", "update", "remove"].forEach((id) => {
+  const element = document.getElementById(id)
+  if (useAuth().user.role != "MANAGER") {
+    element.style.display = "none"
+  }
+})
+      }
     </div>
     </center>
   )

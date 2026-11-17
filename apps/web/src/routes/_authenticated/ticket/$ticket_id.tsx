@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react"
 import {
   createFileRoute,
@@ -13,16 +14,25 @@ import {
   UserRoundCog,
   CheckCheck,
   X,
+  Paperclip,
+  Building2,
+  Users,
+  Wrench,
 } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
 
 import { useAuth } from "@/lib/auth"
-import { approveTicket,
+import {
+  approveTicket,
   rejectTicket,
   reassignTicket,
   completeTicket,
-getTicketById, getAssetById, getWorkerById } from "@/lib/api"
+  getTicketById,
+  getAssetById,
+  getWorkerById,
+} from "@/lib/api"
 import type { Asset } from "@amlak/shared"
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -30,11 +40,13 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+
 import {
   Card,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+
 import { Button } from "@/components/ui/button"
 
 export const Route = createFileRoute(
@@ -42,6 +54,15 @@ export const Route = createFileRoute(
 )({
   component: TicketDetailPage,
 })
+
+type TicketAttachment = {
+  id: string
+  attachment_type: string
+  file_url: string
+  uploaded_by: string
+  created_at: string
+  updated_at: string
+}
 
 type Ticket = {
   id: string
@@ -65,20 +86,28 @@ type Ticket = {
   completion_notes: string | null
   created_at: string
   updated_at: string
+  attachments?: TicketAttachment[]
 }
 
-type ActionType = "approve" | "reject" | "reassign" | "complete" | null
+type ActionType =
+  | "approve"
+  | "reject"
+  | "reassign"
+  | "complete"
+  | null
 
 function TicketDetailPage() {
   const { ticket_id } = useParams({
     from: "/_authenticated/ticket/$ticket_id",
   })
+
   const { accessToken } = useAuth()
 
   const [ticket, setTicket] = useState<Ticket | null>(null)
   const [asset, setAsset] = useState<Asset | null>(null)
   const [reporterName, setReporterName] = useState<string | null>(null)
   const [assigneeName, setAssigneeName] = useState<string | null>(null)
+
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -88,6 +117,7 @@ function TicketDetailPage() {
 
   const [assigneeId] = useState(() => {
     if (typeof window === "undefined") return ""
+
     try {
       const authUser = sessionStorage.getItem("authUser")
       return authUser ? JSON.parse(authUser).id ?? "" : ""
@@ -95,6 +125,7 @@ function TicketDetailPage() {
       return ""
     }
   })
+
   const [dueDate, setDueDate] = useState("")
   const [estimatedCost, setEstimatedCost] = useState("")
   const [rejectionReason, setRejectionReason] = useState("")
@@ -115,61 +146,14 @@ function TicketDetailPage() {
       }),
     )
 
-  const loadTicketDetails = async () => {
-    if (!accessToken) return
+  // Show / hide sections using DOM
+  function toggleSection(id: string) {
+  const element = document.getElementById(id)
+  if (!element) return
 
-    try {
-      setLoading(true)
-      setError(null)
-
-      const ticketData = await getTicketById(accessToken, ticket_id)
-      const selectedTicket = (
-        Array.isArray(ticketData) ? ticketData[0] : ticketData
-      ) as Ticket
-
-      if (!selectedTicket) throw new Error("Ticket not found")
-      setTicket(selectedTicket)
-
-      if (selectedTicket.asset_id) {
-        try {
-          const assetData = await getAssetById(accessToken, selectedTicket.asset_id)
-          setAsset(assetData)
-        } catch (assetError) {
-          console.error("Failed to load asset:", assetError)
-          setAsset(null)
-        }
-      } else {
-        setAsset(null)
-      }
-
-      // Worker names are supplementary; lookup failures must not block ticket details.
-      setReporterName(selectedTicket.reporter_id)
-      setAssigneeName(selectedTicket.assignee_id || null)
-
-      try {
-        const reporter = await getWorkerById(accessToken, selectedTicket.reporter_id)
-        setReporterName(reporter.fullname)
-      } catch (workerError) {
-        console.warn("Could not load reporter as a worker:", workerError)
-      }
-
-      if (selectedTicket.assignee_id) {
-        try {
-          const assignee = await getWorkerById(accessToken, selectedTicket.assignee_id)
-          setAssigneeName(assignee.fullname)
-        } catch (workerError) {
-          console.warn("Could not load assignee as a worker:", workerError)
-        }
-      }
-    } catch (err) {
-      console.error("Failed to load ticket:", err)
-      setError(
-        err instanceof Error ? err.message : "حدث خطأ أثناء تحميل التذكرة",
-      )
-    } finally {
-      setLoading(false)
-    }
-  }
+  const isHidden = element.style.display === "none"
+  element.style.display = isHidden ? "block" : "none"
+}
 
   useEffect(() => {
     let alive = true
@@ -182,11 +166,15 @@ function TicketDetailPage() {
         setError(null)
 
         const ticketData = await getTicketById(accessToken, ticket_id)
+
         const selectedTicket = (
           Array.isArray(ticketData) ? ticketData[0] : ticketData
         ) as Ticket
 
-        if (!selectedTicket) throw new Error("Ticket not found")
+        if (!selectedTicket) {
+          throw new Error("Ticket not found")
+        }
+
         if (!alive) return
 
         setTicket(selectedTicket)
@@ -195,7 +183,11 @@ function TicketDetailPage() {
 
         if (selectedTicket.asset_id) {
           try {
-            const assetData = await getAssetById(accessToken, selectedTicket.asset_id)
+            const assetData = await getAssetById(
+              accessToken,
+              selectedTicket.asset_id,
+            )
+
             if (alive) setAsset(assetData)
           } catch (assetError) {
             console.error("Failed to load asset:", assetError)
@@ -205,27 +197,43 @@ function TicketDetailPage() {
           setAsset(null)
         }
 
-        // A missing Worker record should never prevent the ticket page from loading.
         try {
-          const reporter = await getWorkerById(accessToken, selectedTicket.reporter_id)
+          const reporter = await getWorkerById(
+            accessToken,
+            selectedTicket.reporter_id,
+          )
+
           if (alive) setReporterName(reporter.fullname)
         } catch (workerError) {
-          console.warn("Could not load reporter as a worker:", workerError)
+          console.warn(
+            "Could not load reporter as a worker:",
+            workerError,
+          )
         }
 
         if (selectedTicket.assignee_id) {
           try {
-            const assignee = await getWorkerById(accessToken, selectedTicket.assignee_id)
+            const assignee = await getWorkerById(
+              accessToken,
+              selectedTicket.assignee_id,
+            )
+
             if (alive) setAssigneeName(assignee.fullname)
           } catch (workerError) {
-            console.warn("Could not load assignee as a worker:", workerError)
+            console.warn(
+              "Could not load assignee as a worker:",
+              workerError,
+            )
           }
         }
       } catch (err) {
         console.error("Failed to load ticket:", err)
+
         if (alive) {
           setError(
-            err instanceof Error ? err.message : "حدث خطأ أثناء تحميل التذكرة",
+            err instanceof Error
+              ? err.message
+              : "حدث خطأ أثناء تحميل التذكرة",
           )
         }
       } finally {
@@ -234,10 +242,91 @@ function TicketDetailPage() {
     }
 
     loadData()
+
     return () => {
       alive = false
     }
   }, [accessToken, ticket_id])
+
+  const loadTicketDetails = async () => {
+    if (!accessToken) return
+
+    try {
+      setLoading(true)
+      setError(null)
+
+      const ticketData = await getTicketById(accessToken, ticket_id)
+
+      const selectedTicket = (
+        Array.isArray(ticketData) ? ticketData[0] : ticketData
+      ) as Ticket
+
+      if (!selectedTicket) {
+        throw new Error("Ticket not found")
+      }
+
+      setTicket(selectedTicket)
+
+      if (selectedTicket.asset_id) {
+        try {
+          const assetData = await getAssetById(
+            accessToken,
+            selectedTicket.asset_id,
+          )
+
+          setAsset(assetData)
+        } catch (assetError) {
+          console.error("Failed to load asset:", assetError)
+          setAsset(null)
+        }
+      } else {
+        setAsset(null)
+      }
+
+      setReporterName(selectedTicket.reporter_id)
+      setAssigneeName(selectedTicket.assignee_id || null)
+
+      try {
+        const reporter = await getWorkerById(
+          accessToken,
+          selectedTicket.reporter_id,
+        )
+
+        setReporterName(reporter.fullname)
+      } catch (workerError) {
+        console.warn(
+          "Could not load reporter as a worker:",
+          workerError,
+        )
+      }
+
+      if (selectedTicket.assignee_id) {
+        try {
+          const assignee = await getWorkerById(
+            accessToken,
+            selectedTicket.assignee_id,
+          )
+
+          setAssigneeName(assignee.fullname)
+        } catch (workerError) {
+          console.warn(
+            "Could not load assignee as a worker:",
+            workerError,
+          )
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load ticket:", err)
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "حدث خطأ أثناء تحميل التذكرة",
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const resetActionForm = () => {
     setAction(null)
@@ -248,25 +337,31 @@ function TicketDetailPage() {
     setActualCost("")
     setCompletionNotes("")
     setPhotos([])
-    document.querySelectorAll(".am-btn").forEach(btn => {
-    btn.style.display = "";
-  });
+
+    document.querySelectorAll(".am-btn").forEach((btn) => {
+      ;(btn as HTMLElement).style.display = ""
+    })
   }
 
   const sendAction = async (
     endpoint: string,
     body: Record<string, unknown> | FormData,
   ) => {
-    if (!accessToken) throw new Error("انتهت الجلسة، سجل الدخول مرة أخرى")
+    if (!accessToken) {
+      throw new Error("انتهت الجلسة، سجل الدخول مرة أخرى")
+    }
 
     const isFormData = body instanceof FormData
+
     const response = await fetch(
       `${API_URL}/tickets/${ticket_id}/${endpoint}`,
       {
         method: "POST",
         headers: {
           Authorization: `Bearer ${accessToken}`,
-          ...(isFormData ? {} : { "Content-Type": "application/json" }),
+          ...(isFormData
+            ? {}
+            : { "Content-Type": "application/json" }),
         },
         body: isFormData ? body : JSON.stringify(body),
       },
@@ -285,7 +380,6 @@ function TicketDetailPage() {
     return result
   }
 
-  // POST /tickets/:ticketId/approve
   const handleApprove = async () => {
     if (!assigneeId || !dueDate || estimatedCost === "") return
 
@@ -294,10 +388,10 @@ function TicketDetailPage() {
       setActionError(null)
 
       await approveTicket(accessToken, ticket_id, {
-  assignee_id: assigneeId,
-  due_date: dueDate,
-  estimated_cost: Number(estimatedCost),
-});
+        assignee_id: assigneeId,
+        due_date: dueDate,
+        estimated_cost: Number(estimatedCost),
+      })
 
       resetActionForm()
       await loadTicketDetails()
@@ -310,7 +404,6 @@ function TicketDetailPage() {
     }
   }
 
-  // POST /tickets/:ticketId/reject
   const handleReject = async () => {
     if (!rejectionReason.trim()) return
 
@@ -319,8 +412,8 @@ function TicketDetailPage() {
       setActionError(null)
 
       await rejectTicket(accessToken, ticket_id, {
-  reason: rejectionReason,
-});
+        reason: rejectionReason,
+      })
 
       resetActionForm()
       await loadTicketDetails()
@@ -333,7 +426,6 @@ function TicketDetailPage() {
     }
   }
 
-  // POST /tickets/:ticketId/reassign
   const handleReassign = async () => {
     if (!assigneeId || !dueDate) return
 
@@ -342,22 +434,23 @@ function TicketDetailPage() {
       setActionError(null)
 
       await reassignTicket(accessToken, ticket_id, {
-  assignee_id: assigneeId,
-  due_date: dueDate,
-});
+        assignee_id: assigneeId,
+        due_date: dueDate,
+      })
 
       resetActionForm()
       await loadTicketDetails()
     } catch (err) {
       setActionError(
-        err instanceof Error ? err.message : "تعذر إعادة تعيين المكلف",
+        err instanceof Error
+          ? err.message
+          : "تعذر إعادة تعيين المكلف",
       )
     } finally {
       setActionLoading(false)
     }
   }
 
-  // POST /tickets/:ticketId/complete
   const handleComplete = async () => {
     if (
       actualCost === "" ||
@@ -372,18 +465,11 @@ function TicketDetailPage() {
       setActionLoading(true)
       setActionError(null)
 
-      const formData = new FormData()
-      formData.append("actual_cost", actualCost)
-      if (completionNotes.trim()) {
-        formData.append("completion_notes", completionNotes.trim())
-      }
-      photos.forEach((photo) => formData.append("photos", photo))
-
       await completeTicket(accessToken, ticket_id, {
-  actual_cost: Number(actualCost),
-  completion_notes: completionNotes,
-  photos,
-});
+        actual_cost: Number(actualCost),
+        completion_notes: completionNotes,
+        photos,
+      })
 
       resetActionForm()
       await loadTicketDetails()
@@ -399,15 +485,19 @@ function TicketDetailPage() {
   const openAction = (nextAction: ActionType) => {
     setAction(nextAction)
     setActionError(null)
-    document.querySelectorAll(".am-btn").forEach(btn => {
-    btn.style.display = "none";
-  });
+
+    document.querySelectorAll(".am-btn").forEach((btn) => {
+      ;(btn as HTMLElement).style.display = "none"
+    })
   }
 
   const date = (value: string | null | undefined) => {
     if (!value) return "—"
+
     const parsed = new Date(value)
+
     if (Number.isNaN(parsed.getTime())) return value
+
     return parsed.toLocaleString("ar-SA", {
       dateStyle: "medium",
       timeStyle: "short",
@@ -416,6 +506,7 @@ function TicketDetailPage() {
 
   const money = (value: number | null) => {
     if (value === null || value === undefined) return "—"
+
     return `${Number(value).toLocaleString("ar-SA")} ر.س`
   }
 
@@ -441,6 +532,13 @@ function TicketDetailPage() {
     PREVENTIVE: "صيانة وقائية",
   }
 
+  const attachmentTypeLabels: Record<string, string> = {
+    DAMAGE: "صور الأضرار",
+    BEFORE: "صور قبل الصيانة",
+    AFTER: "صور بعد الصيانة",
+    COMPLETION: "صور الإنجاز",
+  }
+
   const statusColors: Record<string, string> = {
     PENDING_REVIEW: "#d97706",
     PENDING: "#d97706",
@@ -458,10 +556,15 @@ function TicketDetailPage() {
     label: string
     value: React.ReactNode
   }) => (
-    <div style={S("display:flex; flex-direction:column; gap:6px; min-width:0")}>
+    <div
+      style={S(
+        "display:flex; flex-direction:column; gap:6px; min-width:0",
+      )}
+    >
       <span style={S("font-size:12px; color:var(--muted-foreground)")}>
         {label}
       </span>
+
       <strong style={S("font-size:14px; overflow-wrap:anywhere")}>
         {value || "—"}
       </strong>
@@ -479,15 +582,17 @@ function TicketDetailPage() {
   }) => (
     <section
       style={S(
-        "padding:20px; border:1px solid var(--border);  background:var(--card); display:flex; flex-direction:column; gap:20px",
+        "padding:20px; border:1px solid var(--border); background:var(--card); display:flex; flex-direction:column; gap:20px",
       )}
     >
       <div style={S("display:flex; align-items:center; gap:9px")}>
         {icon}
+
         <h2 style={S("font-size:16px; font-weight:700; margin:0")}>
           {title}
         </h2>
       </div>
+
       {children}
     </section>
   )
@@ -506,7 +611,9 @@ function TicketDetailPage() {
     "width:100%; min-height:40px; padding:9px 12px; border:1px solid var(--border); background:var(--background); color:var(--foreground)",
   )
 
-  const labelStyle = S("display:block; font-size:13px; font-weight:600; margin-bottom:7px")
+  const labelStyle = S(
+    "display:block; font-size:13px; font-weight:600; margin-bottom:7px",
+  )
 
   const today = new Date().toISOString().slice(0, 10)
 
@@ -520,7 +627,11 @@ function TicketDetailPage() {
 
   if (error || !ticket) {
     return (
-      <div style={S("padding:32px; display:flex; flex-direction:column; gap:16px")}>
+      <div
+        style={S(
+          "padding:32px; display:flex; flex-direction:column; gap:16px",
+        )}
+      >
         <p style={S("color:#dc2626")}>
           {error || "لم يتم العثور على التذكرة"}
         </p>
@@ -537,13 +648,21 @@ function TicketDetailPage() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink render={<a href="/" />}>الرئيسية</BreadcrumbLink>
+            <BreadcrumbLink render={<a href="/" />}>
+              الرئيسية
+            </BreadcrumbLink>
           </BreadcrumbItem>
+
           <BreadcrumbSeparator />
+
           <BreadcrumbItem>
-            <BreadcrumbLink render={<a href="/places" />}>العقارات</BreadcrumbLink>
+            <BreadcrumbLink render={<a href="/places" />}>
+              العقارات
+            </BreadcrumbLink>
           </BreadcrumbItem>
+
           <BreadcrumbSeparator />
+
           <BreadcrumbItem>
             <BreadcrumbLink
               render={
@@ -568,7 +687,12 @@ function TicketDetailPage() {
           <h1 style={S("font-size:24px; font-weight:800; margin:0")}>
             تفاصيل تذكرة الصيانة
           </h1>
-          <p style={S("font-size:13px; color:var(--muted-foreground); margin:0")}>
+
+          <p
+            style={S(
+              "font-size:13px; color:var(--muted-foreground); margin:0",
+            )}
+          >
             {ticket.description || "تذكرة صيانة"}
           </p>
         </div>
@@ -587,206 +711,328 @@ function TicketDetailPage() {
         </span>
       </header>
 
+      {/* First section: always visible */}
       <Section title="معلومات التذكرة">
         <Grid>
           <InfoItem
             label="نوع الصيانة"
             value={typeLabels[ticket.ticket_type] || ticket.ticket_type}
           />
+
           <InfoItem
             label="الأولوية"
             value={priorityLabels[ticket.priority] || ticket.priority}
           />
+
           <InfoItem
             label="الحالة"
             value={statusLabels[ticket.status] || ticket.status}
           />
-          <InfoItem label="تاريخ الاستحقاق" value={date(ticket.due_date)} />
+
+          <InfoItem
+            label="تاريخ الاستحقاق"
+            value={date(ticket.due_date)}
+          />
+
           <InfoItem
             label="حالة التأخير"
             value={
-              ticket.is_overdue
-                ? <span style={S("color:#dc2626")}>متأخرة</span>
-                : "غير متأخرة"
+              ticket.is_overdue ? (
+                <span style={S("color:#dc2626")}>متأخرة</span>
+              ) : (
+                "غير متأخرة"
+              )
             }
           />
-          <InfoItem label="تاريخ الإنشاء" value={date(ticket.created_at)} />
-          <InfoItem label="آخر تحديث" value={date(ticket.updated_at)} />
+
+          <InfoItem
+            label="تاريخ الإنشاء"
+            value={date(ticket.created_at)}
+          />
+
+          <InfoItem
+            label="آخر تحديث"
+            value={date(ticket.updated_at)}
+          />
         </Grid>
 
-        <div style={S("border-top:1px solid var(--border); padding-top:16px")}>
+        <div
+          style={S(
+            "border-top:1px solid var(--border); padding-top:16px",
+          )}
+        >
           <InfoItem label="الوصف" value={ticket.description} />
         </div>
       </Section>
 
-      <Section title="الأصل المرتبط">
-        {asset ? (
+      <div style={S("display: flex; gap: 10px; flex-wrap: wrap; align-items: center")}>
+  {[
+    { id: "asset-section", title: "الأصل المرتبط", icon: <Building2 size={16} /> },
+    { id: "cost-section", title: "التكاليف", icon: <Wallet size={16} /> },
+    { id: "review-section", title: "المراجعة", icon: <CheckCircle size={16} /> },
+    { id: "completion-section", title: "الإنجاز", icon: <CheckCheck size={16} /> },
+    { id: "people-section", title: "المسؤولون", icon: <Users size={16} /> },
+    { id: "timeline-section", title: "السجل الزمني", icon: <Clock3 size={16} /> },
+    { id: "actions-section", title: "إجراءات التذكرة", icon: <Wrench size={16} /> },
+    { id: "attachments-section", title: "الملحقات", icon: <Paperclip size={16} /> },
+  ].map((section) => (
+    <Button
+  type="button"
+  variant="outline"
+  size="sm"
+  className="am-btn"
+  onClick={() => toggleSection(section.id)}
+  style={S(
+    "height: 40px; padding: 0 16px; gap: 8px; background: transparent; border: 1px solid var(--border); color: var(--foreground)"
+  )}
+>
+  {section.icon}
+  {section.title}
+</Button>
+  ))}
+</div>
+
+      {/* Asset */}
+      <div id="asset-section" style={{ display: "none" }}>
+        <Section title="الأصل المرتبط">
+          {asset ? (
+            <Grid>
+              <InfoItem label="اسم الأصل" value={asset.name} />
+              <InfoItem label="نوع الأصل" value={asset.type} />
+              <InfoItem label="حالة الأصل" value={asset.status} />
+            </Grid>
+          ) : (
+            <p
+              style={S(
+                "font-size:13px; color:var(--muted-foreground); margin:0",
+              )}
+            >
+              لا توجد بيانات للأصل أو لم يتم تحديد أصل لهذه التذكرة.
+            </p>
+          )}
+        </Section>
+      </div>
+
+      {/* Costs */}
+      <div id="cost-section" style={{ display: "none" }}>
+        <Section title="التكاليف" icon={<Wallet size={18} />}>
           <Grid>
-            <InfoItem label="اسم الأصل" value={asset.name} />
-            <InfoItem label="نوع الأصل" value={asset.type} />
-            <InfoItem label="حالة الأصل" value={asset.status} />
+            <InfoItem
+              label="التكلفة التقديرية"
+              value={money(ticket.estimated_cost)}
+            />
+
+            <InfoItem
+              label="التكلفة الفعلية"
+              value={money(ticket.actual_cost)}
+            />
           </Grid>
-        ) : (
-          <p style={S("font-size:13px; color:var(--muted-foreground); margin:0")}>
-            لا توجد بيانات للأصل أو لم يتم تحديد أصل لهذه التذكرة.
-          </p>
-        )}
-      </Section>
+        </Section>
+      </div>
 
-      <Section title="التكاليف" icon={<Wallet size={18} />}>
-        <Grid>
-          <InfoItem label="التكلفة التقديرية" value={money(ticket.estimated_cost)} />
-          <InfoItem label="التكلفة الفعلية" value={money(ticket.actual_cost)} />
-        </Grid>
-      </Section>
+      {/* Review */}
+      <div id="review-section" style={{ display: "none" }}>
+        <Section title="معلومات المراجعة">
+          <Grid>
+            <InfoItem
+              label="تمت المراجعة بواسطة"
+              value={ticket.reviewed_by}
+            />
 
-      <Section title="معلومات المراجعة">
-        <Grid>
-          <InfoItem label="تمت المراجعة بواسطة" value={ticket.reviewed_by} />
-          <InfoItem label="تاريخ المراجعة" value={date(ticket.reviewed_at)} />
-        </Grid>
+            <InfoItem
+              label="تاريخ المراجعة"
+              value={date(ticket.reviewed_at)}
+            />
+          </Grid>
 
-        {ticket.rejection_reason && (
-          <div
-            style={S(
-              "padding:14px;  background:#dc262610; display:flex; flex-direction:column; gap:7px",
-            )}
-          >
-            <strong style={S("font-size:13px; color:#dc2626")}>سبب الرفض</strong>
-            <p style={S("font-size:14px; margin:0")}>{ticket.rejection_reason}</p>
-          </div>
-        )}
-      </Section>
-
-      <Section title="معلومات الإنجاز" icon={<CalendarDays size={18} />}>
-        <Grid>
-          <InfoItem label="تاريخ الإنجاز" value={date(ticket.completed_at)} />
-          <InfoItem label="ملاحظات الإنجاز" value={ticket.completion_notes} />
-        </Grid>
-      </Section>
-
-      <Section title="المسؤولون">
-        <Grid>
-          <InfoItem label="مُبلّغ التذكرة" value={reporterName} />
-          <InfoItem label="المسؤول عن التنفيذ" value={assigneeName} />
-        </Grid>
-      </Section>
-
-      <Section title="السجل الزمني" icon={<Clock3 size={18} />}>
-        <Grid>
-          <InfoItem label="تاريخ الإنشاء" value={date(ticket.created_at)} />
-          <InfoItem label="تاريخ آخر تحديث" value={date(ticket.updated_at)} />
-          <InfoItem label="تاريخ المراجعة" value={date(ticket.reviewed_at)} />
-          <InfoItem label="تاريخ الإنجاز" value={date(ticket.completed_at)} />
-        </Grid>
-      </Section>
-
-      <Card
-        className="am-lift"
-        style={S(
-          "padding:0; border:1px solid var(--border); overflow:hidden; gap:0",
-        )}
-      >
-        <CardHeader
-          style={S(
-            "padding:20px; border-bottom:1px solid var(--border); text-align:center",
-          )}
-        >
-          <CardTitle
-            style={S(
-              "font-size:17px; font-weight:750; width:100%; text-align:center",
-            )}
-          >
-            إجراءات التذكرة
-          </CardTitle>
-        </CardHeader>
-
-        <div
-          style={S(
-            "display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:12px; padding:24px 20px",
-          )}
-        >
-          {ticket.status === "PENDING_REVIEW" && (
-            <>
-              <Button
-                variant="default"
-                className="am-btn"
-                onClick={() => openAction("approve")}
-                style={S("height:42px; padding:0 20px; gap:8px")}
-              >
-                <CheckCircle size={17} />
-                <Trans>قبول التذكرة</Trans>
-              </Button>
-
-              <Button
-                variant="outline"
-                className="am-btn"
-                onClick={() => openAction("reject")}
-                style={S(
-                  "height:42px; padding:0 20px; gap:8px; color:var(--destructive); border-color:var(--destructive)",
-                )}
-              >
-                <XCircle size={17} />
-                <Trans>رفض التذكرة</Trans>
-              </Button>
-            </>
-          )}
-
-          {ticket.status === "APPROVED" && (
-            <>
-              <Button
-                variant="outline"
-                className="am-btn"
-                onClick={() => openAction("reassign")}
-                style={S("height:42px; padding:0 20px; gap:8px")}
-              >
-                <UserRoundCog size={17} />
-                <Trans>إعادة تعيين المكلف</Trans>
-              </Button>
-
-              <Button
-                variant="outline"
-                className="am-btn"
-                onClick={() => openAction("complete")}
-                style={S(
-                  "height:42px; padding:0 20px; gap:8px; color:var(--chart-2); border-color:var(--chart-2)",
-                )}
-              >
-                <CheckCheck size={17} />
-                <Trans>اكتملت التذكرة</Trans>
-              </Button>
-            </>
-          )}
-        </div>
-
-        {action && (
-          <div
-            style={S(
-              "margin:0 20px 20px; padding:18px; border:1px solid var(--border); display:flex; flex-direction:column; gap:16px",
-            )}
-          >
-            <div style={S("display:flex; align-items:center; justify-content:space-between; gap:12px")}>
-              <strong style={S("font-size:15px")}>
-                {action === "approve" && "قبول التذكرة"}
-                {action === "reject" && "رفض التذكرة"}
-                {action === "reassign" && "إعادة تعيين المكلف"}
-                {action === "complete" && "إكمال التذكرة"}
+          {ticket.rejection_reason && (
+            <div
+              style={S(
+                "padding:14px; background:#dc262610; display:flex; flex-direction:column; gap:7px",
+              )}
+            >
+              <strong style={S("font-size:13px; color:#dc2626")}>
+                سبب الرفض
               </strong>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={resetActionForm}
-                disabled={actionLoading}
-                aria-label="إغلاق"
-              >
-                <X size={17} />
-              </Button>
-            </div>
 
-            {(action === "approve" || action === "reassign") && (
+              <p style={S("font-size:14px; margin:0")}>
+                {ticket.rejection_reason}
+              </p>
+            </div>
+          )}
+        </Section>
+      </div>
+
+      {/* Completion */}
+      <div id="completion-section" style={{ display: "none" }}>
+        <Section
+          title="معلومات الإنجاز"
+          icon={<CalendarDays size={18} />}
+        >
+          <Grid>
+            <InfoItem
+              label="تاريخ الإنجاز"
+              value={date(ticket.completed_at)}
+            />
+
+            <InfoItem
+              label="ملاحظات الإنجاز"
+              value={ticket.completion_notes}
+            />
+          </Grid>
+        </Section>
+      </div>
+
+      {/* People */}
+      <div id="people-section" style={{ display: "none" }}>
+        <Section title="المسؤولون">
+          <Grid>
+            <InfoItem label="مُبلّغ التذكرة" value={reporterName} />
+            <InfoItem label="المسؤول عن التنفيذ" value={assigneeName} />
+          </Grid>
+        </Section>
+      </div>
+
+      {/* Timeline */}
+      <div id="timeline-section" style={{ display: "none" }}>
+        <Section title="السجل الزمني" icon={<Clock3 size={18} />}>
+          <Grid>
+            <InfoItem
+              label="تاريخ الإنشاء"
+              value={date(ticket.created_at)}
+            />
+
+            <InfoItem
+              label="تاريخ آخر تحديث"
+              value={date(ticket.updated_at)}
+            />
+
+            <InfoItem
+              label="تاريخ المراجعة"
+              value={date(ticket.reviewed_at)}
+            />
+
+            <InfoItem
+              label="تاريخ الإنجاز"
+              value={date(ticket.completed_at)}
+            />
+          </Grid>
+        </Section>
+      </div>
+
+      {/* Actions */}
+      <div id="actions-section" style={{ display: "none" }}>
+        <Card
+          className="am-lift"
+          style={S(
+            "padding:0; border:1px solid var(--border); overflow:hidden; gap:0",
+          )}
+        >
+          <CardHeader
+            style={S(
+              "padding:20px; border-bottom:1px solid var(--border); text-align:center",
+            )}
+          >
+            <CardTitle
+              style={S(
+                "font-size:17px; font-weight:750; width:100%; text-align:center",
+              )}
+            >
+              إجراءات التذكرة
+            </CardTitle>
+          </CardHeader>
+
+          <div
+            style={S(
+              "display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:12px; padding:24px 20px",
+            )}
+          >
+            {ticket.status === "PENDING_REVIEW" && (
               <>
+                <Button
+                  variant="default"
+                  className="am-btn"
+                  onClick={() => openAction("approve")}
+                  style={S("height:42px; padding:0 20px; gap:8px")}
+                >
+                  <CheckCircle size={17} />
+                  <Trans>قبول التذكرة</Trans>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="am-btn"
+                  onClick={() => openAction("reject")}
+                  style={S(
+                    "height:42px; padding:0 20px; gap:8px; color:var(--destructive); border-color:var(--destructive)",
+                  )}
+                >
+                  <XCircle size={17} />
+                  <Trans>رفض التذكرة</Trans>
+                </Button>
+              </>
+            )}
+
+            {ticket.status === "APPROVED" && (
+              <>
+                <Button
+                  variant="outline"
+                  className="am-btn"
+                  onClick={() => openAction("reassign")}
+                  style={S("height:42px; padding:0 20px; gap:8px")}
+                >
+                  <UserRoundCog size={17} />
+                  <Trans>إعادة تعيين المكلف</Trans>
+                </Button>
+
+                <Button
+                  variant="outline"
+                  className="am-btn"
+                  onClick={() => openAction("complete")}
+                  style={S(
+                    "height:42px; padding:0 20px; gap:8px; color:var(--chart-2); border-color:var(--chart-2)",
+                  )}
+                >
+                  <CheckCheck size={17} />
+                  <Trans>اكتملت التذكرة</Trans>
+                </Button>
+              </>
+            )}
+          </div>
+
+          {action && (
+            <div
+              style={S(
+                "margin:0 20px 20px; padding:18px; border:1px solid var(--border); display:flex; flex-direction:column; gap:16px",
+              )}
+            >
+              <div
+                style={S(
+                  "display:flex; align-items:center; justify-content:space-between; gap:12px",
+                )}
+              >
+                <strong style={S("font-size:15px")}>
+                  {action === "approve" && "قبول التذكرة"}
+                  {action === "reject" && "رفض التذكرة"}
+                  {action === "reassign" && "إعادة تعيين المكلف"}
+                  {action === "complete" && "إكمال التذكرة"}
+                </strong>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={resetActionForm}
+                  disabled={actionLoading}
+                  aria-label="إغلاق"
+                >
+                  <X size={17} />
+                </Button>
+              </div>
+
+              {(action === "approve" || action === "reassign") && (
                 <div>
                   <label style={labelStyle}>تاريخ الاستحقاق</label>
+
                   <input
                     type="date"
                     min={today}
@@ -795,148 +1041,287 @@ function TicketDetailPage() {
                     style={fieldStyle}
                   />
                 </div>
-              </>
-            )}
+              )}
 
-            {action === "approve" && (
-              <div>
-                <label style={labelStyle}>التكلفة التقديرية</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={estimatedCost}
-                  onChange={(event) => setEstimatedCost(event.target.value)}
-                  placeholder="0.00"
-                  style={fieldStyle}
-                />
-              </div>
-            )}
-
-            {action === "reject" && (
-              <div>
-                <label style={labelStyle}>سبب الرفض</label>
-                <textarea
-                  value={rejectionReason}
-                  onChange={(event) => setRejectionReason(event.target.value)}
-                  placeholder="اكتب سبب رفض التذكرة"
-                  rows={4}
-                  style={{ ...fieldStyle, resize: "vertical" }}
-                />
-              </div>
-            )}
-
-            {action === "complete" && (
-              <>
+              {action === "approve" && (
                 <div>
-                  <label style={labelStyle}>التكلفة الفعلية</label>
+                  <label style={labelStyle}>التكلفة التقديرية</label>
+
                   <input
                     type="number"
                     min="0"
                     step="0.01"
-                    value={actualCost}
-                    onChange={(event) => setActualCost(event.target.value)}
+                    value={estimatedCost}
+                    onChange={(event) =>
+                      setEstimatedCost(event.target.value)
+                    }
                     placeholder="0.00"
                     style={fieldStyle}
                   />
                 </div>
-
-                <div>
-                  <label style={labelStyle}>ملاحظات الإنجاز (اختياري)</label>
-                  <textarea
-                    value={completionNotes}
-                    onChange={(event) => setCompletionNotes(event.target.value)}
-                    placeholder="أضف ملاحظات الإنجاز"
-                    rows={3}
-                    style={{ ...fieldStyle, resize: "vertical" }}
-                  />
-                </div>
-
-                <div>
-                  <label style={labelStyle}>صور الإنجاز (من 1 إلى 5 صور)</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(event) => {
-                      setPhotos(Array.from(event.target.files ?? []).slice(0, 5))
-                    }}
-                    style={fieldStyle}
-                  />
-                  <p style={S("font-size:12px; color:var(--muted-foreground); margin:6px 0 0")}>
-                    تم اختيار {photos.length} من 5 صور
-                  </p>
-                </div>
-              </>
-            )}
-
-            {actionError && (
-              <p style={S("margin:0; color:var(--destructive); font-size:13px")}>
-                {actionError}
-              </p>
-            )}
-
-            <div style={S("display:flex; flex-wrap:wrap; gap:10px")}>
-              {action === "approve" && (
-                <Button
-                  onClick={handleApprove}
-                  disabled={
-                    actionLoading ||
-                    !assigneeId.trim() ||
-                    !dueDate ||
-                    estimatedCost === "" ||
-                    Number(estimatedCost) < 0
-                  }
-                >
-                  {actionLoading ? "جاري التنفيذ..." : "تأكيد الموافقة"}
-                </Button>
               )}
 
               {action === "reject" && (
-                <Button
-                  variant="destructive"
-                  onClick={handleReject}
-                  disabled={actionLoading || !rejectionReason.trim()}
-                >
-                  {actionLoading ? "جاري التنفيذ..." : "تأكيد الرفض"}
-                </Button>
-              )}
+                <div>
+                  <label style={labelStyle}>سبب الرفض</label>
 
-              {action === "reassign" && (
-                <Button
-                  onClick={handleReassign}
-                  disabled={actionLoading || !assigneeId.trim() || !dueDate}
-                >
-                  {actionLoading ? "جاري التنفيذ..." : "تأكيد إعادة التعيين"}
-                </Button>
+                  <textarea
+                    value={rejectionReason}
+                    onChange={(event) =>
+                      setRejectionReason(event.target.value)
+                    }
+                    placeholder="اكتب سبب رفض التذكرة"
+                    rows={4}
+                    style={{ ...fieldStyle, resize: "vertical" }}
+                  />
+                </div>
               )}
 
               {action === "complete" && (
-                <Button
-                  onClick={handleComplete}
-                  disabled={
-                    actionLoading ||
-                    actualCost === "" ||
-                    Number(actualCost) < 0 ||
-                    photos.length < 1
-                  }
-                >
-                  {actionLoading ? "جاري التنفيذ..." : "تأكيد الإكمال"}
-                </Button>
+                <>
+                  <div>
+                    <label style={labelStyle}>التكلفة الفعلية</label>
+
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={actualCost}
+                      onChange={(event) =>
+                        setActualCost(event.target.value)
+                      }
+                      placeholder="0.00"
+                      style={fieldStyle}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>
+                      ملاحظات الإنجاز (اختياري)
+                    </label>
+
+                    <textarea
+                      value={completionNotes}
+                      onChange={(event) =>
+                        setCompletionNotes(event.target.value)
+                      }
+                      placeholder="أضف ملاحظات الإنجاز"
+                      rows={3}
+                      style={{ ...fieldStyle, resize: "vertical" }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>
+                      صور الإنجاز (من 1 إلى 5 صور)
+                    </label>
+
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(event) => {
+                        setPhotos(
+                          Array.from(event.target.files ?? []).slice(0, 5),
+                        )
+                      }}
+                      style={fieldStyle}
+                    />
+
+                    <p
+                      style={S(
+                        "font-size:12px; color:var(--muted-foreground); margin:6px 0 0",
+                      )}
+                    >
+                      تم اختيار {photos.length} من 5 صور
+                    </p>
+                  </div>
+                </>
               )}
 
-              <Button
-                id="cancel-action-btn"
-                variant="outline"
-                onClick={resetActionForm}
-                disabled={actionLoading}
-              >
-                إلغاء
-              </Button>
+              {actionError && (
+                <p
+                  style={S(
+                    "margin:0; color:var(--destructive); font-size:13px",
+                  )}
+                >
+                  {actionError}
+                </p>
+              )}
+
+              <div style={S("display:flex; flex-wrap:wrap; gap:10px")}>
+                {action === "approve" && (
+                  <Button
+                    onClick={handleApprove}
+                    disabled={
+                      actionLoading ||
+                      !assigneeId.trim() ||
+                      !dueDate ||
+                      estimatedCost === "" ||
+                      Number(estimatedCost) < 0
+                    }
+                  >
+                    {actionLoading
+                      ? "جاري التنفيذ..."
+                      : "تأكيد الموافقة"}
+                  </Button>
+                )}
+
+                {action === "reject" && (
+                  <Button
+                    variant="destructive"
+                    onClick={handleReject}
+                    disabled={actionLoading || !rejectionReason.trim()}
+                  >
+                    {actionLoading
+                      ? "جاري التنفيذ..."
+                      : "تأكيد الرفض"}
+                  </Button>
+                )}
+
+                {action === "reassign" && (
+                  <Button
+                    onClick={handleReassign}
+                    disabled={
+                      actionLoading ||
+                      !assigneeId.trim() ||
+                      !dueDate
+                    }
+                  >
+                    {actionLoading
+                      ? "جاري التنفيذ..."
+                      : "تأكيد إعادة التعيين"}
+                  </Button>
+                )}
+
+                {action === "complete" && (
+                  <Button
+                    onClick={handleComplete}
+                    disabled={
+                      actionLoading ||
+                      actualCost === "" ||
+                      Number(actualCost) < 0 ||
+                      photos.length < 1
+                    }
+                  >
+                    {actionLoading
+                      ? "جاري التنفيذ..."
+                      : "تأكيد الإكمال"}
+                  </Button>
+                )}
+
+                <Button
+                  variant="outline"
+                  onClick={resetActionForm}
+                  disabled={actionLoading}
+                >
+                  إلغاء
+                </Button>
+              </div>
             </div>
-          </div>
-        )}
-      </Card>
+          )}
+        </Card>
+      </div>
+
+      {/* Attachments - Last section */}
+      <div id="attachments-section" style={{ display: "none" }}>
+        <Section title="الملحقات" icon={<Paperclip size={18} />}>
+          {ticket.attachments && ticket.attachments.length > 0 ? (
+            <>
+              <p
+                style={S(
+                  "font-size:13px; color:var(--muted-foreground); margin:0",
+                )}
+              >
+                عدد المرفقات: {ticket.attachments.length}
+              </p>
+
+              <div
+                style={S(
+                  "display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px",
+                )}
+              >
+                {ticket.attachments.map((attachment) => (
+                  <div
+                    key={attachment.id}
+                    style={S(
+                      "min-width:0; border:1px solid var(--border); overflow:hidden; display:flex; flex-direction:column; background:var(--background)",
+                    )}
+                  >
+                    <a
+                      href={attachment.file_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label="فتح الصورة بالحجم الكامل"
+                      style={S(
+                        "display:block; width:100%; height:200px; background:var(--muted); overflow:hidden",
+                      )}
+                    >
+                      <img
+                        src={attachment.file_url}
+                        alt={
+                          attachmentTypeLabels[attachment.attachment_type] ||
+                          attachment.attachment_type
+                        }
+                        loading="lazy"
+                        style={S(
+                          "width:100%; height:100%; object-fit:cover; display:block",
+                        )}
+                      />
+                    </a>
+
+                    <div
+                      style={S(
+                        "padding:12px; display:flex; flex-direction:column; gap:8px",
+                      )}
+                    >
+                      <strong style={S("font-size:14px")}>
+                        {attachmentTypeLabels[attachment.attachment_type] ||
+                          attachment.attachment_type}
+                      </strong>
+
+                      <span
+                        style={S(
+                          "font-size:12px; color:var(--muted-foreground)",
+                        )}
+                      >
+                        تاريخ الرفع: {date(attachment.created_at)}
+                      </span>
+
+                      <span
+                        style={S(
+                          "font-size:11px; color:var(--muted-foreground); overflow-wrap:anywhere",
+                        )}
+                      >
+                        {attachment.attachment_type}
+                      </span>
+
+                      <a
+                        href={attachment.file_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={S(
+                          "font-size:13px; color:var(--primary); text-decoration:underline",
+                        )}
+                      >
+                        عرض الصورة بالحجم الكامل
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <p
+              style={S(
+                "font-size:13px; color:var(--muted-foreground); margin:0",
+              )}
+            >
+              لا توجد مرفقات لهذه التذكرة.
+            </p>
+          )}
+        </Section>
+      </div>
     </div>
   )
 }

@@ -48,11 +48,177 @@ msgid "OPEN"
 msgstr "مفتوحة"
 msgid "RESOLVED"
 msgstr "تم حلها"
+msgid "Add Content"
+msgstr "اضافة محتوى"
+msgid "title"
+msgstr "العنوان"
+msgid "language"
+msgstr "اللغة"
+msgid "slug"
+msgstr "المسار"
+msgid "body"
+msgstr "المحتوى"
+msgid "is_published"
+msgstr "هل ينشر؟"
 
 
-#: src/routes/_authenticated/home.tsx:239
+#: src/routes/_authenticated/home.tsx
 msgid "Add property"
 msgstr "إضافة عقار"
+msgid "Out of service"
+msgstr "خارج الخدمة"
+msgid "Needs maintenance"
+msgstr "يحتاج صيانة"
+msgid "Good"
+msgstr "ممتاز"
+
+
+
+msgid "Notifications"
+msgstr "الإشعارات"
+
+msgid "Your notifications"
+msgstr "إشعاراتك"
+
+msgid "Stay updated with your latest activity and announcements."
+msgstr "تابع آخر نشاطاتك والإعلانات الجديدة."
+
+msgid "Unread notifications"
+msgstr "الإشعارات غير المقروءة"
+
+msgid "Send announcement"
+msgstr "إرسال إعلان"
+
+msgid "Send an announcement to users by role or user IDs."
+msgstr "أرسل إعلانًا للمستخدمين حسب الدور أو معرفات المستخدمين."
+
+msgid "Close"
+msgstr "إغلاق"
+
+msgid "Create announcement"
+msgstr "إنشاء إعلان"
+
+msgid "By role"
+msgstr "حسب الدور"
+
+msgid "Specific users"
+msgstr "مستخدمون محددون"
+
+msgid "Recipient role"
+msgstr "دور المستلم"
+
+msgid "Admin"
+msgstr "مدير النظام"
+
+msgid "Manager"
+msgstr "مدير"
+
+msgid "Worker"
+msgstr "عامل"
+
+msgid "User IDs"
+msgstr "معرفات المستخدمين"
+
+msgid "Separate user IDs with commas or new lines. Maximum 1000 users."
+msgstr "افصل معرفات المستخدمين بفواصل أو أسطر جديدة. الحد الأقصى 1000 مستخدم."
+
+msgid "English"
+msgstr "الإنجليزية"
+
+msgid "Arabic"
+msgstr "العربية"
+
+msgid "Title"
+msgstr "العنوان"
+
+msgid "Announcement title"
+msgstr "عنوان الإعلان"
+
+msgid "Message"
+msgstr "الرسالة"
+
+msgid "Write your announcement..."
+msgstr "اكتب إعلانك هنا..."
+
+msgid "Sending..."
+msgstr "جارٍ الإرسال..."
+
+msgid "Inbox"
+msgstr "صندوق الوارد"
+
+msgid "Manage your notifications and stay up to date."
+msgstr "إدارة إشعاراتك ومتابعة آخر المستجدات."
+
+msgid "Refresh"
+msgstr "تحديث"
+
+msgid "All"
+msgstr "الكل"
+
+msgid "Unread"
+msgstr "غير مقروء"
+
+msgid "Read"
+msgstr "مقروء"
+
+msgid "No notifications"
+msgstr "لا توجد إشعارات"
+
+msgid "You don't have any notifications in this category."
+msgstr "ليس لديك أي إشعارات في هذه الفئة."
+
+msgid "Previous"
+msgstr "السابق"
+
+msgid "Next"
+msgstr "التالي"
+
+msgid "Announcement"
+msgstr "إعلان"
+
+msgid "Ticket assigned"
+msgstr "تم إسناد تذكرة"
+
+msgid "Ticket updated"
+msgstr "تم تحديث التذكرة"
+
+msgid "Ticket resolved"
+msgstr "تم حل التذكرة"
+
+msgid "Maintenance reminder"
+msgstr "تذكير بالصيانة"
+
+msgid "Booking created"
+msgstr "تم إنشاء حجز"
+
+msgid "Booking updated"
+msgstr "تم تحديث الحجز"
+
+msgid "Updating..."
+msgstr "جارٍ التحديث..."
+
+msgid "Mark as read"
+msgstr "تحديد كمقروء"
+
+msgid "Please fill in all announcement fields."
+msgstr "يرجى تعبئة جميع حقول الإعلان."
+
+msgid "Enter at least one user ID."
+msgstr "أدخل معرف مستخدم واحدًا على الأقل."
+
+msgid "Maximum 1000 users are allowed."
+msgstr "الحد الأقصى المسموح به هو 1000 مستخدم."
+
+msgid "Failed to send announcement."
+msgstr "فشل إرسال الإعلان."
+
+msgid "Failed to load notifications."
+msgstr "فشل تحميل الإشعارات."
+
+msgid "Failed to update notification."
+msgstr "فشل تحديث الإشعار."
+
+
 
 #: src/routes/_authenticated/home.tsx:230
 msgid "Add your first property to see it here."

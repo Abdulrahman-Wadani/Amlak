@@ -192,14 +192,12 @@ function handleLocationSelect(location: LocationData) {
 
     <div
       style={S(
-        "width: 100%; max-width: 1500px; margin: 0 auto; display: flex; align-items: flex-start; gap: 28px"
+        "width: 100%; max-width: 1500px; margin: 0 auto; display: flex; flex-direction: row; align-items: flex-start; gap: 28px"
       )}
     >
-      {/* Form - 65% */}
+      {/* Form */}
       <div
-        style={S(
-          "flex: 1 1 65%; min-width: 0"
-        )}
+        style={S("flex: 1 1 35%; min-width: 0")}
       >
         <Form
           fields={[
@@ -225,10 +223,10 @@ function handleLocationSelect(location: LocationData) {
         />
       </div>
 
-      {/* Map - 35% */}
+      {/* Map */}
       <div
         style={S(
-          "flex: 0 0 35%; min-width: 300px; max-width: 460px; position: sticky; top: 24px"
+          "flex: 1 1 65%; min-width: 0; position: sticky; top: 24px"
         )}
       >
         <LocationPicker onLocationSelect={handleLocationSelect} />
