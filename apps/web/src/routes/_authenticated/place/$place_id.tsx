@@ -17,7 +17,7 @@ import { S } from "@/lib/dom-style"
 import { apiError, errorMessage } from "@/lib/errors"
 import { buttonVariants, Button } from "@/components/ui/button"
 import { cn } from "cn"
-import { Building2, CalendarDays, MapPin, Plus, Wallet, Clock3, Pencil, Save, X, Trash2, Users, Wrench } from "lucide-react"
+import { Building2, CalendarDays, Coins, MapPin, Plus, Wallet, Clock3, Pencil, Save, X, Trash2, Users, Wrench } from "lucide-react"
 import {
   Card,
   CardAction,
@@ -136,8 +136,6 @@ function PlaceDetailPage() {
       monthly_maintenance_budget: place.monthly_maintenance_budget ?? null,
       latitude: place.latitude,
       longitude: place.longitude,
-      currency: place.currency,
-      timezone: place.timezone,
       status: place.status,
     })
 
@@ -467,21 +465,19 @@ function PlaceDetailPage() {
                     }
                   />
 
-                  <EditField
-                    label={t`Currency`}
-                    value={editForm.currency}
-                    onChange={(value) =>
-                      setEditForm({ ...editForm, currency: value })
-                    }
-                  />
-
-                  <EditField
-                    label={t`Time zone`}
-                    value={editForm.timezone}
-                    onChange={(value) =>
-                      setEditForm({ ...editForm, timezone: value })
-                    }
-                  />
+                  {/* The API cannot change these after creation, so they are shown, not edited. */}
+                  <p
+                    data-testid="place-fixed-settings"
+                    style={S(
+                      "grid-column: 1 / -1; margin: 0; font-size: 13px; color: var(--muted-foreground)"
+                    )}
+                  >
+                    <Trans>Currency:</Trans> <bdi dir="ltr">{place?.currency}</bdi>
+                    {" · "}
+                    <Trans>Time zone:</Trans> <bdi dir="ltr">{place?.timezone}</bdi>
+                    {" — "}
+                    <Trans>Currency and time zone are set when the place is created and cannot be changed.</Trans>
+                  </p>
 
                   <label
                     style={S(
@@ -588,6 +584,7 @@ function PlaceDetailPage() {
                   ))}
                 </div>
               ) : (
+                <>
                 <div
                   style={S(
                     "display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px"
@@ -622,9 +619,15 @@ function PlaceDetailPage() {
                   />
 
                   <InfoItem
+                    label={<Trans>Currency</Trans>}
+                    icon={<Coins size={16} />}
+                    value={<bdi dir="ltr">{place.currency}</bdi>}
+                  />
+
+                  <InfoItem
                     label={<Trans>Timezone</Trans>}
                     icon={<Clock3 size={16} />}
-                    value={place.timezone}
+                    value={<bdi dir="ltr">{place.timezone}</bdi>}
                   />
 
                   <InfoItem
@@ -633,6 +636,14 @@ function PlaceDetailPage() {
                     value={<StatusBadge status={String(place.status)} />}
                   />
                 </div>
+                <p
+                  style={S(
+                    "margin: 12px 0 0; font-size: 13px; color: var(--muted-foreground)"
+                  )}
+                >
+                  <Trans>Currency and time zone are set when the place is created and cannot be changed.</Trans>
+                </p>
+                </>
               )}
             </CardContent>
           </Card>
