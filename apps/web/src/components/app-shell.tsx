@@ -31,22 +31,22 @@ const NAV: NavItem[] = [
   },
   {
     to: "/admin",
-    label: <Trans>المسؤول</Trans>,
+    label: <Trans>Admin</Trans>,
     d: "M9 8a3.5 3.5 0 1 0 0-0M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6",
   },
   {
     to: "/support",
-    label: <Trans>الدعم</Trans>,
+    label: <Trans>Support</Trans>,
     d: "M9 8a3.5 3.5 0 1 0 0-0M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6",
   },
   {
     to: "/content",
-    label: <Trans>المحتوى</Trans>,
+    label: <Trans>Content</Trans>,
     d: "",
   },
   {
     to: "/notifications",
-    label: <Trans>الاشعارات</Trans>,
+    label: <Trans>Notfications</Trans>,
     d: "",
   },
 ]

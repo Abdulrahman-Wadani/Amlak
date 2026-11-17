@@ -218,6 +218,15 @@ msgstr "فشل تحميل الإشعارات."
 msgid "Failed to update notification."
 msgstr "فشل تحديث الإشعار."
 
+msgid "Admin"
+msgstr "المسؤول"
+msgid "Support"
+msgstr "الدعم"
+msgid "Content"
+msgstr "المحتوى"
+msgid "Notfications"
+msgstr "الاشعارات"
+
 
 
 #: src/routes/_authenticated/home.tsx:230
