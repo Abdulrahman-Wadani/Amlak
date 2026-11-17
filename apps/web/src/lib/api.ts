@@ -324,6 +324,19 @@ export async function getBookingsForPlace(
   })
 }
 
+/** Every booking of a place that overlaps the window (pages of 100). */
+export function listAllBookingsForPlace(
+  token: string,
+  placeId: string,
+  window: BookingWindow,
+): Promise<Booking[]> {
+  const query = new URLSearchParams({ from: window.from, to: window.to })
+  return apiAllPages<Booking>(
+    `/places/${placeId}/bookings?${query.toString()}`,
+    token,
+  )
+}
+
 export async function createBooking(
   token: string,
   placeId: string,
