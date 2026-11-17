@@ -6,7 +6,7 @@ import { reverseGeocode } from "@tomtom-org/maps-sdk/services"
 import { Marker } from "maplibre-gl"
 import "maplibre-gl/dist/maplibre-gl.css"
 
-interface LocationData {
+export interface LocationData {
   latitude: number
   longitude: number
   address: string

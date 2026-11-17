@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import Form from "@/components/form"
-import LocationPicker from "@/components/location-picker"
+import LocationPicker, { type LocationData } from "@/components/location-picker"
 
 export const Route = createFileRoute("/_authenticated/place/new")({
   component: AddPlace,
@@ -70,25 +70,10 @@ function AddPlace() {
   const [city, setCity] = useState("")
   const [address, setAddress] = useState("")
   const [budget, setBudget] = useState("")
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
-    null,
-  )
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [formError, setFormError] = useState("")
   const [loading, setLoading] = useState(false)
   const [location, setLocation] = useState<LocationData | null>(null)
-
-  function useMyLocation() {
-    setGeoError("")
-    if (!("geolocation" in navigator)) {
-      setGeoError(t`Could not get your location.`)
-      return
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => setGeoError(t`Could not get your location.`),
-    )
-  }
 
   async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -100,8 +85,8 @@ function AddPlace() {
       address: address.trim() || undefined,
       description: description.trim() || undefined,
       monthly_maintenance_budget: budget.trim() ? Number(budget) : undefined,
-      latitude: coords?.lat,
-      longitude: coords?.lng,
+      latitude: location?.latitude,
+      longitude: location?.longitude,
       currency: "SAR",
       timezone: "Asia/Riyadh",
     })
@@ -144,8 +129,8 @@ function AddPlace() {
     ...values,
     latitude: location.latitude,
     longitude: location.longitude,
-    address: location.address || values.address,
-    city: location.city || values.city,
+    address: location.address || (values.address as string | undefined),
+    city: location.city || String(values.city ?? ""),
   })
 }
 
