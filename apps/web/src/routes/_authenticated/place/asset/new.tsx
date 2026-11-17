@@ -1,4 +1,4 @@
-import { useEffect, useState, type SubmitEvent } from "react"
+import { useEffect, useState } from "react"
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
 import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
@@ -71,13 +71,8 @@ function AddAsset() {
   const { place_id } = Route.useSearch()
   const [places, setPlaces] = useState<Place[] | null>(null)
   const [placeId, setPlaceId] = useState(place_id)
-  const [name, setName] = useState("")
-  const [type, setType] = useState("")
   const [status, setStatus] = useState<StatusKey>("GOOD")
-  const [purchaseDate, setPurchaseDate] = useState("")
-  const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [formError, setFormError] = useState("")
-  const [loading, setLoading] = useState(false)
   const [today] = useState(() => new Date().toISOString().slice(0, 10))
 
   useEffect(() => {
@@ -91,14 +86,17 @@ function AddAsset() {
     }
   }, [accessToken])
 
-  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
-    e.preventDefault()
-    if (!accessToken) return
+  // The form below sends (token, placeId, values).
+  async function handleCreateAsset(
+    token: string,
+    place: string,
+    values: Record<string, unknown>,
+  ) {
     const result = assetInput.safeParse({
-      name,
-      type,
-      status,
-      purchase_date: purchaseDate || undefined,
+      name: values.name,
+      type: values.type,
+      status: values.status ?? status,
+      purchase_date: values.purchase_date || undefined,
     })
     const map: Partial<Record<FieldKey, string>> = {}
     if (!result.success) {
@@ -109,33 +107,31 @@ function AddAsset() {
         }
       }
     }
-    if (!placeId) {
+    if (!place) {
       map.place = validationMessage("place")
     }
+    // Both are YYYY-MM-DD strings, which compare correctly as text.
     if (
       result.success &&
       result.data.purchase_date &&
-      result.data.purchase_date > new Date()
+      result.data.purchase_date > today
     ) {
       map.purchase_date = validationMessage("purchase_date")
     }
     if (!result.success || Object.keys(map).length > 0) {
-      setErrors(map)
       setFormError(
-        Object.keys(map).length > 0 ? "" : t`Could not save the asset.`,
+        Object.keys(map).length > 0
+          ? Object.values(map).join(" ")
+          : t`Could not save the asset.`,
       )
       return
     }
-    setErrors({})
     setFormError("")
-    setLoading(true)
     try {
-      await createAsset(accessToken, placeId, result.data)
-      void navigate({ to: "/place/$place_id", params: { place_id: placeId } })
+      await createAsset(token, place, result.data)
+      void navigate({ to: "/place/$place_id", params: { place_id: place } })
     } catch {
       setFormError(t`Could not save the asset.`)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -160,9 +156,15 @@ function AddAsset() {
           { name: "status", label: t`Status`, type: "select", options: STATUSES.map((s) => ({ value: s, label: <StatusLabel status={s} /> })) },
           { name: "purchase_date", label: t`Purchase date`, type: "date" },
         ]}
-        callable={createAsset}
+        callable={handleCreateAsset}
         args={{token:accessToken, placeId:placeId}}
       />
+      {formError && (
+        <p role="alert" className={errorText}>
+          <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+          {formError}
+        </p>
+      )}
     </div>
   </center>
   )
