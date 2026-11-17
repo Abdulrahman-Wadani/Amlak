@@ -5,7 +5,8 @@ import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import type { Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
-import { getPlaceAssets, getPlaces } from "@/lib/api"
+import { countPlaceWorkers, getDashboardRows, getPlaces } from "@/lib/api"
+import { placeCounts, type PlaceCounts } from "@/lib/places"
 import { S } from "@/lib/dom-style"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -40,10 +41,16 @@ const STATS = [
   { key: "workers", label: <Trans>Workers</Trans> },
 ] as const
 
+type StatKey = (typeof STATS)[number]["key"]
+
 function PlacesPage() {
-  const { accessToken } = useAuth()
+  const { accessToken, user } = useAuth()
+  // Workers cannot list a place's workers, so they do not get that column.
+  const isManager = user?.role === "MANAGER"
+  const stats = STATS.filter((s) => s.key !== "workers" || isManager)
   const [places, setPlaces] = useState<Place[] | null>(null)
-  const [assetCounts, setAssetCounts] = useState<Record<string, number>>({})
+  const [counts, setCounts] = useState<Record<string, PlaceCounts>>({})
+  const [workerCounts, setWorkerCounts] = useState<Record<string, number>>({})
   const [error, setError] = useState(false)
   const [query, setQuery] = useState("")
   const [tab, setTab] = useState<TabKey>("ALL")
@@ -72,25 +79,45 @@ function PlacesPage() {
     })
   }, [places, tab, q])
 
+  // Assets and open tickets for every place come from the dashboard, in one
+  // request.
   useEffect(() => {
-    if (!accessToken || !places) return
+    if (!accessToken) return
+    let alive = true
+    getDashboardRows(accessToken)
+      .then((rows) => alive && setCounts(placeCounts(rows)))
+      .catch(() => {})
+    return () => {
+      alive = false
+    }
+  }, [accessToken])
+
+  // Workers per place: one small request per place, for Managers only.
+  useEffect(() => {
+    if (!accessToken || !places || !isManager) return
     let alive = true
     void Promise.all(
       places.map((p) =>
-        getPlaceAssets(accessToken, p.id)
-          .then((list) => [p.id, list.length] as const)
+        countPlaceWorkers(accessToken, p.id)
+          .then((n) => [p.id, n] as const)
           .catch(() => null),
       ),
-    ).then((counts) => {
+    ).then((list) => {
       if (!alive) return
-      setAssetCounts(
-        Object.fromEntries(counts.filter((c) => c !== null) as [string, number][]),
+      setWorkerCounts(
+        Object.fromEntries(list.filter((c) => c !== null) as [string, number][]),
       )
     })
     return () => {
       alive = false
     }
-  }, [accessToken, places])
+  }, [accessToken, places, isManager])
+
+  const statValue = (placeId: string, key: StatKey) => {
+    const value =
+      key === "workers" ? workerCounts[placeId] : counts[placeId]?.[key]
+    return value ?? "\u2014"
+  }
 
   const countFor = (key: TabKey) =>
     places?.filter((p) => key === "ALL" || p.status === key).length ?? 0
@@ -109,6 +136,7 @@ function PlacesPage() {
         <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
           <Trans>Places</Trans>
         </h1>
+        {isManager && (
         <Link
           to="/place/new"
           className={cn(buttonVariants(), "am-btn am-solid")}
@@ -122,6 +150,7 @@ function PlacesPage() {
           />
           <Trans>Add place</Trans>
         </Link>
+        )}
       </div>
 
       <div
@@ -189,15 +218,32 @@ function PlacesPage() {
         </p>
       )}
 
-      {places !== null && visible.length === 0 && (
+      {places !== null && places.length === 0 && (
         <Empty style={S("padding: 40px")}>
           <EmptyHeader>
             <EmptyTitle>
-              <Trans>No properties yet</Trans>
+              <Trans>No places yet</Trans>
+            </EmptyTitle>
+            <EmptyDescription>
+              {isManager ? (
+                <Trans>Add your first place with the Add place button.</Trans>
+              ) : (
+                <Trans>Places your manager assigns you to show here.</Trans>
+              )}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
+
+      {places !== null && places.length > 0 && visible.length === 0 && (
+        <Empty style={S("padding: 40px")}>
+          <EmptyHeader>
+            <EmptyTitle>
+              <Trans>No places match</Trans>
             </EmptyTitle>
             <EmptyDescription>
               <Trans>
-                Nothing matches this search. Clear it to see all properties.
+                Nothing matches this search. Clear it to see all places.
               </Trans>
             </EmptyDescription>
             <Button
@@ -212,14 +258,6 @@ function PlacesPage() {
             </Button>
           </EmptyHeader>
         </Empty>
-      )}
-
-      {visible.length > 0 && (
-        <p style={S("color: var(--muted-foreground); font-size: 13px")}>
-          <Trans>
-            Ticket and worker counts appear once those services are wired up.
-          </Trans>
-        </p>
       )}
 
       <div style={S("display: flex; flex-direction: row; gap: 12px")}>
@@ -263,10 +301,10 @@ function PlacesPage() {
 
             <div
               style={S(
-                "display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; border-top: 1px solid var(--border); padding-top: 14px"
+                `display: grid; grid-template-columns: repeat(${stats.length}, minmax(0, 1fr)); gap: 12px; border-top: 1px solid var(--border); padding-top: 14px`
               )}
             >
-              {STATS.map((s) => (
+              {stats.map((s) => (
                 <div
                   key={s.key}
                   style={S("display: flex; flex-direction: column; line-height: 1.4")}
@@ -278,9 +316,7 @@ function PlacesPage() {
                     className="font-mono tabular-nums"
                     style={S("font-weight: 600")}
                   >
-                    {s.key === "assets"
-                      ? (assetCounts[p.id] ?? "\u2014")
-                      : "\u2014"}
+                    {statValue(p.id, s.key)}
                   </span>
                 </div>
               ))}
