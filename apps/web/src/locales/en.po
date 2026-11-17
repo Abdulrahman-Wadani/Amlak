@@ -118,11 +118,11 @@ msgstr "Actual cost"
 msgid "Add a stay to block its dates on the calendar."
 msgstr "Add a stay to block its dates on the calendar."
 
-#: src/routes/_authenticated/place/$place_id.tsx:780
+#: src/routes/_authenticated/place/$place_id.tsx:791
 msgid "Add an asset to start tracking this property."
 msgstr "Add an asset to start tracking this property."
 
-#: src/routes/_authenticated/place/$place_id.tsx:743
+#: src/routes/_authenticated/place/$place_id.tsx:754
 #: src/routes/_authenticated/place/asset/new.tsx:119
 msgid "Add asset"
 msgstr "Add asset"
@@ -160,8 +160,8 @@ msgstr "Add property"
 msgid "Add ticket"
 msgstr "Add ticket"
 
-#: src/routes/_authenticated/place/$place_id.tsx:876
-#: src/routes/_authenticated/place/$place_id.tsx:929
+#: src/routes/_authenticated/place/$place_id.tsx:887
+#: src/routes/_authenticated/place/$place_id.tsx:940
 #: src/routes/_authenticated/worker/new.tsx:112
 #: src/routes/_authenticated/workers.tsx:128
 #: src/routes/_authenticated/workers.tsx:274
@@ -181,8 +181,8 @@ msgid "Add your first worker to start managing your team."
 msgstr "Add your first worker to start managing your team."
 
 #: src/lib/errors.ts:85
-#: src/routes/_authenticated/place/$place_id.tsx:413
-#: src/routes/_authenticated/place/$place_id.tsx:609
+#: src/routes/_authenticated/place/$place_id.tsx:411
+#: src/routes/_authenticated/place/$place_id.tsx:606
 #: src/routes/_authenticated/place/new.tsx:117
 msgid "Address"
 msgstr "Address"
@@ -234,7 +234,7 @@ msgstr "All your places, their\n"
 "maintenance and bookings,\n"
 "in one place."
 
-#: src/routes/_authenticated/place/$place_id.tsx:966
+#: src/routes/_authenticated/place/$place_id.tsx:977
 msgid "All your workers are already assigned to this place."
 msgstr "All your workers are already assigned to this place."
 
@@ -352,8 +352,8 @@ msgstr "Asset status"
 msgid "Asset type"
 msgstr "Asset type"
 
-#: src/routes/_authenticated/place/$place_id.tsx:652
-#: src/routes/_authenticated/place/$place_id.tsx:717
+#: src/routes/_authenticated/place/$place_id.tsx:663
+#: src/routes/_authenticated/place/$place_id.tsx:728
 #: src/routes/_authenticated/places.tsx:39
 msgid "Assets"
 msgstr "Assets"
@@ -424,7 +424,7 @@ msgstr "Booking income in the selected period"
 #: src/components/place-bookings.tsx:303
 #: src/routes/_authenticated/bookings.tsx:117
 #: src/routes/_authenticated/home.tsx:241
-#: src/routes/_authenticated/place/$place_id.tsx:689
+#: src/routes/_authenticated/place/$place_id.tsx:700
 msgid "Bookings"
 msgstr "Bookings"
 
@@ -441,7 +441,7 @@ msgid "By role"
 msgstr "By role"
 
 #: src/routes/_authenticated/finance.tsx:1099
-#: src/routes/_authenticated/place/$place_id.tsx:550
+#: src/routes/_authenticated/place/$place_id.tsx:546
 #: src/routes/_authenticated/profile.tsx:100
 #: src/routes/_authenticated/support/$support_id.tsx:434
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:1205
@@ -567,11 +567,11 @@ msgstr "Choose a period to see income, expenses and profit."
 msgid "Choose a place"
 msgstr "Choose a place"
 
-#: src/routes/_authenticated/place/$place_id.tsx:948
+#: src/routes/_authenticated/place/$place_id.tsx:959
 msgid "Choose a worker"
 msgstr "Choose a worker"
 
-#: src/routes/_authenticated/place/$place_id.tsx:936
+#: src/routes/_authenticated/place/$place_id.tsx:947
 msgid "Choose a worker (name and ID)"
 msgstr "Choose a worker (name and ID)"
 
@@ -592,8 +592,8 @@ msgid "Choose who does the work"
 msgstr "Choose who does the work"
 
 #: src/lib/errors.ts:83
-#: src/routes/_authenticated/place/$place_id.tsx:405
-#: src/routes/_authenticated/place/$place_id.tsx:603
+#: src/routes/_authenticated/place/$place_id.tsx:403
+#: src/routes/_authenticated/place/$place_id.tsx:600
 #: src/routes/_authenticated/place/new.tsx:116
 msgid "City"
 msgstr "City"
@@ -793,9 +793,18 @@ msgstr "Created At"
 msgid "Creating account…"
 msgstr "Creating account…"
 
-#: src/routes/_authenticated/place/$place_id.tsx:471
+#: src/routes/_authenticated/place/$place_id.tsx:622
 msgid "Currency"
 msgstr "Currency"
+
+#: src/routes/_authenticated/place/$place_id.tsx:479
+#: src/routes/_authenticated/place/$place_id.tsx:644
+msgid "Currency and time zone are set when the place is created and cannot be changed."
+msgstr "Currency and time zone are set when the place is created and cannot be changed."
+
+#: src/routes/_authenticated/place/$place_id.tsx:475
+msgid "Currency:"
+msgstr "Currency:"
 
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:454
 msgid "Damage photos"
@@ -830,12 +839,12 @@ msgstr "Delete asset"
 msgid "Delete page"
 msgstr "Delete page"
 
-#: src/routes/_authenticated/place/$place_id.tsx:324
+#: src/routes/_authenticated/place/$place_id.tsx:322
 msgid "Delete place"
 msgstr "Delete place"
 
 #. placeholder {0}: place.place_name
-#: src/routes/_authenticated/place/$place_id.tsx:178
+#: src/routes/_authenticated/place/$place_id.tsx:176
 msgid "Delete the place \"{0}\"? This cannot be undone."
 msgstr "Delete the place \"{0}\"? This cannot be undone."
 
@@ -858,14 +867,14 @@ msgstr "Delete worker"
 
 #: src/components/asset-manage.tsx:239
 #: src/routes/_authenticated/content/$content_id.tsx:728
-#: src/routes/_authenticated/place/$place_id.tsx:324
+#: src/routes/_authenticated/place/$place_id.tsx:322
 #: src/routes/_authenticated/worker/$worker_id.tsx:728
 msgid "Deleting…"
 msgstr "Deleting…"
 
 #: src/lib/errors.ts:112
 #: src/routes/_authenticated/finance.tsx:1050
-#: src/routes/_authenticated/place/$place_id.tsx:424
+#: src/routes/_authenticated/place/$place_id.tsx:422
 #: src/routes/_authenticated/place/asset/maintenance/new.tsx:140
 #: src/routes/_authenticated/place/new.tsx:115
 #: src/routes/_authenticated/support/$support_id.tsx:311
@@ -1278,7 +1287,7 @@ msgstr "High"
 #: src/components/app-shell.tsx:14
 #: src/routes/_authenticated/admin/$admin_id.tsx:168
 #: src/routes/_authenticated/content/$content_id.tsx:213
-#: src/routes/_authenticated/place/$place_id.tsx:265
+#: src/routes/_authenticated/place/$place_id.tsx:263
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:163
 #: src/routes/_authenticated/support/$support_id.tsx:242
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:605
@@ -1360,7 +1369,7 @@ msgid "Last updated:"
 msgstr "Last updated:"
 
 #: src/lib/errors.ts:87
-#: src/routes/_authenticated/place/$place_id.tsx:447
+#: src/routes/_authenticated/place/$place_id.tsx:445
 #: src/routes/_authenticated/place/new.tsx:118
 msgid "Latitude"
 msgstr "Latitude"
@@ -1398,7 +1407,7 @@ msgid "Loading..."
 msgstr "Loading..."
 
 #: src/lib/errors.ts:89
-#: src/routes/_authenticated/place/$place_id.tsx:459
+#: src/routes/_authenticated/place/$place_id.tsx:457
 #: src/routes/_authenticated/place/new.tsx:119
 msgid "Longitude"
 msgstr "Longitude"
@@ -1439,8 +1448,8 @@ msgstr "Maintenance ticket"
 msgid "Maintenance ticket ID (optional)"
 msgstr "Maintenance ticket ID (optional)"
 
-#: src/routes/_authenticated/place/$place_id.tsx:678
-#: src/routes/_authenticated/place/$place_id.tsx:981
+#: src/routes/_authenticated/place/$place_id.tsx:689
+#: src/routes/_authenticated/place/$place_id.tsx:992
 msgid "Maintenance tickets"
 msgstr "Maintenance tickets"
 
@@ -1494,8 +1503,8 @@ msgstr "Month"
 
 #: src/lib/errors.ts:91
 #: src/routes/_authenticated/finance.tsx:560
-#: src/routes/_authenticated/place/$place_id.tsx:435
-#: src/routes/_authenticated/place/$place_id.tsx:615
+#: src/routes/_authenticated/place/$place_id.tsx:433
+#: src/routes/_authenticated/place/$place_id.tsx:612
 msgid "Monthly budget"
 msgstr "Monthly budget"
 
@@ -1574,7 +1583,7 @@ msgstr "No address was found for this location."
 msgid "No asset"
 msgstr "No asset"
 
-#: src/routes/_authenticated/place/$place_id.tsx:773
+#: src/routes/_authenticated/place/$place_id.tsx:784
 msgid "No assets yet."
 msgstr "No assets yet."
 
@@ -1667,7 +1676,7 @@ msgstr "No users match"
 msgid "No users yet"
 msgstr "No users yet"
 
-#: src/routes/_authenticated/place/$place_id.tsx:895
+#: src/routes/_authenticated/place/$place_id.tsx:906
 msgid "No workers are assigned to this place."
 msgstr "No workers are assigned to this place."
 
@@ -1692,7 +1701,7 @@ msgstr "Not confirmed"
 msgid "Not overdue"
 msgstr "Not overdue"
 
-#: src/routes/_authenticated/place/$place_id.tsx:611
+#: src/routes/_authenticated/place/$place_id.tsx:608
 msgid "Not set"
 msgstr "Not set"
 
@@ -1917,28 +1926,28 @@ msgstr "Photos of the damage"
 msgid "Place"
 msgstr "Place"
 
-#: src/routes/_authenticated/place/$place_id.tsx:572
+#: src/routes/_authenticated/place/$place_id.tsx:568
 msgid "Place information"
 msgstr "Place information"
 
 #: src/lib/errors.ts:79
-#: src/routes/_authenticated/place/$place_id.tsx:389
+#: src/routes/_authenticated/place/$place_id.tsx:387
 #: src/routes/_authenticated/place/new.tsx:109
 msgid "Place name"
 msgstr "Place name"
 
-#: src/routes/_authenticated/place/$place_id.tsx:285
+#: src/routes/_authenticated/place/$place_id.tsx:283
 msgid "Place not found"
 msgstr "Place not found"
 
 #: src/lib/errors.ts:81
-#: src/routes/_authenticated/place/$place_id.tsx:397
+#: src/routes/_authenticated/place/$place_id.tsx:395
 #: src/routes/_authenticated/place/new.tsx:112
 msgid "Place type"
 msgstr "Place type"
 
 #: src/components/app-shell.tsx:19
-#: src/routes/_authenticated/place/$place_id.tsx:270
+#: src/routes/_authenticated/place/$place_id.tsx:268
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:171
 #: src/routes/_authenticated/places.tsx:137
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:613
@@ -2005,7 +2014,7 @@ msgstr "Profile Picture"
 msgid "Profile updated successfully."
 msgstr "Profile updated successfully."
 
-#: src/routes/_authenticated/place/$place_id.tsx:597
+#: src/routes/_authenticated/place/$place_id.tsx:594
 msgid "Property type"
 msgstr "Property type"
 
@@ -2197,7 +2206,7 @@ msgstr "Save"
 
 #: src/routes/_authenticated/admin/$admin_id.tsx:660
 #: src/routes/_authenticated/content/$content_id.tsx:714
-#: src/routes/_authenticated/place/$place_id.tsx:537
+#: src/routes/_authenticated/place/$place_id.tsx:533
 #: src/routes/_authenticated/worker/$worker_id.tsx:714
 msgid "Save changes"
 msgstr "Save changes"
@@ -2207,7 +2216,7 @@ msgid "Save Changes"
 msgstr "Save Changes"
 
 #: src/routes/_authenticated/finance.tsx:1110
-#: src/routes/_authenticated/place/$place_id.tsx:535
+#: src/routes/_authenticated/place/$place_id.tsx:531
 #: src/routes/_authenticated/profile.tsx:98
 msgid "Saving..."
 msgstr "Saving..."
@@ -2354,8 +2363,8 @@ msgstr "Spent:"
 #: src/components/asset-manage.tsx:181
 #: src/lib/errors.ts:97
 #: src/routes/_authenticated/content/new.tsx:59
-#: src/routes/_authenticated/place/$place_id.tsx:491
-#: src/routes/_authenticated/place/$place_id.tsx:631
+#: src/routes/_authenticated/place/$place_id.tsx:487
+#: src/routes/_authenticated/place/$place_id.tsx:634
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:265
 #: src/routes/_authenticated/place/asset/new.tsx:125
 #: src/routes/_authenticated/support/$support_id.tsx:316
@@ -2470,7 +2479,7 @@ msgstr "The slug format is not valid."
 msgid "The user was updated."
 msgstr "The user was updated."
 
-#: src/routes/_authenticated/place/$place_id.tsx:229
+#: src/routes/_authenticated/place/$place_id.tsx:227
 msgid "The worker was added to the place."
 msgstr "The worker was added to the place."
 
@@ -2530,11 +2539,11 @@ msgstr "This password reset link is invalid or incomplete. Please request a new 
 msgid "This place has current or upcoming stays."
 msgstr "This place has current or upcoming stays."
 
-#: src/routes/_authenticated/place/$place_id.tsx:983
+#: src/routes/_authenticated/place/$place_id.tsx:994
 msgid "This place has no maintenance tickets."
 msgstr "This place has no maintenance tickets."
 
-#: src/routes/_authenticated/place/$place_id.tsx:982
+#: src/routes/_authenticated/place/$place_id.tsx:993
 msgid "This place has no open tickets."
 msgstr "This place has no open tickets."
 
@@ -2601,16 +2610,16 @@ msgstr "Tickets waiting for your review"
 msgid "Tickets you open show here."
 msgstr "Tickets you open show here."
 
-#: src/routes/_authenticated/place/$place_id.tsx:479
-msgid "Time zone"
-msgstr "Time zone"
+#: src/routes/_authenticated/place/$place_id.tsx:477
+msgid "Time zone:"
+msgstr "Time zone:"
 
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:728
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:862
 msgid "Timeline"
 msgstr "Timeline"
 
-#: src/routes/_authenticated/place/$place_id.tsx:625
+#: src/routes/_authenticated/place/$place_id.tsx:628
 msgid "Timezone"
 msgstr "Timezone"
 
@@ -2719,7 +2728,7 @@ msgstr "Unticking this makes the page a draft."
 msgid "Upcoming"
 msgstr "Upcoming"
 
-#: src/routes/_authenticated/place/$place_id.tsx:308
+#: src/routes/_authenticated/place/$place_id.tsx:306
 msgid "Update place"
 msgstr "Update place"
 
@@ -2727,7 +2736,7 @@ msgstr "Update place"
 msgid "Update Profile"
 msgstr "Update Profile"
 
-#: src/routes/_authenticated/place/$place_id.tsx:365
+#: src/routes/_authenticated/place/$place_id.tsx:363
 msgid "Update property"
 msgstr "Update property"
 
@@ -2882,7 +2891,7 @@ msgstr "We could not load the workers."
 msgid "We could not load this page. Try again later."
 msgstr "We could not load this page. Try again later."
 
-#: src/routes/_authenticated/place/$place_id.tsx:338
+#: src/routes/_authenticated/place/$place_id.tsx:336
 msgid "We could not load this property."
 msgstr "We could not load this property."
 
@@ -2935,8 +2944,8 @@ msgid "Worker status"
 msgstr "Worker status"
 
 #: src/components/app-shell.tsx:29
-#: src/routes/_authenticated/place/$place_id.tsx:666
-#: src/routes/_authenticated/place/$place_id.tsx:859
+#: src/routes/_authenticated/place/$place_id.tsx:677
+#: src/routes/_authenticated/place/$place_id.tsx:870
 #: src/routes/_authenticated/places.tsx:41
 #: src/routes/_authenticated/worker/$worker_id.tsx:232
 #: src/routes/_authenticated/worker/$worker_id.tsx:268

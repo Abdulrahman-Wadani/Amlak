@@ -436,9 +436,8 @@ export async function updatePlace(
     monthly_maintenance_budget: number | null
     latitude: number | null
     longitude: number | null
-    currency: string
-    timezone: string
     status: PlaceStatus
+    // No currency or timezone: the API sets them at creation only.
   },
 ): Promise<Place> {
   const place = await apiRequest<Place>(
