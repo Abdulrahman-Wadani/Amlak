@@ -1,20 +1,14 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Link, createFileRoute } from "@tanstack/react-router"
-import {
-  CircleAlert,
-  MapPin,
-  Plus,
-  Search,
-  UserRound,
-  Phone,
-} from "lucide-react"
+import { CircleAlert, Plus, Search, UserRound } from "lucide-react"
 
 import { t } from "@lingui/core/macro"
-import type { SupportTicket, SupportTicketStatus } from "@amlak/shared"
+import type { SupportTicket } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { getSupportTicket } from "@/lib/api"
 import { S } from "@/lib/dom-style"
+import { filterSupportTickets, type SupportFilter } from "@/lib/support"
 import { Trans } from "@lingui/react/macro"
 
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -42,7 +36,7 @@ const TABS = [
   { key: "RESOLVED", label: <Trans>Resolved</Trans> },
 ] as const
 
-type TabKey = "ALL" | SupportTicketStatus
+type TabKey = SupportFilter
 
 function UsersPage() {
   const { accessToken } = useAuth()
@@ -75,17 +69,7 @@ function UsersPage() {
   const visible = useMemo(() => {
     if (!ticket) return []
 
-    return ticket.filter((user) => {
-      const matchesTab =
-        tab === "ALL" || user.status === tab
-
-      const matchesQuery =
-        !q ||
-        user.subject.toLowerCase().includes(q) ||
-        user.description.toLowerCase().includes(q)
-
-      return matchesTab && matchesQuery
-    })
+    return filterSupportTickets(ticket, tab, q)
   }, [ticket, tab, q])
 
   const countFor = (key: TabKey) =>
@@ -351,7 +335,7 @@ function UsersPage() {
                 )}
               >
                 <Trans>View details</Trans>
-                <span aria-hidden="true">←</span>
+                <span aria-hidden="true" className="inline-block rtl:rotate-180">→</span>
               </div>
             </Link>
           ))}

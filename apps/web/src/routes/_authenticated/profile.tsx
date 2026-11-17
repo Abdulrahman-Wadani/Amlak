@@ -1,9 +1,7 @@
 
 import { createFileRoute } from "@tanstack/react-router"
 import { useEffect, useRef, useState } from "react"
-import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import { useLingui } from "@lingui/react"
 import { LANGUAGE_NAMES, useLanguage } from "@/lib/i18n"
 import {
   UserRound,
@@ -22,6 +20,7 @@ import {
 import { S } from "@/lib/dom-style"
 import { useAuth } from "@/lib/auth"
 import { getProfile, updateProfile } from "@/lib/api"
+import { errorMessage } from "@/lib/errors"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -66,7 +65,6 @@ function formatDate(value: string | null, locale: string) {
 
 function ProfilePage() {
   const { accessToken } = useAuth()
-  const { i18n } = useLingui()
   const { lang, setLang } = useLanguage()
 
   const locale = lang
@@ -175,7 +173,7 @@ function ProfilePage() {
       } catch (err) {
         if (alive) {
           setError(
-            err instanceof Error ? err.message : messages.failedLoad,
+            errorMessage(err),
           )
         }
       } finally {
@@ -320,7 +318,7 @@ function ProfilePage() {
       setSuccess(messages.updated)
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : messages.failedUpdate,
+        errorMessage(err),
       )
     } finally {
       setSaving(false)

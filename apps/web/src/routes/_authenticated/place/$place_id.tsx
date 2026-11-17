@@ -14,23 +14,10 @@ import {
   updatePlace,
 } from "@/lib/api"
 import { S } from "@/lib/dom-style"
+import { apiError, errorMessage } from "@/lib/errors"
 import { buttonVariants, Button } from "@/components/ui/button"
 import { cn } from "cn"
-import {
-  Building2,
-  CalendarDays,
-  MapPin,
-  Plus,
-  Wallet,
-  Clock3,
-  Pencil,
-  Save,
-  X,
-  Trash2,
-  Users,
-  Wrench,
-  AlertTriangle,
-} from "lucide-react"
+import { Building2, CalendarDays, MapPin, Plus, Wallet, Clock3, Pencil, Save, X, Trash2, Users, Wrench } from "lucide-react"
 import {
   Card,
   CardAction,
@@ -46,14 +33,7 @@ import {
   StatusBadge,
   TypeLabel,
 } from "@/components/place-shared"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 
 export const Route = createFileRoute("/_authenticated/place/$place_id")({
   component: PlaceDetailPage,
@@ -144,26 +124,6 @@ function PlaceDetailPage() {
     { dateStyle: "medium" }
   )
 
-function formatTicketDate(value: string | null | undefined) {
-  if (!value) return "—"
-
-  return day.format(
-    new Date(value.length === 10 ? `${value}T00:00:00` : value)
-  )
-}
-
-function getAssetForTicket(assetId: string | null) {
-  if (!assetId || !assets) return null
-
-  return assets.find((asset) => asset.id === assetId) ?? null
-}
-function getWorkerName(userId: string | null | undefined) {
-  if (!userId || !workers) return "—"
-
-  return workers.find((worker) => worker.id === userId)?.fullname ?? "—"
-}
-
-
   function openEditForm() {
     if (!place) return
 
@@ -173,7 +133,7 @@ function getWorkerName(userId: string | null | undefined) {
       city: place.city,
       address: place.address,
       description: place.description,
-      monthly_maintenance_budget: place.monthly_maintenance_budget,
+      monthly_maintenance_budget: place.monthly_maintenance_budget ?? null,
       latitude: place.latitude,
       longitude: place.longitude,
       currency: place.currency,
@@ -204,9 +164,7 @@ function getWorkerName(userId: string | null | undefined) {
       setEditing(false)
     } catch (error) {
       setUpdateError(
-        error instanceof Error
-          ? error.message
-          : t`Could not update the place.`
+        errorMessage(error)
       )
     } finally {
       setSaving(false)
@@ -231,22 +189,23 @@ function getWorkerName(userId: string | null | undefined) {
       const result = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(result?.message ?? `Delete failed (${response.status})`)
+        throw apiError(response.status, result)
       }
 
       await navigate({ to: "/places" })
     } catch (error) {
       console.error("Delete place error:", error)
       setDeleteError(
-        error instanceof Error ? error.message : "Failed to delete property",
+        errorMessage(error),
       )
     } finally {
       setDeleting(false)
     }
   }
 
-  async function handleAddWorker(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
+  // Used by the add-worker form and by the header button.
+  async function handleAddWorker(e?: React.SyntheticEvent) {
+    e?.preventDefault()
     if (!accessToken || !selectedWorkerId || addingWorker) return
 
     try {
@@ -261,7 +220,7 @@ function getWorkerName(userId: string | null | undefined) {
       const result = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(result?.message ?? `Assign failed (${response.status})`)
+        throw apiError(response.status, result)
       }
 
       const refreshedWorkers = await getWorkers(accessToken)
@@ -271,7 +230,7 @@ function getWorkerName(userId: string | null | undefined) {
     } catch (error) {
       console.error("Assign worker error:", error)
       setWorkerError(
-        error instanceof Error ? error.message : "Failed to assign worker",
+        errorMessage(error),
       )
     } finally {
       setAddingWorker(false)
@@ -475,7 +434,7 @@ function getWorkerName(userId: string | null | undefined) {
                   <EditField
                     label={t`Monthly budget`}
                     type="number"
-                    value={String(editForm.monthly_maintenance_budget)}
+                    value={editForm.monthly_maintenance_budget?.toString() ?? ""}
                     onChange={(value) =>
                       setEditForm({
                         ...editForm,
@@ -655,7 +614,11 @@ function getWorkerName(userId: string | null | undefined) {
                   <InfoItem
                     label={<Trans>Monthly budget</Trans>}
                     icon={<Wallet size={16} />}
-                    value={`${money.format(place.monthly_maintenance_budget)} ${place.currency}`}
+                    value={
+                      place.monthly_maintenance_budget == null
+                        ? "—"
+                        : `${money.format(place.monthly_maintenance_budget)} ${place.currency}`
+                    }
                   />
 
                   <InfoItem

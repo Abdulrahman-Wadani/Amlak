@@ -24,6 +24,7 @@ import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 
 import { useAuth } from "@/lib/auth"
+import { errorMessage } from "@/lib/errors"
 import {
   approveTicket,
   rejectTicket,
@@ -208,9 +209,7 @@ function TicketDetailPage() {
 
         if (alive) {
           setError(
-            err instanceof Error
-              ? err.message
-              : t`We could not load the ticket`,
+            errorMessage(err),
           )
         }
       } finally {
@@ -264,9 +263,7 @@ function TicketDetailPage() {
       console.error("Failed to load ticket:", err)
 
       setError(
-        err instanceof Error
-          ? err.message
-          : t`We could not load the ticket`,
+        errorMessage(err),
       )
     } finally {
       setLoading(false)
@@ -290,7 +287,7 @@ function TicketDetailPage() {
   }
 
   const handleApprove = async () => {
-    if (!assigneeId || !dueDate) return
+    if (!accessToken || !assigneeId || !dueDate) return
 
     try {
       setActionLoading(true)
@@ -309,7 +306,7 @@ function TicketDetailPage() {
       await loadTicketDetails()
     } catch (err) {
       setActionError(
-        err instanceof Error ? err.message : t`Could not approve the ticket`,
+        errorMessage(err),
       )
     } finally {
       setActionLoading(false)
@@ -317,7 +314,7 @@ function TicketDetailPage() {
   }
 
   const handleReject = async () => {
-    if (!rejectionReason.trim()) return
+    if (!accessToken || !rejectionReason.trim()) return
 
     try {
       setActionLoading(true)
@@ -331,7 +328,7 @@ function TicketDetailPage() {
       await loadTicketDetails()
     } catch (err) {
       setActionError(
-        err instanceof Error ? err.message : t`Could not reject the ticket`,
+        errorMessage(err),
       )
     } finally {
       setActionLoading(false)
@@ -339,7 +336,7 @@ function TicketDetailPage() {
   }
 
   const handleReassign = async () => {
-    if (!assigneeId || !dueDate) return
+    if (!accessToken || !assigneeId || !dueDate) return
 
     try {
       setActionLoading(true)
@@ -354,9 +351,7 @@ function TicketDetailPage() {
       await loadTicketDetails()
     } catch (err) {
       setActionError(
-        err instanceof Error
-          ? err.message
-          : t`Could not reassign the ticket`,
+        errorMessage(err),
       )
     } finally {
       setActionLoading(false)
@@ -365,6 +360,7 @@ function TicketDetailPage() {
 
   const handleComplete = async () => {
     if (
+      !accessToken ||
       actualCost === "" ||
       Number(actualCost) < 0 ||
       photos.length < 1 ||
@@ -387,7 +383,7 @@ function TicketDetailPage() {
       await loadTicketDetails()
     } catch (err) {
       setActionError(
-        err instanceof Error ? err.message : t`Could not complete the ticket`,
+        errorMessage(err),
       )
     } finally {
       setActionLoading(false)

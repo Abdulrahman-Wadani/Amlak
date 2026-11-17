@@ -1,65 +1,65 @@
-import { useEffect, useState, type SubmitEvent } from "react"
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
+import { useState } from "react"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
 import { CircleAlert } from "lucide-react"
-import { cn } from "cn"
-import type { Place } from "@amlak/shared"
 import { S } from "@/lib/dom-style"
 import { useAuth } from "@/lib/auth"
 import { createSupportTicket } from "@/lib/api"
-import { assetInput } from "@/lib/validators"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import Form from "@/components/form"
-
+import { errorMessage } from "@/lib/errors"
+import Form, { type FormValues } from "@/components/form"
 
 export const Route = createFileRoute("/_authenticated/support/new")({
-  component: AddAsset,
-  validateSearch: (search: Record<string, unknown>) => ({
-    place_id: typeof search.place_id === "string" ? search.place_id : "",
-  }),
+  component: NewSupportTicket,
 })
 
-function AddAsset() {
+function NewSupportTicket() {
   const { accessToken } = useAuth()
-  const [subject, setsubject] = useState("")
-  const [description, setdescription] = useState("")
-  const [errors, setErrors] = useState({})
+  const navigate = useNavigate()
   const [formError, setFormError] = useState("")
-  const [loading, setLoading] = useState(false)
 
-  const errorText =
-    "flex items-center gap-1.5 text-[13px] leading-5 text-crit-900"
+  async function handleSubmit(values: FormValues) {
+    if (!accessToken) return
+    const subject = typeof values.subject === "string" ? values.subject.trim() : ""
+    const description =
+      typeof values.description === "string" ? values.description.trim() : ""
+    if (!subject || !description) {
+      setFormError(t`Write a subject and a description.`)
+      return
+    }
+    setFormError("")
+    try {
+      await createSupportTicket(accessToken, { subject, description })
+      void navigate({ to: "/support" })
+    } catch (err) {
+      setFormError(errorMessage(err))
+    }
+  }
 
   return (
     <center>
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 640px"
-      )}
-    >
-      <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-        <Trans>Add asset</Trans>
-      </h1>
-      <Form
-        fields={[
-          { name: "subject", label: t`subject`, type: "text"},
-          { name: "description", label: t`description`, type: "text" },
-        ]}
-        callable={createSupportTicket}
-        args={{token:accessToken}}
-        redirect_to="/support"
-      />
-    </div>
-  </center>
+      <div
+        style={S(
+          "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 640px",
+        )}
+      >
+        <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
+          <Trans>New support ticket</Trans>
+        </h1>
+        <Form
+          fields={[
+            { name: "subject", label: t`Subject`, type: "text", required: true },
+            { name: "description", label: t`Description`, type: "textarea", required: true },
+          ]}
+          onSubmit={handleSubmit}
+        />
+        {formError && (
+          <p role="alert" className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
+            <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+            {formError}
+          </p>
+        )}
+      </div>
+    </center>
   )
 }

@@ -17,24 +17,9 @@ import {
   type ExpenseInput,
 } from "@/lib/api"
 import { S } from "@/lib/dom-style"
+import { errorMessage } from "@/lib/errors"
 
-import {
-  Wallet,
-  Building2,
-  CalendarDays,
-  Receipt,
-  Filter,
-  TrendingDown,
-  TrendingUp,
-  FileText,
-  AlertCircle,
-  Plus,
-  Pencil,
-  Trash2,
-  X,
-  Save,
-  BarChart3,
-} from "lucide-react"
+import { Wallet, Building2, CalendarDays, Receipt, TrendingDown, TrendingUp, FileText, AlertCircle, Plus, Pencil, Trash2, X, Save, BarChart3 } from "lucide-react"
 
 import {
   Card,
@@ -446,9 +431,7 @@ function FinancePage() {
     } catch (error) {
       console.error(error)
       setFormError(
-        error instanceof Error
-          ? error.message
-          : t`Failed to save expense.`,
+        errorMessage(error),
       )
     } finally {
       setFormLoading(false)
@@ -470,9 +453,7 @@ function FinancePage() {
     } catch (error) {
       console.error(error)
       window.alert(
-        error instanceof Error
-          ? error.message
-          : t`Failed to delete expense.`,
+        errorMessage(error),
       )
     }
   }

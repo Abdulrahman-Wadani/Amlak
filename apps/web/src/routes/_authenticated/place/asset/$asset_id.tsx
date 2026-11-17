@@ -9,7 +9,7 @@ import {
 import { Trans } from "@lingui/react/macro"
 import { plural, t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
-import type { Asset, Place } from "@amlak/shared"
+import type { Asset, Place, Schedule } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { cn } from "cn"
 import { buttonVariants,Button } from "@/components/ui/button"
@@ -27,30 +27,16 @@ import {
   Wrench,
   Plus
 } from "lucide-react"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardAction,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Badge } from "@/components/ui/badge"
 import {
   AssetStatusBadge,
 } from "@/components/place-shared"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import Form from "@/components/form"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { AssetManage } from "@/components/asset-manage"
 import { TicketsSection } from "@/components/tickets-section"
 import { todayIn } from "@/lib/dates"
+import { errorMessage } from "@/lib/errors"
 
 
 export const Route = createFileRoute("/_authenticated/place/asset/$asset_id")({
@@ -68,7 +54,7 @@ function AssetDetailPage() {
 
   const [asset, setAsset] = useState<Asset | null>(null)
   const [place, setPlace] = useState<Place | null>(null)
-  const [scheduledMaintenances, setScheduledMaintenances] = useState<any[]>([])
+  const [scheduledMaintenances, setScheduledMaintenances] = useState<Schedule[]>([])
   const [scheduledLoading, setScheduledLoading] = useState(true)
   // Bumped after a schedule is cancelled, to load the list again.
   const [schedulesVersion, setSchedulesVersion] = useState(0)
@@ -107,7 +93,7 @@ function AssetDetailPage() {
       setSchedulesVersion((version) => version + 1)
     } catch (error) {
       setCancelError(
-        error instanceof Error ? error.message : t`Could not cancel the schedule.`,
+        errorMessage(error),
       )
     }
   }
@@ -148,11 +134,6 @@ function AssetDetailPage() {
     i18n.locale === "ar" ? "ar" : "en",
     { dateStyle: "medium" }
   )
-const referrer = document.referrer
-
-const placeId = referrer
-  ? new URL(referrer).pathname.split("/").filter(Boolean).pop()
-  : undefined
   function formatDate(value: string | null | undefined) {
     if (!value) return "—"
 

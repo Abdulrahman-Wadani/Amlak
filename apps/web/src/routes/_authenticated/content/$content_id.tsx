@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react"
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
@@ -22,6 +22,7 @@ import {
 } from "@/lib/api"
 import type { WebContent } from "@/lib/api"
 import { S } from "@/lib/dom-style"
+import { errorMessage } from "@/lib/errors"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -138,9 +139,7 @@ function ContentDetailsPage() {
       console.error("Update content error:", error)
 
       setSaveError(
-        error instanceof Error
-          ? error.message
-          : t`Could not save the changes.`,
+        errorMessage(error),
       )
     } finally {
       setSaving(false)
@@ -162,14 +161,12 @@ function ContentDetailsPage() {
 
     try {
       await deleteContent(accessToken, content.id)
-      await navigate({ to: "/content/" })
+      await navigate({ to: "/content" })
     } catch (error) {
       console.error("Delete content error:", error)
 
       setSaveError(
-        error instanceof Error
-          ? error.message
-          : t`Could not delete the page.`,
+        errorMessage(error),
       )
     } finally {
       setDeleting(false)

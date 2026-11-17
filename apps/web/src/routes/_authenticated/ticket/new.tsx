@@ -1,38 +1,23 @@
-import { useEffect, useState, type SubmitEvent } from "react"
+import { useEffect, useState } from "react"
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import { CircleAlert, X } from "lucide-react"
-import type { Place, Asset } from "@amlak/shared"
+import { CircleAlert } from "lucide-react"
+import type { Asset } from "@amlak/shared"
 
 import { S } from "@/lib/dom-style"
 import { useAuth } from "@/lib/auth"
-import { createTicket, getPlaces, getPlaceAssets } from "@/lib/api"
+import { createTicket, getPlaceAssets } from "@/lib/api"
 import type { TicketPriority } from "@/lib/api"
-
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { errorMessage } from "@/lib/errors"
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
-  BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
-import Form from "@/components/form"
-
-
-import { cn } from "cn"
+import Form, { type FormValues } from "@/components/form"
 
 export const Route = createFileRoute("/_authenticated/ticket/new")({
   component: AddTicket,
@@ -41,67 +26,20 @@ export const Route = createFileRoute("/_authenticated/ticket/new")({
   }),
 })
 
-const PRIORITIES: TicketPriority[] = [
-  "LOW",
-  "MEDIUM",
-  "HIGH",
-  "URGENT",
-]
-
 function AddTicket() {
   const { accessToken } = useAuth()
   const navigate = useNavigate()
   const { place_id } = Route.useSearch()
 
-const [places, setPlaces] = useState<Place[]>([])
-const [assets, setAssets] = useState<Asset[]>([])
-
-  const [placeId, setPlaceId] = useState(place_id)
-  const [assetId, setAssetId] = useState("")
-  const [priority, setPriority] = useState<TicketPriority | "">("")
-  const [description, setDescription] = useState("")
-  const [photos, setPhotos] = useState<File[]>([])
-
-  const [loading, setLoading] = useState(false)
-  const [loadingAssets, setLoadingAssets] = useState(false)
+  const [assets, setAssets] = useState<Asset[]>([])
   const [formError, setFormError] = useState("")
-  const [photoError, setPhotoError] = useState("")
-
-  const errorText =
-    "flex items-center gap-1.5 text-[13px] leading-5 text-crit-900"
 
   useEffect(() => {
-    if (!accessToken) return
+    if (!accessToken || !place_id) return
 
     let alive = true
 
-    getPlaces(accessToken)
-      .then((list) => {
-        if (alive) setPlaces(list)
-      })
-      .catch(() => {
-        if (alive) setPlaces([])
-      })
-
-    return () => {
-      alive = false
-    }
-  }, [accessToken])
-
-  useEffect(() => {
-    if (!accessToken || !placeId) {
-      setAssets([])
-      setAssetId("")
-      return
-    }
-
-    let alive = true
-
-    setLoadingAssets(true)
-    setAssets([])
-    setAssetId("")
-
-    getPlaceAssets(accessToken, placeId)
+    getPlaceAssets(accessToken, place_id)
       .then((list) => {
         if (alive) setAssets(list)
       })
@@ -109,86 +47,41 @@ const [assets, setAssets] = useState<Asset[]>([])
         console.error("Failed to load assets:", error)
         if (alive) setAssets([])
       })
-      .finally(() => {
-        if (alive) setLoadingAssets(false)
-      })
 
     return () => {
       alive = false
     }
-  }, [accessToken, placeId])
+  }, [accessToken, place_id])
 
-  function handlePhotosChange(
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) {
-    const selected = Array.from(e.target.files ?? [])
+  async function handleSubmit(values: FormValues) {
+    if (!accessToken) return
+    const text = (name: string) =>
+      typeof values[name] === "string" ? (values[name] as string).trim() : ""
+    const photos = Array.isArray(values.photos) ? values.photos : []
 
-    if (selected.length > 5) {
-      setPhotoError(t`You can add up to 5 photos`)
-      setPhotos([])
-      e.target.value = ""
+    if (!place_id) {
+      setFormError(t`Choose the place first`)
+      return
+    }
+    if (photos.length > 5) {
+      setFormError(t`You can add up to 5 photos`)
       return
     }
 
-    setPhotoError("")
-    setPhotos(selected)
+    setFormError("")
+    try {
+      await createTicket(accessToken, place_id, {
+        asset_id: text("assetId") || undefined,
+        priority: (text("priority") || undefined) as TicketPriority | undefined,
+        description: text("description") || undefined,
+        photos,
+      })
+
+      void navigate({ to: "/place/$place_id", params: { place_id } })
+    } catch (error) {
+      setFormError(errorMessage(error))
+    }
   }
-
-  function removePhoto(index: number) {
-    setPhotos((current) => current.filter((_, i) => i !== index))
-  }
-
-  async function handleSubmit(
-  token: string,
-  values: Record<string, string | File[]>
-) {
-  const selectedPlaceId = values.placeId as string
-  const selectedAssetId = values.assetId as string
-  const selectedPriority = values.priority as TicketPriority
-  const selectedDescription = values.description as string
-  const selectedPhotos = (values.photos as File[]) || []
-
-  if (!token) return
-
-  setFormError("")
-  setPhotoError("")
-
-  if (!selectedPlaceId) {
-    setFormError(t`Choose the place first`)
-    return
-  }
-
-  if (selectedPhotos.length > 5) {
-    setPhotoError(t`You can add up to 5 photos`)
-    return
-  }
-
-  setLoading(true)
-
-  try {
-    await createTicket(token, selectedPlaceId, {
-      asset_id: selectedAssetId || undefined,
-      priority: selectedPriority || undefined,
-      description: selectedDescription.trim() || undefined,
-      photos: selectedPhotos,
-    })
-
-    void navigate({
-      to: "/place/$place_id",
-      params: { place_id: selectedPlaceId },
-    })
-  } catch (error) {
-    console.error("Failed to create ticket:", error)
-
-    setFormError(
-      error instanceof Error
-        ? error.message
-        : t`Could not create the maintenance ticket`,
-    )
-  } finally {
-    setLoading(false)
-  }
-}
 
   return (
     <div
@@ -213,7 +106,7 @@ const [assets, setAssets] = useState<Asset[]>([])
             to="/place/$place_id"
             params={{ place_id: place_id }}
           >
-            {place_id}
+            <Trans>Place</Trans>
           </Link>
         }
       />
@@ -232,14 +125,6 @@ const [assets, setAssets] = useState<Asset[]>([])
       </div>
         <Form
   fields={[
-    {
-      name: "placeId",
-      label: t`Place`,
-      type: "select",
-      required: true,
-      defaultValue: place_id,
-      hidden:true,
-    },
     {
       name: "assetId",
       label: t`Asset`,
@@ -276,9 +161,14 @@ const [assets, setAssets] = useState<Asset[]>([])
       multiple: true,
     },
   ]}
-  args={{ accessToken }}
-  callable={handleSubmit}
+  onSubmit={handleSubmit}
 />
+        {formError && (
+          <p role="alert" className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900" style={S("margin-top: 12px")}>
+            <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+            {formError}
+          </p>
+        )}
 
   </center>
 

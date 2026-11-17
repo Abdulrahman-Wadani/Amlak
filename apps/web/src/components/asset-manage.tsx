@@ -4,6 +4,7 @@ import { t } from "@lingui/core/macro"
 import { CircleAlert, PencilLine, Trash2 } from "lucide-react"
 import { ASSET_STATUSES, type Asset, type AssetStatus } from "@amlak/shared"
 import { deleteAsset, updateAsset } from "@/lib/api"
+import { ApiError, errorMessage } from "@/lib/errors"
 import { S } from "@/lib/dom-style"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -104,8 +105,8 @@ export function AssetManage({
       })
       onUpdated(updated)
       setEditing(false)
-    } catch {
-      setError(t`Could not save the asset.`)
+    } catch (err) {
+      setError(errorMessage(err))
     } finally {
       setBusy(false)
     }
@@ -120,9 +121,9 @@ export function AssetManage({
       onDeleted()
     } catch (err) {
       setError(
-        err instanceof Error && /open maintenance tickets/i.test(err.message)
+        err instanceof ApiError && Array.isArray(err.details.ticket_ids)
           ? t`This asset has open maintenance tickets. Complete or reject them first.`
-          : t`Could not delete the asset.`,
+          : errorMessage(err),
       )
     } finally {
       setBusy(false)

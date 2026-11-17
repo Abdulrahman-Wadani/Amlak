@@ -2,17 +2,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 import { t } from "@lingui/core/macro"
-import Form from "@/components/form"
+import Form, { type FormValues } from "@/components/form"
 import { S } from "@/lib/dom-style"
+import { apiError, errorMessage } from "@/lib/errors"
 
 export const Route = createFileRoute("/account-setup")({
   component: AccountSetupPage,
 })
 
-interface AccountSetupValues {
-  password: string
-  confirm_password: string
-}
 
 function AccountSetupPage() {
   const navigate = useNavigate()
@@ -61,7 +58,12 @@ function AccountSetupPage() {
     },
   ]
 
-  async function handleSubmit(values: AccountSetupValues) {
+  async function handleSubmit(submitted: FormValues) {
+    const values = {
+      password: typeof submitted.password === "string" ? submitted.password : "",
+      confirm_password:
+        typeof submitted.confirm_password === "string" ? submitted.confirm_password : "",
+    }
     setError("")
 
     if (!email || !token) {
@@ -113,7 +115,7 @@ function AccountSetupPage() {
       }
 
       setError(
-        data?.message || messages.invalidResponse,
+        errorMessage(apiError(response.status, data)),
       )
     } catch {
       setError(messages.invalidResponse)
@@ -200,11 +202,7 @@ function AccountSetupPage() {
             )}
 <center>
             <div style={S("opacity: 1")}>
-              <Form
-                args={{}}
-                callable={handleSubmit}
-                fields={fields}
-              />
+              <Form onSubmit={handleSubmit} fields={fields} />
             </div>
             </center>
 

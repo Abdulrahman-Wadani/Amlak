@@ -8,7 +8,7 @@ import {
 } from "react"
 
 import { useNavigate } from "@tanstack/react-router"
-import { t } from "@lingui/core/macro"
+import { readApiError } from "@/lib/errors"
 import type { Language, User } from "@amlak/shared"
 import { rememberAccessToken, setSessionHandlers } from "@/lib/http"
 import { useLanguage } from "@/lib/i18n"
@@ -69,29 +69,10 @@ async function api(path: string, body?: unknown): Promise<Response> {
   })
 }
 
-function failureMessage(data: unknown): string {
-  const d = data as {
-    code?: string
-    message?: string
-    details?: { reason?: string }
-  }
-
-  if (
-    d.code === "ACCOUNT_NOT_ACTIVE" &&
-    d.details?.reason === "EMAIL_NOT_VERIFIED"
-  ) {
-    return t`Verify your email first — we sent a 6-digit code.`
-  }
-
-  return d.message ?? t`Something went wrong. Try again.`
-}
-
 async function call(path: string, body?: unknown): Promise<unknown> {
   const res = await api(path, body)
 
-  if (!res.ok) {
-    throw new Error(failureMessage(await res.json().catch(() => ({}))))
-  }
+  if (!res.ok) throw await readApiError(res)
 
   if (res.status === 204) return null
 

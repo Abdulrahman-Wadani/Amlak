@@ -1,39 +1,19 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
 import { CircleAlert } from "lucide-react"
-import { cn } from "cn"
 import { S } from "@/lib/dom-style"
 import { useAuth } from "@/lib/auth"
 import type { CreatePlaceInput } from "@amlak/shared"
 import { createPlace } from "@/lib/api"
-import { TypeLabel } from "@/components/place-shared"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import Form from "@/components/form"
+import { errorMessage } from "@/lib/errors"
+import Form, { type FormValues } from "@/components/form"
 import LocationPicker, { type LocationData } from "@/components/location-picker"
 
 export const Route = createFileRoute("/_authenticated/place/new")({
   component: AddPlace,
 })
-
-const TYPES = ["Chalet", "Rest house", "Apartment", "Villa"]
-
-const FIGURE_LABELS = [
-  { key: "assets", label: <Trans>Assets</Trans> },
-  { key: "tickets", label: <Trans>Open tickets</Trans> },
-  { key: "workers", label: <Trans>Workers</Trans> },
-]
 
 function AddPlace() {
   const { accessToken } = useAuth()
@@ -41,10 +21,8 @@ function AddPlace() {
   const [formError, setFormError] = useState("")
   const [location, setLocation] = useState<LocationData | null>(null)
 
-  async function handleCreatePlace(
-    token: string,
-    values: Record<string, unknown>,
-  ) {
+  async function handleCreatePlace(values: FormValues) {
+    if (!accessToken) return
     // Picking on the map also fills the latitude and longitude fields; they
     // can be typed by hand too. Coordinates are optional: without both, the
     // place is saved without them.
@@ -69,14 +47,10 @@ function AddPlace() {
 
     setFormError("")
     try {
-      await createPlace(token, input)
+      await createPlace(accessToken, input)
       void navigate({ to: "/places" })
     } catch (err) {
-      setFormError(
-        (err as { code?: string }).code === "CONFLICT"
-          ? t`That place name is already taken.`
-          : t`Could not save the place.`,
-      )
+      setFormError(errorMessage(err))
     }
   }
 
@@ -149,8 +123,7 @@ function handleLocationSelect(location: LocationData) {
               type: "number",
             },
           ]}
-          callable={handleCreatePlace}
-          args={{ token: accessToken }}
+          onSubmit={handleCreatePlace}
         />
         {formError && (
           <p role="alert" className={errorText} style={S("margin-top: 12px")}>
