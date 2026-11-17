@@ -901,7 +901,7 @@ export async function handleCancelSchedule(
 
     throw new Error(message)
   }
-  return document.location.reload()
+  // 204: the schedule is stopped. The caller refreshes its list.
 }
 
 
