@@ -1,15 +1,18 @@
+
 import {
   createContext,
-  useCallback,
   useContext,
   useEffect,
-  useMemo,
   useState,
+  useCallback,
+  useMemo,
   type ReactNode,
 } from "react"
+
 import { i18n, type Messages } from "@lingui/core"
 import { I18nProvider } from "@lingui/react"
 import type { Language } from "@amlak/shared"
+
 import { messages as enMessages } from "@/locales/en.po"
 import { messages as arMessages } from "@/locales/ar.po"
 
@@ -27,11 +30,9 @@ function activate(lang: Language) {
 
 function readInitialLang(): Language {
   const saved = localStorage.getItem(LANG_KEY)
+
   return saved === "en" || saved === "ar" ? saved : "ar"
 }
-
-const initialLang = readInitialLang()
-activate(initialLang)
 
 type LangContextValue = {
   lang: Language
@@ -41,31 +42,66 @@ type LangContextValue = {
 const LangContext = createContext<LangContextValue | null>(null)
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Language>(initialLang)
+  const [lang, setLangState] = useState<Language>(readInitialLang)
 
   const setLang = useCallback((next: Language) => {
+    if (next !== "ar" && next !== "en") return
+
+    // Activate Lingui catalog
     activate(next)
+
+    // Save language
+    localStorage.setItem(LANG_KEY, next)
+
+    // Update the entire website direction and language
+    document.documentElement.lang = next
+    document.documentElement.dir = next === "ar" ? "rtl" : "ltr"
+    document.documentElement.classList.toggle(
+      "font-arabic",
+      next === "ar"
+    )
+
+    // Update React context
     setLangState(next)
   }, [])
 
   useEffect(() => {
+    activate(lang)
+
     localStorage.setItem(LANG_KEY, lang)
+
     document.documentElement.lang = lang
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr"
-    document.documentElement.classList.toggle("font-arabic", lang === "ar")
+
+    document.documentElement.classList.toggle(
+      "font-arabic",
+      lang === "ar"
+    )
   }, [lang])
 
-  const value = useMemo<LangContextValue>(() => ({ lang, setLang }), [lang, setLang])
+  const value = useMemo(
+    () => ({
+      lang,
+      setLang,
+    }),
+    [lang, setLang]
+  )
 
   return (
     <LangContext.Provider value={value}>
-      <I18nProvider i18n={i18n}>{children}</I18nProvider>
+      <I18nProvider i18n={i18n}>
+        {children}
+      </I18nProvider>
     </LangContext.Provider>
   )
 }
 
 export function useLanguage(): LangContextValue {
   const ctx = useContext(LangContext)
-  if (!ctx) throw new Error("useLanguage must be used inside <LanguageProvider>")
+
+  if (!ctx) {
+    throw new Error("useLanguage must be used inside LanguageProvider")
+  }
+
   return ctx
 }

@@ -1,3 +1,4 @@
+
 import {
   createContext,
   useContext,
@@ -5,7 +6,9 @@ import {
   useState,
   type ReactNode,
 } from "react"
+
 import type { Language, User } from "@amlak/shared"
+import { useLanguage } from "@/lib/i18n"
 
 type Auth = {
   user: User | null
@@ -40,6 +43,7 @@ function refreshOnce(): Promise<unknown> {
         refreshInFlight = null
       })
   }
+
   return refreshInFlight
 }
 
@@ -58,54 +62,81 @@ function failureMessage(data: unknown): string {
     message?: string
     details?: { reason?: string }
   }
+
   if (
     d.code === "ACCOUNT_NOT_ACTIVE" &&
     d.details?.reason === "EMAIL_NOT_VERIFIED"
   ) {
     return "Verify your email first — we sent a 6-digit code."
   }
+
   return d.message ?? "Something went wrong. Try again."
 }
 
 async function call(path: string, body?: unknown): Promise<unknown> {
   const res = await api(path, body)
+
   if (!res.ok) {
     throw new Error(failureMessage(await res.json().catch(() => ({}))))
   }
+
   if (res.status === 204) return null
+
   return res.json()
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { setLang } = useLanguage()
+
   const saved = sessionStorage.getItem(USER_KEY)
+
   const [user, setUser] = useState<User | null>(
     saved ? (JSON.parse(saved) as User) : null
   )
 
   const [accessToken, setAccessToken] = useState<string | null>(null)
 
+  // Restore the authenticated session
   useEffect(() => {
     if (!saved) return
+
     refreshOnce()
-      .then((data) =>
-        setAccessToken((data as { access_token: string }).access_token)
-      )
+      .then((data) => {
+        const result = data as { access_token: string }
+
+        setAccessToken(result.access_token)
+      })
       .catch(() => {
         sessionStorage.removeItem(USER_KEY)
         setUser(null)
+        setAccessToken(null)
       })
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
     
   }, [])
 
   async function login(email: string, password: string) {
-    const data = (await call("/auth/login", { email, password })) as {
+    const data = (await call("/auth/login", {
+      email,
+      password,
+    })) as {
       access_token: string
       user: User
     }
+
     setAccessToken(data.access_token)
     setUser(data.user)
+
     sessionStorage.setItem(USER_KEY, JSON.stringify(data.user))
+
+    // Apply the user's preferred language globally
+    if (
+      data.user.preferred_language === "ar" ||
+      data.user.preferred_language === "en"
+    ) {
+      setLang(data.user.preferred_language)
+    }
   }
 
   async function register(
@@ -134,7 +165,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   function logout() {
     void api("/auth/logout")
+
     sessionStorage.removeItem(USER_KEY)
+
     setAccessToken(null)
     setUser(null)
   }
@@ -158,6 +191,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider")
+
+  if (!ctx) {
+    throw new Error("useAuth must be used inside AuthProvider")
+  }
+
   return ctx
 }

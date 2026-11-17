@@ -48,6 +48,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
+import Form from "@/components/form"
+
 
 export const Route = createFileRoute("/_authenticated/place/asset/$asset_id")({
   component: AssetDetailPage,
@@ -138,7 +140,11 @@ function AssetDetailPage() {
     i18n.locale === "ar" ? "ar" : "en",
     { dateStyle: "medium" }
   )
+const referrer = document.referrer
 
+const placeId = referrer
+  ? new URL(referrer).pathname.split("/").filter(Boolean).pop()
+  : undefined
   const ticketLabels: Record<string, string> = {
     CORRECTIVE: "صيانة تصحيحية",
     PREVENTIVE: "صيانة وقائية",
@@ -169,6 +175,7 @@ function AssetDetailPage() {
   }
   
   return (
+    <center>
     <div
       dir="rtl"
       style={S(
@@ -651,6 +658,7 @@ function AssetDetailPage() {
         </>
       )}
     </div>
+    </center>
   )
 }
 

@@ -1,8 +1,11 @@
 
+import type { BookingInput } from "./validators"
 import type {
   Asset,
   CreateAssetInput,
   CreatePlaceInput,
+  Expense,
+  ExpenseCategory,
   Place,
   WorkerResponse,
 } from "@amlak/shared"
@@ -42,7 +45,7 @@ function unwrapResponse<T>(response: unknown): T {
   return response as T
 }
 
-async function apiRequest<T>(
+export async function apiRequest<T>(
   path: string,
   token: string,
   options: RequestInit = {},
@@ -69,7 +72,20 @@ async function apiRequest<T>(
         ? String((response as { message: unknown }).message)
         : `${path} failed with ${res.status}`
 
-    throw new Error(message)
+    const error = new Error(message) as Error & {
+      code?: string
+      details?: Record<string, unknown>
+    }
+    error.code =
+      response && typeof response === "object" && "code" in response
+        ? String((response as { code: unknown }).code)
+        : ""
+    error.details =
+      response && typeof response === "object" && "details" in response
+        ? (response as { details?: Record<string, unknown> }).details
+        : undefined
+
+    throw error
   }
 
   return unwrapResponse<T>(response)
@@ -174,6 +190,94 @@ export async function createPlace(
 
     throw error
   }
+}
+
+// shortcut: packages/shared has no bookings.ts on this branch; when it lands,
+// delete this shape and import Booking from @amlak/shared.
+export type BookingStatus =
+  | "CONFIRMED"
+  | "CHECKED_IN"
+  | "CHECKED_OUT"
+  | "CANCELLED"
+
+export interface Booking {
+  id: string
+  guest_name: string
+  guest_phone: string
+  guest_email: string | null
+  guest_count: number
+  check_in_date: string
+  check_out_date: string
+  total_price: number
+  currency: string
+  status: BookingStatus
+  notes: string | null
+  ready_for_check_in: boolean
+  cancellation_reason: string | null
+}
+
+export interface BookingWindow {
+  from: string
+  to: string
+}
+
+export async function getBookingsForPlace(
+  token: string,
+  placeId: string,
+  window: BookingWindow,
+  page = 1,
+): Promise<Booking[]> {
+  const query = new URLSearchParams({
+    from: window.from,
+    to: window.to,
+    page: String(page),
+    page_size: "100",
+  })
+
+  return apiRequest<Booking[]>(
+    `/places/${placeId}/bookings?${query.toString()}`,
+    token,
+  ).then((data) => {
+    if (!Array.isArray(data)) {
+      throw new Error("/bookings returned no list")
+    }
+
+    return data
+  })
+}
+
+export async function createBooking(
+  token: string,
+  placeId: string,
+  input: BookingInput,
+): Promise<Booking> {
+  return apiRequest<Booking>(`/places/${placeId}/bookings`, token, {
+    method: "POST",
+    body: JSON.stringify(input),
+  })
+}
+
+export function checkInBooking(token: string, bookingId: string): Promise<Booking> {
+  return apiRequest<Booking>(`/bookings/${bookingId}/check-in`, token, {
+    method: "POST",
+  })
+}
+
+export function checkOutBooking(token: string, bookingId: string): Promise<Booking> {
+  return apiRequest<Booking>(`/bookings/${bookingId}/check-out`, token, {
+    method: "POST",
+  })
+}
+
+export function cancelBooking(
+  token: string,
+  bookingId: string,
+  reason: string,
+): Promise<Booking> {
+  return apiRequest<Booking>(`/bookings/${bookingId}/cancel`, token, {
+    method: "POST",
+    body: JSON.stringify({ reason }),
+  })
 }
 
 // Workers
@@ -330,14 +434,242 @@ export async function getTicketById(
   return response;
 }
 
+// Finanace
+
+export interface ExpenseListResponse {
+  data: Expense[]
+  pagination: {
+    page: number
+    page_size: number
+    total: number
+    total_pages: number
+  }
+}
+
+export interface ExpenseInput {
+  category: ExpenseCategory
+  amount: number
+  expense_date: string
+  description?: string
+  ticket_id?: string
+  receipt?: File | null
+}
+
+export interface FinancialReportPlace {
+  place_id: string
+  place_name: string
+  currency: string
+  total_income: number
+  total_expenses: number
+  profit: number
+  expenses_by_category: Record<ExpenseCategory, number>
+}
+
+export interface FinancialReportTotal {
+  currency: string
+  total_income: number
+  total_expenses: number
+  profit: number
+}
+
+export interface FinancialReport {
+  period: {
+    from: string
+    to: string
+  }
+  places: FinancialReportPlace[]
+  totals_by_currency: FinancialReportTotal[]
+}
+
+export interface FinancialReportParams {
+  from: string
+  to: string
+  place_id?: string
+}
+
+async function expenseMultipartRequest<T>(
+  path: string,
+  token: string,
+  method: "POST" | "PUT",
+  input: Partial<ExpenseInput>,
+): Promise<T> {
+  const formData = new FormData()
+
+  if (input.category) formData.append("category", input.category)
+  if (input.amount !== undefined) {
+    formData.append("amount", String(input.amount))
+  }
+  if (input.expense_date) {
+    formData.append("expense_date", input.expense_date)
+  }
+  if (input.description !== undefined) {
+    formData.append("description", input.description)
+  }
+  if (input.ticket_id !== undefined) {
+    formData.append("ticket_id", input.ticket_id)
+  }
+  if (input.receipt) {
+    formData.append("receipt", input.receipt)
+  }
+
+  const response = await fetch(`/api/v1${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+    credentials: "same-origin",
+  })
+
+  const result: unknown = await response.json().catch(() => null)
+
+  if (!response.ok) {
+    const message =
+      result &&
+      typeof result === "object" &&
+      "message" in result
+        ? String(result.message)
+        : `Expense request failed (${response.status})`
+
+    throw new Error(message)
+  }
+
+  return unwrapResponse<T>(result)
+}
+
 export async function expenseslist(
   token: string,
   placeId: string,
-): Promise<Blob> {
-return expense.data;
+  params: {
+    from?: string
+    to?: string
+    category?: ExpenseCategory
+    page?: number
+    page_size?: number
+  } = {},
+): Promise<Expense[]> {
+  const query = new URLSearchParams()
+
+  query.set("page", String(params.page ?? 1))
+  query.set("page_size", String(params.page_size ?? 100))
+
+  if (params.from) query.set("from", params.from)
+  if (params.to) query.set("to", params.to)
+  if (params.category) query.set("category", params.category)
+
+  const result = await apiRequest<Expense[]>(
+    `/places/${placeId}/expenses?${query.toString()}`,
+    token,
+  )
+
+  if (!Array.isArray(result)) {
+    throw new Error("Invalid expenses response")
+  }
+
+  return result
 }
 
-// for test now only
+export async function getExpenseById(
+  token: string,
+  expenseId: string,
+): Promise<Expense> {
+  const expense = await apiRequest<Expense>(
+    `/expenses/${expenseId}`,
+    token,
+  )
+
+  if (!expense || typeof expense.id !== "string") {
+    throw new Error("Expense not found")
+  }
+
+  return expense
+}
+
+export async function createExpense(
+  token: string,
+  placeId: string,
+  input: ExpenseInput,
+): Promise<Expense> {
+  const expense = await expenseMultipartRequest<Expense>(
+    `/places/${placeId}/expenses`,
+    token,
+    "POST",
+    input,
+  )
+
+  if (!expense || typeof expense.id !== "string") {
+    throw new Error("Expense was not created")
+  }
+
+  return expense
+}
+
+export async function updateExpense(
+  token: string,
+  expenseId: string,
+  input: Partial<ExpenseInput>,
+): Promise<Expense> {
+  const expense = await expenseMultipartRequest<Expense>(
+    `/expenses/${expenseId}`,
+    token,
+    "PUT",
+    input,
+  )
+
+  if (!expense || typeof expense.id !== "string") {
+    throw new Error("Expense was not updated")
+  }
+
+  return expense
+}
+
+export async function deleteExpense(
+  token: string,
+  expenseId: string,
+): Promise<void> {
+  const response = await fetch(`/api/v1/expenses/${expenseId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    credentials: "same-origin",
+  })
+
+  if (!response.ok) {
+    const result = await response.json().catch(() => null)
+
+    throw new Error(
+      result?.message || `Failed to delete expense (${response.status})`,
+    )
+  }
+}
+
+export async function getFinancialReport(
+  token: string,
+  params: FinancialReportParams,
+): Promise<FinancialReport> {
+  const query = new URLSearchParams({
+    from: params.from,
+    to: params.to,
+  })
+
+  if (params.place_id) {
+    query.set("place_id", params.place_id)
+  }
+
+  const report = await apiRequest<FinancialReport>(
+    `/reports/financial?${query.toString()}`,
+    token,
+  )
+
+  if (!report || !Array.isArray(report.places)) {
+    throw new Error("Invalid financial report response")
+  }
+
+  return report
+}
+
+
 export type TicketPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT"
 
 export interface CreateTicketInput {
@@ -639,4 +971,502 @@ export async function updateProfile(
 
 export async function getProfile(token: string) {
   return apiRequest('/users/me', token)
+}
+
+export async function getUsers(token: string){
+  return apiRequest('/users', token)
+}
+
+export type UserResponse = {
+  id: string
+  email: string
+  fullname: string
+  phone: string | null
+  picture_url: string | null
+  role: "ADMIN" | "MANAGER" | "WORKER"
+  status:
+    | "INVITED"
+    | "PENDING_VERIFICATION"
+    | "ACTIVE"
+    | "DEACTIVATED"
+  preferred_language: "ar" | "en"
+  email_verified_at: string | null
+  manager_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+type UserApiResponse = {
+  data?: UserResponse
+  message?: string
+}
+
+export async function getUserById(
+  accessToken: string,
+  userId: string,
+): Promise<UserResponse> {
+  const response = await fetch(`/api/v1/users/${userId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  })
+
+  const result = (await response.json().catch(() => null)) as
+    | UserApiResponse
+    | UserResponse
+    | null
+
+  if (!response.ok) {
+    throw new Error(
+      result && "message" in result
+        ? result.message
+        : `Failed to get user (${response.status})`,
+    )
+  }
+
+  if (!result) {
+    throw new Error("Invalid user response")
+  }
+
+  const user =
+    "data" in result && result.data
+      ? result.data
+      : (result as UserResponse)
+
+  return user
+}
+
+export type UpdateUserInput = {
+  fullname: string
+  phone: string | null
+  role: UserResponse["role"]
+  status: UserResponse["status"]
+  preferred_language: UserResponse["preferred_language"]
+}
+
+export async function updateUser(
+  accessToken: string,
+  userId: string,
+  payload: UpdateUserInput,
+): Promise<UserResponse> {
+  const response = await fetch(`/api/v1/users/${userId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+    },
+    body: JSON.stringify(payload),
+  })
+
+  const result = (await response.json().catch(() => null)) as
+    | UserApiResponse
+    | UserResponse
+    | null
+
+  if (!response.ok) {
+    throw new Error(
+      result && "message" in result
+        ? result.message
+        : `Failed to update user (${response.status})`,
+    )
+  }
+
+  if (!result) {
+    throw new Error("Invalid update response")
+  }
+
+  return "data" in result && result.data
+    ? result.data
+    : (result as UserResponse)
+}
+
+export async function getSupportTicket(token:string){
+  return apiRequest('/support-tickets',token)
+}
+
+type createSpTicket = {
+  subject:string,
+  description:string
+}
+export async function createSupportTicket(token:string,input:[]){
+  const res = await fetch('/api/v1/support-tickets',
+    {
+      method:"POST",
+      headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(input),
+    }
+  )
+  return res
+}
+
+
+export async function getSupportTicketById(token:string,ticket:string){
+  return apiRequest(`/support-tickets/${ticket}`,token)
+}
+
+export async function resolveSupportTicket(
+  token: string,
+  ticketId: string,
+  admin_response: string
+) {
+  const response = await fetch(
+    `/api/v1/support-tickets/${ticketId}/resolve`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ admin_response }),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message || result.error || "Failed to resolve ticket");
+  }
+
+  return result;
+}
+
+
+export type ContentLanguage = "ar" | "en"
+
+export interface WebContent {
+  id: string
+  author_id: string
+  title: string
+  language: ContentLanguage
+  slug: string
+  body: string
+  is_published: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface ContentPagination {
+  page: number
+  page_size: number
+  total: number
+  total_pages: number
+}
+
+export interface ContentListResponse {
+  data: WebContent[]
+  pagination: ContentPagination
+}
+
+export interface GetContentsParams {
+  language?: ContentLanguage
+  slug?: string
+  page?: number
+  page_size?: number
+}
+
+export interface CreateContentInput {
+  title: string
+  language: ContentLanguage
+  slug: string
+  body: string
+  is_published?: boolean
+}
+
+export interface UpdateContentInput {
+  title?: string
+  slug?: string
+  body?: string
+  is_published?: boolean
+}
+
+export async function getContents(
+  token: string,
+  params: GetContentsParams = {},
+): Promise<ContentListResponse> {
+  const query = new URLSearchParams()
+
+  if (params.language) query.set("language", params.language)
+  if (params.slug) query.set("slug", params.slug)
+  if (params.page) query.set("page", String(params.page))
+  if (params.page_size) query.set("page_size", String(params.page_size))
+
+  const response = await fetch(
+    `/api/v1/content${query.size ? `?${query.toString()}` : ""}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      credentials: "same-origin",
+    },
+  )
+
+  const result = await response.json().catch(() => null)
+
+  if (!response.ok) {
+    throw new Error(
+      result?.message || `Failed to get content (${response.status})`,
+    )
+  }
+
+  if (!result || !Array.isArray(result.data) || !result.pagination) {
+    throw new Error("Invalid content list response")
+  }
+
+  return result
+}
+
+export async function getContentById(
+  token: string,
+  contentId: string,
+): Promise<WebContent> {
+  return apiRequest<WebContent>(`/content/${contentId}`, token).then(
+    (content) => {
+      if (!content || typeof content.id !== "string") {
+        throw new Error("Content not found")
+      }
+
+      return content
+    },
+  )
+}
+
+export async function createContent(
+  token: string,
+  input: CreateContentInput,
+): Promise<WebContent> {
+  return apiRequest<WebContent>("/content", token, {
+    method: "POST",
+    body: JSON.stringify(input),
+  })
+}
+
+export async function updateContent(
+  token: string,
+  contentId: string,
+  input: UpdateContentInput,
+): Promise<WebContent> {
+  return apiRequest<WebContent>(`/content/${contentId}`, token, {
+    method: "PUT",
+    body: JSON.stringify(input),
+  })
+}
+
+export async function deleteContent(
+  token: string,
+  contentId: string,
+): Promise<void> {
+  const response = await fetch(`/api/v1/content/${contentId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    credentials: "same-origin",
+  })
+
+  if (!response.ok) {
+    const result = await response.json().catch(() => null)
+
+    throw new Error(
+      result?.message || `Failed to delete content (${response.status})`,
+    )
+  }
+}
+
+
+export interface DashboardPlace {
+  place_id: string
+  place_name: string
+  status: string
+
+  assets: {
+    GOOD: number
+    NEEDS_MAINTENANCE: number
+    UNDER_MAINTENANCE: number
+    OUT_OF_SERVICE: number
+  }
+
+  open_tickets: {
+    PENDING_REVIEW: number
+    APPROVED: number
+    overdue: number
+  }
+
+  today: {
+    check_ins: number
+    check_outs: number
+  }
+
+  maintenance_budget: {
+    currency: string
+    budget: number
+    spent: number
+    remaining: number
+  } | null
+}
+
+export interface DashboardResponse {
+  data: DashboardPlace[]
+  pagination: {
+    page: number
+    page_size: number
+    total: number
+    total_pages: number
+  }
+}
+
+export async function getDashboard(
+  token: string,
+  params?: {
+    place_id?: string
+    page?: number
+    page_size?: number
+  }
+): Promise<DashboardResponse> {
+  const query = new URLSearchParams()
+
+  if (params?.place_id) query.set("place_id", params.place_id)
+  if (params?.page) query.set("page", String(params.page))
+  if (params?.page_size) query.set("page_size", String(params.page_size))
+
+  const response = await fetch(
+    `/api/v1/dashboard${query.toString() ? `?${query.toString()}` : ""}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }
+  )
+
+  const result = await response.json()
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to fetch dashboard")
+  }
+
+  return result
+}
+
+
+export interface Notification {
+  id: string
+  type: string
+  title: string
+  message: string
+  is_read: boolean
+  sender_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface NotificationsResponse {
+  data: Notification[]
+  pagination: {
+    page: number
+    page_size: number
+    total: number
+    total_pages: number
+  }
+  unread_count: number
+}
+
+export interface SendAnnouncementInput {
+  role?: "ADMIN" | "MANAGER" | "WORKER"
+  user_ids?: string[]
+  title_en: string
+  message_en: string
+  title_ar: string
+  message_ar: string
+}
+
+export async function getNotifications(
+  token: string,
+  params?: {
+    is_read?: boolean
+    page?: number
+    page_size?: number
+  }
+): Promise<NotificationsResponse> {
+  const query = new URLSearchParams()
+
+  if (params?.is_read !== undefined) {
+    query.set("is_read", String(params.is_read))
+  }
+
+  if (params?.page !== undefined) {
+    query.set("page", String(params.page))
+  }
+
+  if (params?.page_size !== undefined) {
+    query.set("page_size", String(params.page_size))
+  }
+
+  const response = await fetch(
+    `/api/v1/notifications${query.toString() ? `?${query}` : ""}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  )
+
+  const result = await response.json()
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to fetch notifications")
+  }
+
+  return result
+}
+
+export async function markNotificationAsRead(
+  token: string,
+  notificationId: string
+): Promise<Notification> {
+  const response = await fetch(
+    `/api/v1/notifications/${notificationId}/read`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  )
+
+  const result = await response.json()
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to mark notification as read")
+  }
+
+  return result
+}
+
+export async function sendAnnouncement(
+  token: string,
+  input: SendAnnouncementInput
+): Promise<{ recipient_count: number }> {
+  const response = await fetch("/api/v1/notifications", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(input),
+  })
+
+  const result = await response.json()
+
+  if (!response.ok) {
+    throw new Error(result.message || "Failed to send announcement")
+  }
+
+  return result
 }

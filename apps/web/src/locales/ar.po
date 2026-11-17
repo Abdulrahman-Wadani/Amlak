@@ -38,10 +38,196 @@ msgstr "إضافة أصل"
 #: src/routes/_authenticated/places.tsx:123
 msgid "Add place"
 msgstr "إضافة عقار"
+msgid "Add ticket"
+msgstr "رفع تذكرة"
+msgid "subject"
+msgstr "العنوان"
+msgid "description"
+msgstr "الوصف"
+msgid "OPEN"
+msgstr "مفتوحة"
+msgid "RESOLVED"
+msgstr "تم حلها"
+msgid "Add Content"
+msgstr "اضافة محتوى"
+msgid "title"
+msgstr "العنوان"
+msgid "language"
+msgstr "اللغة"
+msgid "slug"
+msgstr "المسار"
+msgid "body"
+msgstr "المحتوى"
+msgid "is_published"
+msgstr "هل ينشر؟"
 
-#: src/routes/_authenticated/home.tsx:239
+
+#: src/routes/_authenticated/home.tsx
 msgid "Add property"
 msgstr "إضافة عقار"
+msgid "Out of service"
+msgstr "خارج الخدمة"
+msgid "Needs maintenance"
+msgstr "يحتاج صيانة"
+msgid "Good"
+msgstr "ممتاز"
+
+
+
+msgid "Notifications"
+msgstr "الإشعارات"
+
+msgid "Your notifications"
+msgstr "إشعاراتك"
+
+msgid "Stay updated with your latest activity and announcements."
+msgstr "تابع آخر نشاطاتك والإعلانات الجديدة."
+
+msgid "Unread notifications"
+msgstr "الإشعارات غير المقروءة"
+
+msgid "Send announcement"
+msgstr "إرسال إعلان"
+
+msgid "Send an announcement to users by role or user IDs."
+msgstr "أرسل إعلانًا للمستخدمين حسب الدور أو معرفات المستخدمين."
+
+msgid "Close"
+msgstr "إغلاق"
+
+msgid "Create announcement"
+msgstr "إنشاء إعلان"
+
+msgid "By role"
+msgstr "حسب الدور"
+
+msgid "Specific users"
+msgstr "مستخدمون محددون"
+
+msgid "Recipient role"
+msgstr "دور المستلم"
+
+msgid "Admin"
+msgstr "مدير النظام"
+
+msgid "Manager"
+msgstr "مدير"
+
+msgid "Worker"
+msgstr "عامل"
+
+msgid "User IDs"
+msgstr "معرفات المستخدمين"
+
+msgid "Separate user IDs with commas or new lines. Maximum 1000 users."
+msgstr "افصل معرفات المستخدمين بفواصل أو أسطر جديدة. الحد الأقصى 1000 مستخدم."
+
+msgid "English"
+msgstr "الإنجليزية"
+
+msgid "Arabic"
+msgstr "العربية"
+
+msgid "Title"
+msgstr "العنوان"
+
+msgid "Announcement title"
+msgstr "عنوان الإعلان"
+
+msgid "Message"
+msgstr "الرسالة"
+
+msgid "Write your announcement..."
+msgstr "اكتب إعلانك هنا..."
+
+msgid "Sending..."
+msgstr "جارٍ الإرسال..."
+
+msgid "Inbox"
+msgstr "صندوق الوارد"
+
+msgid "Manage your notifications and stay up to date."
+msgstr "إدارة إشعاراتك ومتابعة آخر المستجدات."
+
+msgid "Refresh"
+msgstr "تحديث"
+
+msgid "All"
+msgstr "الكل"
+
+msgid "Unread"
+msgstr "غير مقروء"
+
+msgid "Read"
+msgstr "مقروء"
+
+msgid "No notifications"
+msgstr "لا توجد إشعارات"
+
+msgid "You don't have any notifications in this category."
+msgstr "ليس لديك أي إشعارات في هذه الفئة."
+
+msgid "Previous"
+msgstr "السابق"
+
+msgid "Next"
+msgstr "التالي"
+
+msgid "Announcement"
+msgstr "إعلان"
+
+msgid "Ticket assigned"
+msgstr "تم إسناد تذكرة"
+
+msgid "Ticket updated"
+msgstr "تم تحديث التذكرة"
+
+msgid "Ticket resolved"
+msgstr "تم حل التذكرة"
+
+msgid "Maintenance reminder"
+msgstr "تذكير بالصيانة"
+
+msgid "Booking created"
+msgstr "تم إنشاء حجز"
+
+msgid "Booking updated"
+msgstr "تم تحديث الحجز"
+
+msgid "Updating..."
+msgstr "جارٍ التحديث..."
+
+msgid "Mark as read"
+msgstr "تحديد كمقروء"
+
+msgid "Please fill in all announcement fields."
+msgstr "يرجى تعبئة جميع حقول الإعلان."
+
+msgid "Enter at least one user ID."
+msgstr "أدخل معرف مستخدم واحدًا على الأقل."
+
+msgid "Maximum 1000 users are allowed."
+msgstr "الحد الأقصى المسموح به هو 1000 مستخدم."
+
+msgid "Failed to send announcement."
+msgstr "فشل إرسال الإعلان."
+
+msgid "Failed to load notifications."
+msgstr "فشل تحميل الإشعارات."
+
+msgid "Failed to update notification."
+msgstr "فشل تحديث الإشعار."
+
+msgid "Admin"
+msgstr "المسؤول"
+msgid "Support"
+msgstr "الدعم"
+msgid "Content"
+msgstr "المحتوى"
+msgid "Notfications"
+msgstr "الاشعارات"
+
+
 
 #: src/routes/_authenticated/home.tsx:230
 msgid "Add your first property to see it here."
@@ -289,6 +475,32 @@ msgstr "تظهر بيانات المصروفات هنا فور ربط خدمة �
 #: src/routes/_authenticated/finance.tsx:117
 msgid "Expenses"
 msgstr "المصروفات"
+
+#: src/routes/_authenticated/place/new.tsx
+msgid "Save"
+msgstr: "حفظ"
+
+#: src/routes/_authenticated/ticket/new.tsx
+msgid "Save"
+msgstr: "حفظ"
+
+#: src/routes/_authenticated/worker/new.tsx
+msgid "Add worker"
+msgstr: "اضافة عامل"
+msgid "Create worker"
+msgstr: "انشاء عامل"
+msgid "Preferred language"
+msgstr: "اللغة المفضلة"
+msgid "Email Address"
+msgstr: "البريد"
+
+#: src/routes/_authenticated/place/asset/new.tsx
+msgid "Save"
+msgstr: "حفظ"
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx
+msgid "Save"
+msgstr: "حفظ"
+
 
 #: src/routes/_authenticated/places.tsx:160
 msgid "Filter by status"
@@ -664,7 +876,6 @@ msgstr "هوية المسؤول (اختياري)"
 msgid "Create Schedule"
 msgstr "انشاء جدولة"
 
-
 #: src/routes/_authenticated/profile
 
 msgid ""
@@ -759,8 +970,6 @@ msgstr "تاريخ تأكيد البريد الاكتروني"
 msgid "Last Updated"
 msgstr "اخر تحديث"
 
-
-
 #: src/components/email-verify-panel.tsx:35
 msgid "We sent a 6-digit code to <0>{email}</0>."
 msgstr "أرسلنا رمزًا مكوّنًا من 6 أرقام إلى <0>{email}</0>."
@@ -787,3 +996,257 @@ msgstr "يمكنك طلب رمز جديد خلال"
 #: src/routes/_authenticated/place/$place_id.tsx:83
 msgid "Your places"
 msgstr "عقاراتك"
+
+#: src/components/place-bookings.tsx:468
+msgid "Add booking"
+msgstr "إضافة حجز"
+
+#: src/components/place-bookings.tsx:211
+msgid "Back"
+msgstr "رجوع"
+
+#: src/components/place-shared.tsx:147
+msgid "Cancelled"
+msgstr "ملغى"
+
+#: src/components/place-bookings.tsx:305
+msgid "Check-in"
+msgstr "الوصول"
+
+#: src/components/place-bookings.tsx:318
+msgid "Check-out"
+msgstr "المغادرة"
+
+#: src/components/place-shared.tsx:123
+msgid "Checked in"
+msgstr "تم تسجيل الوصول"
+
+#: src/components/place-shared.tsx:135
+msgid "Checked out"
+msgstr "تم تسجيل المغادرة"
+
+#: src/components/place-bookings.tsx:246
+msgid "Close"
+msgstr "إغلاق"
+
+#: src/components/place-shared.tsx:158
+msgid "Confirmed"
+msgstr "مؤكد"
+
+#: src/components/place-bookings.tsx:168
+msgid "Could not save the booking. Please try again."
+msgstr "تعذّر حفظ الحجز. حاول مرة أخرى."
+
+#: src/components/place-bookings.tsx:288
+msgid "Guest email"
+msgstr "بريد الضيف"
+
+#: src/components/place-bookings.tsx:261
+msgid "Guest name"
+msgstr "اسم الضيف"
+
+#: src/components/place-bookings.tsx:274
+msgid "Guest phone"
+msgstr "هاتف الضيف"
+
+#: src/components/place-bookings.tsx:439
+msgid "guests"
+msgstr "ضيوف"
+
+#: src/components/place-bookings.tsx:335
+msgid "Guests"
+msgstr "عدد الضيوف"
+
+#: src/components/place-bookings.tsx:235
+msgid "Next month"
+msgstr "الشهر التالي"
+
+#: src/components/place-bookings.tsx:416
+msgid "No bookings in this month."
+msgstr "لا توجد حجوزات في هذا الشهر."
+
+#: src/components/place-bookings.tsx:364
+msgid "Notes"
+msgstr "ملاحظات"
+
+#: src/components/place-bookings.tsx:219
+msgid "Previous month"
+msgstr "الشهر السابق"
+
+#: src/components/place-bookings.tsx:393
+msgid "Save booking"
+msgstr "حفظ الحجز"
+
+#: src/components/place-bookings.tsx:390
+msgid "Saving…"
+msgstr "جارٍ الحفظ…"
+
+#: src/components/place-bookings.tsx:167
+msgid "Those dates are already booked for this property."
+msgstr "هذه التواريخ محجوزة بالفعل لهذه الملكية."
+
+#: src/components/place-bookings.tsx:349
+msgid "Total price"
+msgstr "السعر الإجمالي"
+
+#: src/components/place-bookings.tsx:404
+msgid "Try again in a moment."
+msgstr "أعد المحاولة بعد قليل."
+
+#: src/components/place-bookings.tsx:401
+msgid "We could not load the bookings for this property."
+msgstr "تعذّر تحميل حجوزات هذه الملكية."
+
+#: src/components/place-bookings.tsx
+msgid "Enter the guest name"
+msgstr "أدخل اسم الضيف"
+
+#: src/components/place-bookings.tsx
+msgid "Use the international phone format"
+msgstr "استخدم الصيغة الدولية للرقم"
+
+#: src/components/place-bookings.tsx
+msgid "Enter a valid email address"
+msgstr "أدخل بريداً إلكترونياً صحيحاً"
+
+#: src/components/place-bookings.tsx
+msgid "Enter the number of guests"
+msgstr "أدخل عدد الضيوف"
+
+#: src/components/place-bookings.tsx
+msgid "Choose the check-in date"
+msgstr "اختر تاريخ الوصول"
+
+#: src/components/place-bookings.tsx
+msgid "Choose a check-out date after the check-in date"
+msgstr "اختر تاريخ مغادرة بعد تاريخ الوصول"
+
+#: src/components/place-bookings.tsx
+msgid "Enter the total price"
+msgstr "أدخل السعر الإجمالي"
+
+#: src/components/place-bookings.tsx
+msgid "Notes are too long"
+msgstr "الملاحظات أطول من الحد المسموح"
+
+#: src/components/place-bookings.tsx
+msgid "All bookings"
+msgstr "كل الحجوزات"
+
+#: src/components/place-bookings.tsx
+msgid "By month"
+msgstr "حسب الشهر"
+
+#: src/components/place-bookings.tsx
+msgid "Cancel booking"
+msgstr "إلغاء الحجز"
+
+#: src/components/place-bookings.tsx
+msgid "Cancellation reason"
+msgstr "سبب الإلغاء"
+
+#: src/components/place-bookings.tsx
+msgid "Confirm cancel"
+msgstr "تأكيد الإلغاء"
+
+#: src/components/place-bookings.tsx
+msgid "Could not cancel the booking. Please try again."
+msgstr "تعذّر إلغاء الحجز. حاول مرة أخرى."
+
+#: src/components/place-bookings.tsx
+msgid "Enter the reason for the cancellation"
+msgstr "أدخل سبب الإلغاء"
+
+#: src/components/place-bookings.tsx
+msgid "Load more"
+msgstr "تحميل المزيد"
+
+#: src/components/place-bookings.tsx
+msgid "No bookings for this property yet."
+msgstr "لا توجد حجوزات لهذا العقار بعد."
+
+#: src/components/place-bookings.tsx
+msgid "This booking can no longer be cancelled."
+msgstr "لم يعد بإمكانك إلغاء هذا الحجز."
+#: src/components/place-bookings.tsx
+msgid "Filter bookings by month"
+msgstr "تصفية الحجوزات حسب الشهر"
+
+#: src/components/place-bookings.tsx
+msgid "Add a stay to block its dates on the calendar."
+msgstr "أضف إقامة لحجز هذه التواريخ في التقويم."
+
+#: src/components/place-bookings.tsx
+msgid "Cancel this booking?"
+msgstr "إلغاء هذا الحجز؟"
+
+#: src/components/place-bookings.tsx
+msgid "Cancelling…"
+msgstr "جارٍ الإلغاء…"
+
+#: src/components/place-bookings.tsx
+msgid "Use the international format, e.g. +966512345678"
+msgstr "استخدم الصيغة الدولية، مثل +966512345678"
+
+#: src/components/place-bookings.tsx
+msgid "Guest"
+msgstr "الضيف"
+
+#: src/components/place-bookings.tsx
+msgid "Stay"
+msgstr "الإقامة"
+
+#: src/components/place-bookings.tsx
+msgid "Why is this stay being cancelled?"
+msgstr "لماذا تم إلغاء هذه الإقامة؟"
+
+#: src/components/place-bookings.tsx
+msgid "Kept in the booking record."
+msgstr "يُحفظ في سجل الحجز."
+
+#: src/components/place-bookings.tsx
+msgid "Example: the guest changed their plans"
+msgstr "مثال: غيّر الضيف خطته"
+
+#: src/components/place-bookings.tsx
+msgid "Check in"
+msgstr "تسجيل الوصول"
+
+#: src/components/place-bookings.tsx
+msgid "Check out"
+msgstr "تسجيل المغادرة"
+
+#: src/components/place-bookings.tsx
+msgid "Another guest has not checked out yet."
+msgstr "ضيف آخر لم يُغادر بعد."
+
+#: src/components/place-bookings.tsx
+msgid "This booking can no longer be moved to another state."
+msgstr "لم يعد بإمكانه تغيير حالته."
+#: src/components/place-bookings.tsx
+msgid "Check-in opens on"
+msgstr "تسجيل الوصول متاح في"
+
+#: src/components/place-bookings.tsx
+msgid "Check this guest in?"
+msgstr "تسجيل وصول الضيف؟"
+
+#: src/components/place-bookings.tsx
+msgid "Check this guest out?"
+msgstr "تسجيل مغادرة الضيف؟"
+
+#: src/components/place-bookings.tsx
+msgid "Confirm check-in"
+msgstr "تأكيد الوصول"
+
+#: src/components/place-bookings.tsx
+msgid "Confirm check-out"
+msgstr "تأكيد المغادرة"
+
+#: src/components/place-bookings.tsx
+msgid "Check-in has not opened for this stay yet."
+msgstr "لم يحِن موعد الوصول بعد."
+
+#: src/components/place-bookings.tsx
+msgid "Could not change the booking. Please try again."
+msgstr "تعذّر تغيير حالة الحجز. حاول مرة أخرى."

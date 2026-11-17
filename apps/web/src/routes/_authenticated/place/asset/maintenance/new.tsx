@@ -26,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import Form from "@/components/form"
 
 export const Route = createFileRoute(
   "/_authenticated/place/asset/maintenance/new"
@@ -149,40 +150,73 @@ function NewMaintenancePage() {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setError("")
-
-    if (!validate() || !accessToken) return
-
-    try {
-      setLoading(true)
-
-      await createMaintenanceSchedule(accessToken, selectedAsset, {
-        description: description.trim(),
-        interval_count: Number(intervalCount),
-        interval_unit: intervalUnit,
-        next_due_date: nextDueDate,
-        lead_days: Number(leadDays),
-        ...(defaultAssigneeId.trim()
-          ? { default_assignee_id: defaultAssigneeId.trim() }
-          : {}),
-      })
-
-      navigate({
-        to: "/place/asset/$asset_id",
-        params: { asset_id: selectedAsset },
-      })
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : t`Failed to create maintenance schedule`
-      )
-    } finally {
-      setLoading(false)
-    }
+  const handleSubmit = async (
+  _args: Record<string, unknown>,
+  values: Record<string, string>,
+) => {
+  if (!accessToken) {
+    setError(t`You must be logged in`)
+    return
   }
 
+  const {
+    asset_id,
+    description,
+    interval_count,
+    interval_unit,
+    next_due_date,
+    lead_days,
+    default_assignee_id,
+  } = values
+
+  if (!asset_id || !description.trim() || !next_due_date) {
+    setError(t`Please fill in all required fields`)
+    return
+  }
+
+  const count = Number(interval_count)
+  const lead = Number(lead_days)
+
+  if (
+    !Number.isInteger(count) ||
+    count < 1 ||
+    !Number.isInteger(lead) ||
+    lead < 0
+  ) {
+    setError(t`Please enter valid interval and lead days values`)
+    return
+  }
+
+  try {
+    setLoading(true)
+    setError("")
+
+    await createMaintenanceSchedule(accessToken, asset_id, {
+      description: description.trim(),
+      interval_count: count,
+      interval_unit: interval_unit as IntervalUnit,
+      next_due_date,
+      lead_days: lead,
+      default_assignee_id: default_assignee_id || undefined,
+    })
+
+    navigate({
+      to: "/place/asset/$asset_id",
+      params: { asset_id },
+    })
+  } catch (err) {
+    setError(
+      err instanceof Error
+        ? err.message
+        : t`Failed to create maintenance schedule`,
+    )
+  } finally {
+    setLoading(false)
+  }
+}
+
   return (
+    <center>
     <div style={S("padding: 40px 48px 56px; width: 100%; box-sizing: border-box")}>
       <div style={S("margin-bottom: 28px")}>
         <h1 style={S("font-size: 28px; font-weight: 700; margin: 0 0 8px")}>
@@ -194,233 +228,70 @@ function NewMaintenancePage() {
         </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        style={S(
-          "width: 100%; min-width: 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 22px; box-sizing: border-box"
-        )}
-      >
-        {error && (
-          <div
-            style={S(
-              "display: flex; align-items: center; gap: 8px; padding: 12px; border-radius: 8px; background: var(--destructive-background); color: var(--destructive); font-size: 14px"
-            )}
-          >
-            <CircleAlert size={18} />
-            {error}
-          </div>
-        )}
-
-        <div style={S("display: flex; flex-direction: column; gap: 8px")}>
-          <Label>
-            <Trans>Place</Trans>
-          </Label>
-
-          <Select
-            value={selectedPlace}
-            onValueChange={(value) => {
-              setSelectedPlace(value)
-              setSelectedAsset("")
-              setErrors((prev) => ({ ...prev, place_id: "" }))
-            }}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t`Select a place`} />
-            </SelectTrigger>
-
-            <SelectContent>
-              {places.map((place) => (
-                <SelectItem key={place.id} value={place.id}>
-                  {place.place_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {errors.place_id && (
-            <p style={S("color: var(--destructive); font-size: 13px; margin: 0")}>
-              {errors.place_id}
-            </p>
-          )}
-        </div>
-
-        <div style={S("display: flex; flex-direction: column; gap: 8px")}>
-          <Label>
-            <Trans>Asset</Trans>
-          </Label>
-
-          <Select
-            value={selectedAsset}
-            onValueChange={(value) => {
-              setSelectedAsset(value)
-              setErrors((prev) => ({ ...prev, asset_id: "" }))
-            }}
-            disabled={!selectedPlace || assets.length === 0}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={t`Select an asset`} />
-            </SelectTrigger>
-
-            <SelectContent>
-              {assets.map((asset) => (
-                <SelectItem key={asset.id} value={asset.id}>
-                  {asset.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {errors.asset_id && (
-            <p style={S("color: var(--destructive); font-size: 13px; margin: 0")}>
-              {errors.asset_id}
-            </p>
-          )}
-        </div>
-
-        <div style={S("display: flex; flex-direction: column; gap: 8px")}>
-          <Label>
-            <Trans>Description</Trans>
-          </Label>
-
-          <Textarea
-            value={description}
-            onChange={(event) => {
-              setDescription(event.target.value)
-              setErrors((prev) => ({ ...prev, description: "" }))
-            }}
-            placeholder={t`Enter maintenance description`}
-            rows={4}
-          />
-
-          {errors.description && (
-            <p style={S("color: var(--destructive); font-size: 13px; margin: 0")}>
-              {errors.description}
-            </p>
-          )}
-        </div>
-
-        <div
-          style={S(
-            "display: flex; gap: 16px; flex-wrap: wrap"
-          )}
-        >
-          <div style={S("flex: 1 1 180px; display: flex; flex-direction: column; gap: 8px")}>
-            <Label>
-              <Trans>Repeat Every</Trans>
-            </Label>
-
-            <Input
-              type="number"
-              min="1"
-              value={intervalCount}
-              onChange={(event) => {
-                setIntervalCount(event.target.value)
-                setErrors((prev) => ({ ...prev, interval_count: "" }))
-              }}
-            />
-
-            {errors.interval_count && (
-              <p style={S("color: var(--destructive); font-size: 13px; margin: 0")}>
-                {errors.interval_count}
-              </p>
-            )}
-          </div>
-
-          <div style={S("flex: 1 1 180px; display: flex; flex-direction: column; gap: 8px")}>
-            <Label>
-              <Trans>Interval Unit</Trans>
-            </Label>
-
-            <Select
-              value={intervalUnit}
-              onValueChange={(value) => setIntervalUnit(value as IntervalUnit)}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-
-              <SelectContent>
-                {INTERVAL_UNITS.map((unit) => (
-                  <SelectItem key={unit.value} value={unit.value}>
-                    {unit.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        <div style={S("display: flex; flex-direction: column; gap: 8px")}>
-          <Label>
-            <Trans>Next Due Date</Trans>
-          </Label>
-
-          <Input
-            type="date"
-            value={nextDueDate}
-            onChange={(event) => {
-              setNextDueDate(event.target.value)
-              setErrors((prev) => ({ ...prev, next_due_date: "" }))
-            }}
-          />
-
-          {errors.next_due_date && (
-            <p style={S("color: var(--destructive); font-size: 13px; margin: 0")}>
-              {errors.next_due_date}
-            </p>
-          )}
-        </div>
-
-        <div style={S("display: flex; flex-direction: column; gap: 8px")}>
-          <Label>
-            <Trans>Reminder Before Due Date (Days)</Trans>
-          </Label>
-
-          <Input
-            type="number"
-            min="0"
-            value={leadDays}
-            onChange={(event) => {
-              setLeadDays(event.target.value)
-              setErrors((prev) => ({ ...prev, lead_days: "" }))
-            }}
-          />
-
-          {errors.lead_days && (
-            <p style={S("color: var(--destructive); font-size: 13px; margin: 0")}>
-              {errors.lead_days}
-            </p>
-          )}
-        </div>
-
-        <div style={S("display: flex; flex-direction: column; gap: 8px")}>
-          <Label>
-            <Trans>Default Assignee ID</Trans>
-          </Label>
-
-          <Input
-            value={defaultAssigneeId}
-            onChange={(event) => setDefaultAssigneeId(event.target.value)}
-            placeholder={t`Optional`}
-          />
-        </div>
-
-        <div
-          style={S(
-            "display: flex; justify-content: flex-end; gap: 12px; padding-top: 8px; border-top: 1px solid var(--border)"
-          )}
-        >
-          <Button type="button" variant="outline" asChild>
-            <Link to="/places">
-              <Trans>Cancel</Trans>
-            </Link>
-          </Button>
-
-          <Button type="submit" disabled={loading}>
-            {loading ? <Trans>Creating...</Trans> : <Trans>Create Schedule</Trans>}
-          </Button>
-        </div>
-      </form>
+      <Form
+  fields={[
+    {
+      name: "asset_id",
+      label: t`Asset`,
+      type: "select",
+      required: true,
+      defaultValue: asset_id,
+      hidden: true
+    },
+    {
+      name: "place_id",
+      label: t`Asset`,
+      type: "select",
+      required: true,
+      defaultValue: place_id,
+      hidden: true
+    },
+    {
+      name: "description",
+      label: t`description`,
+      type: "text",
+      required: true,
+    },
+    {
+      name: "interval_count",
+      label: t`Repeat Every`,
+      type: "number",
+      required: true,
+      defaultValue: "1",
+    },
+    {
+      name: "interval_unit",
+      label: t`Interval Unit`,
+      type: "select",
+      required: true,
+      defaultValue: "MONTH",
+      options: INTERVAL_UNITS.map((unit) => ({
+        value: unit.value,
+        label: unit.label,
+      })),
+    },
+    {
+      name: "next_due_date",
+      label: t`Next Due Date`,
+      type: "date",
+      required: true,
+    },
+    {
+      name: "lead_days",
+      label: t`Reminder Before Due Date (Days)`,
+      type: "number",
+      required: true,
+      defaultValue: "7",
+    },
+    {
+      name: "default_assignee_id",
+      label: t`Default Assignee ID`,
+    },
+  ]}
+  args={{ accessToken }}
+  callable={handleSubmit}
+/>
     </div>
+    </center>
   )
 }
