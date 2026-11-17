@@ -1,4 +1,9 @@
-import type { DashboardQuery, Paginated, PlaceHealth } from "@amlak/shared";
+import {
+	type DashboardQuery,
+	OPEN_TICKET_STATUSES,
+	type Paginated,
+	type PlaceHealth,
+} from "@amlak/shared";
 import type { AuthUser } from "../auth/tokens.ts";
 import { addMonths, toDbDate, todayIn } from "../dates.ts";
 import { prisma } from "../db.ts";
@@ -48,7 +53,7 @@ async function countPlaces(places: PlaceRow[]): Promise<PlaceCounts> {
 			by: ["place_id", "status"],
 			where: {
 				place_id: { in: placeIds },
-				status: { in: ["PENDING_REVIEW", "APPROVED"] },
+				status: { in: OPEN_TICKET_STATUSES },
 			},
 			_count: { _all: true },
 		}),

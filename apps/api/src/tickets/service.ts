@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
-import type {
-	CreateTicketInput,
-	ListTicketsQuery,
-	Paginated,
-	Ticket,
+import {
+	type CreateTicketInput,
+	type ListTicketsQuery,
+	OPEN_TICKET_STATUSES,
+	type Paginated,
+	type Ticket,
 } from "@amlak/shared";
 import { auditLog } from "../audit.ts";
 import type { AuthUser } from "../auth/tokens.ts";
@@ -29,14 +30,24 @@ export async function listTickets(
 	query: ListTicketsQuery,
 	page: Page,
 ): Promise<Paginated<Ticket>> {
-	const { overdue, sort, ...filters } = query;
+	const { open, overdue, sort, ...filters } = query;
 	const where: Prisma.MaintenanceTicketWhereInput = {
 		...visibleTickets(user),
 		...filters,
 	};
-	if (overdue === true) {
-		where.AND = [await overdueTickets(user)];
+	// Each condition narrows the list, so status=APPROVED&open=true is the
+	// APPROVED tickets, and status=COMPLETED&open=true is none.
+	const conditions: Prisma.MaintenanceTicketWhereInput[] = [];
+	if (open === true) {
+		conditions.push({ status: { in: OPEN_TICKET_STATUSES } });
 	}
+	if (open === false) {
+		conditions.push({ status: { notIn: OPEN_TICKET_STATUSES } });
+	}
+	if (overdue === true) {
+		conditions.push(await overdueTickets(user));
+	}
+	where.AND = conditions;
 	if (overdue === false) {
 		where.NOT = [await overdueTickets(user)];
 	}

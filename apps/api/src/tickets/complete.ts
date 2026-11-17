@@ -1,4 +1,8 @@
-import type { CompleteTicketInput, Ticket } from "@amlak/shared";
+import {
+	type CompleteTicketInput,
+	OPEN_TICKET_STATUSES,
+	type Ticket,
+} from "@amlak/shared";
 import { auditLog } from "../audit.ts";
 import type { AuthUser } from "../auth/tokens.ts";
 import { prisma } from "../db.ts";
@@ -69,7 +73,7 @@ export async function completeTicket(
 			const openTickets = await tx.maintenanceTicket.count({
 				where: {
 					asset_id: ticket.asset_id,
-					status: { in: ["PENDING_REVIEW", "APPROVED"] },
+					status: { in: OPEN_TICKET_STATUSES },
 				},
 			});
 			if (openTickets === 0) {
