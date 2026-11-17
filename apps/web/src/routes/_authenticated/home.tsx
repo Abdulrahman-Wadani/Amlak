@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react"
-import { Link, createFileRoute } from "@tanstack/react-router"
+import { Link, createFileRoute, redirect } from "@tanstack/react-router"
 import {
   CalendarDays,
   ChevronDown,
@@ -14,7 +14,7 @@ import {
 import { Trans } from "@lingui/react/macro"
 import { useLingui } from "@lingui/react"
 import type { Place } from "@amlak/shared"
-import { useAuth } from "@/lib/auth"
+import { storedUser, useAuth } from "@/lib/auth"
 import {
   getPlaces,
   getDashboard,
@@ -41,6 +41,12 @@ import { StatusBadge, TypeLabel } from "@/components/place-shared"
 import "@/styles/motion.css"
 
 export const Route = createFileRoute("/_authenticated/home")({
+  // Admins have no dashboard here; their start page is /admin.
+  beforeLoad: () => {
+    if (storedUser()?.role === "ADMIN") {
+      throw redirect({ to: "/admin" })
+    }
+  },
   component: HomePage,
 })
 
@@ -103,9 +109,6 @@ function HomePage() {
       alive = false
     }
   }, [accessToken])
-  if (useAuth().user.role == 'ADMIN'){
-  document.location.href="/admin"
-  }
 
 
   const locale = i18n.locale === "ar" ? "ar" : "en"
