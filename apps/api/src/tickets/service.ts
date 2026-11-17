@@ -29,7 +29,7 @@ export async function listTickets(
 	query: ListTicketsQuery,
 	page: Page,
 ): Promise<Paginated<Ticket>> {
-	const { overdue, ...filters } = query;
+	const { overdue, sort, ...filters } = query;
 	const where: Prisma.MaintenanceTicketWhereInput = {
 		...visibleTickets(user),
 		...filters,
@@ -44,7 +44,7 @@ export async function listTickets(
 		prisma.maintenanceTicket.findMany({
 			where,
 			include: ticketListInclude,
-			orderBy: [{ created_at: "desc" }, { id: "asc" }],
+			orderBy: ticketOrder(sort),
 			skip: page.skip,
 			take: page.take,
 		}),
@@ -55,6 +55,15 @@ export async function listTickets(
 		total,
 		page,
 	);
+}
+
+function ticketOrder(
+	sort: ListTicketsQuery["sort"],
+): Prisma.MaintenanceTicketOrderByWithRelationInput[] {
+	if (sort === "due_date") {
+		return [{ due_date: { sort: "asc", nulls: "last" } }, { id: "asc" }];
+	}
+	return [{ created_at: "desc" }, { id: "asc" }];
 }
 
 export async function getTicket(
