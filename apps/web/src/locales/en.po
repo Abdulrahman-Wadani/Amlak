@@ -99,7 +99,7 @@ msgstr "Activating Account..."
 #: src/components/place-shared.tsx:42
 #: src/routes/_authenticated/admin/$admin_id.tsx:465
 #: src/routes/_authenticated/admin/index.tsx:70
-#: src/routes/_authenticated/places.tsx:30
+#: src/routes/_authenticated/places.tsx:31
 #: src/routes/_authenticated/profile.tsx:122
 #: src/routes/_authenticated/worker/$worker_id.tsx:488
 #: src/routes/_authenticated/workers.tsx:42
@@ -145,7 +145,7 @@ msgid "Add expense"
 msgstr "Add expense"
 
 #: src/routes/_authenticated/place/new.tsx:121
-#: src/routes/_authenticated/places.tsx:123
+#: src/routes/_authenticated/places.tsx:150
 msgid "Add place"
 msgstr "Add place"
 
@@ -199,7 +199,7 @@ msgstr "Ahmed Hamad"
 #: src/routes/_authenticated/content/index.tsx:241
 #: src/routes/_authenticated/finance.tsx:845
 #: src/routes/_authenticated/notifications.tsx:600
-#: src/routes/_authenticated/places.tsx:29
+#: src/routes/_authenticated/places.tsx:30
 #: src/routes/_authenticated/workers.tsx:41
 msgid "All"
 msgstr "All"
@@ -338,7 +338,7 @@ msgstr "Asset type"
 #: src/routes/_authenticated/place/$place_id.tsx:698
 #: src/routes/_authenticated/place/$place_id.tsx:763
 #: src/routes/_authenticated/place/new.tsx:33
-#: src/routes/_authenticated/places.tsx:38
+#: src/routes/_authenticated/places.tsx:39
 msgid "Assets"
 msgstr "Assets"
 
@@ -578,7 +578,7 @@ msgstr "Cleaning"
 
 #: src/routes/_authenticated/admin/index.tsx:281
 #: src/routes/_authenticated/content/index.tsx:315
-#: src/routes/_authenticated/places.tsx:211
+#: src/routes/_authenticated/places.tsx:238
 #: src/routes/_authenticated/support/index.tsx:271
 #: src/routes/_authenticated/workers.tsx:266
 msgid "Clear filters"
@@ -1231,7 +1231,7 @@ msgid "Filter by publishing status"
 msgstr "Filter by publishing status"
 
 #: src/routes/_authenticated/admin/index.tsx:187
-#: src/routes/_authenticated/places.tsx:160
+#: src/routes/_authenticated/places.tsx:187
 #: src/routes/_authenticated/support/index.tsx:177
 #: src/routes/_authenticated/workers.tsx:172
 msgid "Filter by status"
@@ -1379,7 +1379,7 @@ msgid "In progress"
 msgstr "In progress"
 
 #: src/components/place-shared.tsx:84
-#: src/routes/_authenticated/places.tsx:32
+#: src/routes/_authenticated/places.tsx:33
 msgid "Inactive"
 msgstr "Inactive"
 
@@ -1706,7 +1706,7 @@ msgid "No phone number"
 msgstr "No phone number"
 
 #: src/routes/_authenticated/home.tsx:395
-#: src/routes/_authenticated/places.tsx:196
+#: src/routes/_authenticated/places.tsx:223
 msgid "No properties yet"
 msgstr "No properties yet"
 
@@ -1779,7 +1779,7 @@ msgstr "Notes"
 msgid "Notes are too long"
 msgstr "Notes are too long"
 
-#: src/routes/_authenticated/places.tsx:199
+#: src/routes/_authenticated/places.tsx:226
 msgid "Nothing matches this search. Clear it to see all properties."
 msgstr "Nothing matches this search. Clear it to see all properties."
 
@@ -1814,7 +1814,7 @@ msgid "Open the full-size photo"
 msgstr "Open the full-size photo"
 
 #: src/routes/_authenticated/place/new.tsx:34
-#: src/routes/_authenticated/places.tsx:39
+#: src/routes/_authenticated/places.tsx:40
 msgid "Open tickets"
 msgstr "Open tickets"
 
@@ -2000,7 +2000,7 @@ msgstr "Place type"
 #: src/components/app-shell.tsx:19
 #: src/routes/_authenticated/place/$place_id.tsx:320
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:218
-#: src/routes/_authenticated/places.tsx:110
+#: src/routes/_authenticated/places.tsx:137
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:617
 #: src/routes/_authenticated/ticket/new.tsx:206
 msgid "Places"
@@ -2284,7 +2284,7 @@ msgid "Scheduled maintenance"
 msgstr "Scheduled maintenance"
 
 #: src/routes/_authenticated/admin/index.tsx:164
-#: src/routes/_authenticated/places.tsx:139
+#: src/routes/_authenticated/places.tsx:166
 #: src/routes/_authenticated/support/index.tsx:154
 #: src/routes/_authenticated/workers.tsx:149
 msgid "Search"
@@ -2298,7 +2298,7 @@ msgstr "Search by name, email or phone"
 msgid "Search by name, email, phone or ID"
 msgstr "Search by name, email, phone or ID"
 
-#: src/routes/_authenticated/places.tsx:152
+#: src/routes/_authenticated/places.tsx:179
 msgid "Search by place name or city"
 msgstr "Search by place name or city"
 
@@ -2571,10 +2571,6 @@ msgstr "This worker has no assigned places."
 msgid "Those dates are already booked for this property."
 msgstr "Those dates are already booked for this property."
 
-#: src/routes/_authenticated/places.tsx:219
-msgid "Ticket and worker counts appear once those services are wired up."
-msgstr "Ticket and worker counts appear once those services are wired up."
-
 #: src/routes/_authenticated/notifications.tsx:748
 msgid "Ticket assigned"
 msgstr "Ticket assigned"
@@ -2708,7 +2704,7 @@ msgstr "Unable to connect to the server. Please try again."
 #: src/components/place-shared.tsx:54
 #: src/components/place-shared.tsx:122
 #: src/routes/_authenticated/place/asset/new.tsx:62
-#: src/routes/_authenticated/places.tsx:31
+#: src/routes/_authenticated/places.tsx:32
 msgid "Under maintenance"
 msgstr "Under maintenance"
 
@@ -2909,7 +2905,7 @@ msgstr "We could not load this worker."
 
 #: src/routes/_authenticated/bookings.tsx:149
 #: src/routes/_authenticated/home.tsx:387
-#: src/routes/_authenticated/places.tsx:188
+#: src/routes/_authenticated/places.tsx:215
 msgid "We could not load your places."
 msgstr "We could not load your places."
 
@@ -2951,7 +2947,7 @@ msgstr "Worker status"
 #: src/routes/_authenticated/place/$place_id.tsx:712
 #: src/routes/_authenticated/place/$place_id.tsx:905
 #: src/routes/_authenticated/place/new.tsx:35
-#: src/routes/_authenticated/places.tsx:40
+#: src/routes/_authenticated/places.tsx:41
 #: src/routes/_authenticated/worker/$worker_id.tsx:246
 #: src/routes/_authenticated/worker/$worker_id.tsx:282
 #: src/routes/_authenticated/workers.tsx:112

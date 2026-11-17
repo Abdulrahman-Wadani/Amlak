@@ -1395,6 +1395,17 @@ export interface DashboardResponse {
   }
 }
 
+/** Every place's dashboard row, in pages of 100 (one request for up to 100 places). */
+export function getDashboardRows(token: string): Promise<DashboardPlace[]> {
+  return apiAllPages<DashboardPlace>("/dashboard", token)
+}
+
+/** How many workers are assigned to a place (Manager only). Reads only the total. */
+export async function countPlaceWorkers(token: string, placeId: string): Promise<number> {
+  const result = await apiPage<PlaceWorker>(`/places/${placeId}/workers?page_size=1`, token)
+  return result.pagination.total
+}
+
 export async function getDashboard(
   token: string,
   params?: {
