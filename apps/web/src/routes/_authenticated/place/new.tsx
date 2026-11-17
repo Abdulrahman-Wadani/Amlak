@@ -1,13 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { useState, type SubmitEvent } from "react"
+import { useState } from "react"
 import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
-import { CircleAlert, MapPin } from "lucide-react"
+import { CircleAlert } from "lucide-react"
 import { cn } from "cn"
 import { S } from "@/lib/dom-style"
 import { useAuth } from "@/lib/auth"
-import { createPlace, PlaceNameTakenError } from "@/lib/api"
-import { placeInput } from "@/lib/validators"
+import type { CreatePlaceInput } from "@amlak/shared"
+import { createPlace } from "@/lib/api"
 import { TypeLabel } from "@/components/place-shared"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,32 +29,6 @@ export const Route = createFileRoute("/_authenticated/place/new")({
 
 const TYPES = ["Chalet", "Rest house", "Apartment", "Villa"]
 
-type FieldKey =
-  | "place_name"
-  | "place_type"
-  | "city"
-  | "monthly_maintenance_budget"
-
-function validationMessage(key: FieldKey): string {
-  switch (key) {
-    case "place_name":
-      return t`Enter a place name`
-    case "place_type":
-      return t`Choose a place type`
-    case "city":
-      return t`Enter a city`
-    case "monthly_maintenance_budget":
-      return t`Enter an amount`
-  }
-}
-
-const FIELD_KEYS: FieldKey[] = [
-  "place_name",
-  "place_type",
-  "city",
-  "monthly_maintenance_budget",
-]
-
 const FIGURE_LABELS = [
   { key: "assets", label: <Trans>Assets</Trans> },
   { key: "tickets", label: <Trans>Open tickets</Trans> },
@@ -64,75 +38,47 @@ const FIGURE_LABELS = [
 function AddPlace() {
   const { accessToken } = useAuth()
   const navigate = useNavigate()
-  const [placeName, setPlaceName] = useState("")
-  const [placeType, setPlaceType] = useState<string>("Chalet")
-  const [description, setDescription] = useState("")
-  const [city, setCity] = useState("")
-  const [address, setAddress] = useState("")
-  const [budget, setBudget] = useState("")
-  const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [formError, setFormError] = useState("")
-  const [loading, setLoading] = useState(false)
   const [location, setLocation] = useState<LocationData | null>(null)
 
-  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
-    e.preventDefault()
-    if (!accessToken) return
-    const result = placeInput.safeParse({
-      place_name: placeName,
-      place_type: placeType,
-      city,
-      address: address.trim() || undefined,
-      description: description.trim() || undefined,
-      monthly_maintenance_budget: budget.trim() ? Number(budget) : undefined,
-      latitude: location?.latitude,
-      longitude: location?.longitude,
-      currency: "SAR",
-      timezone: "Asia/Riyadh",
-    })
-    if (!result.success) {
-      const map: Partial<Record<FieldKey, string>> = {}
-      for (const issue of result.error.issues) {
-        const key = String(issue.path[0]) as FieldKey
-        if (FIELD_KEYS.includes(key) && !map[key]) map[key] = validationMessage(key)
-      }
-      setErrors(map)
-      if (Object.keys(map).length === 0) setFormError(t`Could not save the place.`)
-      return
+  async function handleCreatePlace(
+    token: string,
+    values: Record<string, unknown>,
+  ) {
+    // Picking on the map also fills the latitude and longitude fields; they
+    // can be typed by hand too. Coordinates are optional: without both, the
+    // place is saved without them.
+    const typed = (value: unknown) =>
+      typeof value === "number" && Number.isFinite(value) ? value : undefined
+    const latitude = location?.latitude ?? typed(values.latitude)
+    const longitude = location?.longitude ?? typed(values.longitude)
+    const text = (value: unknown) =>
+      typeof value === "string" && value.trim() ? value.trim() : undefined
+
+    const input: CreatePlaceInput = {
+      place_name: text(values.place_name) ?? "",
+      place_type: text(values.place_type) ?? "",
+      city: location?.city || (text(values.city) ?? ""),
+      address: location?.address || text(values.address),
+      description: text(values.description),
+      monthly_maintenance_budget: typed(values.monthly_maintenance_budget),
+      ...(latitude !== undefined && longitude !== undefined
+        ? { latitude, longitude }
+        : {}),
     }
-    setErrors({})
+
     setFormError("")
-    setLoading(true)
     try {
-      await createPlace(accessToken, result.data)
+      await createPlace(token, input)
       void navigate({ to: "/places" })
     } catch (err) {
-      if (err instanceof PlaceNameTakenError) {
-        setErrors({ place_name: t`That place name is already taken.` })
-      } else {
-        setFormError(t`Could not save the place.`)
-      }
-    } finally {
-      setLoading(false)
+      setFormError(
+        (err as { code?: string }).code === "CONFLICT"
+          ? t`That place name is already taken.`
+          : t`Could not save the place.`,
+      )
     }
   }
-
-  async function handleCreatePlace(
-  token: string,
-  values: Record<string, unknown>,
-) {
-  if (!location) {
-    throw new Error("Please select a location")
-  }
-
-  await createPlace(token, {
-    ...values,
-    latitude: location.latitude,
-    longitude: location.longitude,
-    address: location.address || (values.address as string | undefined),
-    city: location.city || String(values.city ?? ""),
-  })
-}
 
 function handleLocationSelect(location: LocationData) {
   setLocation(location)
@@ -206,6 +152,12 @@ function handleLocationSelect(location: LocationData) {
           callable={handleCreatePlace}
           args={{ token: accessToken }}
         />
+        {formError && (
+          <p role="alert" className={errorText} style={S("margin-top: 12px")}>
+            <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+            {formError}
+          </p>
+        )}
       </div>
 
       {/* Map */}
