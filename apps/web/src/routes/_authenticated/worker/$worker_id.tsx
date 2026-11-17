@@ -21,6 +21,7 @@ import {
 } from "lucide-react"
 
 import { useAuth } from "@/lib/auth"
+import { authFetch } from "@/lib/http"
 import { getWorkerById } from "@/lib/api"
 import { S } from "@/lib/dom-style"
 import { buttonVariants, Button } from "@/components/ui/button"
@@ -115,12 +116,8 @@ function WorkerDetailPage() {
     }
 
     try {
-      const response = await fetch(`/api/v1/workers/${worker.id}`, {
+      const response = await authFetch(`/workers/${worker.id}`, accessToken, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
         body: JSON.stringify(payload),
       })
 
@@ -171,11 +168,8 @@ function WorkerDetailPage() {
     setSaveError("")
 
     try {
-      const response = await fetch(`/api/v1/workers/${worker.id}`, {
+      const response = await authFetch(`/workers/${worker.id}`, accessToken, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
       })
 
       const result = await response.json().catch(() => null)
