@@ -26,7 +26,9 @@ export async function register(input: RegisterInput): Promise<User> {
 		where: { email: input.email },
 	});
 	if (existing) {
-		throw new AppError("CONFLICT", "This email is already registered");
+		throw new AppError("CONFLICT", "This email is already registered", {
+			fields: { email: "This email is already registered" },
+		});
 	}
 
 	const managerRole = await prisma.role.findUniqueOrThrow({
