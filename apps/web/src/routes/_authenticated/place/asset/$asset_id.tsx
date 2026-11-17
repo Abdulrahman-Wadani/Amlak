@@ -16,7 +16,6 @@ import { buttonVariants,Button } from "@/components/ui/button"
 import {
   getAssetById,
   getPlace,
-  getTicketsForPlace,
   getScheduledMaintenancesForAsset,handleCancelSchedule
 } from "@/lib/api"
 import { S } from "@/lib/dom-style"
@@ -26,7 +25,6 @@ import {
   CalendarDays,
   MapPin,
   Wrench,
-  AlertTriangle,
   Plus
 } from "lucide-react"
 import {
@@ -40,7 +38,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import {
   AssetStatusBadge,
-  TicketStatusChip,
 } from "@/components/place-shared"
 import {
   Breadcrumb,
@@ -52,6 +49,7 @@ import {
 } from "@/components/ui/breadcrumb"
 import Form from "@/components/form"
 import { AssetManage } from "@/components/asset-manage"
+import { TicketsSection } from "@/components/tickets-section"
 import { todayIn } from "@/lib/dates"
 
 
@@ -70,9 +68,6 @@ function AssetDetailPage() {
 
   const [asset, setAsset] = useState<Asset | null>(null)
   const [place, setPlace] = useState<Place | null>(null)
-  const [tickets, setTickets] = useState<
-    Awaited<ReturnType<typeof getTicketsForPlace>> | null
-  >(null)
   const [scheduledMaintenances, setScheduledMaintenances] = useState<any[]>([])
   const [scheduledLoading, setScheduledLoading] = useState(true)
   // Bumped after a schedule is cancelled, to load the list again.
@@ -130,20 +125,12 @@ function AssetDetailPage() {
 
         setAsset(assetData)
 
-        // Load the property associated with this asset.
-        const [placeData, placeTickets] = await Promise.all([
-          getPlace(accessToken!, assetData.place_id),
-          getTicketsForPlace(accessToken!, assetData.place_id),
-        ])
+        // Load the place this asset belongs to.
+        const placeData = await getPlace(accessToken!, assetData.place_id)
 
         if (!alive) return
 
         setPlace(placeData)
-
-        // Show only tickets belonging to this asset.
-        setTickets(
-          placeTickets.filter((ticket) => ticket.asset_id === asset_id)
-        )
       } catch (error) {
         console.error("Failed to load asset:", error)
         if (alive) setFailed(true)
@@ -166,21 +153,6 @@ const referrer = document.referrer
 const placeId = referrer
   ? new URL(referrer).pathname.split("/").filter(Boolean).pop()
   : undefined
-  function getTicketLabel(value: string) {
-    switch (value) {
-      case "LOW":
-        return t`Low`
-      case "MEDIUM":
-        return t`Medium`
-      case "HIGH":
-        return t`High`
-      case "URGENT":
-        return t`Urgent`
-      default:
-        return value
-    }
-  }
-
   function formatDate(value: string | null | undefined) {
     if (!value) return "—"
 
@@ -379,105 +351,16 @@ const placeId = referrer
           </Card>
 
           {/* Maintenance Tickets */}
-          <Card
-            className="am-lift"
-            style={S(
-              "padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0"
-            )}
-          >
-            <CardHeader
-              style={S(
-                "padding: 18px 20px; border-bottom: 1px solid var(--border)"
-              )}
-            >
-              <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-                <Trans>Maintenance tickets for this asset</Trans>
-                {tickets !== null && (
-                  <span
-                    style={S(
-                      "margin-inline-start: 8px; font-size: 12px; color: var(--muted-foreground)"
-                    )}
-                  >
-                    {tickets.length}
-                  </span>
-                )}
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent style={S("padding: 20px")}>
-              {tickets === null ? (
-                <div style={S("display: flex; flex-direction: column; gap: 10px")}>
-                  <Skeleton style={S("height: 70px")} />
-                  <Skeleton style={S("height: 70px")} />
-                </div>
-              ) : tickets.length === 0 ? (
-                <div
-                  style={S(
-                    "display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 32px 16px; text-align: center"
-                  )}
-                >
-                  <AlertTriangle
-                    size={28}
-                    style={S("color: var(--muted-foreground)")}
-                  />
-                  <p
-                    style={S(
-                      "font-size: 14px; color: var(--muted-foreground); margin: 0"
-                    )}
-                  >
-                    <Trans>This asset has no maintenance tickets.</Trans>
-                  </p>
-                </div>
-              ) : (
-                <div style={S("display: flex; flex-direction: column; gap: 10px")}>
-                  {tickets.map((ticket) => (
-                    <Link
-                      key={ticket.id}
-                      to="/ticket/$ticket_id"
-                      params={{ ticket_id: ticket.id }}
-                      className="am-lift"
-                      style={S(
-                        "display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px; border: 1px solid var(--border); background: var(--card); text-decoration: none; color: inherit"
-                      )}
-                    >
-                      <div
-                        style={S(
-                          "display: flex; flex-direction: column; gap: 6px; min-width: 0"
-                        )}
-                      >
-                        <strong style={S("font-size: 14px")}>
-                          {ticket.description || t`Maintenance ticket`}
-                        </strong>
-
-                        <span
-                          style={S(
-                            "font-size: 12px; color: var(--muted-foreground)"
-                          )}
-                        >
-                          {getTicketLabel(ticket.ticket_type)}
-                          {" · "}
-                          <Trans>Priority: {getTicketLabel(ticket.priority)}</Trans>
-                        </span>
-
-                        <span
-                          style={S(
-                            "font-size: 12px; color: var(--muted-foreground)"
-                          )}
-                        >
-                          <Trans>Created: {formatDate(ticket.created_at)}</Trans>
-                        </span>
-                      </div>
-
-                      <div style={S("display: flex; align-items: center; gap: 10px")}>
-                        <TicketStatusChip status={String(ticket.status)} />
-                        <ArrowRight size={17} className="rtl:rotate-180" />
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          {asset && accessToken && (
+            <TicketsSection
+              token={accessToken}
+              placeId={asset.place_id}
+              assetId={asset.id}
+              title={<Trans>Maintenance tickets for this asset</Trans>}
+              emptyOpen={<Trans>This asset has no open tickets.</Trans>}
+              emptyAll={<Trans>This asset has no maintenance tickets.</Trans>}
+            />
+          )}
 
 {/* Scheduled Maintenances */}
 {/* Scheduled Maintenances */}

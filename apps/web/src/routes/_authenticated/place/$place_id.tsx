@@ -40,7 +40,7 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { PlaceBookings } from "@/components/place-bookings"
-import { PlaceTickets } from "@/components/place-tickets"
+import { TicketsSection } from "@/components/tickets-section"
 import {
   AssetStatusBadge,
   StatusBadge,
@@ -1011,7 +1011,15 @@ function getWorkerName(userId: string | null | undefined) {
           )}
 
           {activeSection === "tickets" && accessToken && (
-            <PlaceTickets token={accessToken} placeId={place_id} assets={assets} />
+            <TicketsSection
+              token={accessToken}
+              placeId={place_id}
+              assets={assets}
+              title={<Trans>Maintenance tickets</Trans>}
+              emptyOpen={<Trans>This place has no open tickets.</Trans>}
+              emptyAll={<Trans>This place has no maintenance tickets.</Trans>}
+              showAddTicket
+            />
           )}
 
         </>

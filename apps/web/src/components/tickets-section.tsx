@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, type ReactNode } from "react"
 import { Link } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
@@ -18,18 +18,32 @@ const PAGE_SIZE = 20
 type Filter = "OPEN" | "ALL"
 
 /**
- * A place's maintenance tickets, paged by the API. "Open" (the default)
- * asks for open=true: PENDING_REVIEW and APPROVED, the same tickets the
- * dashboard and the places page count. "All" sends no filter.
+ * The maintenance tickets of a place, or of one asset with assetId, paged
+ * by the API. "Open" (the default) asks for open=true: PENDING_REVIEW and
+ * APPROVED, the same tickets the dashboard and the places page count.
+ * "All" sends no open filter.
  */
-export function PlaceTickets({
+export function TicketsSection({
   token,
   placeId,
+  assetId,
   assets,
+  title,
+  emptyOpen,
+  emptyAll,
+  showAddTicket = false,
 }: {
   token: string
   placeId: string
-  assets: Asset[] | null
+  /** Only this asset's tickets (GET /tickets?asset_id=). */
+  assetId?: string
+  /** The place's assets, to name each ticket's asset; omit on an asset page. */
+  assets?: Asset[] | null
+  title: ReactNode
+  emptyOpen: ReactNode
+  emptyAll: ReactNode
+  /** The Add ticket link (/ticket/new takes place_id only). */
+  showAddTicket?: boolean
 }) {
   const [filter, setFilter] = useState<Filter>("OPEN")
   const [page, setPage] = useState(1)
@@ -44,7 +58,11 @@ export function PlaceTickets({
     setFailed(false)
     listTickets(
       token,
-      { place_id: placeId, ...(filter === "OPEN" ? { open: true } : {}) },
+      {
+        place_id: placeId,
+        ...(assetId ? { asset_id: assetId } : {}),
+        ...(filter === "OPEN" ? { open: true } : {}),
+      },
       page,
       PAGE_SIZE,
     )
@@ -58,14 +76,14 @@ export function PlaceTickets({
     return () => {
       alive = false
     }
-  }, [token, placeId, filter, page])
+  }, [token, placeId, assetId, filter, page])
 
   function choose(next: Filter) {
     setFilter(next)
     setPage(1)
   }
 
-  const tabs: { key: Filter; label: React.ReactNode }[] = [
+  const tabs: { key: Filter; label: ReactNode }[] = [
     { key: "OPEN", label: <Trans>Open</Trans> },
     { key: "ALL", label: <Trans>All</Trans> },
   ]
@@ -81,7 +99,7 @@ export function PlaceTickets({
         )}
       >
         <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-          <Trans>Maintenance tickets</Trans>
+          {title}
           {total !== null && (
             <span
               data-testid="place-tickets-total"
@@ -105,17 +123,19 @@ export function PlaceTickets({
               </button>
             ))}
           </div>
-          <CardAction>
-            <Link
-              to="/ticket/new"
-              search={{ place_id: placeId }}
-              className={cn(buttonVariants({ variant: "outline", size: "sm" }), "am-btn")}
-              style={S("height: 38px; padding: 0 12px; gap: 6px; white-space: nowrap")}
-            >
-              <Plus size={16} />
-              <Trans>Add ticket</Trans>
-            </Link>
-          </CardAction>
+          {showAddTicket && (
+            <CardAction>
+              <Link
+                to="/ticket/new"
+                search={{ place_id: placeId }}
+                className={cn(buttonVariants({ variant: "outline", size: "sm" }), "am-btn")}
+                style={S("height: 38px; padding: 0 12px; gap: 6px; white-space: nowrap")}
+              >
+                <Plus size={16} />
+                <Trans>Add ticket</Trans>
+              </Link>
+            </CardAction>
+          )}
         </div>
       </CardHeader>
 
@@ -129,11 +149,7 @@ export function PlaceTickets({
           <Skeleton style={S("height: 70px")} />
         ) : tickets.length === 0 ? (
           <p style={S("text-align: center; color: var(--muted-foreground); font-size: 14px")}>
-            {filter === "OPEN" ? (
-              <Trans>This place has no open tickets.</Trans>
-            ) : (
-              <Trans>This place has no maintenance tickets.</Trans>
-            )}
+            {filter === "OPEN" ? emptyOpen : emptyAll}
           </p>
         ) : (
           <div style={S("display: flex; flex-direction: column; gap: 10px")}>
@@ -154,8 +170,12 @@ export function PlaceTickets({
                       {ticket.description || t`Maintenance ticket`}
                     </strong>
                     <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-                      {asset?.name ?? t`No asset`}
-                      {" · "}
+                      {!assetId && (
+                        <>
+                          {asset?.name ?? t`No asset`}
+                          {" · "}
+                        </>
+                      )}
                       {ticket.ticket_type === "CORRECTIVE"
                         ? t`Corrective maintenance`
                         : t`Preventive maintenance`}
