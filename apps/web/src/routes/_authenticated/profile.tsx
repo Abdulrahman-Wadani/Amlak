@@ -298,13 +298,6 @@ function ProfilePage() {
         preferred_language: form.preferred_language,
         picture: form.picture,
       })
-      if (
-        updatedProfile.preferred_language === "ar" ||
-        updatedProfile.preferred_language === "en"
-      ) {
-        setLang(updatedProfile.preferred_language)
-      }
-
       const updatedProfile: Profile = response?.data
         ? response.data
         : response?.fullname
@@ -318,6 +311,13 @@ function ProfilePage() {
                 ? preview
                 : profile.picture_url,
             }
+
+      if (
+        updatedProfile.preferred_language === "ar" ||
+        updatedProfile.preferred_language === "en"
+      ) {
+        setLang(updatedProfile.preferred_language)
+      }
 
       setProfile(updatedProfile)
 
