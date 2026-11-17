@@ -174,7 +174,7 @@ function UsersPage() {
             type="search"
             className="am-input"
             style={S("padding-inline-start: 44px")}
-            placeholder="ابحث بالاسم أو البريد الإلكتروني أو الجوال او المعرف"
+            placeholder="ابحث بالاسم أو البريد الإلكتروني أو الجوال او"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />

@@ -280,65 +280,68 @@ function ProfilePage() {
     setError("")
   }
 
-  const handleUpdateProfile = async () => {
-    if (!accessToken || !profile) return
+const handleUpdateProfile = async () => {
+  if (!accessToken || !profile) return
 
-    if (!form.fullname.trim()) {
-      setError(messages.fullNameRequired)
-      return
-    }
-
-    try {
-      setSaving(true)
-      setError("")
-      setSuccess("")
-      const response = await updateProfile(accessToken, {
-        fullname: form.fullname.trim(),
-        phone: form.phone.trim() || null,
-        preferred_language: form.preferred_language,
-        picture: form.picture,
-      })
-      if (
-        updatedProfile.preferred_language === "ar" ||
-        updatedProfile.preferred_language === "en"
-      ) {
-        setLang(updatedProfile.preferred_language)
-      }
-
-      const updatedProfile: Profile = response?.data
-        ? response.data
-        : response?.fullname
-          ? response
-          : {
-              ...profile,
-              fullname: form.fullname.trim(),
-              phone: form.phone.trim() || null,
-              preferred_language: form.preferred_language,
-              picture_url: form.picture
-                ? preview
-                : profile.picture_url,
-            }
-
-      setProfile(updatedProfile)
-
-      setForm({
-        fullname: updatedProfile.fullname,
-        phone: updatedProfile.phone || "",
-        preferred_language: updatedProfile.preferred_language,
-        picture: null,
-      })
-
-      setPreview(updatedProfile.picture_url)
-      setEditing(false)
-      setSuccess(messages.updated)
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : messages.failedUpdate,
-      )
-    } finally {
-      setSaving(false)
-    }
+  if (!form.fullname.trim()) {
+    setError(messages.fullNameRequired)
+    return
   }
+
+  try {
+    setSaving(true)
+    setError("")
+    setSuccess("")
+
+    const response = await updateProfile(accessToken, {
+      fullname: form.fullname.trim(),
+      phone: form.phone.trim() || null,
+      preferred_language: form.preferred_language,
+      picture: form.picture,
+    })
+
+    const updatedProfile: Profile = response?.data
+      ? response.data
+      : response?.fullname
+        ? response
+        : {
+            ...profile,
+            fullname: form.fullname.trim(),
+            phone: form.phone.trim() || null,
+            preferred_language: form.preferred_language,
+            picture_url: form.picture
+              ? preview
+              : profile.picture_url,
+          }
+
+    // تحديث لغة الموقع بالكامل
+    if (
+      updatedProfile.preferred_language === "ar" ||
+      updatedProfile.preferred_language === "en"
+    ) {
+      setLang(updatedProfile.preferred_language)
+    }
+
+    setProfile(updatedProfile)
+
+    setForm({
+      fullname: updatedProfile.fullname,
+      phone: updatedProfile.phone || "",
+      preferred_language: updatedProfile.preferred_language,
+      picture: null,
+    })
+
+    setPreview(updatedProfile.picture_url)
+    setEditing(false)
+    setSuccess(messages.updated)
+  } catch (err) {
+    setError(
+      err instanceof Error ? err.message : messages.failedUpdate,
+    )
+  } finally {
+    setSaving(false)
+  }
+}
 
   if (loading) {
     return (

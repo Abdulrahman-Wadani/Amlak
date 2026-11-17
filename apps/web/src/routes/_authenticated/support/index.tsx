@@ -252,7 +252,7 @@ function UsersPage() {
             aria-hidden="true"
             className="size-3.5 shrink-0"
           />
-          تعذر تحميل بيانات المستخدمين.
+         <Trans> تعذر تحميل بيانات المستخدمين.</Trans>
         </p>
       )}
 
