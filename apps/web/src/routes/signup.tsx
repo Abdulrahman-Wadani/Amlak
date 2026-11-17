@@ -5,6 +5,7 @@ import { Trans } from "@lingui/react/macro"
 import { signUpInput } from "@/lib/validators"
 import { useAuth } from "@/lib/auth"
 import { LANGUAGE_NAMES, useLanguage } from "@/lib/i18n"
+import { errorMessage } from "@/lib/errors"
 import { AuthBrandPanel } from "@/components/auth-brand-panel"
 import { EmailVerifyPanel } from "@/components/email-verify-panel"
 import { Alert, AlertTitle } from "@/components/ui/alert"
@@ -76,7 +77,7 @@ function SignUp() {
         setCooldown(60)
       })
       .catch((err: unknown) => {
-        setFormError(err instanceof Error ? err.message : t`Could not create the account`)
+        setFormError(errorMessage(err))
       })
       .finally(() => {
         setLoading(false)
@@ -93,7 +94,7 @@ function SignUp() {
         void navigate({ to: "/home" })
       })
       .catch((err: unknown) => {
-        setFormError(err instanceof Error ? err.message : t`Could not confirm the email`)
+        setFormError(errorMessage(err))
       })
       .finally(() => {
         setLoading(false)
@@ -105,7 +106,7 @@ function SignUp() {
     resendCode(email)
       .then(() => setCooldown(60))
       .catch((err: unknown) => {
-        setFormError(err instanceof Error ? err.message : t`Could not resend the code`)
+        setFormError(errorMessage(err))
       })
   }
 

@@ -1,18 +1,14 @@
 
-import { useState, type FormEvent } from "react"
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
+import { useState } from "react"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { CircleAlert } from "lucide-react"
 import { t } from "@lingui/core/macro"
 
 import { useAuth } from "@/lib/auth"
 import { createContent } from "@/lib/api"
-import type { ContentLanguage } from "@/lib/api"
+import { errorMessage } from "@/lib/errors"
 import { S } from "@/lib/dom-style"
-import Form from "@/components/form"
-
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import Form, { type FormValues } from "@/components/form"
 
 export const Route = createFileRoute("/_authenticated/content/new")({
   component: NewContentPage,
@@ -21,34 +17,28 @@ export const Route = createFileRoute("/_authenticated/content/new")({
 function NewContentPage() {
   const { accessToken } = useAuth()
   const navigate = useNavigate()
-
-  const [title, setTitle] = useState("")
-  const [language, setLanguage] = useState<ContentLanguage>("ar")
-  const [slug, setSlug] = useState("")
-  const [body, setBody] = useState("")
-  const [isPublished, setIsPublished] = useState(false)
-
   const [error, setError] = useState("")
-  const [saving, setSaving] = useState(false)
 
-  const slugIsValid = /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)
+  const handleSubmit = async (values: FormValues) => {
+    if (!accessToken) return
+    const text = (name: string) =>
+      typeof values[name] === "string" ? (values[name] as string) : ""
+    try {
+      const response = await createContent(accessToken, {
+        title: text("title"),
+        language: text("language") === "en" ? "en" : "ar",
+        slug: text("slug"),
+        body: text("body"),
+        is_published: values.is_published === "true",
+      })
 
-const handleSubmit = async (values: Record<string, unknown>) => {
-  try {
-    const response = await createContent(accessToken, {
-      title: String(values.title),
-      language: values.language as "ar" | "en",
-      slug: String(values.slug),
-      body: String(values.body),
-      is_published: values.is_published === "true",
-    })
-
-    setError("")
-    void navigate({ to: "/content/$content_id", params: { content_id: response.id } })
-  } catch (err) {
-    setError(err instanceof Error ? err.message : t`Could not save the content.`)
+      setError("")
+      void navigate({ to: "/content/$content_id", params: { content_id: response.id } })
+    } catch (err) {
+      setError(errorMessage(err))
+    }
   }
-}
+
   return (
     <center>
     <div
@@ -58,17 +48,17 @@ const handleSubmit = async (values: Record<string, unknown>) => {
     >
 
     <Form
-    callable={handleSubmit}
-    args={{}}
+    onSubmit={handleSubmit}
     fields={[
           { name: "title", label: t`Title`, type: "text"},
-          { name: "language", label: t`Language`, type: "select",options:[{label: t`Arabic`, value:'ar' },{label: t`English`, value:'en'}] },
+          { name: "language", label: t`Language`, type: "select", defaultValue: "ar", options:[{label: t`Arabic`, value:'ar' },{label: t`English`, value:'en'}] },
           { name: "slug", label: t`Slug`, type: "text" },
           { name: "body", label: t`Body`, type: "textarea" },
 {
   name: "is_published",
   label: t`Status`,
   type: "select",
+  defaultValue: "false",
   options: [
     { label: t`Published`, value: "true" },
     { label: t`Draft`, value: "false" },

@@ -26,6 +26,7 @@ import {
 } from "@/lib/api"
 
 import { S } from "@/lib/dom-style"
+import { errorMessage } from "@/lib/errors"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { StatusBadge } from "@/components/place-shared"
@@ -77,6 +78,9 @@ const [resolveError, setResolveError] = useState<string | null>(null);
 
     let alive = true
 
+    // Captured here: inside the async function TypeScript forgets the check above.
+    const token = accessToken
+
     async function loadTicket() {
       setLoading(true)
       setError("")
@@ -84,10 +88,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
       setUser(null)
 
       try {
-        const ticketData = await getSupportTicketById(
-          accessToken,
-          support_id,
-        )
+        const ticketData = await getSupportTicketById(token, support_id)
 
         if (!alive) return
 
@@ -95,10 +96,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
 
         if (isAdmin) {
           try {
-            const userData = await getUserById(
-              accessToken,
-              ticketData.user_id,
-            )
+            const userData = await getUserById(token, ticketData.user_id)
 
             if (alive && userData) {
               setUser(userData)
@@ -180,7 +178,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
     setAdminResponse("")
   } catch (err) {
     setResolveError(
-      err instanceof Error ? err.message : t`Could not resolve the ticket`
+      errorMessage(err)
     )
   } finally {
     setResolving(false)
@@ -440,7 +438,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
   )}
 
   {/* Resolve button, always at the bottom */}
-  {isAdmin && ticket.status === "OPEN" && (
+  {isAdmin && ticket.status === "OPEN" && !showResolveForm && (
   <div
   style={S(`
     display:flex;
@@ -453,11 +451,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
     type="button"
     variant="default"
     id="solvebutton"
-    onClick={() => {
-        setShowResolveForm(!showResolveForm);
-        const element = document.getElementById("solvebutton");
-        element.style.display = "none"
-    }}
+    onClick={() => setShowResolveForm(true)}
     style={S("height:42px; padding:0 20px; gap:8px")}
   >
     <CheckCircle size={17} />

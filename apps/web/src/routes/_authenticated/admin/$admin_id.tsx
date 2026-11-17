@@ -18,6 +18,7 @@ import {
 import { useAuth } from "@/lib/auth"
 import { getUserById, updateUser, type UserResponse } from "@/lib/api"
 import { S } from "@/lib/dom-style"
+import { errorMessage } from "@/lib/errors"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -119,9 +120,7 @@ function UserDetailPage() {
     } catch (error) {
       console.error("Update user error:", error)
       setSaveError(
-        error instanceof Error
-          ? error.message
-          : "Failed to update user",
+        errorMessage(error),
       )
     } finally {
       setSaving(false)

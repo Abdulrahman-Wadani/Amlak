@@ -33,6 +33,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { cn } from "@/lib/utils"
+import { errorMessage } from "@/lib/errors"
 import { buttonVariants } from "@/components/ui/button"
 import { Trans } from "@lingui/react/macro"
 import { useLingui } from "@lingui/react"
@@ -84,9 +85,7 @@ function ContentPage() {
       .catch((err: unknown) => {
         if (!alive) return
         setError(
-          err instanceof Error
-            ? err.message
-            : t`We could not load the content pages.`,
+          errorMessage(err),
         )
         setContents([])
       })

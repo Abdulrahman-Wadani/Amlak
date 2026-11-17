@@ -1,18 +1,23 @@
 
 import { authFetch } from "./http"
+import { apiError, readApiError } from "./errors"
 import type { BookingInput } from "./validators"
 import type {
   Asset,
   CreateAssetInput,
+  CreateSupportTicketInput,
   CreatePlaceInput,
   Expense,
   ExpenseCategory,
   Place,
+  PlaceStatus,
   PlaceWorker,
+  Schedule,
   SupportTicket,
   Ticket,
   TicketStatus,
   UpdateAssetInput,
+  User,
   Worker,
 } from "@amlak/shared"
 
@@ -68,12 +73,9 @@ export interface PageOf<T> {
 export async function apiPage<T>(path: string, token: string): Promise<PageOf<T>> {
   const res = await authFetch(path, token)
   const body = (await res.json().catch(() => null)) as PageOf<T> | null
-  if (!res.ok || !body || !Array.isArray(body.data) || !body.pagination) {
-    const message =
-      body && typeof body === "object" && "message" in body
-        ? String((body as { message: unknown }).message)
-        : `${path} failed with ${res.status}`
-    throw new Error(message)
+  if (!res.ok) throw apiError(res.status, body)
+  if (!body || !Array.isArray(body.data) || !body.pagination) {
+    throw new Error(`${path} returned no list`)
   }
   return body
 }
@@ -106,29 +108,7 @@ export async function apiRequest<T>(
 
   const response: unknown = await res.json().catch(() => null)
 
-  if (!res.ok) {
-    const message =
-      response &&
-      typeof response === "object" &&
-      "message" in response
-        ? String((response as { message: unknown }).message)
-        : `${path} failed with ${res.status}`
-
-    const error = new Error(message) as Error & {
-      code?: string
-      details?: Record<string, unknown>
-    }
-    error.code =
-      response && typeof response === "object" && "code" in response
-        ? String((response as { code: unknown }).code)
-        : ""
-    error.details =
-      response && typeof response === "object" && "details" in response
-        ? (response as { details?: Record<string, unknown> }).details
-        : undefined
-
-    throw error
-  }
+  if (!res.ok) throw apiError(res.status, response)
 
   return unwrapResponse<T>(response)
 }
@@ -214,10 +194,7 @@ export async function deleteAsset(token: string, assetId: string): Promise<void>
   const response = await authFetch(`/assets/${assetId}`, token, {
     method: "DELETE",
   })
-  if (!response.ok) {
-    const result = await response.json().catch(() => null)
-    throw new Error(result?.message ?? `Delete failed (${response.status})`)
-  }
+  if (!response.ok) throw await readApiError(response)
 }
 
 // Tickets
@@ -256,39 +233,21 @@ export function listTickets(
 }
 
 
-// Create place
-export class PlaceNameTakenError extends Error {}
-
+// Create place. A taken name is a 409 CONFLICT with details.fields.place_name.
 export async function createPlace(
   token: string,
   input: CreatePlaceInput,
 ): Promise<Place> {
-  try {
-    const place = await apiRequest<Place | string>(
-      "/places",
-      token,
-      {
-        method: "POST",
-        body: JSON.stringify(input),
-      },
-    )
+  const place = await apiRequest<Place>("/places", token, {
+    method: "POST",
+    body: JSON.stringify(input),
+  })
 
-    if (typeof place === "string") {
-      throw new PlaceNameTakenError(place)
-    }
-
-    if (!place || typeof place.id !== "string") {
-      throw new Error("place not created")
-    }
-
-    return normalizePlace(place)
-  } catch (error) {
-    if (error instanceof PlaceNameTakenError) {
-      throw error
-    }
-
-    throw error
+  if (!place || typeof place.id !== "string") {
+    throw new Error("place not created")
   }
+
+  return normalizePlace(place)
 }
 
 // shortcut: packages/shared has no bookings.ts on this branch; when it lands,
@@ -474,12 +433,12 @@ export async function updatePlace(
     city: string
     address: string | null
     description: string | null
-    monthly_maintenance_budget: number
+    monthly_maintenance_budget: number | null
     latitude: number | null
     longitude: number | null
     currency: string
     timezone: string
-    status: "ACTIVE" | "INACTIVE"
+    status: PlaceStatus
   },
 ): Promise<Place> {
   const place = await apiRequest<Place>(
@@ -508,11 +467,7 @@ export async function deleteWorker(
 
   const result = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    throw new Error(
-      result?.message ?? `Delete failed (${response.status})`
-    )
-  }
+  if (!response.ok) throw apiError(response.status, result)
 }
 
 export async function getAssetById(
@@ -626,16 +581,7 @@ async function expenseMultipartRequest<T>(
 
   const result: unknown = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    const message =
-      result &&
-      typeof result === "object" &&
-      "message" in result
-        ? String(result.message)
-        : `Expense request failed (${response.status})`
-
-    throw new Error(message)
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   return unwrapResponse<T>(result)
 }
@@ -734,13 +680,7 @@ export async function deleteExpense(
     method: "DELETE",
   })
 
-  if (!response.ok) {
-    const result = await response.json().catch(() => null)
-
-    throw new Error(
-      result?.message || `Failed to delete expense (${response.status})`,
-    )
-  }
+  if (!response.ok) throw await readApiError(response)
 }
 
 export async function getFinancialReport(
@@ -808,16 +748,7 @@ export async function createTicket(
 
   const response: unknown = await res.json().catch(() => null)
 
-  if (!res.ok) {
-    const message =
-      response &&
-      typeof response === "object" &&
-      "message" in response
-        ? String((response as { message: unknown }).message)
-        : `Create ticket failed with ${res.status}`
-
-    throw new Error(message)
-  }
+  if (!res.ok) throw apiError(res.status, response)
 
   return unwrapResponse(response)
 }
@@ -857,13 +788,9 @@ async function ticketRequest<T>(
     body: isFormData ? body : JSON.stringify(body),
   });
 
-  const result = await response.json();
+  const result = await response.json().catch(() => null);
 
-  if (!response.ok) {
-    throw new Error(
-      result.message || result.error || `Failed to ${action} ticket`,
-    );
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   return result as T;
 }
@@ -938,11 +865,11 @@ export async function completeTicket(
 
 
 
-export async function getScheduledMaintenancesForAsset(
+export function getScheduledMaintenancesForAsset(
   token: string,
   assetId: string,
-) {
-  return apiRequest(`/assets/${assetId}/maintenance-schedules`, token)
+): Promise<Schedule[]> {
+  return apiRequest<Schedule[]>(`/assets/${assetId}/maintenance-schedules`, token)
 }
 
 
@@ -973,17 +900,7 @@ export async function createMaintenanceSchedule(
 
   const data: unknown = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    const message =
-      typeof data === "object" &&
-      data !== null &&
-      "message" in data &&
-      typeof data.message === "string"
-        ? data.message
-        : "Failed to create maintenance schedule"
-
-    throw new Error(message)
-  }
+  if (!response.ok) throw apiError(response.status, data)
 
   return data
 }
@@ -997,18 +914,7 @@ export async function handleCancelSchedule(
     token,
     { method: "DELETE" }
   )
-  if (!response.ok) {
-    const data: unknown = await response.json().catch(() => null)
-    const message =
-      typeof data === "object" &&
-      data !== null &&
-      "message" in data &&
-      typeof data.message === "string"
-        ? data.message
-        : "Failed to cancel maintenance schedule"
-
-    throw new Error(message)
-  }
+  if (!response.ok) throw await readApiError(response)
   // 204: the schedule is stopped. The caller refreshes its list.
 }
 
@@ -1037,20 +943,17 @@ export async function updateProfile(
     body: formData,
   })
 
-  if (!response.ok) {
-    const result = await response.json().catch(() => null)
-    throw new Error(result?.message || "Failed to update profile")
-  }
+  if (!response.ok) throw await readApiError(response)
 
   return response.json()
 }
 
-export async function getProfile(token: string) {
-  return apiRequest('/users/me', token)
+export function getProfile(token: string): Promise<User> {
+  return apiRequest<User>("/users/me", token)
 }
 
-export async function getUsers(token: string){
-  return apiRequest('/users', token)
+export function getUsers(token: string): Promise<User[]> {
+  return apiRequest<User[]>("/users", token)
 }
 
 export type UserResponse = {
@@ -1088,13 +991,7 @@ export async function getUserById(
     | UserResponse
     | null
 
-  if (!response.ok) {
-    throw new Error(
-      result && "message" in result
-        ? result.message
-        : `Failed to get user (${response.status})`,
-    )
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   if (!result) {
     throw new Error("Invalid user response")
@@ -1131,13 +1028,7 @@ export async function updateUser(
     | UserResponse
     | null
 
-  if (!response.ok) {
-    throw new Error(
-      result && "message" in result
-        ? result.message
-        : `Failed to update user (${response.status})`,
-    )
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   if (!result) {
     throw new Error("Invalid update response")
@@ -1152,21 +1043,18 @@ export async function getSupportTicket(token: string) {
   return apiRequest<SupportTicket[]>("/support-tickets", token)
 }
 
-type createSpTicket = {
-  subject:string,
-  description:string
-}
-export async function createSupportTicket(token:string,input:[]){
-  const res = await authFetch("/support-tickets", token, {
+export function createSupportTicket(
+  token: string,
+  input: CreateSupportTicketInput,
+): Promise<SupportTicket> {
+  return apiRequest<SupportTicket>("/support-tickets", token, {
     method: "POST",
     body: JSON.stringify(input),
   })
-  return res
 }
 
-
-export async function getSupportTicketById(token:string,ticket:string){
-  return apiRequest(`/support-tickets/${ticket}`,token)
+export function getSupportTicketById(token: string, ticketId: string): Promise<SupportTicket> {
+  return apiRequest<SupportTicket>(`/support-tickets/${ticketId}`, token)
 }
 
 export async function resolveSupportTicket(
@@ -1183,11 +1071,9 @@ export async function resolveSupportTicket(
     }
   );
 
-  const result = await response.json();
+  const result = await response.json().catch(() => null);
 
-  if (!response.ok) {
-    throw new Error(result.message || result.error || "Failed to resolve ticket");
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   return result;
 }
@@ -1259,11 +1145,7 @@ export async function getContents(
 
   const result = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    throw new Error(
-      result?.message || `Failed to get content (${response.status})`,
-    )
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   if (!result || !Array.isArray(result.data) || !result.pagination) {
     throw new Error("Invalid content list response")
@@ -1287,8 +1169,9 @@ export async function getPublicContent(
   const result = (await response.json().catch(() => null)) as
     | ContentListResponse
     | null
-  if (!response.ok || !result || !Array.isArray(result.data)) {
-    throw new Error(`Failed to get content (${response.status})`)
+  if (!response.ok) throw apiError(response.status, result)
+  if (!result || !Array.isArray(result.data)) {
+    throw new Error("/content returned no list")
   }
   return result.data.find((page) => page.slug === slug) ?? null
 }
@@ -1337,13 +1220,7 @@ export async function deleteContent(
     method: "DELETE",
   })
 
-  if (!response.ok) {
-    const result = await response.json().catch(() => null)
-
-    throw new Error(
-      result?.message || `Failed to delete content (${response.status})`,
-    )
-  }
+  if (!response.ok) throw await readApiError(response)
 }
 
 
@@ -1418,11 +1295,9 @@ export async function getDashboard(
     token,
   )
 
-  const result = await response.json()
+  const result = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    throw new Error(result.message || "Failed to fetch dashboard")
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   return result
 }
@@ -1486,11 +1361,9 @@ export async function getNotifications(
     token,
   )
 
-  const result = await response.json()
+  const result = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    throw new Error(result.message || "Failed to fetch notifications")
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   return result
 }
@@ -1505,11 +1378,9 @@ export async function markNotificationAsRead(
     { method: "POST" }
   )
 
-  const result = await response.json()
+  const result = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    throw new Error(result.message || "Failed to mark notification as read")
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   return result
 }
@@ -1523,11 +1394,9 @@ export async function sendAnnouncement(
     body: JSON.stringify(input),
   })
 
-  const result = await response.json()
+  const result = await response.json().catch(() => null)
 
-  if (!response.ok) {
-    throw new Error(result.message || "Failed to send announcement")
-  }
+  if (!response.ok) throw apiError(response.status, result)
 
   return result
 }

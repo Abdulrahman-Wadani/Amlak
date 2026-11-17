@@ -398,7 +398,7 @@ function WorkersPage() {
                 )}
               >
                 <Trans>View details</Trans>
-                <span aria-hidden="true">←</span>
+                <span aria-hidden="true" className="inline-block rtl:rotate-180">→</span>
               </div>
             </Link>
           ))}

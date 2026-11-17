@@ -1,26 +1,14 @@
-import { useEffect, useState } from "react"
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
+import { useState } from "react"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
 import { CircleAlert } from "lucide-react"
-import { cn } from "cn"
-import type { Place } from "@amlak/shared"
 import { S } from "@/lib/dom-style"
 import { useAuth } from "@/lib/auth"
-import { createAsset, getPlaces } from "@/lib/api"
+import { createAsset } from "@/lib/api"
+import { errorMessage } from "@/lib/errors"
 import { assetInput } from "@/lib/validators"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import Form from "@/components/form"
-
+import Form, { type FormValues } from "@/components/form"
 
 export const Route = createFileRoute("/_authenticated/place/asset/new")({
   component: AddAsset,
@@ -36,7 +24,6 @@ const STATUSES = [
   "OUT_OF_SERVICE",
 ] as const
 
-type StatusKey = (typeof STATUSES)[number]
 type FieldKey = "name" | "type" | "purchase_date" | "place"
 
 function validationMessage(key: FieldKey): string {
@@ -69,33 +56,16 @@ function AddAsset() {
   const { accessToken } = useAuth()
   const navigate = useNavigate()
   const { place_id } = Route.useSearch()
-  const [places, setPlaces] = useState<Place[] | null>(null)
-  const [placeId, setPlaceId] = useState(place_id)
-  const [status, setStatus] = useState<StatusKey>("GOOD")
   const [formError, setFormError] = useState("")
   const [today] = useState(() => new Date().toISOString().slice(0, 10))
 
-  useEffect(() => {
+  async function handleCreateAsset(values: FormValues) {
     if (!accessToken) return
-    let alive = true
-    getPlaces(accessToken)
-      .then((list) => alive && setPlaces(list))
-      .catch(() => alive && setPlaces([]))
-    return () => {
-      alive = false
-    }
-  }, [accessToken])
-
-  // The form below sends (token, placeId, values).
-  async function handleCreateAsset(
-    token: string,
-    place: string,
-    values: Record<string, unknown>,
-  ) {
+    const place = place_id
     const result = assetInput.safeParse({
       name: values.name,
       type: values.type,
-      status: values.status ?? status,
+      status: values.status ?? "GOOD",
       purchase_date: values.purchase_date || undefined,
     })
     const map: Partial<Record<FieldKey, string>> = {}
@@ -128,10 +98,10 @@ function AddAsset() {
     }
     setFormError("")
     try {
-      await createAsset(token, place, result.data)
+      await createAsset(accessToken, place, result.data)
       void navigate({ to: "/place/$place_id", params: { place_id: place } })
-    } catch {
-      setFormError(t`Could not save the asset.`)
+    } catch (err) {
+      setFormError(errorMessage(err))
     }
   }
 
@@ -150,14 +120,12 @@ function AddAsset() {
       </h1>
       <Form
         fields={[
-          { name: "placeId", label: t`Place`, type: "select", defaultValue: placeId,hidden:true},
           { name: "name", label: t`Asset name`, type: "text" },
           { name: "type", label: t`Type`, type: "text" },
-          { name: "status", label: t`Status`, type: "select", options: STATUSES.map((s) => ({ value: s, label: <StatusLabel status={s} /> })) },
+          { name: "status", label: t`Status`, type: "select", defaultValue: "GOOD", options: STATUSES.map((s) => ({ value: s, label: <StatusLabel status={s} /> })) },
           { name: "purchase_date", label: t`Purchase date`, type: "date" },
         ]}
-        callable={handleCreateAsset}
-        args={{token:accessToken, placeId:placeId}}
+        onSubmit={handleCreateAsset}
       />
       {formError && (
         <p role="alert" className={errorText}>

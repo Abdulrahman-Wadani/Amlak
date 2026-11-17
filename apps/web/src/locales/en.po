@@ -7,48 +7,50 @@ msgstr ""
 "X-Generator: @lingui/cli\n"
 "Language: en\n"
 
+#: src/lib/errors.ts:181
+msgid ", "
+msgstr ", "
+
 #. placeholder {0}: booking.guest_count
 #: src/routes/_authenticated/bookings.tsx:255
 msgid "{0} guests"
 msgstr "{0} guests"
 
 #. placeholder {0}: photos.length
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1128
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1124
 msgid "{0} of 5 photos chosen"
 msgstr "{0} of 5 photos chosen"
 
-#. placeholder {0}: user.assigned_places?.length ?? 0
 #. placeholder {0}: worker.assigned_places?.length ?? 0
-#: src/routes/_authenticated/admin/index.tsx:378
 #: src/routes/_authenticated/workers.tsx:359
 msgid "{0} places"
 msgstr "{0} places"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:463
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:444
 msgid "{count, plural, one {Every day} other {Every # days}}"
 msgstr "{count, plural, one {Every day} other {Every # days}}"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:467
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:448
 msgid "{count, plural, one {Every month} other {Every # months}}"
 msgstr "{count, plural, one {Every month} other {Every # months}}"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:465
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:446
 msgid "{count, plural, one {Every week} other {Every # weeks}}"
 msgstr "{count, plural, one {Every week} other {Every # weeks}}"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:468
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:449
 msgid "{count, plural, one {Every year} other {Every # years}}"
 msgstr "{count, plural, one {Every year} other {Every # years}}"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:550
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:531
 msgid "{daysRemaining, plural, one {# day until maintenance} other {# days until maintenance}}"
 msgstr "{daysRemaining, plural, one {# day until maintenance} other {# days until maintenance}}"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:531
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:512
 msgid "{leadDays, plural, one {# day} other {# days}}"
 msgstr "{leadDays, plural, one {# day} other {# days}}"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:547
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:528
 msgid "{overdueDays, plural, one {Overdue by # day} other {Overdue by # days}}"
 msgstr "{overdueDays, plural, one {Overdue by # day} other {Overdue by # days}}"
 
@@ -63,51 +65,52 @@ msgstr "A"
 msgid "Account"
 msgstr "Account"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:503
+#: src/routes/_authenticated/admin/$admin_id.tsx:502
 msgid "Account created"
 msgstr "Account created"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:555
+#: src/routes/_authenticated/admin/$admin_id.tsx:554
 msgid "Account information"
 msgstr "Account information"
 
-#: src/routes/signup.tsx:225
+#: src/routes/signup.tsx:226
 msgid "Account language"
 msgstr "Account language"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:452
+#: src/routes/_authenticated/admin/$admin_id.tsx:451
 msgid "Account status"
 msgstr "Account status"
 
-#: src/routes/_authenticated/profile.tsx:111
+#: src/routes/_authenticated/profile.tsx:109
 msgid "Account Status"
 msgstr "Account Status"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:733
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:909
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:729
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:905
 msgid "Actions"
 msgstr "Actions"
 
-#: src/routes/account-setup.tsx:36
+#: src/routes/account-setup.tsx:33
 msgid "Activate Account"
 msgstr "Activate Account"
 
-#: src/routes/account-setup.tsx:37
+#: src/routes/account-setup.tsx:34
 msgid "Activating Account..."
 msgstr "Activating Account..."
 
 #: src/components/place-shared.tsx:43
-#: src/routes/_authenticated/admin/$admin_id.tsx:465
-#: src/routes/_authenticated/admin/index.tsx:70
+#: src/routes/_authenticated/admin/$admin_id.tsx:464
+#: src/routes/_authenticated/admin/index.tsx:34
 #: src/routes/_authenticated/places.tsx:31
-#: src/routes/_authenticated/profile.tsx:122
-#: src/routes/_authenticated/worker/$worker_id.tsx:488
+#: src/routes/_authenticated/profile.tsx:120
+#: src/routes/_authenticated/worker/$worker_id.tsx:474
 #: src/routes/_authenticated/workers.tsx:42
 msgid "Active"
 msgstr "Active"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:786
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1075
+#: src/lib/errors.ts:126
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:782
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1071
 msgid "Actual cost"
 msgstr "Actual cost"
 
@@ -115,13 +118,12 @@ msgstr "Actual cost"
 msgid "Add a stay to block its dates on the calendar."
 msgstr "Add a stay to block its dates on the calendar."
 
-#: src/routes/_authenticated/place/$place_id.tsx:817
+#: src/routes/_authenticated/place/$place_id.tsx:780
 msgid "Add an asset to start tracking this property."
 msgstr "Add an asset to start tracking this property."
 
-#: src/routes/_authenticated/place/$place_id.tsx:780
-#: src/routes/_authenticated/place/asset/new.tsx:149
-#: src/routes/_authenticated/support/new.tsx:51
+#: src/routes/_authenticated/place/$place_id.tsx:743
+#: src/routes/_authenticated/place/asset/new.tsx:119
 msgid "Add asset"
 msgstr "Add asset"
 
@@ -131,36 +133,36 @@ msgstr "Add asset"
 msgid "Add booking"
 msgstr "Add booking"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1100
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1096
 msgid "Add completion notes"
 msgstr "Add completion notes"
 
-#: src/routes/_authenticated/content/index.tsx:170
+#: src/routes/_authenticated/content/index.tsx:169
 msgid "Add Content"
 msgstr "Add Content"
 
-#: src/routes/_authenticated/finance.tsx:834
-#: src/routes/_authenticated/finance.tsx:997
+#: src/routes/_authenticated/finance.tsx:815
+#: src/routes/_authenticated/finance.tsx:978
 msgid "Add expense"
 msgstr "Add expense"
 
-#: src/routes/_authenticated/place/new.tsx:121
+#: src/routes/_authenticated/place/new.tsx:95
 #: src/routes/_authenticated/places.tsx:151
 msgid "Add place"
 msgstr "Add place"
 
-#: src/routes/_authenticated/home.tsx:404
+#: src/routes/_authenticated/home.tsx:394
 msgid "Add property"
 msgstr "Add property"
 
 #: src/components/tickets-section.tsx:135
-#: src/routes/_authenticated/support/index.tsx:132
+#: src/routes/_authenticated/support/index.tsx:116
 msgid "Add ticket"
 msgstr "Add ticket"
 
-#: src/routes/_authenticated/place/$place_id.tsx:913
-#: src/routes/_authenticated/place/$place_id.tsx:966
-#: src/routes/_authenticated/worker/new.tsx:113
+#: src/routes/_authenticated/place/$place_id.tsx:876
+#: src/routes/_authenticated/place/$place_id.tsx:929
+#: src/routes/_authenticated/worker/new.tsx:112
 #: src/routes/_authenticated/workers.tsx:128
 #: src/routes/_authenticated/workers.tsx:274
 msgid "Add worker"
@@ -170,7 +172,7 @@ msgstr "Add worker"
 msgid "Add your first place with the Add place button."
 msgstr "Add your first place with the Add place button."
 
-#: src/routes/_authenticated/home.tsx:398
+#: src/routes/_authenticated/home.tsx:388
 msgid "Add your first property to see it here."
 msgstr "Add your first property to see it here."
 
@@ -178,31 +180,32 @@ msgstr "Add your first property to see it here."
 msgid "Add your first worker to start managing your team."
 msgstr "Add your first worker to start managing your team."
 
-#: src/routes/_authenticated/place/$place_id.tsx:454
-#: src/routes/_authenticated/place/$place_id.tsx:650
-#: src/routes/_authenticated/place/new.tsx:143
+#: src/lib/errors.ts:85
+#: src/routes/_authenticated/place/$place_id.tsx:413
+#: src/routes/_authenticated/place/$place_id.tsx:609
+#: src/routes/_authenticated/place/new.tsx:117
 msgid "Address"
 msgstr "Address"
 
 #: src/components/app-shell.tsx:34
-#: src/routes/_authenticated/admin/$admin_id.tsx:446
+#: src/routes/_authenticated/admin/$admin_id.tsx:445
 #: src/routes/_authenticated/notifications.tsx:425
-#: src/routes/_authenticated/profile.tsx:126
+#: src/routes/_authenticated/profile.tsx:124
 msgid "Admin"
 msgstr "Admin"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:460
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:456
 msgid "After photos"
 msgstr "After photos"
 
-#: src/routes/signup.tsx:146
+#: src/routes/signup.tsx:147
 msgid "Ahmed Hamad"
 msgstr "Ahmed Hamad"
 
 #: src/components/tickets-section.tsx:88
-#: src/routes/_authenticated/admin/index.tsx:69
-#: src/routes/_authenticated/content/index.tsx:241
-#: src/routes/_authenticated/finance.tsx:845
+#: src/routes/_authenticated/admin/index.tsx:33
+#: src/routes/_authenticated/content/index.tsx:240
+#: src/routes/_authenticated/finance.tsx:826
 #: src/routes/_authenticated/notifications.tsx:600
 #: src/routes/_authenticated/places.tsx:30
 #: src/routes/_authenticated/workers.tsx:41
@@ -214,12 +217,12 @@ msgstr "All"
 msgid "All bookings"
 msgstr "All bookings"
 
-#: src/routes/_authenticated/content/index.tsx:215
+#: src/routes/_authenticated/content/index.tsx:214
 msgid "All languages"
 msgstr "All languages"
 
 #: src/routes/_authenticated/bookings.tsx:137
-#: src/routes/_authenticated/finance.tsx:557
+#: src/routes/_authenticated/finance.tsx:538
 msgid "All places"
 msgstr "All places"
 
@@ -231,11 +234,11 @@ msgstr "All your places, their\n"
 "maintenance and bookings,\n"
 "in one place."
 
-#: src/routes/_authenticated/place/$place_id.tsx:1003
+#: src/routes/_authenticated/place/$place_id.tsx:966
 msgid "All your workers are already assigned to this place."
 msgstr "All your workers are already assigned to this place."
 
-#: src/routes/signup.tsx:274
+#: src/routes/signup.tsx:275
 msgid "Already have an account? <0>Sign in</0>"
 msgstr "Already have an account? <0>Sign in</0>"
 
@@ -247,7 +250,8 @@ msgstr "Already have an account? <0>Sign in</0>"
 msgid "Amlak"
 msgstr "Amlak"
 
-#: src/routes/_authenticated/finance.tsx:1043
+#: src/lib/errors.ts:138
+#: src/routes/_authenticated/finance.tsx:1024
 msgid "Amount"
 msgstr "Amount"
 
@@ -265,12 +269,20 @@ msgstr "Announcement sent successfully to {0} users."
 msgid "Announcement title"
 msgstr "Announcement title"
 
+#: src/lib/errors.ts:151
+msgid "another field"
+msgstr "another field"
+
 #: src/components/place-bookings.tsx:219
 #: src/components/place-bookings.tsx:789
 msgid "Another guest has not checked out yet."
 msgstr "Another guest has not checked out yet."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:583
+#: src/lib/errors.ts:175
+msgid "Another guest is staying at the place. Check them out first."
+msgstr "Another guest is staying at the place. Check them out first."
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:579
 msgid "Another team member"
 msgstr "Another team member"
 
@@ -278,13 +290,13 @@ msgstr "Another team member"
 msgid "Apartment"
 msgstr "Apartment"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:927
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:985
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:923
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:981
 msgid "Approve ticket"
 msgstr "Approve ticket"
 
 #: src/components/place-shared.tsx:270
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:438
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:434
 msgid "Approved"
 msgstr "Approved"
 
@@ -292,135 +304,135 @@ msgstr "Approved"
 msgid "Approved tickets assigned to you, the soonest due first."
 msgstr "Approved tickets assigned to you, the soonest due first."
 
-#: src/routes/_authenticated/home.tsx:281
+#: src/routes/_authenticated/home.tsx:271
 msgid "Approved:"
 msgstr "Approved:"
 
-#: src/routes/_authenticated/content/$content_id.tsx:451
-#: src/routes/_authenticated/content/index.tsx:216
-#: src/routes/_authenticated/content/index.tsx:382
-#: src/routes/_authenticated/content/new.tsx:65
+#: src/routes/_authenticated/content/$content_id.tsx:448
+#: src/routes/_authenticated/content/index.tsx:215
+#: src/routes/_authenticated/content/index.tsx:381
+#: src/routes/_authenticated/content/new.tsx:54
 #: src/routes/_authenticated/notifications.tsx:489
-#: src/routes/_authenticated/worker/new.tsx:210
+#: src/routes/_authenticated/worker/new.tsx:212
 msgid "Arabic"
 msgstr "Arabic"
 
-#: src/routes/_authenticated/finance.tsx:462
+#: src/routes/_authenticated/finance.tsx:445
 msgid "Are you sure you want to delete this expense?"
 msgstr "Are you sure you want to delete this expense?"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:283
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:291
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:727
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:757
-#: src/routes/_authenticated/ticket/new.tsx:245
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:723
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:753
+#: src/routes/_authenticated/ticket/new.tsx:130
 msgid "Asset"
 msgstr "Asset"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:250
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:231
 msgid "Asset information"
 msgstr "Asset information"
 
-#: src/components/asset-manage.tsx:168
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:272
-#: src/routes/_authenticated/place/asset/new.tsx:154
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:760
+#: src/components/asset-manage.tsx:169
+#: src/lib/errors.ts:93
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:253
+#: src/routes/_authenticated/place/asset/new.tsx:123
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:756
 msgid "Asset name"
 msgstr "Asset name"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:203
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:184
 msgid "Asset not found"
 msgstr "Asset not found"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:762
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:758
 msgid "Asset status"
 msgstr "Asset status"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:278
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:761
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:259
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:757
 msgid "Asset type"
 msgstr "Asset type"
 
-#: src/routes/_authenticated/place/$place_id.tsx:689
-#: src/routes/_authenticated/place/$place_id.tsx:754
-#: src/routes/_authenticated/place/new.tsx:33
+#: src/routes/_authenticated/place/$place_id.tsx:652
+#: src/routes/_authenticated/place/$place_id.tsx:717
 #: src/routes/_authenticated/places.tsx:39
 msgid "Assets"
 msgstr "Assets"
 
-#: src/routes/_authenticated/worker/$worker_id.tsx:544
+#: src/routes/_authenticated/worker/$worker_id.tsx:530
 msgid "Assigned places"
 msgstr "Assigned places"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:857
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1005
+#: src/lib/errors.ts:122
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:853
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1001
 msgid "Assignee"
 msgstr "Assignee"
 
-#: src/routes/signup.tsx:205
+#: src/routes/signup.tsx:206
 msgid "At least 8 characters"
 msgstr "At least 8 characters"
 
-#: src/routes/reset-password.tsx:248
+#: src/routes/reset-password.tsx:240
 msgid "At least 8 characters."
 msgstr "At least 8 characters."
 
-#: src/routes/_authenticated/finance.tsx:1090
+#: src/routes/_authenticated/finance.tsx:1071
 msgid "Attach a receipt (optional)"
 msgstr "Attach a receipt (optional)"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:734
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1219
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:730
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1215
 msgid "Attachments"
 msgstr "Attachments"
 
 #. placeholder {0}: ticket.attachments.length
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1227
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1223
 msgid "Attachments: {0}"
 msgstr "Attachments: {0}"
 
-#: src/components/asset-manage.tsx:210
-#: src/components/asset-manage.tsx:235
+#: src/components/asset-manage.tsx:211
+#: src/components/asset-manage.tsx:236
 #: src/components/place-bookings.tsx:636
 #: src/components/place-bookings.tsx:735
 #: src/components/place-bookings.tsx:810
 msgid "Back"
 msgstr "Back"
 
-#: src/routes/forgot-password.tsx:197
-#: src/routes/reset-password.tsx:327
+#: src/routes/forgot-password.tsx:189
+#: src/routes/reset-password.tsx:319
 msgid "Back to Login"
 msgstr "Back to Login"
 
-#: src/routes/_authenticated/support/$support_id.tsx:212
-#: src/routes/_authenticated/support/$support_id.tsx:554
+#: src/routes/_authenticated/support/$support_id.tsx:210
+#: src/routes/_authenticated/support/$support_id.tsx:548
 msgid "Back to support tickets"
 msgstr "Back to support tickets"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:459
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:455
 msgid "Before photos"
 msgstr "Before photos"
 
-#: src/routes/_authenticated/content/new.tsx:67
+#: src/lib/errors.ts:105
+#: src/routes/_authenticated/content/new.tsx:56
 msgid "Body"
 msgstr "Body"
 
-#: src/routes/_authenticated/finance.tsx:628
+#: src/routes/_authenticated/finance.tsx:609
 msgid "Booking income in the selected period"
 msgstr "Booking income in the selected period"
 
 #: src/components/place-bookings.tsx:303
 #: src/routes/_authenticated/bookings.tsx:117
-#: src/routes/_authenticated/home.tsx:251
-#: src/routes/_authenticated/place/$place_id.tsx:726
+#: src/routes/_authenticated/home.tsx:241
+#: src/routes/_authenticated/place/$place_id.tsx:689
 msgid "Bookings"
 msgstr "Bookings"
 
-#: src/routes/_authenticated/home.tsx:295
+#: src/routes/_authenticated/home.tsx:285
 msgid "Bookings today"
 msgstr "Bookings today"
 
-#: src/routes/_authenticated/home.tsx:635
+#: src/routes/_authenticated/home.tsx:627
 msgid "Budget:"
 msgstr "Budget:"
 
@@ -428,12 +440,12 @@ msgstr "Budget:"
 msgid "By role"
 msgstr "By role"
 
-#: src/routes/_authenticated/finance.tsx:1118
-#: src/routes/_authenticated/place/$place_id.tsx:591
-#: src/routes/_authenticated/profile.tsx:102
-#: src/routes/_authenticated/support/$support_id.tsx:436
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1209
-#: src/routes/_authenticated/worker/new.tsx:234
+#: src/routes/_authenticated/finance.tsx:1099
+#: src/routes/_authenticated/place/$place_id.tsx:550
+#: src/routes/_authenticated/profile.tsx:100
+#: src/routes/_authenticated/support/$support_id.tsx:434
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1205
+#: src/routes/_authenticated/worker/new.tsx:236
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -441,7 +453,7 @@ msgstr "Cancel"
 msgid "Cancel booking"
 msgstr "Cancel booking"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:568
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:549
 msgid "Cancel schedule"
 msgstr "Cancel schedule"
 
@@ -454,7 +466,7 @@ msgid "Cancellation reason"
 msgstr "Cancellation reason"
 
 #: src/components/place-shared.tsx:172
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:442
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:438
 msgid "Cancelled"
 msgstr "Cancelled"
 
@@ -462,7 +474,8 @@ msgstr "Cancelled"
 msgid "Cancelling…"
 msgstr "Cancelling…"
 
-#: src/routes/_authenticated/finance.tsx:1030
+#: src/lib/errors.ts:140
+#: src/routes/_authenticated/finance.tsx:1011
 msgid "Category"
 msgstr "Category"
 
@@ -482,6 +495,10 @@ msgstr "Check in"
 msgid "Check out"
 msgstr "Check out"
 
+#: src/lib/errors.ts:182
+msgid "Check these fields: {names}."
+msgstr "Check these fields: {names}."
+
 #: src/components/place-bookings.tsx:763
 msgid "Check this guest in?"
 msgstr "Check this guest in?"
@@ -490,11 +507,12 @@ msgstr "Check this guest in?"
 msgid "Check this guest out?"
 msgstr "Check this guest out?"
 
-#: src/routes/forgot-password.tsx:107
+#: src/routes/forgot-password.tsx:99
 msgid "Check your email"
 msgstr "Check your email"
 
 #: src/components/place-bookings.tsx:550
+#: src/lib/errors.ts:130
 msgid "Check-in"
 msgstr "Check-in"
 
@@ -510,11 +528,12 @@ msgstr "Check-in opens on"
 msgid "Check-ins today"
 msgstr "Check-ins today"
 
-#: src/routes/_authenticated/home.tsx:310
+#: src/routes/_authenticated/home.tsx:300
 msgid "Check-ins:"
 msgstr "Check-ins:"
 
 #: src/components/place-bookings.tsx:563
+#: src/lib/errors.ts:132
 msgid "Check-out"
 msgstr "Check-out"
 
@@ -522,7 +541,7 @@ msgstr "Check-out"
 msgid "Check-outs today"
 msgstr "Check-outs today"
 
-#: src/routes/_authenticated/home.tsx:312
+#: src/routes/_authenticated/home.tsx:302
 msgid "Check-outs:"
 msgstr "Check-outs:"
 
@@ -538,25 +557,25 @@ msgstr "Checked out"
 msgid "Choose a check-out date after the check-in date"
 msgstr "Choose a check-out date after the check-in date"
 
-#: src/routes/_authenticated/finance.tsx:698
+#: src/routes/_authenticated/finance.tsx:679
 msgid "Choose a period to see income, expenses and profit."
 msgstr "Choose a period to see income, expenses and profit."
 
-#: src/routes/_authenticated/finance.tsx:551
-#: src/routes/_authenticated/finance.tsx:1021
-#: src/routes/_authenticated/place/asset/new.tsx:51
+#: src/routes/_authenticated/finance.tsx:532
+#: src/routes/_authenticated/finance.tsx:1002
+#: src/routes/_authenticated/place/asset/new.tsx:38
 msgid "Choose a place"
 msgstr "Choose a place"
 
-#: src/routes/_authenticated/place/$place_id.tsx:985
+#: src/routes/_authenticated/place/$place_id.tsx:948
 msgid "Choose a worker"
 msgstr "Choose a worker"
 
-#: src/routes/_authenticated/place/$place_id.tsx:973
+#: src/routes/_authenticated/place/$place_id.tsx:936
 msgid "Choose a worker (name and ID)"
 msgstr "Choose a worker (name and ID)"
 
-#: src/routes/_authenticated/profile.tsx:104
+#: src/routes/_authenticated/profile.tsx:102
 msgid "Choose Image"
 msgstr "Choose Image"
 
@@ -564,28 +583,29 @@ msgstr "Choose Image"
 msgid "Choose the check-in date"
 msgstr "Choose the check-in date"
 
-#: src/routes/_authenticated/ticket/new.tsx:157
+#: src/routes/_authenticated/ticket/new.tsx:63
 msgid "Choose the place first"
 msgstr "Choose the place first"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1014
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1010
 msgid "Choose who does the work"
 msgstr "Choose who does the work"
 
-#: src/routes/_authenticated/place/$place_id.tsx:446
-#: src/routes/_authenticated/place/$place_id.tsx:644
-#: src/routes/_authenticated/place/new.tsx:142
+#: src/lib/errors.ts:83
+#: src/routes/_authenticated/place/$place_id.tsx:405
+#: src/routes/_authenticated/place/$place_id.tsx:603
+#: src/routes/_authenticated/place/new.tsx:116
 msgid "City"
 msgstr "City"
 
-#: src/routes/_authenticated/finance.tsx:145
+#: src/routes/_authenticated/finance.tsx:130
 msgid "Cleaning"
 msgstr "Cleaning"
 
-#: src/routes/_authenticated/admin/index.tsx:281
-#: src/routes/_authenticated/content/index.tsx:315
+#: src/routes/_authenticated/admin/index.tsx:245
+#: src/routes/_authenticated/content/index.tsx:314
 #: src/routes/_authenticated/places.tsx:257
-#: src/routes/_authenticated/support/index.tsx:271
+#: src/routes/_authenticated/support/index.tsx:255
 #: src/routes/_authenticated/workers.tsx:266
 msgid "Clear filters"
 msgstr "Clear filters"
@@ -597,48 +617,48 @@ msgstr "Click on the map or drag the marker to choose a location."
 #: src/components/ui/dialog.tsx:74
 #: src/components/ui/dialog.tsx:112
 #: src/routes/_authenticated/notifications.tsx:349
-#: src/routes/_authenticated/support/$support_id.tsx:392
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:996
+#: src/routes/_authenticated/support/$support_id.tsx:390
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:992
 msgid "Close"
 msgstr "Close"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:967
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:988
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:963
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:984
 msgid "Complete ticket"
 msgstr "Complete ticket"
 
 #: src/components/place-shared.tsx:282
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:441
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:437
 msgid "Completed"
 msgstr "Completed"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:836
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:884
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:832
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:880
 msgid "Completed on"
 msgstr "Completed on"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:730
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:831
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:726
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:827
 msgid "Completion"
 msgstr "Completion"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:841
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:837
 msgid "Completion notes"
 msgstr "Completion notes"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1092
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1088
 msgid "Completion notes (optional)"
 msgstr "Completion notes (optional)"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:461
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:457
 msgid "Completion photos"
 msgstr "Completion photos"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1108
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1104
 msgid "Completion photos (1 to 5)"
 msgstr "Completion photos (1 to 5)"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1157
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1153
 msgid "Confirm approval"
 msgstr "Confirm approval"
 
@@ -654,7 +674,7 @@ msgstr "Confirm check-in"
 msgid "Confirm check-out"
 msgstr "Confirm check-out"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1200
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1196
 msgid "Confirm completion"
 msgstr "Confirm completion"
 
@@ -662,23 +682,23 @@ msgstr "Confirm completion"
 msgid "Confirm email"
 msgstr "Confirm email"
 
-#: src/routes/reset-password.tsx:257
+#: src/routes/reset-password.tsx:249
 msgid "Confirm New Password"
 msgstr "Confirm New Password"
 
-#: src/routes/account-setup.tsx:33
+#: src/routes/account-setup.tsx:30
 msgid "Confirm Password"
 msgstr "Confirm Password"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1184
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1180
 msgid "Confirm reassignment"
 msgstr "Confirm reassignment"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1169
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1165
 msgid "Confirm rejection"
 msgstr "Confirm rejection"
 
-#: src/routes/_authenticated/support/$support_id.tsx:424
+#: src/routes/_authenticated/support/$support_id.tsx:422
 msgid "Confirm resolution"
 msgstr "Confirm resolution"
 
@@ -691,92 +711,38 @@ msgid "Confirming…"
 msgstr "Confirming…"
 
 #: src/components/app-shell.tsx:44
-#: src/routes/_authenticated/content/$content_id.tsx:224
-#: src/routes/_authenticated/content/index.tsx:148
+#: src/routes/_authenticated/content/$content_id.tsx:221
+#: src/routes/_authenticated/content/index.tsx:147
 msgid "Content"
 msgstr "Content"
 
-#: src/routes/_authenticated/content/$content_id.tsx:251
+#: src/routes/_authenticated/content/$content_id.tsx:248
 msgid "Content not found"
 msgstr "Content not found"
 
 #: src/components/tickets-section.tsx:180
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:453
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:449
 msgid "Corrective maintenance"
 msgstr "Corrective maintenance"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:728
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:778
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:724
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:774
 msgid "Costs"
 msgstr "Costs"
-
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:312
-msgid "Could not approve the ticket"
-msgstr "Could not approve the ticket"
 
 #: src/components/place-bookings.tsx:719
 msgid "Could not cancel the booking. Please try again."
 msgstr "Could not cancel the booking. Please try again."
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:110
-msgid "Could not cancel the schedule."
-msgstr "Could not cancel the schedule."
-
 #: src/components/place-bookings.tsx:794
 msgid "Could not change the booking. Please try again."
 msgstr "Could not change the booking. Please try again."
-
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:390
-msgid "Could not complete the ticket"
-msgstr "Could not complete the ticket"
-
-#: src/routes/signup.tsx:96
-msgid "Could not confirm the email"
-msgstr "Could not confirm the email"
-
-#: src/routes/signup.tsx:79
-msgid "Could not create the account"
-msgstr "Could not create the account"
-
-#: src/routes/_authenticated/ticket/new.tsx:186
-msgid "Could not create the maintenance ticket"
-msgstr "Could not create the maintenance ticket"
-
-#: src/routes/_authenticated/worker/new.tsx:90
-msgid "Could not create the worker. Please try again."
-msgstr "Could not create the worker. Please try again."
-
-#: src/components/asset-manage.tsx:125
-msgid "Could not delete the asset."
-msgstr "Could not delete the asset."
-
-#: src/routes/_authenticated/content/$content_id.tsx:172
-msgid "Could not delete the page."
-msgstr "Could not delete the page."
 
 #: src/components/location-picker.tsx:108
 msgid "Could not get the address."
 msgstr "Could not get the address."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:359
-msgid "Could not reassign the ticket"
-msgstr "Could not reassign the ticket"
-
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:334
-msgid "Could not reject the ticket"
-msgstr "Could not reject the ticket"
-
-#: src/routes/signup.tsx:108
-msgid "Could not resend the code"
-msgstr "Could not resend the code"
-
-#: src/routes/_authenticated/support/$support_id.tsx:183
-msgid "Could not resolve the ticket"
-msgstr "Could not resolve the ticket"
-
-#: src/components/asset-manage.tsx:108
-#: src/routes/_authenticated/place/asset/new.tsx:125
-#: src/routes/_authenticated/place/asset/new.tsx:134
+#: src/routes/_authenticated/place/asset/new.tsx:95
 msgid "Could not save the asset."
 msgstr "Could not save the asset."
 
@@ -784,35 +750,15 @@ msgstr "Could not save the asset."
 msgid "Could not save the booking. Please try again."
 msgstr "Could not save the booking. Please try again."
 
-#: src/routes/_authenticated/content/$content_id.tsx:143
-msgid "Could not save the changes."
-msgstr "Could not save the changes."
-
-#: src/routes/_authenticated/content/new.tsx:49
-msgid "Could not save the content."
-msgstr "Could not save the content."
-
-#: src/routes/_authenticated/place/new.tsx:78
-msgid "Could not save the place."
-msgstr "Could not save the place."
-
-#: src/routes/signin.tsx:53
-msgid "Could not sign in"
-msgstr "Could not sign in"
-
-#: src/routes/_authenticated/place/$place_id.tsx:209
-msgid "Could not update the place."
-msgstr "Could not update the place."
-
-#: src/routes/reset-password.tsx:157
+#: src/routes/reset-password.tsx:149
 msgid "Create a new password for your account. Your password must be at least 8 characters long."
 msgstr "Create a new password for your account. Your password must be at least 8 characters long."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:275
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:132
 msgid "Create a recurring maintenance schedule for an asset."
 msgstr "Create a recurring maintenance schedule for an asset."
 
-#: src/routes/signup.tsx:267
+#: src/routes/signup.tsx:268
 msgid "Create account"
 msgstr "Create account"
 
@@ -820,122 +766,116 @@ msgstr "Create account"
 msgid "Create announcement"
 msgstr "Create announcement"
 
-#: src/routes/signup.tsx:133
+#: src/routes/signup.tsx:134
 msgid "Create manager account"
 msgstr "Create manager account"
 
-#: src/routes/_authenticated/worker/new.tsx:243
+#: src/routes/_authenticated/worker/new.tsx:245
 msgid "Create worker"
 msgstr "Create worker"
 
-#: src/routes/_authenticated/content/index.tsx:302
+#: src/routes/_authenticated/content/index.tsx:301
 msgid "Create your first content page."
 msgstr "Create your first content page."
 
-#: src/routes/_authenticated/content/$content_id.tsx:485
-#: src/routes/_authenticated/support/$support_id.tsx:324
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:706
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:869
+#: src/routes/_authenticated/content/$content_id.tsx:482
+#: src/routes/_authenticated/support/$support_id.tsx:322
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:702
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:865
 msgid "Created"
 msgstr "Created"
 
-#: src/routes/_authenticated/profile.tsx:113
+#: src/routes/_authenticated/profile.tsx:111
 msgid "Created At"
 msgstr "Created At"
 
-#: src/routes/signup.tsx:267
+#: src/routes/signup.tsx:268
 msgid "Creating account…"
 msgstr "Creating account…"
 
-#: src/routes/_authenticated/place/$place_id.tsx:512
+#: src/routes/_authenticated/place/$place_id.tsx:471
 msgid "Currency"
 msgstr "Currency"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:458
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:454
 msgid "Damage photos"
 msgstr "Damage photos"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:47
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:28
 msgid "Day"
 msgstr "Day"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:466
-#: src/routes/_authenticated/admin/index.tsx:73
-#: src/routes/_authenticated/profile.tsx:125
-#: src/routes/_authenticated/worker/$worker_id.tsx:489
+#: src/routes/_authenticated/admin/$admin_id.tsx:465
+#: src/routes/_authenticated/admin/index.tsx:37
+#: src/routes/_authenticated/profile.tsx:123
+#: src/routes/_authenticated/worker/$worker_id.tsx:475
 #: src/routes/_authenticated/workers.tsx:44
 msgid "Deactivated"
 msgstr "Deactivated"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:336
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:177
 msgid "Default assignee (optional)"
 msgstr "Default assignee (optional)"
 
-#: src/routes/_authenticated/finance.tsx:969
+#: src/routes/_authenticated/finance.tsx:950
 msgid "Delete"
 msgstr "Delete"
 
-#: src/components/asset-manage.tsx:155
-#: src/components/asset-manage.tsx:238
+#: src/components/asset-manage.tsx:156
+#: src/components/asset-manage.tsx:239
 msgid "Delete asset"
 msgstr "Delete asset"
 
-#: src/routes/_authenticated/content/$content_id.tsx:731
+#: src/routes/_authenticated/content/$content_id.tsx:728
 msgid "Delete page"
 msgstr "Delete page"
 
-#: src/routes/_authenticated/place/$place_id.tsx:365
+#: src/routes/_authenticated/place/$place_id.tsx:324
 msgid "Delete place"
 msgstr "Delete place"
 
 #. placeholder {0}: place.place_name
-#: src/routes/_authenticated/place/$place_id.tsx:220
+#: src/routes/_authenticated/place/$place_id.tsx:178
 msgid "Delete the place \"{0}\"? This cannot be undone."
 msgstr "Delete the place \"{0}\"? This cannot be undone."
 
 #. placeholder {0}: worker.fullname
-#: src/routes/_authenticated/worker/$worker_id.tsx:162
+#: src/routes/_authenticated/worker/$worker_id.tsx:152
 msgid "Delete the worker \"{0}\"? This cannot be undone."
 msgstr "Delete the worker \"{0}\"? This cannot be undone."
 
-#: src/components/asset-manage.tsx:224
+#: src/components/asset-manage.tsx:225
 msgid "Delete this asset?"
 msgstr "Delete this asset?"
 
-#: src/routes/_authenticated/content/$content_id.tsx:154
+#: src/routes/_authenticated/content/$content_id.tsx:153
 msgid "Delete this page? This cannot be undone."
 msgstr "Delete this page? This cannot be undone."
 
-#: src/routes/_authenticated/worker/$worker_id.tsx:742
+#: src/routes/_authenticated/worker/$worker_id.tsx:728
 msgid "Delete worker"
 msgstr "Delete worker"
 
-#: src/components/asset-manage.tsx:238
-#: src/routes/_authenticated/content/$content_id.tsx:731
-#: src/routes/_authenticated/place/$place_id.tsx:365
-#: src/routes/_authenticated/worker/$worker_id.tsx:742
+#: src/components/asset-manage.tsx:239
+#: src/routes/_authenticated/content/$content_id.tsx:728
+#: src/routes/_authenticated/place/$place_id.tsx:324
+#: src/routes/_authenticated/worker/$worker_id.tsx:728
 msgid "Deleting…"
 msgstr "Deleting…"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:299
-#: src/routes/_authenticated/support/new.tsx:56
-msgid "description"
-msgstr "description"
-
-#: src/routes/_authenticated/finance.tsx:1069
-#: src/routes/_authenticated/place/$place_id.tsx:465
-#: src/routes/_authenticated/place/new.tsx:141
-#: src/routes/_authenticated/support/$support_id.tsx:313
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:721
-#: src/routes/_authenticated/ticket/new.tsx:267
+#: src/lib/errors.ts:112
+#: src/routes/_authenticated/finance.tsx:1050
+#: src/routes/_authenticated/place/$place_id.tsx:424
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:140
+#: src/routes/_authenticated/place/new.tsx:115
+#: src/routes/_authenticated/support/$support_id.tsx:311
+#: src/routes/_authenticated/support/new.tsx:52
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:717
+#: src/routes/_authenticated/ticket/new.tsx:152
 msgid "Description"
 msgstr "Description"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:175
-msgid "Description is required"
-msgstr "Description is required"
-
-#: src/routes/_authenticated/home.tsx:601
+#: src/routes/_authenticated/home.tsx:593
 msgid "Details"
 msgstr "Details"
 
@@ -943,17 +883,17 @@ msgstr "Details"
 msgid "Didn't get the code?"
 msgstr "Didn't get the code?"
 
-#: src/routes/signin.tsx:139
+#: src/routes/signin.tsx:140
 msgid "Don't have an account? <0>Create manager account</0>"
 msgstr "Don't have an account? <0>Create manager account</0>"
 
-#: src/routes/_authenticated/content/$content_id.tsx:375
-#: src/routes/_authenticated/content/index.tsx:391
-#: src/routes/_authenticated/content/new.tsx:74
+#: src/routes/_authenticated/content/$content_id.tsx:372
+#: src/routes/_authenticated/content/index.tsx:390
+#: src/routes/_authenticated/content/new.tsx:64
 msgid "Draft"
 msgstr "Draft"
 
-#: src/routes/_authenticated/content/index.tsx:243
+#: src/routes/_authenticated/content/index.tsx:242
 msgid "Drafts"
 msgstr "Drafts"
 
@@ -962,79 +902,81 @@ msgstr "Drafts"
 msgid "Due {0}"
 msgstr "Due {0}"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:690
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1026
+#: src/lib/errors.ts:119
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:686
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1022
 msgid "Due date"
 msgstr "Due date"
 
-#: src/routes/_authenticated/finance.tsx:959
+#: src/routes/_authenticated/finance.tsx:940
 msgid "Edit"
 msgstr "Edit"
 
-#: src/components/asset-manage.tsx:143
-#: src/components/asset-manage.tsx:162
+#: src/components/asset-manage.tsx:144
+#: src/components/asset-manage.tsx:163
 msgid "Edit asset"
 msgstr "Edit asset"
 
-#: src/routes/_authenticated/finance.tsx:996
+#: src/routes/_authenticated/finance.tsx:977
 msgid "Edit expense"
 msgstr "Edit expense"
 
-#: src/routes/_authenticated/profile.tsx:117
+#: src/routes/_authenticated/profile.tsx:115
 msgid "Edit Personal Information"
 msgstr "Edit Personal Information"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:382
-#: src/routes/_authenticated/support/$support_id.tsx:488
-#: src/routes/_authenticated/worker/$worker_id.tsx:420
-#: src/routes/signin.tsx:76
-#: src/routes/signup.tsx:157
+#: src/lib/errors.ts:68
+#: src/routes/_authenticated/admin/$admin_id.tsx:381
+#: src/routes/_authenticated/support/$support_id.tsx:482
+#: src/routes/_authenticated/worker/$worker_id.tsx:406
+#: src/routes/signin.tsx:77
+#: src/routes/signup.tsx:158
 msgid "Email"
 msgstr "Email"
 
-#: src/routes/_authenticated/worker/new.tsx:154
+#: src/routes/_authenticated/worker/new.tsx:153
 msgid "Email address"
 msgstr "Email address"
 
-#: src/routes/_authenticated/profile.tsx:109
-#: src/routes/account-setup.tsx:31
-#: src/routes/forgot-password.tsx:137
+#: src/routes/_authenticated/profile.tsx:107
+#: src/routes/account-setup.tsx:28
+#: src/routes/forgot-password.tsx:129
 msgid "Email Address"
 msgstr "Email Address"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:494
-#: src/routes/_authenticated/worker/$worker_id.tsx:499
+#: src/routes/_authenticated/admin/$admin_id.tsx:493
+#: src/routes/_authenticated/worker/$worker_id.tsx:485
 msgid "Email confirmed"
 msgstr "Email confirmed"
 
-#: src/routes/_authenticated/worker/new.tsx:53
+#: src/routes/_authenticated/worker/new.tsx:54
 msgid "Email is required."
 msgstr "Email is required."
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:576
+#: src/routes/_authenticated/admin/$admin_id.tsx:575
 msgid "Email verification"
 msgstr "Email verification"
 
-#: src/routes/_authenticated/profile.tsx:112
+#: src/routes/_authenticated/profile.tsx:110
 msgid "Email Verified At"
 msgstr "Email Verified At"
 
-#: src/routes/_authenticated/content/$content_id.tsx:451
-#: src/routes/_authenticated/content/index.tsx:217
-#: src/routes/_authenticated/content/index.tsx:382
-#: src/routes/_authenticated/content/new.tsx:65
+#: src/routes/_authenticated/content/$content_id.tsx:448
+#: src/routes/_authenticated/content/index.tsx:216
+#: src/routes/_authenticated/content/index.tsx:381
+#: src/routes/_authenticated/content/new.tsx:54
 #: src/routes/_authenticated/notifications.tsx:468
-#: src/routes/_authenticated/worker/new.tsx:213
+#: src/routes/_authenticated/worker/new.tsx:215
 msgid "English"
 msgstr "English"
 
-#: src/components/asset-manage.tsx:38
-#: src/routes/_authenticated/place/asset/new.tsx:47
+#: src/components/asset-manage.tsx:39
+#: src/routes/_authenticated/place/asset/new.tsx:34
 msgid "Enter a type"
 msgstr "Enter a type"
 
-#: src/routes/signin.tsx:38
-#: src/routes/signup.tsx:27
+#: src/routes/signin.tsx:39
+#: src/routes/signup.tsx:28
 msgid "Enter a valid email"
 msgstr "Enter a valid email"
 
@@ -1042,28 +984,20 @@ msgstr "Enter a valid email"
 msgid "Enter a valid email address"
 msgstr "Enter a valid email address"
 
-#: src/routes/_authenticated/worker/new.tsx:55
+#: src/routes/_authenticated/worker/new.tsx:56
 msgid "Enter a valid email address."
 msgstr "Enter a valid email address."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:181
-msgid "Enter a valid interval"
-msgstr "Enter a valid interval"
-
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:187
-msgid "Enter a valid number of days"
-msgstr "Enter a valid number of days"
-
-#: src/routes/signup.tsx:29
+#: src/routes/signup.tsx:30
 msgid "Enter a valid phone number"
 msgstr "Enter a valid phone number"
 
-#: src/routes/_authenticated/worker/new.tsx:61
+#: src/routes/_authenticated/worker/new.tsx:62
 msgid "Enter a valid phone number in E.164 format (e.g. +966501234567)."
 msgstr "Enter a valid phone number in E.164 format (e.g. +966501234567)."
 
-#: src/components/asset-manage.tsx:37
-#: src/routes/_authenticated/place/asset/new.tsx:45
+#: src/components/asset-manage.tsx:38
+#: src/routes/_authenticated/place/asset/new.tsx:32
 msgid "Enter an asset name"
 msgstr "Enter an asset name"
 
@@ -1071,7 +1005,7 @@ msgstr "Enter an asset name"
 msgid "Enter at least one user ID."
 msgstr "Enter at least one user ID."
 
-#: src/routes/_authenticated/profile.tsx:120
+#: src/routes/_authenticated/profile.tsx:118
 msgid "Enter phone number"
 msgstr "Enter phone number"
 
@@ -1091,40 +1025,41 @@ msgstr "Enter the reason for the cancellation"
 msgid "Enter the total price"
 msgstr "Enter the total price"
 
-#: src/routes/_authenticated/worker/new.tsx:140
+#: src/routes/_authenticated/worker/new.tsx:139
 msgid "Enter worker's full name"
 msgstr "Enter worker's full name"
 
-#: src/routes/signup.tsx:136
+#: src/routes/signup.tsx:137
 msgid "Enter your details to create your account."
 msgstr "Enter your details to create your account."
 
-#: src/routes/forgot-password.tsx:93
+#: src/routes/forgot-password.tsx:85
 msgid "Enter your email address and we will send you a link to reset your password."
 msgstr "Enter your email address and we will send you a link to reset your password."
 
-#: src/routes/signin.tsx:70
+#: src/routes/signin.tsx:71
 msgid "Enter your email and password to continue."
 msgstr "Enter your email and password to continue."
 
-#: src/routes/_authenticated/profile.tsx:119
-#: src/routes/signup.tsx:25
+#: src/routes/_authenticated/profile.tsx:117
+#: src/routes/signup.tsx:26
 msgid "Enter your full name"
 msgstr "Enter your full name"
 
-#: src/routes/account-setup.tsx:34
+#: src/routes/account-setup.tsx:31
 msgid "Enter your password"
 msgstr "Enter your password"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:781
+#: src/lib/errors.ts:124
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:777
 msgid "Estimated cost"
 msgstr "Estimated cost"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1040
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1036
 msgid "Estimated cost (optional)"
 msgstr "Estimated cost (optional)"
 
-#: src/routes/_authenticated/finance.tsx:822
+#: src/routes/_authenticated/finance.tsx:803
 msgid "Every expense recorded for your places."
 msgstr "Every expense recorded for your places."
 
@@ -1132,51 +1067,40 @@ msgstr "Every expense recorded for your places."
 msgid "Example: the guest changed their plans"
 msgstr "Example: the guest changed their plans"
 
-#: src/routes/_authenticated/finance.tsx:1058
+#: src/lib/errors.ts:142
+#: src/routes/_authenticated/finance.tsx:1039
 msgid "Expense date"
 msgstr "Expense date"
 
-#: src/routes/_authenticated/finance.tsx:1074
+#: src/routes/_authenticated/finance.tsx:1055
 msgid "Expense description (optional)"
 msgstr "Expense description (optional)"
 
-#: src/routes/_authenticated/finance.tsx:816
+#: src/routes/_authenticated/finance.tsx:797
 msgid "Expense log"
 msgstr "Expense log"
 
-#: src/routes/_authenticated/finance.tsx:761
+#: src/routes/_authenticated/finance.tsx:742
 msgid "Expenses"
 msgstr "Expenses"
 
-#: src/routes/_authenticated/finance.tsx:780
+#: src/routes/_authenticated/finance.tsx:761
 msgid "Expenses by category"
 msgstr "Expenses by category"
 
-#: src/routes/_authenticated/finance.tsx:656
+#: src/routes/_authenticated/finance.tsx:637
 msgid "Expenses in the selected period"
 msgstr "Expenses in the selected period"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:259
-msgid "Failed to create maintenance schedule"
-msgstr "Failed to create maintenance schedule"
-
-#: src/routes/_authenticated/finance.tsx:475
-msgid "Failed to delete expense."
-msgstr "Failed to delete expense."
-
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:156
-msgid "Failed to load assets"
-msgstr "Failed to load assets"
-
-#: src/routes/_authenticated/finance.tsx:379
+#: src/routes/_authenticated/finance.tsx:364
 msgid "Failed to load expense details."
 msgstr "Failed to load expense details."
 
-#: src/routes/_authenticated/finance.tsx:232
+#: src/routes/_authenticated/finance.tsx:217
 msgid "Failed to load expenses. Please try again."
 msgstr "Failed to load expenses. Please try again."
 
-#: src/routes/_authenticated/finance.tsx:270
+#: src/routes/_authenticated/finance.tsx:255
 msgid "Failed to load financial report."
 msgstr "Failed to load financial report."
 
@@ -1184,21 +1108,13 @@ msgstr "Failed to load financial report."
 msgid "Failed to load notifications."
 msgstr "Failed to load notifications."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:129
-msgid "Failed to load places"
-msgstr "Failed to load places"
-
-#: src/routes/_authenticated/finance.tsx:184
+#: src/routes/_authenticated/finance.tsx:169
 msgid "Failed to load places."
 msgstr "Failed to load places."
 
-#: src/routes/_authenticated/profile.tsx:94
+#: src/routes/_authenticated/profile.tsx:92
 msgid "Failed to load profile."
 msgstr "Failed to load profile."
-
-#: src/routes/_authenticated/finance.tsx:451
-msgid "Failed to save expense."
-msgstr "Failed to save expense."
 
 #: src/routes/_authenticated/notifications.tsx:520
 msgid "Failed to send announcement."
@@ -1208,11 +1124,11 @@ msgstr "Failed to send announcement."
 msgid "Failed to update notification."
 msgstr "Failed to update notification."
 
-#: src/routes/_authenticated/profile.tsx:95
+#: src/routes/_authenticated/profile.tsx:93
 msgid "Failed to update profile."
 msgstr "Failed to update profile."
 
-#: src/routes/_authenticated/content/$content_id.tsx:109
+#: src/routes/_authenticated/content/$content_id.tsx:110
 msgid "Fill in all the required fields."
 msgstr "Fill in all the required fields."
 
@@ -1220,33 +1136,33 @@ msgstr "Fill in all the required fields."
 msgid "Filter bookings by month"
 msgstr "Filter bookings by month"
 
-#: src/routes/_authenticated/content/index.tsx:210
+#: src/routes/_authenticated/content/index.tsx:209
 msgid "Filter by language"
 msgstr "Filter by language"
 
-#: src/routes/_authenticated/finance.tsx:538
+#: src/routes/_authenticated/finance.tsx:519
 msgid "Filter by place"
 msgstr "Filter by place"
 
-#: src/routes/_authenticated/content/index.tsx:236
+#: src/routes/_authenticated/content/index.tsx:235
 msgid "Filter by publishing status"
 msgstr "Filter by publishing status"
 
 #: src/components/tickets-section.tsx:113
-#: src/routes/_authenticated/admin/index.tsx:187
+#: src/routes/_authenticated/admin/index.tsx:151
 #: src/routes/_authenticated/places.tsx:189
-#: src/routes/_authenticated/support/index.tsx:177
+#: src/routes/_authenticated/support/index.tsx:161
 #: src/routes/_authenticated/workers.tsx:172
 msgid "Filter by status"
 msgstr "Filter by status"
 
 #: src/components/app-shell.tsx:24
-#: src/routes/_authenticated/finance.tsx:508
-#: src/routes/_authenticated/finance.tsx:512
+#: src/routes/_authenticated/finance.tsx:489
+#: src/routes/_authenticated/finance.tsx:493
 msgid "Finance"
 msgstr "Finance"
 
-#: src/routes/_authenticated/finance.tsx:695
+#: src/routes/_authenticated/finance.tsx:676
 msgid "Financial report"
 msgstr "Financial report"
 
@@ -1254,33 +1170,34 @@ msgstr "Financial report"
 msgid "For managers and workers. On mobile and desktop."
 msgstr "For managers and workers. On mobile and desktop."
 
-#: src/routes/signin.tsx:100
+#: src/routes/signin.tsx:101
 msgid "Forgot password?"
 msgstr "Forgot password?"
 
-#: src/routes/forgot-password.tsx:89
+#: src/routes/forgot-password.tsx:81
 msgid "Forgot Password?"
 msgstr "Forgot Password?"
 
-#: src/routes/_authenticated/finance.tsx:705
+#: src/routes/_authenticated/finance.tsx:686
 msgid "From"
 msgstr "From"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:373
-#: src/routes/_authenticated/support/$support_id.tsx:483
-#: src/routes/_authenticated/support/$support_id.tsx:501
-#: src/routes/_authenticated/worker/$worker_id.tsx:411
-#: src/routes/_authenticated/worker/new.tsx:133
-#: src/routes/signup.tsx:142
+#: src/lib/errors.ts:75
+#: src/routes/_authenticated/admin/$admin_id.tsx:372
+#: src/routes/_authenticated/support/$support_id.tsx:477
+#: src/routes/_authenticated/support/$support_id.tsx:495
+#: src/routes/_authenticated/worker/$worker_id.tsx:397
+#: src/routes/_authenticated/worker/new.tsx:132
+#: src/routes/signup.tsx:143
 msgid "Full name"
 msgstr "Full name"
 
-#: src/routes/_authenticated/profile.tsx:105
+#: src/routes/_authenticated/profile.tsx:103
 msgid "Full Name"
 msgstr "Full Name"
 
-#: src/routes/_authenticated/profile.tsx:98
-#: src/routes/_authenticated/worker/new.tsx:49
+#: src/routes/_authenticated/profile.tsx:96
+#: src/routes/_authenticated/worker/new.tsx:50
 msgid "Full name is required."
 msgstr "Full name is required."
 
@@ -1288,30 +1205,30 @@ msgstr "Full name is required."
 msgid "Getting the address…"
 msgstr "Getting the address…"
 
-#: src/routes/account-setup.tsx:45
-#: src/routes/reset-password.tsx:186
+#: src/routes/account-setup.tsx:42
+#: src/routes/reset-password.tsx:178
 msgid "Go to Login"
 msgstr "Go to Login"
 
-#: src/components/asset-manage.tsx:22
+#: src/components/asset-manage.tsx:23
 #: src/components/place-shared.tsx:99
-#: src/routes/_authenticated/place/asset/new.tsx:58
+#: src/routes/_authenticated/place/asset/new.tsx:45
 msgid "Good"
 msgstr "Good"
 
-#: src/routes/_authenticated/home.tsx:56
+#: src/routes/_authenticated/home.tsx:46
 msgid "Good afternoon"
 msgstr "Good afternoon"
 
-#: src/routes/_authenticated/home.tsx:57
+#: src/routes/_authenticated/home.tsx:47
 msgid "Good evening"
 msgstr "Good evening"
 
-#: src/routes/_authenticated/home.tsx:55
+#: src/routes/_authenticated/home.tsx:45
 msgid "Good morning"
 msgstr "Good morning"
 
-#: src/routes/_authenticated/home.tsx:452
+#: src/routes/_authenticated/home.tsx:442
 msgid "Good:"
 msgstr "Good:"
 
@@ -1325,6 +1242,7 @@ msgid "Guest email"
 msgstr "Guest email"
 
 #: src/components/place-bookings.tsx:504
+#: src/lib/errors.ts:77
 msgid "Guest name"
 msgstr "Guest name"
 
@@ -1337,46 +1255,47 @@ msgid "guests"
 msgstr "guests"
 
 #: src/components/place-bookings.tsx:579
+#: src/lib/errors.ts:134
 msgid "Guests"
 msgstr "Guests"
 
-#: src/routes/_authenticated/home.tsx:601
+#: src/routes/_authenticated/home.tsx:593
 msgid "Hide details"
 msgstr "Hide details"
 
-#: src/routes/reset-password.tsx:236
-#: src/routes/reset-password.tsx:281
-#: src/routes/signin.tsx:117
+#: src/routes/reset-password.tsx:228
+#: src/routes/reset-password.tsx:273
+#: src/routes/signin.tsx:118
 msgid "Hide password"
 msgstr "Hide password"
 
 #: src/components/place-shared.tsx:225
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:448
-#: src/routes/_authenticated/ticket/new.tsx:261
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:444
+#: src/routes/_authenticated/ticket/new.tsx:146
 msgid "High"
 msgstr "High"
 
 #: src/components/app-shell.tsx:14
-#: src/routes/_authenticated/admin/$admin_id.tsx:169
-#: src/routes/_authenticated/content/$content_id.tsx:216
-#: src/routes/_authenticated/place/$place_id.tsx:306
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:182
-#: src/routes/_authenticated/support/$support_id.tsx:244
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:609
-#: src/routes/_authenticated/ticket/new.tsx:202
-#: src/routes/_authenticated/worker/$worker_id.tsx:241
+#: src/routes/_authenticated/admin/$admin_id.tsx:168
+#: src/routes/_authenticated/content/$content_id.tsx:213
+#: src/routes/_authenticated/place/$place_id.tsx:265
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:163
+#: src/routes/_authenticated/support/$support_id.tsx:242
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:605
+#: src/routes/_authenticated/ticket/new.tsx:95
+#: src/routes/_authenticated/worker/$worker_id.tsx:227
 msgid "Home"
 msgstr "Home"
 
-#: src/routes/forgot-password.tsx:111
+#: src/routes/forgot-password.tsx:103
 msgid "If an active account exists for this email address, you will receive a password reset link shortly."
 msgstr "If an active account exists for this email address, you will receive a password reset link shortly."
 
-#: src/routes/_authenticated/profile.tsx:97
+#: src/routes/_authenticated/profile.tsx:95
 msgid "Image size must not exceed 5MB."
 msgstr "Image size must not exceed 5MB."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:440
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:436
 msgid "In progress"
 msgstr "In progress"
 
@@ -1389,29 +1308,29 @@ msgstr "Inactive"
 msgid "Inbox"
 msgstr "Inbox"
 
-#: src/routes/_authenticated/finance.tsx:752
+#: src/routes/_authenticated/finance.tsx:733
 msgid "Income"
 msgstr "Income"
 
-#: src/routes/_authenticated/finance.tsx:684
+#: src/routes/_authenticated/finance.tsx:665
 msgid "Income minus expenses"
 msgstr "Income minus expenses"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:312
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:153
 msgid "Interval Unit"
 msgstr "Interval Unit"
 
-#: src/routes/_authenticated/admin/index.tsx:71
-#: src/routes/_authenticated/profile.tsx:123
+#: src/routes/_authenticated/admin/index.tsx:35
+#: src/routes/_authenticated/profile.tsx:121
 #: src/routes/_authenticated/workers.tsx:43
 msgid "Invited"
 msgstr "Invited"
 
-#: src/components/asset-manage.tsx:228
+#: src/components/asset-manage.tsx:229
 msgid "Its maintenance schedules stop, and its past tickets stay in the records. An asset with open tickets cannot be deleted."
 msgstr "Its maintenance schedules stop, and its past tickets stay in the records. An asset with open tickets cannot be deleted."
 
-#: src/routes/_authenticated/worker/$worker_id.tsx:508
+#: src/routes/_authenticated/worker/$worker_id.tsx:494
 msgid "Joined"
 msgstr "Joined"
 
@@ -1419,36 +1338,38 @@ msgstr "Joined"
 msgid "Kept in the booking record."
 msgstr "Kept in the booking record."
 
-#: src/routes/_authenticated/content/new.tsx:65
+#: src/lib/errors.ts:108
+#: src/routes/_authenticated/content/new.tsx:54
 msgid "Language"
 msgstr "Language"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:571
-#: src/routes/_authenticated/content/$content_id.tsx:490
-#: src/routes/_authenticated/support/$support_id.tsx:330
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:711
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:874
+#: src/routes/_authenticated/admin/$admin_id.tsx:570
+#: src/routes/_authenticated/content/$content_id.tsx:487
+#: src/routes/_authenticated/support/$support_id.tsx:328
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:707
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:870
 msgid "Last updated"
 msgstr "Last updated"
 
-#: src/routes/_authenticated/profile.tsx:114
+#: src/routes/_authenticated/profile.tsx:112
 msgid "Last Updated"
 msgstr "Last Updated"
 
-#: src/routes/_authenticated/content/index.tsx:401
+#: src/routes/_authenticated/content/index.tsx:400
 msgid "Last updated:"
 msgstr "Last updated:"
 
-#: src/routes/_authenticated/place/$place_id.tsx:488
-#: src/routes/_authenticated/place/new.tsx:144
+#: src/lib/errors.ts:87
+#: src/routes/_authenticated/place/$place_id.tsx:447
+#: src/routes/_authenticated/place/new.tsx:118
 msgid "Latitude"
 msgstr "Latitude"
 
-#: src/routes/_authenticated/profile.tsx:121
+#: src/routes/_authenticated/profile.tsx:119
 msgid "Leave empty to keep the current picture."
 msgstr "Leave empty to keep the current picture."
 
-#: src/routes/_authenticated/finance.tsx:1099
+#: src/routes/_authenticated/finance.tsx:1080
 msgid "Leave it empty to keep the current receipt."
 msgstr "Leave it empty to keep the current receipt."
 
@@ -1456,34 +1377,35 @@ msgstr "Leave it empty to keep the current receipt."
 msgid "Load more"
 msgstr "Load more"
 
-#: src/routes/_authenticated/home.tsx:307
+#: src/routes/_authenticated/home.tsx:297
 msgid "Loading booking statistics..."
 msgstr "Loading booking statistics..."
 
-#: src/routes/_authenticated/home.tsx:335
+#: src/routes/_authenticated/home.tsx:325
 msgid "Loading budget statistics..."
 msgstr "Loading budget statistics..."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:545
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:541
 msgid "Loading the ticket…"
 msgstr "Loading the ticket…"
 
-#: src/routes/_authenticated/home.tsx:278
+#: src/routes/_authenticated/home.tsx:268
 msgid "Loading ticket statistics..."
 msgstr "Loading ticket statistics..."
 
-#: src/routes/_authenticated/profile.tsx:93
+#: src/routes/_authenticated/profile.tsx:91
 msgid "Loading..."
 msgstr "Loading..."
 
-#: src/routes/_authenticated/place/$place_id.tsx:500
-#: src/routes/_authenticated/place/new.tsx:145
+#: src/lib/errors.ts:89
+#: src/routes/_authenticated/place/$place_id.tsx:459
+#: src/routes/_authenticated/place/new.tsx:119
 msgid "Longitude"
 msgstr "Longitude"
 
 #: src/components/place-shared.tsx:236
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:446
-#: src/routes/_authenticated/ticket/new.tsx:259
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:442
+#: src/routes/_authenticated/ticket/new.tsx:144
 msgid "Low"
 msgstr "Low"
 
@@ -1491,11 +1413,11 @@ msgstr "Low"
 msgid "Main menu"
 msgstr "Main menu"
 
-#: src/routes/_authenticated/finance.tsx:139
+#: src/routes/_authenticated/finance.tsx:124
 msgid "Maintenance"
 msgstr "Maintenance"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:549
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:530
 msgid "Maintenance is due today"
 msgstr "Maintenance is due today"
 
@@ -1508,29 +1430,29 @@ msgid "Maintenance reminder"
 msgstr "Maintenance reminder"
 
 #: src/components/tickets-section.tsx:170
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:645
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:653
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:641
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:649
 msgid "Maintenance ticket"
 msgstr "Maintenance ticket"
 
-#: src/routes/_authenticated/finance.tsx:1080
+#: src/routes/_authenticated/finance.tsx:1061
 msgid "Maintenance ticket ID (optional)"
 msgstr "Maintenance ticket ID (optional)"
 
-#: src/routes/_authenticated/place/$place_id.tsx:715
-#: src/routes/_authenticated/place/$place_id.tsx:1018
+#: src/routes/_authenticated/place/$place_id.tsx:678
+#: src/routes/_authenticated/place/$place_id.tsx:981
 msgid "Maintenance tickets"
 msgstr "Maintenance tickets"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:359
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:340
 msgid "Maintenance tickets for this asset"
 msgstr "Maintenance tickets for this asset"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:675
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:671
 msgid "Maintenance type"
 msgstr "Maintenance type"
 
-#: src/routes/_authenticated/content/index.tsx:155
+#: src/routes/_authenticated/content/index.tsx:154
 msgid "Manage the site's pages, their text and whether they are published."
 msgstr "Manage the site's pages, their text and whether they are published."
 
@@ -1539,11 +1461,11 @@ msgid "Manage your notifications and stay up to date."
 msgstr "Manage your notifications and stay up to date."
 
 #: src/routes/_authenticated/notifications.tsx:428
-#: src/routes/_authenticated/profile.tsx:127
+#: src/routes/_authenticated/profile.tsx:125
 msgid "Manager"
 msgstr "Manager"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:513
+#: src/routes/_authenticated/admin/$admin_id.tsx:512
 msgid "Manager ID"
 msgstr "Manager ID"
 
@@ -1556,8 +1478,8 @@ msgid "Maximum 1000 users are allowed."
 msgstr "Maximum 1000 users are allowed."
 
 #: src/components/place-shared.tsx:236
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:447
-#: src/routes/_authenticated/ticket/new.tsx:260
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:443
+#: src/routes/_authenticated/ticket/new.tsx:145
 msgid "Medium"
 msgstr "Medium"
 
@@ -1566,18 +1488,19 @@ msgstr "Medium"
 msgid "Message"
 msgstr "Message"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:49
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:30
 msgid "Month"
 msgstr "Month"
 
-#: src/routes/_authenticated/finance.tsx:579
-#: src/routes/_authenticated/place/$place_id.tsx:476
-#: src/routes/_authenticated/place/$place_id.tsx:656
+#: src/lib/errors.ts:91
+#: src/routes/_authenticated/finance.tsx:560
+#: src/routes/_authenticated/place/$place_id.tsx:435
+#: src/routes/_authenticated/place/$place_id.tsx:615
 msgid "Monthly budget"
 msgstr "Monthly budget"
 
-#: src/routes/_authenticated/home.tsx:323
-#: src/routes/_authenticated/place/new.tsx:148
+#: src/routes/_authenticated/home.tsx:313
+#: src/routes/_authenticated/place/new.tsx:122
 msgid "Monthly maintenance budget"
 msgstr "Monthly maintenance budget"
 
@@ -1585,61 +1508,61 @@ msgstr "Monthly maintenance budget"
 msgid "More"
 msgstr "More"
 
-#: src/routes/_authenticated/profile.tsx:115
+#: src/routes/_authenticated/profile.tsx:113
 msgid "My Profile"
 msgstr "My Profile"
 
-#: src/routes/_authenticated/home.tsx:241
+#: src/routes/_authenticated/home.tsx:231
 #: src/routes/_authenticated/tickets.tsx:70
 msgid "My tasks"
 msgstr "My tasks"
 
-#: src/components/asset-manage.tsx:24
+#: src/components/asset-manage.tsx:25
 #: src/components/place-shared.tsx:111
-#: src/routes/_authenticated/place/asset/new.tsx:60
+#: src/routes/_authenticated/place/asset/new.tsx:47
 msgid "Needs maintenance"
 msgstr "Needs maintenance"
 
-#: src/routes/_authenticated/home.tsx:461
+#: src/routes/_authenticated/home.tsx:451
 msgid "Needs maintenance:"
 msgstr "Needs maintenance:"
 
-#: src/routes/_authenticated/finance.tsx:665
-#: src/routes/_authenticated/finance.tsx:770
+#: src/routes/_authenticated/finance.tsx:646
+#: src/routes/_authenticated/finance.tsx:751
 msgid "Net profit"
 msgstr "Net profit"
 
-#: src/routes/_authenticated/content/index.tsx:320
+#: src/routes/_authenticated/content/index.tsx:319
 msgid "New page"
 msgstr "New page"
 
-#: src/routes/reset-password.tsx:214
+#: src/routes/reset-password.tsx:206
 msgid "New Password"
 msgstr "New Password"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:271
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:128
 msgid "New Scheduled Maintenance"
 msgstr "New Scheduled Maintenance"
+
+#: src/routes/_authenticated/support/new.tsx:47
+msgid "New support ticket"
+msgstr "New support ticket"
 
 #: src/routes/_authenticated/tickets.tsx:205
 msgid "New tickets will show here."
 msgstr "New tickets will show here."
 
 #: src/components/pager.tsx:46
-#: src/routes/_authenticated/content/index.tsx:443
+#: src/routes/_authenticated/content/index.tsx:442
 #: src/routes/_authenticated/notifications.tsx:716
 msgid "Next"
 msgstr "Next"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:323
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:164
 msgid "Next Due Date"
 msgstr "Next Due Date"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:191
-msgid "Next due date is required"
-msgstr "Next due date is required"
-
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:515
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:496
 msgid "Next maintenance"
 msgstr "Next maintenance"
 
@@ -1651,7 +1574,7 @@ msgstr "No address was found for this location."
 msgid "No asset"
 msgstr "No asset"
 
-#: src/routes/_authenticated/place/$place_id.tsx:810
+#: src/routes/_authenticated/place/$place_id.tsx:773
 msgid "No assets yet."
 msgstr "No assets yet."
 
@@ -1663,23 +1586,23 @@ msgstr "No bookings for this property yet."
 msgid "No bookings in this month."
 msgstr "No bookings in this month."
 
-#: src/routes/_authenticated/content/index.tsx:297
+#: src/routes/_authenticated/content/index.tsx:296
 msgid "No content pages yet"
 msgstr "No content pages yet"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:340
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:181
 msgid "No default assignee"
 msgstr "No default assignee"
 
-#: src/routes/_authenticated/finance.tsx:891
+#: src/routes/_authenticated/finance.tsx:872
 msgid "No expenses"
 msgstr "No expenses"
 
-#: src/routes/_authenticated/finance.tsx:894
+#: src/routes/_authenticated/finance.tsx:875
 msgid "No expenses match the selected filters."
 msgstr "No expenses match the selected filters."
 
-#: src/routes/_authenticated/finance.tsx:799
+#: src/routes/_authenticated/finance.tsx:780
 msgid "No financial data in the selected period."
 msgstr "No financial data in the selected period."
 
@@ -1695,11 +1618,11 @@ msgstr "No guests leave today."
 msgid "No notifications"
 msgstr "No notifications"
 
-#: src/routes/_authenticated/content/index.tsx:296
+#: src/routes/_authenticated/content/index.tsx:295
 msgid "No pages match"
 msgstr "No pages match"
 
-#: src/routes/_authenticated/admin/index.tsx:368
+#: src/routes/_authenticated/admin/index.tsx:332
 #: src/routes/_authenticated/workers.tsx:349
 msgid "No phone number"
 msgstr "No phone number"
@@ -1712,11 +1635,11 @@ msgstr "No places match"
 msgid "No places yet"
 msgstr "No places yet"
 
-#: src/routes/_authenticated/home.tsx:395
+#: src/routes/_authenticated/home.tsx:385
 msgid "No properties yet"
 msgstr "No properties yet"
 
-#: src/routes/_authenticated/support/$support_id.tsx:520
+#: src/routes/_authenticated/support/$support_id.tsx:514
 msgid "No reply yet"
 msgstr "No reply yet"
 
@@ -1724,7 +1647,7 @@ msgstr "No reply yet"
 msgid "No stays start in the next {UPCOMING_DAYS} days."
 msgstr "No stays start in the next {UPCOMING_DAYS} days."
 
-#: src/routes/_authenticated/support/index.tsx:253
+#: src/routes/_authenticated/support/index.tsx:237
 msgid "No support tickets yet"
 msgstr "No support tickets yet"
 
@@ -1732,19 +1655,19 @@ msgstr "No support tickets yet"
 msgid "No tickets are waiting for review."
 msgstr "No tickets are waiting for review."
 
-#: src/routes/_authenticated/support/index.tsx:252
+#: src/routes/_authenticated/support/index.tsx:236
 msgid "No tickets match"
 msgstr "No tickets match"
 
-#: src/routes/_authenticated/admin/index.tsx:262
+#: src/routes/_authenticated/admin/index.tsx:226
 msgid "No users match"
 msgstr "No users match"
 
-#: src/routes/_authenticated/admin/index.tsx:263
+#: src/routes/_authenticated/admin/index.tsx:227
 msgid "No users yet"
 msgstr "No users yet"
 
-#: src/routes/_authenticated/place/$place_id.tsx:932
+#: src/routes/_authenticated/place/$place_id.tsx:895
 msgid "No workers are assigned to this place."
 msgstr "No workers are assigned to this place."
 
@@ -1756,24 +1679,24 @@ msgstr "No workers match"
 msgid "No workers yet"
 msgstr "No workers yet"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:514
+#: src/routes/_authenticated/admin/$admin_id.tsx:513
 msgid "None"
 msgstr "None"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:498
-#: src/routes/_authenticated/worker/$worker_id.tsx:503
+#: src/routes/_authenticated/admin/$admin_id.tsx:497
+#: src/routes/_authenticated/worker/$worker_id.tsx:489
 msgid "Not confirmed"
 msgstr "Not confirmed"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:700
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:696
 msgid "Not overdue"
 msgstr "Not overdue"
 
-#: src/routes/_authenticated/place/$place_id.tsx:652
+#: src/routes/_authenticated/place/$place_id.tsx:611
 msgid "Not set"
 msgstr "Not set"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:580
+#: src/routes/_authenticated/admin/$admin_id.tsx:579
 msgid "Not verified"
 msgstr "Not verified"
 
@@ -1794,21 +1717,21 @@ msgstr "Nothing matches this search. Clear it to see all places."
 msgid "Notifications"
 msgstr "Notifications"
 
-#: src/routes/signup.tsx:213
+#: src/routes/signup.tsx:214
 msgid "One lowercase letter (a-z)"
 msgstr "One lowercase letter (a-z)"
 
-#: src/routes/signup.tsx:217
+#: src/routes/signup.tsx:218
 msgid "One symbol (like ! or @)"
 msgstr "One symbol (like ! or @)"
 
-#: src/routes/signup.tsx:209
+#: src/routes/signup.tsx:210
 msgid "One uppercase letter (A-Z)"
 msgstr "One uppercase letter (A-Z)"
 
 #: src/components/tickets-section.tsx:87
-#: src/routes/_authenticated/support/index.tsx:41
-#: src/routes/_authenticated/support/index.tsx:323
+#: src/routes/_authenticated/support/index.tsx:35
+#: src/routes/_authenticated/support/index.tsx:307
 msgid "Open"
 msgstr "Open"
 
@@ -1816,11 +1739,14 @@ msgstr "Open"
 msgid "OPEN"
 msgstr "OPEN"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1246
+#: src/lib/errors.ts:189
+msgid "Open maintenance tickets are in the way. Complete, reject or reassign them first."
+msgstr "Open maintenance tickets are in the way. Complete, reject or reassign them first."
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1242
 msgid "Open the full-size photo"
 msgstr "Open the full-size photo"
 
-#: src/routes/_authenticated/place/new.tsx:34
 #: src/routes/_authenticated/places.tsx:40
 msgid "Open tickets"
 msgstr "Open tickets"
@@ -1829,41 +1755,41 @@ msgstr "Open tickets"
 msgid "Open your email"
 msgstr "Open your email"
 
-#: src/routes/_authenticated/finance.tsx:149
+#: src/routes/_authenticated/finance.tsx:134
 msgid "Other"
 msgstr "Other"
 
-#: src/components/asset-manage.tsx:28
+#: src/components/asset-manage.tsx:29
 #: src/components/place-shared.tsx:134
-#: src/routes/_authenticated/place/asset/new.tsx:64
+#: src/routes/_authenticated/place/asset/new.tsx:51
 msgid "Out of service"
 msgstr "Out of service"
 
-#: src/routes/_authenticated/home.tsx:470
+#: src/routes/_authenticated/home.tsx:460
 msgid "Out of service:"
 msgstr "Out of service:"
 
 #: src/components/place-shared.tsx:249
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:698
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:694
 msgid "Overdue"
 msgstr "Overdue"
 
-#: src/routes/_authenticated/home.tsx:284
+#: src/routes/_authenticated/home.tsx:274
 msgid "Overdue:"
 msgstr "Overdue:"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:695
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:691
 msgid "Overdue?"
 msgstr "Overdue?"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:447
+#: src/routes/_authenticated/admin/$admin_id.tsx:446
 msgid "Owner / Manager"
 msgstr "Owner / Manager"
 
 #. placeholder {0}: pagination.page
 #. placeholder {1}: pagination.total_pages
 #. placeholder {2}: pagination.total
-#: src/routes/_authenticated/content/index.tsx:419
+#: src/routes/_authenticated/content/index.tsx:418
 msgid "Page {0} of {1} — {2} pages in total"
 msgstr "Page {0} of {1} — {2} pages in total"
 
@@ -1871,23 +1797,23 @@ msgstr "Page {0} of {1} — {2} pages in total"
 msgid "Page {page} of {totalPages}"
 msgstr "Page {page} of {totalPages}"
 
-#: src/routes/_authenticated/content/$content_id.tsx:532
+#: src/routes/_authenticated/content/$content_id.tsx:529
 msgid "Page body"
 msgstr "Page body"
 
-#: src/routes/_authenticated/content/$content_id.tsx:232
+#: src/routes/_authenticated/content/$content_id.tsx:229
 msgid "Page details"
 msgstr "Page details"
 
-#: src/routes/_authenticated/content/$content_id.tsx:482
+#: src/routes/_authenticated/content/$content_id.tsx:479
 msgid "Page ID"
 msgstr "Page ID"
 
-#: src/routes/_authenticated/content/$content_id.tsx:414
+#: src/routes/_authenticated/content/$content_id.tsx:411
 msgid "Page information"
 msgstr "Page information"
 
-#: src/routes/_authenticated/content/$content_id.tsx:448
+#: src/routes/_authenticated/content/$content_id.tsx:445
 msgid "Page language"
 msgstr "Page language"
 
@@ -1895,11 +1821,11 @@ msgstr "Page language"
 msgid "Page not found"
 msgstr "Page not found"
 
-#: src/routes/_authenticated/content/$content_id.tsx:457
+#: src/routes/_authenticated/content/$content_id.tsx:454
 msgid "Page slug"
 msgstr "Page slug"
 
-#: src/routes/_authenticated/content/$content_id.tsx:439
+#: src/routes/_authenticated/content/$content_id.tsx:436
 msgid "Page title"
 msgstr "Page title"
 
@@ -1907,109 +1833,116 @@ msgstr "Page title"
 msgid "Pages"
 msgstr "Pages"
 
-#: src/routes/account-setup.tsx:32
-#: src/routes/signin.tsx:94
-#: src/routes/signup.tsx:191
+#: src/lib/errors.ts:70
+#: src/routes/account-setup.tsx:29
+#: src/routes/signin.tsx:95
+#: src/routes/signup.tsx:192
 msgid "Password"
 msgstr "Password"
 
-#: src/routes/signin.tsx:39
-#: src/routes/signup.tsx:31
+#: src/routes/signin.tsx:40
+#: src/routes/signup.tsx:32
 msgid "Password does not meet the requirements"
 msgstr "Password does not meet the requirements"
 
-#: src/routes/account-setup.tsx:39
+#: src/routes/account-setup.tsx:36
 msgid "Password is required."
 msgstr "Password is required."
 
-#: src/routes/account-setup.tsx:40
-#: src/routes/reset-password.tsx:116
+#: src/routes/account-setup.tsx:37
+#: src/routes/reset-password.tsx:108
 msgid "Password must be at least 8 characters."
 msgstr "Password must be at least 8 characters."
 
-#: src/routes/reset-password.tsx:171
+#: src/routes/reset-password.tsx:163
 msgid "Password Reset Successful"
 msgstr "Password Reset Successful"
 
-#: src/routes/account-setup.tsx:41
-#: src/routes/reset-password.tsx:119
+#: src/routes/account-setup.tsx:38
+#: src/routes/reset-password.tsx:111
 msgid "Passwords do not match."
 msgstr "Passwords do not match."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:437
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:433
 msgid "Pending"
 msgstr "Pending"
 
-#: src/routes/_authenticated/admin/index.tsx:72
+#: src/routes/_authenticated/admin/index.tsx:36
 msgid "Pending verification"
 msgstr "Pending verification"
 
-#: src/routes/_authenticated/profile.tsx:124
+#: src/routes/_authenticated/profile.tsx:122
 msgid "Pending Verification"
 msgstr "Pending Verification"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:731
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:850
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:727
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:846
 msgid "People"
 msgstr "People"
 
-#: src/routes/_authenticated/profile.tsx:118
+#: src/routes/_authenticated/profile.tsx:116
 msgid "Personal Information"
 msgstr "Personal Information"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:408
-#: src/routes/_authenticated/support/$support_id.tsx:494
-#: src/routes/_authenticated/worker/$worker_id.tsx:446
-#: src/routes/_authenticated/worker/new.tsx:177
-#: src/routes/signup.tsx:174
+#: src/lib/errors.ts:73
+#: src/routes/_authenticated/admin/$admin_id.tsx:407
+#: src/routes/_authenticated/support/$support_id.tsx:488
+#: src/routes/_authenticated/worker/$worker_id.tsx:432
+#: src/routes/_authenticated/worker/new.tsx:176
+#: src/routes/signup.tsx:175
 msgid "Phone number"
 msgstr "Phone number"
 
-#: src/routes/_authenticated/profile.tsx:106
+#: src/routes/_authenticated/profile.tsx:104
 msgid "Phone Number"
 msgstr "Phone Number"
 
-#: src/routes/_authenticated/worker/new.tsx:59
+#: src/routes/_authenticated/worker/new.tsx:60
 msgid "Phone number is required."
 msgstr "Phone number is required."
 
-#: src/routes/_authenticated/ticket/new.tsx:273
+#: src/lib/errors.ts:116
+msgid "Photos"
+msgstr "Photos"
+
+#: src/routes/_authenticated/ticket/new.tsx:158
 msgid "Photos of the damage"
 msgstr "Photos of the damage"
 
 #: src/routes/_authenticated/bookings.tsx:126
-#: src/routes/_authenticated/finance.tsx:1013
-#: src/routes/_authenticated/place/asset/new.tsx:153
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:630
-#: src/routes/_authenticated/ticket/new.tsx:237
+#: src/routes/_authenticated/finance.tsx:994
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:626
+#: src/routes/_authenticated/ticket/new.tsx:109
 #: src/routes/_authenticated/tickets.tsx:229
 msgid "Place"
 msgstr "Place"
 
-#: src/routes/_authenticated/place/$place_id.tsx:613
+#: src/routes/_authenticated/place/$place_id.tsx:572
 msgid "Place information"
 msgstr "Place information"
 
-#: src/routes/_authenticated/place/$place_id.tsx:430
-#: src/routes/_authenticated/place/new.tsx:135
+#: src/lib/errors.ts:79
+#: src/routes/_authenticated/place/$place_id.tsx:389
+#: src/routes/_authenticated/place/new.tsx:109
 msgid "Place name"
 msgstr "Place name"
 
-#: src/routes/_authenticated/place/$place_id.tsx:326
+#: src/routes/_authenticated/place/$place_id.tsx:285
 msgid "Place not found"
 msgstr "Place not found"
 
-#: src/routes/_authenticated/place/$place_id.tsx:438
-#: src/routes/_authenticated/place/new.tsx:138
+#: src/lib/errors.ts:81
+#: src/routes/_authenticated/place/$place_id.tsx:397
+#: src/routes/_authenticated/place/new.tsx:112
 msgid "Place type"
 msgstr "Place type"
 
 #: src/components/app-shell.tsx:19
-#: src/routes/_authenticated/place/$place_id.tsx:311
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:190
+#: src/routes/_authenticated/place/$place_id.tsx:270
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:171
 #: src/routes/_authenticated/places.tsx:137
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:617
-#: src/routes/_authenticated/ticket/new.tsx:206
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:613
+#: src/routes/_authenticated/ticket/new.tsx:99
 msgid "Places"
 msgstr "Places"
 
@@ -2017,11 +1950,11 @@ msgstr "Places"
 msgid "Places your manager assigns you to show here."
 msgstr "Places your manager assigns you to show here."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:231
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:103
 msgid "Please enter valid interval and lead days values"
 msgstr "Please enter valid interval and lead days values"
 
-#: src/routes/forgot-password.tsx:159
+#: src/routes/forgot-password.tsx:151
 msgid "Please enter your email address."
 msgstr "Please enter your email address."
 
@@ -2029,79 +1962,73 @@ msgstr "Please enter your email address."
 msgid "Please fill in all announcement fields."
 msgstr "Please fill in all announcement fields."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:218
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:92
 msgid "Please fill in all required fields"
 msgstr "Please fill in all required fields"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:167
-msgid "Please select a place"
-msgstr "Please select a place"
-
-#: src/routes/_authenticated/profile.tsx:96
+#: src/routes/_authenticated/profile.tsx:94
 msgid "Please select a valid image."
 msgstr "Please select a valid image."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:171
-msgid "Please select an asset"
-msgstr "Please select an asset"
-
-#: src/routes/_authenticated/admin/$admin_id.tsx:471
-#: src/routes/_authenticated/worker/$worker_id.tsx:494
-#: src/routes/_authenticated/worker/new.tsx:200
+#: src/routes/_authenticated/admin/$admin_id.tsx:470
+#: src/routes/_authenticated/worker/$worker_id.tsx:480
+#: src/routes/_authenticated/worker/new.tsx:199
 msgid "Preferred language"
 msgstr "Preferred language"
 
-#: src/routes/_authenticated/profile.tsx:107
+#: src/routes/_authenticated/profile.tsx:105
 msgid "Preferred Language"
 msgstr "Preferred Language"
 
 #: src/components/tickets-section.tsx:181
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:454
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:450
 msgid "Preventive maintenance"
 msgstr "Preventive maintenance"
 
 #: src/components/pager.tsx:32
-#: src/routes/_authenticated/content/index.tsx:433
+#: src/routes/_authenticated/content/index.tsx:432
 #: src/routes/_authenticated/notifications.tsx:692
 msgid "Previous"
 msgstr "Previous"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:680
-#: src/routes/_authenticated/ticket/new.tsx:254
+#: src/lib/errors.ts:114
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:676
+#: src/routes/_authenticated/ticket/new.tsx:139
 msgid "Priority"
 msgstr "Priority"
 
-#: src/routes/_authenticated/profile.tsx:108
+#: src/routes/_authenticated/profile.tsx:106
 msgid "Profile Picture"
 msgstr "Profile Picture"
 
-#: src/routes/_authenticated/profile.tsx:99
+#: src/routes/_authenticated/profile.tsx:97
 msgid "Profile updated successfully."
 msgstr "Profile updated successfully."
 
-#: src/routes/_authenticated/place/$place_id.tsx:638
+#: src/routes/_authenticated/place/$place_id.tsx:597
 msgid "Property type"
 msgstr "Property type"
 
-#: src/routes/_authenticated/content/$content_id.tsx:375
-#: src/routes/_authenticated/content/$content_id.tsx:628
-#: src/routes/_authenticated/content/index.tsx:242
-#: src/routes/_authenticated/content/index.tsx:391
-#: src/routes/_authenticated/content/new.tsx:73
+#: src/routes/_authenticated/content/$content_id.tsx:372
+#: src/routes/_authenticated/content/$content_id.tsx:625
+#: src/routes/_authenticated/content/index.tsx:241
+#: src/routes/_authenticated/content/index.tsx:390
+#: src/routes/_authenticated/content/new.tsx:63
 msgid "Published"
 msgstr "Published"
 
-#: src/routes/_authenticated/content/$content_id.tsx:593
+#: src/routes/_authenticated/content/$content_id.tsx:590
 msgid "Publishing"
 msgstr "Publishing"
 
-#: src/components/asset-manage.tsx:197
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:290
-#: src/routes/_authenticated/place/asset/new.tsx:157
+#: src/components/asset-manage.tsx:198
+#: src/lib/errors.ts:99
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:271
+#: src/routes/_authenticated/place/asset/new.tsx:126
 msgid "Purchase date"
 msgstr "Purchase date"
 
-#: src/routes/account-setup.tsx:35
+#: src/routes/account-setup.tsx:32
 msgid "Re-enter your password"
 msgstr "Re-enter your password"
 
@@ -2110,13 +2037,17 @@ msgstr "Re-enter your password"
 msgid "Read"
 msgstr "Read"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:817
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1058
+#: src/lib/errors.ts:128
+msgid "Reason"
+msgstr "Reason"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:813
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1054
 msgid "Reason for rejection"
 msgstr "Reason for rejection"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:952
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:987
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:948
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:983
 msgid "Reassign"
 msgstr "Reassign"
 
@@ -2128,42 +2059,50 @@ msgstr "Recipient role"
 msgid "Refresh"
 msgstr "Refresh"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:939
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:986
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:935
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:982
 msgid "Reject ticket"
 msgstr "Reject ticket"
 
 #: src/components/place-shared.tsx:276
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:439
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:435
 msgid "Rejected"
 msgstr "Rejected"
 
-#: src/routes/_authenticated/home.tsx:340
-#: src/routes/_authenticated/home.tsx:645
+#: src/routes/_authenticated/home.tsx:330
+#: src/routes/_authenticated/home.tsx:637
 msgid "Remaining:"
 msgstr "Remaining:"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:527
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:508
 msgid "Reminder before"
 msgstr "Reminder before"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:329
+#: src/lib/errors.ts:147
+msgid "Reminder before due date"
+msgstr "Reminder before due date"
+
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:170
 msgid "Reminder Before Due Date (Days)"
 msgstr "Reminder Before Due Date (Days)"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:305
+#: src/lib/errors.ts:145
+msgid "Repeat every"
+msgstr "Repeat every"
+
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:146
 msgid "Repeat Every"
 msgstr "Repeat Every"
 
-#: src/routes/_authenticated/support/$support_id.tsx:519
+#: src/routes/_authenticated/support/$support_id.tsx:513
 msgid "Reply"
 msgstr "Reply"
 
-#: src/routes/_authenticated/ticket/new.tsx:226
+#: src/routes/_authenticated/ticket/new.tsx:119
 msgid "Report damage"
 msgstr "Report damage"
 
-#: src/routes/_authenticated/ticket/new.tsx:230
+#: src/routes/_authenticated/ticket/new.tsx:123
 msgid "Report new damage for maintenance"
 msgstr "Report new damage for maintenance"
 
@@ -2172,7 +2111,7 @@ msgstr "Report new damage for maintenance"
 msgid "Reported {0}"
 msgstr "Reported {0}"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:853
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:849
 msgid "Reported by"
 msgstr "Reported by"
 
@@ -2180,7 +2119,7 @@ msgstr "Reported by"
 msgid "Reported damage that needs your approval, newest first."
 msgstr "Reported damage that needs your approval, newest first."
 
-#: src/routes/reset-password.tsx:204
+#: src/routes/reset-password.tsx:196
 msgid "Request a New Link"
 msgstr "Request a New Link"
 
@@ -2188,22 +2127,22 @@ msgstr "Request a New Link"
 msgid "Resend code"
 msgstr "Resend code"
 
-#: src/routes/reset-password.tsx:153
-#: src/routes/reset-password.tsx:314
+#: src/routes/reset-password.tsx:145
+#: src/routes/reset-password.tsx:306
 msgid "Reset Password"
 msgstr "Reset Password"
 
-#: src/routes/reset-password.tsx:311
+#: src/routes/reset-password.tsx:303
 msgid "Resetting Password..."
 msgstr "Resetting Password..."
 
-#: src/routes/_authenticated/support/$support_id.tsx:384
-#: src/routes/_authenticated/support/$support_id.tsx:464
+#: src/routes/_authenticated/support/$support_id.tsx:382
+#: src/routes/_authenticated/support/$support_id.tsx:458
 msgid "Resolve ticket"
 msgstr "Resolve ticket"
 
-#: src/routes/_authenticated/support/index.tsx:42
-#: src/routes/_authenticated/support/index.tsx:323
+#: src/routes/_authenticated/support/index.tsx:36
+#: src/routes/_authenticated/support/index.tsx:307
 msgid "Resolved"
 msgstr "Resolved"
 
@@ -2211,11 +2150,11 @@ msgstr "Resolved"
 msgid "RESOLVED"
 msgstr "RESOLVED"
 
-#: src/routes/_authenticated/support/$support_id.tsx:524
+#: src/routes/_authenticated/support/$support_id.tsx:518
 msgid "Resolved by"
 msgstr "Resolved by"
 
-#: src/routes/_authenticated/support/$support_id.tsx:535
+#: src/routes/_authenticated/support/$support_id.tsx:529
 msgid "Resolved on"
 msgstr "Resolved on"
 
@@ -2223,26 +2162,26 @@ msgstr "Resolved on"
 msgid "Rest house"
 msgstr "Rest house"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:729
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:795
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:725
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:791
 msgid "Review"
 msgstr "Review"
 
-#: src/routes/_authenticated/home.tsx:241
+#: src/routes/_authenticated/home.tsx:231
 msgid "Review tickets"
 msgstr "Review tickets"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:798
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:794
 msgid "Reviewed by"
 msgstr "Reviewed by"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:805
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:879
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:801
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:875
 msgid "Reviewed on"
 msgstr "Reviewed on"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:433
-#: src/routes/_authenticated/profile.tsx:110
+#: src/routes/_authenticated/admin/$admin_id.tsx:432
+#: src/routes/_authenticated/profile.tsx:108
 msgid "Role"
 msgstr "Role"
 
@@ -2250,49 +2189,49 @@ msgstr "Role"
 msgid "Room"
 msgstr "Room"
 
-#: src/components/asset-manage.tsx:213
-#: src/components/form.tsx:170
-#: src/routes/_authenticated/finance.tsx:1130
+#: src/components/asset-manage.tsx:214
+#: src/components/form.tsx:145
+#: src/routes/_authenticated/finance.tsx:1111
 msgid "Save"
 msgstr "Save"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:661
-#: src/routes/_authenticated/content/$content_id.tsx:717
-#: src/routes/_authenticated/place/$place_id.tsx:578
-#: src/routes/_authenticated/worker/$worker_id.tsx:728
+#: src/routes/_authenticated/admin/$admin_id.tsx:660
+#: src/routes/_authenticated/content/$content_id.tsx:714
+#: src/routes/_authenticated/place/$place_id.tsx:537
+#: src/routes/_authenticated/worker/$worker_id.tsx:714
 msgid "Save changes"
 msgstr "Save changes"
 
-#: src/routes/_authenticated/profile.tsx:101
+#: src/routes/_authenticated/profile.tsx:99
 msgid "Save Changes"
 msgstr "Save Changes"
 
-#: src/routes/_authenticated/finance.tsx:1129
-#: src/routes/_authenticated/place/$place_id.tsx:576
-#: src/routes/_authenticated/profile.tsx:100
+#: src/routes/_authenticated/finance.tsx:1110
+#: src/routes/_authenticated/place/$place_id.tsx:535
+#: src/routes/_authenticated/profile.tsx:98
 msgid "Saving..."
 msgstr "Saving..."
 
-#: src/components/asset-manage.tsx:213
+#: src/components/asset-manage.tsx:214
 #: src/components/place-bookings.tsx:641
 #: src/components/place-bookings.tsx:824
-#: src/routes/_authenticated/admin/$admin_id.tsx:661
-#: src/routes/_authenticated/content/$content_id.tsx:717
-#: src/routes/_authenticated/worker/$worker_id.tsx:728
+#: src/routes/_authenticated/admin/$admin_id.tsx:660
+#: src/routes/_authenticated/content/$content_id.tsx:714
+#: src/routes/_authenticated/worker/$worker_id.tsx:714
 msgid "Saving…"
 msgstr "Saving…"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:412
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:393
 msgid "Schedule maintenance"
 msgstr "Schedule maintenance"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:385
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:366
 msgid "Scheduled maintenance"
 msgstr "Scheduled maintenance"
 
-#: src/routes/_authenticated/admin/index.tsx:164
+#: src/routes/_authenticated/admin/index.tsx:128
 #: src/routes/_authenticated/places.tsx:168
-#: src/routes/_authenticated/support/index.tsx:154
+#: src/routes/_authenticated/support/index.tsx:138
 #: src/routes/_authenticated/workers.tsx:149
 msgid "Search"
 msgstr "Search"
@@ -2301,7 +2240,7 @@ msgstr "Search"
 msgid "Search by name, email or phone"
 msgstr "Search by name, email or phone"
 
-#: src/routes/_authenticated/admin/index.tsx:179
+#: src/routes/_authenticated/admin/index.tsx:143
 msgid "Search by name, email, phone or ID"
 msgstr "Search by name, email, phone or ID"
 
@@ -2309,23 +2248,23 @@ msgstr "Search by name, email, phone or ID"
 msgid "Search by place name or city"
 msgstr "Search by place name or city"
 
-#: src/routes/_authenticated/support/index.tsx:169
+#: src/routes/_authenticated/support/index.tsx:153
 msgid "Search by subject or description"
 msgstr "Search by subject or description"
 
-#: src/routes/_authenticated/content/index.tsx:202
+#: src/routes/_authenticated/content/index.tsx:201
 msgid "Search by title or slug…"
 msgstr "Search by title or slug…"
 
-#: src/routes/_authenticated/content/index.tsx:187
+#: src/routes/_authenticated/content/index.tsx:186
 msgid "Search content"
 msgstr "Search content"
 
-#: src/routes/_authenticated/home.tsx:374
+#: src/routes/_authenticated/home.tsx:364
 msgid "See all"
 msgstr "See all"
 
-#: src/routes/_authenticated/finance.tsx:420
+#: src/routes/_authenticated/finance.tsx:405
 msgid "Select a place and enter a valid amount."
 msgstr "Select a place and enter a valid amount."
 
@@ -2342,16 +2281,16 @@ msgstr "Send an announcement to users by role or user IDs."
 msgid "Send announcement"
 msgstr "Send announcement"
 
-#: src/routes/forgot-password.tsx:185
+#: src/routes/forgot-password.tsx:177
 msgid "Send Reset Link"
 msgstr "Send Reset Link"
 
-#: src/routes/_authenticated/worker/new.tsx:239
+#: src/routes/_authenticated/worker/new.tsx:241
 msgid "Sending invitation..."
 msgstr "Sending invitation..."
 
 #: src/routes/_authenticated/notifications.tsx:543
-#: src/routes/forgot-password.tsx:182
+#: src/routes/forgot-password.tsx:174
 msgid "Sending..."
 msgstr "Sending..."
 
@@ -2359,19 +2298,19 @@ msgstr "Sending..."
 msgid "Separate user IDs with commas or new lines. Maximum 1000 users."
 msgstr "Separate user IDs with commas or new lines. Maximum 1000 users."
 
-#: src/routes/account-setup.tsx:29
+#: src/routes/account-setup.tsx:26
 msgid "Set Up Your Account"
 msgstr "Set Up Your Account"
 
-#: src/routes/reset-password.tsx:236
-#: src/routes/reset-password.tsx:282
-#: src/routes/signin.tsx:117
+#: src/routes/reset-password.tsx:228
+#: src/routes/reset-password.tsx:274
+#: src/routes/signin.tsx:118
 msgid "Show password"
 msgstr "Show password"
 
 #. Page title
-#: src/routes/signin.tsx:67
-#: src/routes/signin.tsx:135
+#: src/routes/signin.tsx:68
+#: src/routes/signin.tsx:136
 msgid "Sign in"
 msgstr "Sign in"
 
@@ -2379,21 +2318,27 @@ msgstr "Sign in"
 msgid "Sign out"
 msgstr "Sign out"
 
-#: src/routes/signin.tsx:135
+#: src/routes/signin.tsx:136
 msgid "Signing in…"
 msgstr "Signing in…"
 
-#: src/routes/_authenticated/content/new.tsx:66
+#: src/lib/errors.ts:103
+#: src/routes/_authenticated/content/new.tsx:55
 msgid "Slug"
 msgstr "Slug"
 
-#: src/routes/account-setup.tsx:46
-#: src/routes/forgot-password.tsx:167
-#: src/routes/reset-password.tsx:136
+#: src/lib/errors.ts:180
+msgid "Some fields are not valid."
+msgstr "Some fields are not valid."
+
+#: src/routes/account-setup.tsx:43
+#: src/routes/forgot-password.tsx:159
+#: src/routes/reset-password.tsx:128
 msgid "Something went wrong. Please try again."
 msgstr "Something went wrong. Please try again."
 
-#: src/lib/auth.tsx:86
+#: src/lib/errors.ts:162
+#: src/lib/errors.ts:208
 msgid "Something went wrong. Try again."
 msgstr "Something went wrong. Try again."
 
@@ -2401,19 +2346,20 @@ msgstr "Something went wrong. Try again."
 msgid "Specific users"
 msgstr "Specific users"
 
-#: src/routes/_authenticated/home.tsx:338
-#: src/routes/_authenticated/home.tsx:640
+#: src/routes/_authenticated/home.tsx:328
+#: src/routes/_authenticated/home.tsx:632
 msgid "Spent:"
 msgstr "Spent:"
 
-#: src/components/asset-manage.tsx:180
-#: src/routes/_authenticated/content/new.tsx:70
-#: src/routes/_authenticated/place/$place_id.tsx:532
-#: src/routes/_authenticated/place/$place_id.tsx:668
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:284
-#: src/routes/_authenticated/place/asset/new.tsx:156
-#: src/routes/_authenticated/support/$support_id.tsx:318
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:685
+#: src/components/asset-manage.tsx:181
+#: src/lib/errors.ts:97
+#: src/routes/_authenticated/content/new.tsx:59
+#: src/routes/_authenticated/place/$place_id.tsx:491
+#: src/routes/_authenticated/place/$place_id.tsx:631
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:265
+#: src/routes/_authenticated/place/asset/new.tsx:125
+#: src/routes/_authenticated/support/$support_id.tsx:316
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:681
 msgid "Status"
 msgstr "Status"
 
@@ -2426,15 +2372,13 @@ msgstr "Stay"
 msgid "Stay updated with your latest activity and announcements."
 msgstr "Stay updated with your latest activity and announcements."
 
-#: src/routes/_authenticated/support/new.tsx:55
-msgid "subject"
-msgstr "subject"
-
-#: src/routes/_authenticated/support/$support_id.tsx:308
+#: src/lib/errors.ts:110
+#: src/routes/_authenticated/support/$support_id.tsx:306
+#: src/routes/_authenticated/support/new.tsx:51
 msgid "Subject"
 msgstr "Subject"
 
-#: src/routes/_authenticated/finance.tsx:147
+#: src/routes/_authenticated/finance.tsx:132
 msgid "Supplies"
 msgstr "Supplies"
 
@@ -2442,17 +2386,17 @@ msgstr "Supplies"
 msgid "Support"
 msgstr "Support"
 
-#: src/routes/_authenticated/support/$support_id.tsx:372
-#: src/routes/_authenticated/support/$support_id.tsx:400
-#: src/routes/_authenticated/support/$support_id.tsx:513
+#: src/routes/_authenticated/support/$support_id.tsx:370
+#: src/routes/_authenticated/support/$support_id.tsx:398
+#: src/routes/_authenticated/support/$support_id.tsx:507
 msgid "Support reply"
 msgstr "Support reply"
 
-#: src/routes/_authenticated/support/$support_id.tsx:530
+#: src/routes/_authenticated/support/$support_id.tsx:524
 msgid "Support team"
 msgstr "Support team"
 
-#: src/routes/_authenticated/support/$support_id.tsx:294
+#: src/routes/_authenticated/support/$support_id.tsx:292
 msgid "Support ticket"
 msgstr "Support ticket"
 
@@ -2460,20 +2404,20 @@ msgstr "Support ticket"
 msgid "Support ticket resolved"
 msgstr "Support ticket resolved"
 
-#: src/routes/_authenticated/support/$support_id.tsx:253
-#: src/routes/_authenticated/support/index.tsx:114
+#: src/routes/_authenticated/support/$support_id.tsx:251
+#: src/routes/_authenticated/support/index.tsx:98
 msgid "Support tickets"
 msgstr "Support tickets"
 
-#: src/routes/_authenticated/finance.tsx:143
+#: src/routes/_authenticated/finance.tsx:128
 msgid "Taxes"
 msgstr "Taxes"
 
-#: src/routes/_authenticated/place/new.tsx:77
+#: src/lib/errors.ts:185
 msgid "That place name is already taken."
 msgstr "That place name is already taken."
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:316
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:297
 msgid "The asset's place"
 msgstr "The asset's place"
 
@@ -2481,7 +2425,15 @@ msgstr "The asset's place"
 msgid "The code is valid for 10 minutes."
 msgstr "The code is valid for 10 minutes."
 
-#: src/routes/account-setup.tsx:38
+#: src/lib/errors.ts:198
+msgid "The email or password is not correct."
+msgstr "The email or password is not correct."
+
+#: src/lib/errors.ts:172
+msgid "The guest cannot check in before the check-in date."
+msgstr "The guest cannot check in before the check-in date."
+
+#: src/routes/account-setup.tsx:35
 msgid "The invitation link is invalid or missing required information."
 msgstr "The invitation link is invalid or missing required information."
 
@@ -2489,60 +2441,64 @@ msgstr "The invitation link is invalid or missing required information."
 msgid "The map is not available: the TomTom key is missing."
 msgstr "The map is not available: the TomTom key is missing."
 
-#: src/routes/_authenticated/content/$content_id.tsx:692
+#: src/routes/_authenticated/content/$content_id.tsx:689
 msgid "The page was updated."
 msgstr "The page was updated."
 
-#: src/components/asset-manage.tsx:41
-#: src/routes/_authenticated/place/asset/new.tsx:49
+#: src/components/asset-manage.tsx:42
+#: src/routes/_authenticated/place/asset/new.tsx:36
 msgid "The purchase date cannot be in the future."
 msgstr "The purchase date cannot be in the future."
 
-#: src/routes/reset-password.tsx:113
+#: src/routes/reset-password.tsx:105
 msgid "The reset link is invalid or incomplete."
 msgstr "The reset link is invalid or incomplete."
 
-#: src/routes/reset-password.tsx:123
+#: src/routes/reset-password.tsx:115
 msgid "The reset link is invalid, expired, or already used."
 msgstr "The reset link is invalid, expired, or already used."
 
-#: src/routes/_authenticated/content/$content_id.tsx:115
+#: src/routes/_authenticated/content/$content_id.tsx:116
 msgid "The slug can only have lowercase English letters, numbers and hyphens (-)."
 msgstr "The slug can only have lowercase English letters, numbers and hyphens (-)."
 
-#: src/routes/_authenticated/content/$content_id.tsx:477
+#: src/routes/_authenticated/content/$content_id.tsx:474
 msgid "The slug format is not valid."
 msgstr "The slug format is not valid."
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:636
+#: src/routes/_authenticated/admin/$admin_id.tsx:635
 msgid "The user was updated."
 msgstr "The user was updated."
 
-#: src/routes/_authenticated/place/$place_id.tsx:270
+#: src/routes/_authenticated/place/$place_id.tsx:229
 msgid "The worker was added to the place."
 msgstr "The worker was added to the place."
 
-#: src/routes/_authenticated/worker/$worker_id.tsx:704
+#: src/routes/_authenticated/worker/$worker_id.tsx:690
 msgid "The worker was updated."
 msgstr "The worker was updated."
 
-#: src/routes/_authenticated/admin/index.tsx:269
+#: src/routes/_authenticated/admin/index.tsx:233
 msgid "There are no users to show."
 msgstr "There are no users to show."
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:361
+#: src/lib/errors.ts:200
+msgid "This account is not active."
+msgstr "This account is not active."
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:342
 msgid "This asset has no maintenance tickets."
 msgstr "This asset has no maintenance tickets."
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:360
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:341
 msgid "This asset has no open tickets."
 msgstr "This asset has no open tickets."
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:444
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:425
 msgid "This asset has no scheduled maintenance."
 msgstr "This asset has no scheduled maintenance."
 
-#: src/components/asset-manage.tsx:124
+#: src/components/asset-manage.tsx:125
 msgid "This asset has open maintenance tickets. Complete or reject them first."
 msgstr "This asset has open maintenance tickets. Complete or reject them first."
 
@@ -2554,31 +2510,47 @@ msgstr "This booking can no longer be cancelled."
 msgid "This booking can no longer be moved to another state."
 msgstr "This booking can no longer be moved to another state."
 
+#: src/lib/errors.ts:194
+msgid "This clashes with the current data. Reload the page and try again."
+msgstr "This clashes with the current data. Reload the page and try again."
+
+#: src/lib/errors.ts:187
+msgid "This email is already registered."
+msgstr "This email is already registered."
+
 #: src/routes/p/$lang/$slug.tsx:71
 msgid "This page does not exist or is not published."
 msgstr "This page does not exist or is not published."
 
-#: src/routes/reset-password.tsx:193
+#: src/routes/reset-password.tsx:185
 msgid "This password reset link is invalid or incomplete. Please request a new reset link."
 msgstr "This password reset link is invalid or incomplete. Please request a new reset link."
 
-#: src/routes/_authenticated/place/$place_id.tsx:1020
+#: src/lib/errors.ts:192
+msgid "This place has current or upcoming stays."
+msgstr "This place has current or upcoming stays."
+
+#: src/routes/_authenticated/place/$place_id.tsx:983
 msgid "This place has no maintenance tickets."
 msgstr "This place has no maintenance tickets."
 
-#: src/routes/_authenticated/place/$place_id.tsx:1019
+#: src/routes/_authenticated/place/$place_id.tsx:982
 msgid "This place has no open tickets."
 msgstr "This place has no open tickets."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:770
+#: src/lib/errors.ts:186
+msgid "This slug is already used in this language."
+msgstr "This slug is already used in this language."
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:766
 msgid "This ticket has no asset."
 msgstr "This ticket has no asset."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1311
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1307
 msgid "This ticket has no attachments."
 msgstr "This ticket has no attachments."
 
-#: src/routes/_authenticated/worker/$worker_id.tsx:638
+#: src/routes/_authenticated/worker/$worker_id.tsx:624
 msgid "This worker has no assigned places."
 msgstr "This worker has no assigned places."
 
@@ -2594,22 +2566,22 @@ msgstr "Ticket assigned"
 msgid "Ticket completed"
 msgstr "Ticket completed"
 
-#: src/routes/_authenticated/support/$support_id.tsx:259
+#: src/routes/_authenticated/support/$support_id.tsx:257
 msgid "Ticket details"
 msgstr "Ticket details"
 
-#: src/routes/_authenticated/support/$support_id.tsx:302
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:672
+#: src/routes/_authenticated/support/$support_id.tsx:300
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:668
 msgid "Ticket information"
 msgstr "Ticket information"
 
-#: src/routes/_authenticated/support/$support_id.tsx:206
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:558
+#: src/routes/_authenticated/support/$support_id.tsx:204
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:554
 msgid "Ticket not found"
 msgstr "Ticket not found"
 
-#: src/routes/_authenticated/support/$support_id.tsx:355
-#: src/routes/_authenticated/support/$support_id.tsx:475
+#: src/routes/_authenticated/support/$support_id.tsx:353
+#: src/routes/_authenticated/support/$support_id.tsx:469
 msgid "Ticket owner"
 msgstr "Ticket owner"
 
@@ -2621,39 +2593,40 @@ msgstr "Ticket rejected"
 msgid "Ticket submitted"
 msgstr "Ticket submitted"
 
-#: src/routes/_authenticated/home.tsx:266
+#: src/routes/_authenticated/home.tsx:256
 msgid "Tickets waiting for your review"
 msgstr "Tickets waiting for your review"
 
-#: src/routes/_authenticated/support/index.tsx:259
+#: src/routes/_authenticated/support/index.tsx:243
 msgid "Tickets you open show here."
 msgstr "Tickets you open show here."
 
-#: src/routes/_authenticated/place/$place_id.tsx:520
+#: src/routes/_authenticated/place/$place_id.tsx:479
 msgid "Time zone"
 msgstr "Time zone"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:732
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:866
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:728
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:862
 msgid "Timeline"
 msgstr "Timeline"
 
-#: src/routes/_authenticated/place/$place_id.tsx:662
+#: src/routes/_authenticated/place/$place_id.tsx:625
 msgid "Timezone"
 msgstr "Timezone"
 
-#: src/routes/_authenticated/content/new.tsx:64
+#: src/lib/errors.ts:101
+#: src/routes/_authenticated/content/new.tsx:53
 #: src/routes/_authenticated/notifications.tsx:472
 #: src/routes/_authenticated/notifications.tsx:493
 msgid "Title"
 msgstr "Title"
 
-#: src/routes/_authenticated/finance.tsx:716
+#: src/routes/_authenticated/finance.tsx:697
 msgid "To"
 msgstr "To"
 
-#: src/routes/_authenticated/home.tsx:205
-#: src/routes/_authenticated/home.tsx:217
+#: src/routes/_authenticated/home.tsx:195
+#: src/routes/_authenticated/home.tsx:207
 msgid "Today"
 msgstr "Today"
 
@@ -2661,64 +2634,70 @@ msgstr "Today"
 msgid "Today's arrivals and departures, and stays starting in the next {UPCOMING_DAYS} days."
 msgstr "Today's arrivals and departures, and stays starting in the next {UPCOMING_DAYS} days."
 
-#: src/routes/forgot-password.tsx:161
+#: src/lib/errors.ts:206
+msgid "Too many attempts. Wait a little and try again."
+msgstr "Too many attempts. Wait a little and try again."
+
+#: src/routes/forgot-password.tsx:153
 msgid "Too many requests. Please try again later."
 msgstr "Too many requests. Please try again later."
 
-#: src/routes/_authenticated/finance.tsx:600
+#: src/routes/_authenticated/finance.tsx:581
 msgid "Total budget for the selected places"
 msgstr "Total budget for the selected places"
 
-#: src/routes/_authenticated/finance.tsx:637
+#: src/routes/_authenticated/finance.tsx:618
 msgid "Total expenses"
 msgstr "Total expenses"
 
-#: src/routes/_authenticated/finance.tsx:609
+#: src/routes/_authenticated/finance.tsx:590
 msgid "Total income"
 msgstr "Total income"
 
 #: src/components/place-bookings.tsx:593
 #: src/components/place-bookings.tsx:688
 #: src/components/place-bookings.tsx:778
+#: src/lib/errors.ts:136
 msgid "Total price"
 msgstr "Total price"
 
-#: src/routes/_authenticated/finance.tsx:516
+#: src/routes/_authenticated/finance.tsx:497
 msgid "Track expenses and budgets for your places."
 msgstr "Track expenses and budgets for your places."
 
-#: src/routes/forgot-password.tsx:127
+#: src/routes/forgot-password.tsx:119
 msgid "Try another email"
 msgstr "Try another email"
 
-#: src/routes/_authenticated/content/index.tsx:301
+#: src/routes/_authenticated/content/index.tsx:300
 msgid "Try another search or other filters."
 msgstr "Try another search or other filters."
 
-#: src/routes/_authenticated/admin/index.tsx:268
-#: src/routes/_authenticated/support/index.tsx:258
+#: src/routes/_authenticated/admin/index.tsx:232
+#: src/routes/_authenticated/support/index.tsx:242
 #: src/routes/_authenticated/workers.tsx:253
 msgid "Try other search words or another filter."
 msgstr "Try other search words or another filter."
 
-#: src/components/asset-manage.tsx:174
-#: src/routes/_authenticated/place/asset/new.tsx:155
+#: src/components/asset-manage.tsx:175
+#: src/lib/errors.ts:95
+#: src/routes/_authenticated/place/asset/new.tsx:124
 msgid "Type"
 msgstr "Type"
 
-#: src/routes/account-setup.tsx:42
+#: src/routes/account-setup.tsx:39
 msgid "Unable to activate your account. The link may be invalid, expired, or already used."
 msgstr "Unable to activate your account. The link may be invalid, expired, or already used."
 
-#: src/routes/forgot-password.tsx:163
-#: src/routes/reset-password.tsx:130
+#: src/routes/forgot-password.tsx:155
+#: src/routes/reset-password.tsx:122
 msgid "Unable to connect to the server. Please try again."
 msgstr "Unable to connect to the server. Please try again."
 
-#: src/components/asset-manage.tsx:26
+#: src/components/asset-manage.tsx:27
 #: src/components/place-shared.tsx:55
 #: src/components/place-shared.tsx:123
-#: src/routes/_authenticated/place/asset/new.tsx:62
+#: src/routes/_authenticated/place/asset/new.tsx:49
 #: src/routes/_authenticated/places.tsx:32
 msgid "Under maintenance"
 msgstr "Under maintenance"
@@ -2732,7 +2711,7 @@ msgstr "Unread"
 msgid "Unread notifications"
 msgstr "Unread notifications"
 
-#: src/routes/_authenticated/content/$content_id.tsx:637
+#: src/routes/_authenticated/content/$content_id.tsx:634
 msgid "Unticking this makes the page a draft."
 msgstr "Unticking this makes the page a draft."
 
@@ -2740,15 +2719,15 @@ msgstr "Unticking this makes the page a draft."
 msgid "Upcoming"
 msgstr "Upcoming"
 
-#: src/routes/_authenticated/place/$place_id.tsx:349
+#: src/routes/_authenticated/place/$place_id.tsx:308
 msgid "Update place"
 msgstr "Update place"
 
-#: src/routes/_authenticated/profile.tsx:103
+#: src/routes/_authenticated/profile.tsx:101
 msgid "Update Profile"
 msgstr "Update Profile"
 
-#: src/routes/_authenticated/place/$place_id.tsx:406
+#: src/routes/_authenticated/place/$place_id.tsx:365
 msgid "Update property"
 msgstr "Update property"
 
@@ -2757,17 +2736,17 @@ msgid "Updating..."
 msgstr "Updating..."
 
 #. placeholder {0}: date(attachment.created_at)
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1279
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1275
 msgid "Uploaded: {0}"
 msgstr "Uploaded: {0}"
 
 #: src/components/place-shared.tsx:225
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:449
-#: src/routes/_authenticated/ticket/new.tsx:262
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:445
+#: src/routes/_authenticated/ticket/new.tsx:147
 msgid "Urgent"
 msgstr "Urgent"
 
-#: src/routes/_authenticated/worker/new.tsx:205
+#: src/routes/_authenticated/worker/new.tsx:207
 msgid "Use my preferred language"
 msgstr "Use my preferred language"
 
@@ -2779,11 +2758,11 @@ msgstr "Use the international format, e.g. +966512345678"
 msgid "Use the international phone format"
 msgstr "Use the international phone format"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:185
+#: src/routes/_authenticated/admin/$admin_id.tsx:184
 msgid "User details"
 msgstr "User details"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:508
+#: src/routes/_authenticated/admin/$admin_id.tsx:507
 msgid "User ID"
 msgstr "User ID"
 
@@ -2791,20 +2770,20 @@ msgstr "User ID"
 msgid "User IDs"
 msgstr "User IDs"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:348
+#: src/routes/_authenticated/admin/$admin_id.tsx:347
 msgid "User information"
 msgstr "User information"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:205
+#: src/routes/_authenticated/admin/$admin_id.tsx:204
 msgid "User not found"
 msgstr "User not found"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:177
-#: src/routes/_authenticated/admin/index.tsx:142
+#: src/routes/_authenticated/admin/$admin_id.tsx:176
+#: src/routes/_authenticated/admin/index.tsx:106
 msgid "Users"
 msgstr "Users"
 
-#: src/routes/_authenticated/finance.tsx:141
+#: src/routes/_authenticated/finance.tsx:126
 msgid "Utilities"
 msgstr "Utilities"
 
@@ -2813,33 +2792,34 @@ msgid "UUID 1, UUID 2..."
 msgstr "UUID 1, UUID 2..."
 
 #: src/components/email-verify-panel.tsx:47
+#: src/lib/errors.ts:149
 msgid "Verification code"
 msgstr "Verification code"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:579
+#: src/routes/_authenticated/admin/$admin_id.tsx:578
 msgid "Verified"
 msgstr "Verified"
 
-#: src/lib/auth.tsx:83
+#: src/lib/errors.ts:169
 msgid "Verify your email first — we sent a 6-digit code."
 msgstr "Verify your email first — we sent a 6-digit code."
 
-#: src/routes/_authenticated/admin/index.tsx:419
-#: src/routes/_authenticated/content/index.tsx:404
-#: src/routes/_authenticated/support/index.tsx:353
+#: src/routes/_authenticated/admin/index.tsx:344
+#: src/routes/_authenticated/content/index.tsx:403
+#: src/routes/_authenticated/support/index.tsx:337
 #: src/routes/_authenticated/workers.tsx:400
 msgid "View details"
 msgstr "View details"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1298
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1294
 msgid "View full size"
 msgstr "View full size"
 
-#: src/routes/_authenticated/finance.tsx:946
+#: src/routes/_authenticated/finance.tsx:927
 msgid "View receipt"
 msgstr "View receipt"
 
-#: src/routes/_authenticated/profile.tsx:116
+#: src/routes/_authenticated/profile.tsx:114
 msgid "View your account information."
 msgstr "View your account information."
 
@@ -2848,12 +2828,16 @@ msgid "Villa"
 msgstr "Villa"
 
 #: src/components/place-shared.tsx:264
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:436
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:432
 #: src/routes/_authenticated/tickets.tsx:110
 msgid "Waiting for review"
 msgstr "Waiting for review"
 
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:230
+#: src/lib/errors.ts:204
+msgid "We could not find it. It may have been deleted."
+msgstr "We could not find it. It may have been deleted."
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:211
 msgid "We could not load the asset."
 msgstr "We could not load the asset."
 
@@ -2865,28 +2849,19 @@ msgstr "We could not load the bookings for this property."
 msgid "We could not load the bookings for:"
 msgstr "We could not load the bookings for:"
 
-#: src/routes/_authenticated/content/index.tsx:89
-msgid "We could not load the content pages."
-msgstr "We could not load the content pages."
-
-#: src/routes/_authenticated/finance.tsx:879
+#: src/routes/_authenticated/finance.tsx:860
 msgid "We could not load the expenses"
 msgstr "We could not load the expenses"
 
-#: src/routes/_authenticated/content/$content_id.tsx:282
+#: src/routes/_authenticated/content/$content_id.tsx:279
 msgid "We could not load the page."
 msgstr "We could not load the page."
 
-#: src/routes/_authenticated/support/index.tsx:242
+#: src/routes/_authenticated/support/index.tsx:226
 msgid "We could not load the support tickets."
 msgstr "We could not load the support tickets."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:213
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:269
-msgid "We could not load the ticket"
-msgstr "We could not load the ticket"
-
-#: src/routes/_authenticated/support/$support_id.tsx:111
+#: src/routes/_authenticated/support/$support_id.tsx:109
 msgid "We could not load the ticket. Try again."
 msgstr "We could not load the ticket. Try again."
 
@@ -2895,7 +2870,7 @@ msgstr "We could not load the ticket. Try again."
 msgid "We could not load the tickets."
 msgstr "We could not load the tickets."
 
-#: src/routes/_authenticated/admin/index.tsx:252
+#: src/routes/_authenticated/admin/index.tsx:216
 msgid "We could not load the users."
 msgstr "We could not load the users."
 
@@ -2907,20 +2882,20 @@ msgstr "We could not load the workers."
 msgid "We could not load this page. Try again later."
 msgstr "We could not load this page. Try again later."
 
-#: src/routes/_authenticated/place/$place_id.tsx:379
+#: src/routes/_authenticated/place/$place_id.tsx:338
 msgid "We could not load this property."
 msgstr "We could not load this property."
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:236
+#: src/routes/_authenticated/admin/$admin_id.tsx:235
 msgid "We could not load this user."
 msgstr "We could not load this user."
 
-#: src/routes/_authenticated/worker/$worker_id.tsx:301
+#: src/routes/_authenticated/worker/$worker_id.tsx:287
 msgid "We could not load this worker."
 msgstr "We could not load this worker."
 
 #: src/routes/_authenticated/bookings.tsx:149
-#: src/routes/_authenticated/home.tsx:387
+#: src/routes/_authenticated/home.tsx:377
 #: src/routes/_authenticated/places.tsx:217
 msgid "We could not load your places."
 msgstr "We could not load your places."
@@ -2929,60 +2904,63 @@ msgstr "We could not load your places."
 msgid "We sent a 6-digit code to <0>{email}</0>."
 msgstr "We sent a 6-digit code to <0>{email}</0>."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:48
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:29
 msgid "Week"
 msgstr "Week"
 
-#: src/routes/account-setup.tsx:30
+#: src/routes/account-setup.tsx:27
 msgid "Welcome! Create a password to activate your account and get started."
 msgstr "Welcome! Create a password to activate your account and get started."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1065
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1061
 msgid "Why is this ticket rejected?"
 msgstr "Why is this ticket rejected?"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:448
+#: src/routes/_authenticated/admin/$admin_id.tsx:447
 #: src/routes/_authenticated/notifications.tsx:431
-#: src/routes/_authenticated/profile.tsx:128
+#: src/routes/_authenticated/profile.tsx:126
 msgid "Worker"
 msgstr "Worker"
 
-#: src/routes/_authenticated/worker/$worker_id.tsx:392
+#: src/routes/_authenticated/worker/$worker_id.tsx:378
 msgid "Worker information"
 msgstr "Worker information"
 
-#: src/routes/_authenticated/worker/$worker_id.tsx:263
+#: src/routes/_authenticated/worker/$worker_id.tsx:249
 msgid "Worker not found"
 msgstr "Worker not found"
 
-#: src/routes/_authenticated/worker/$worker_id.tsx:471
+#: src/routes/_authenticated/worker/$worker_id.tsx:457
 msgid "Worker status"
 msgstr "Worker status"
 
 #: src/components/app-shell.tsx:29
-#: src/routes/_authenticated/place/$place_id.tsx:703
-#: src/routes/_authenticated/place/$place_id.tsx:896
-#: src/routes/_authenticated/place/new.tsx:35
+#: src/routes/_authenticated/place/$place_id.tsx:666
+#: src/routes/_authenticated/place/$place_id.tsx:859
 #: src/routes/_authenticated/places.tsx:41
-#: src/routes/_authenticated/worker/$worker_id.tsx:246
-#: src/routes/_authenticated/worker/$worker_id.tsx:282
+#: src/routes/_authenticated/worker/$worker_id.tsx:232
+#: src/routes/_authenticated/worker/$worker_id.tsx:268
 #: src/routes/_authenticated/workers.tsx:112
 msgid "Workers"
 msgstr "Workers"
 
-#: src/routes/signin.tsx:147
+#: src/routes/signin.tsx:148
 msgid "Workers sign in with the invite sent by their manager."
 msgstr "Workers sign in with the invite sent by their manager."
 
-#: src/routes/_authenticated/support/$support_id.tsx:424
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1156
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1168
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1183
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:1199
+#: src/routes/_authenticated/support/$support_id.tsx:422
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1152
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1164
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1179
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1195
 msgid "Working…"
 msgstr "Working…"
 
-#: src/routes/_authenticated/support/$support_id.tsx:406
+#: src/routes/_authenticated/support/new.tsx:27
+msgid "Write a subject and a description."
+msgstr "Write a subject and a description."
+
+#: src/routes/_authenticated/support/$support_id.tsx:404
 msgid "Write the reply and how it was solved…"
 msgstr "Write the reply and how it was solved…"
 
@@ -2991,33 +2969,36 @@ msgstr "Write the reply and how it was solved…"
 msgid "Write your announcement..."
 msgstr "Write your announcement..."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:50
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:31
 msgid "Year"
 msgstr "Year"
 
-#: src/routes/_authenticated/support/$support_id.tsx:502
-#: src/routes/_authenticated/support/$support_id.tsx:529
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:582
+#: src/routes/_authenticated/support/$support_id.tsx:496
+#: src/routes/_authenticated/support/$support_id.tsx:523
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:578
 msgid "You"
 msgstr "You"
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:97
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:589
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:63
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:585
 msgid "You (owner)"
 msgstr "You (owner)"
 
-#: src/routes/_authenticated/ticket/new.tsx:127
-#: src/routes/_authenticated/ticket/new.tsx:162
+#: src/routes/_authenticated/ticket/new.tsx:67
 msgid "You can add up to 5 photos"
 msgstr "You can add up to 5 photos"
 
-#: src/routes/account-setup.tsx:44
+#: src/routes/account-setup.tsx:41
 msgid "You can now log in using your email and password."
 msgstr "You can now log in using your email and password."
 
 #: src/components/email-verify-panel.tsx:84
 msgid "You can request a new code in"
 msgstr "You can request a new code in"
+
+#: src/lib/errors.ts:202
+msgid "You do not have permission to do this."
+msgstr "You do not have permission to do this."
 
 #: src/routes/_authenticated/notifications.tsx:651
 msgid "You don't have any notifications in this category."
@@ -3031,11 +3012,7 @@ msgstr "You have no open tasks."
 msgid "You have no places yet."
 msgstr "You have no places yet."
 
-#: src/routes/_authenticated/place/asset/maintenance/new.tsx:203
-msgid "You must be logged in"
-msgstr "You must be logged in"
-
-#: src/routes/account-setup.tsx:43
+#: src/routes/account-setup.tsx:40
 msgid "Your account has been activated successfully!"
 msgstr "Your account has been activated successfully!"
 
@@ -3043,10 +3020,14 @@ msgstr "Your account has been activated successfully!"
 msgid "Your notifications"
 msgstr "Your notifications"
 
-#: src/routes/reset-password.tsx:175
+#: src/routes/reset-password.tsx:167
 msgid "Your password has been changed successfully. Please log in again using your new password."
 msgstr "Your password has been changed successfully. Please log in again using your new password."
 
-#: src/routes/_authenticated/home.tsx:364
+#: src/routes/_authenticated/home.tsx:354
 msgid "Your places"
 msgstr "Your places"
+
+#: src/lib/errors.ts:196
+msgid "Your session has ended. Sign in again."
+msgstr "Your session has ended. Sign in again."

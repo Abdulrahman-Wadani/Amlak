@@ -1,16 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { Link, createFileRoute, redirect } from "@tanstack/react-router"
-import {
-  CalendarDays,
-  ChevronDown,
-  ChevronUp,
-  Ticket,
-  Wallet,
-  Wrench,
-  AlertTriangle,
-  CheckCircle2,
-  LogOut,
-} from "lucide-react"
+import { CalendarDays, ChevronDown, ChevronUp, Ticket, Wallet, Wrench, AlertTriangle, CheckCircle2 } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
@@ -485,7 +475,9 @@ function HomePage() {
                         "font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 14px"
                       )}
                     >
-                      {money(p.monthly_maintenance_budget)} {p.currency}
+                      {p.monthly_maintenance_budget == null
+                        ? "—"
+                        : `${money(p.monthly_maintenance_budget)} ${p.currency}`}
                     </span>
                   )}
 

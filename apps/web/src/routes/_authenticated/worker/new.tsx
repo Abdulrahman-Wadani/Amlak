@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
+import { errorMessage } from "@/lib/errors"
 
 export const Route = createFileRoute("/_authenticated/worker/new")({
   component: AddWorker,
@@ -32,7 +33,7 @@ function AddWorker() {
   const [fullname, setFullname] = useState("")
   const [email, setEmail] = useState("")
   const [phone, setPhone] = useState("")
-  const [language, setLanguage] = useState("")
+  const [language, setLanguage] = useState<"" | "ar" | "en">("")
 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [formError, setFormError] = useState("")
@@ -85,9 +86,7 @@ function AddWorker() {
       console.error("Create worker error:", error)
 
       setFormError(
-        error instanceof Error
-          ? error.message
-          : t`Could not create the worker. Please try again.`,
+        errorMessage(error),
       )
     } finally {
       setLoading(false)
@@ -200,7 +199,10 @@ function AddWorker() {
               <Trans>Preferred language</Trans>
             </Label>
 
-            <Select value={language} onValueChange={setLanguage}>
+            <Select
+              value={language}
+              onValueChange={(value) => setLanguage(value === "ar" || value === "en" ? value : "")}
+            >
               <SelectTrigger id="language" style={S("width: 100%; height: 40px")}>
                 <SelectValue placeholder={t`Use my preferred language`} />
               </SelectTrigger>

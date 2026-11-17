@@ -9,7 +9,7 @@
     "build": "tsc -b && vp build",
     "lint": "vp lint .",
     "format": "vp fmt \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "preview": "vp preview",
     "i18n:check": "lingui extract --clean && node scripts/check-catalogs.mjs"
   },

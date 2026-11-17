@@ -27,6 +27,7 @@ import { getWorkerById } from "@/lib/api"
 import { S } from "@/lib/dom-style"
 import { buttonVariants, Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { apiError, errorMessage } from "@/lib/errors"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -36,14 +37,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 
 import { StatusBadge } from "@/components/place-shared"
 import "@/styles/motion.css"
@@ -125,9 +119,7 @@ function WorkerDetailPage() {
       const result = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(
-          result?.message ?? `Update failed (${response.status})`,
-        )
+        throw apiError(response.status, result)
       }
 
       setWorker((previous) =>
@@ -145,9 +137,7 @@ function WorkerDetailPage() {
     } catch (error) {
       console.error("Update worker error:", error)
       setSaveError(
-        error instanceof Error
-          ? error.message
-          : "Failed to update worker",
+        errorMessage(error),
       )
     } finally {
       setSaving(false)
@@ -176,18 +166,14 @@ function WorkerDetailPage() {
       const result = await response.json().catch(() => null)
 
       if (!response.ok) {
-        throw new Error(
-          result?.message ?? `Delete failed (${response.status})`,
-        )
+        throw apiError(response.status, result)
       }
 
       await navigate({ to: "/workers" })
     } catch (error) {
       console.error("Delete worker error:", error)
       setDeleteError(
-        error instanceof Error
-          ? error.message
-          : "Failed to delete worker",
+        errorMessage(error),
       )
     } finally {
       setDeleting(false)

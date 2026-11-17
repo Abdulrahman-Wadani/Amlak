@@ -1,22 +1,16 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { Link, createFileRoute } from "@tanstack/react-router"
-import {
-  CircleAlert,
-  MapPin,
-  Plus,
-  Search,
-  UserRound,
-  Phone,
-} from "lucide-react"
+import { CircleAlert, Search, UserRound, Phone } from "lucide-react"
 
+import type { User } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
 import { getUsers } from "@/lib/api"
 import { S } from "@/lib/dom-style"
 
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -28,41 +22,11 @@ import {
 } from "@/components/ui/empty"
 
 import { StatusBadge } from "@/components/place-shared"
-import { cn } from "cn"
 import "@/styles/motion.css"
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: UsersPage,
 })
-
-type UserStatus =
-  | "ACTIVE"
-  | "INVITED"
-  | "PENDING_VERIFICATION"
-  | "DEACTIVATED"
-
-type UserRole = "ADMIN" | "MANAGER" | "WORKER"
-
-interface AssignedPlace {
-  id: string
-  place_name: string
-}
-
-interface Users {
-  id: string
-  fullname: string
-  email: string
-  phone: string | null
-  picture_url: string | null
-  role: UserRole
-  status: UserStatus
-  preferred_language: "ar" | "en"
-  email_verified_at: string | null
-  manager_id: string | null
-  created_at: string
-  updated_at: string
-  assigned_places?: AssignedPlace[]
-}
 
 // Labels are components so they translate at render, not at import.
 const TABS = [
@@ -78,7 +42,7 @@ type TabKey = (typeof TABS)[number]["key"]
 function UsersPage() {
   const { accessToken } = useAuth()
 
-  const [users, setUsers] = useState<Users[] | null>(null)
+  const [users, setUsers] = useState<User[] | null>(null)
   const [error, setError] = useState(false)
   const [query, setQuery] = useState("")
   const [tab, setTab] = useState<TabKey>("ALL")
@@ -369,46 +333,7 @@ function UsersPage() {
                   </span>
                 </span>
 
-                <span
-                  style={S(
-                    "display: flex; align-items: center; gap: 4px; flex-shrink: 0",
-                  )}
-                >
-                  <MapPin size={12} />
-                  <Trans>{user.assigned_places?.length ?? 0} places</Trans>
-                </span>
               </div>
-
-              {/* Assigned Places */}
-              {user.assigned_places &&
-                user.assigned_places.length > 0 && (
-                  <div
-                    style={S(
-                      "display: flex; flex-wrap: wrap; gap: 5px",
-                    )}
-                  >
-                    {user.assigned_places.slice(0, 2).map((place) => (
-                      <span
-                        key={place.id}
-                        style={S(
-                          "max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 4px 7px; background: var(--muted); color: var(--muted-foreground); font-size: 10px",
-                        )}
-                      >
-                        {place.place_name}
-                      </span>
-                    ))}
-
-                    {user.assigned_places.length > 2 && (
-                      <span
-                        style={S(
-                          "padding: 4px 7px; background: var(--muted); color: var(--muted-foreground); font-size: 10px",
-                        )}
-                      >
-                        +{user.assigned_places.length - 2}
-                      </span>
-                    )}
-                  </div>
-                )}
 
               {/* Footer */}
               <div
@@ -417,7 +342,7 @@ function UsersPage() {
                 )}
               >
                 <Trans>View details</Trans>
-                <span aria-hidden="true">←</span>
+                <span aria-hidden="true" className="inline-block rtl:rotate-180">→</span>
               </div>
             </Link>
           ))}
