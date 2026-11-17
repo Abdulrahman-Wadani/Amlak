@@ -168,10 +168,10 @@ export default defineConfig({
     tanstackRouter({ target: "react", autoCodeSplitting: true }),
     react(),
   ]),
-  test:{
-    envrionment: "happy-dom",
-    setupFiles: ['./src/tests/setup.ts'],
-    include: ['/src/**/*.{test,spec}.{ts,tsx}']
+  test: {
+    environment: "happy-dom",
+    setupFiles: ["./tests/setup.ts"],
+    include: ["src/**/*.{test,spec}.{ts,tsx}"],
   },
   resolve: {
     alias: {
