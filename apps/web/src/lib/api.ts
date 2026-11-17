@@ -225,14 +225,18 @@ export interface TicketListQuery {
   status?: TicketStatus
   assignee_id?: string
   place_id?: string
+  asset_id?: string
   /** newest (the default): last created first. due_date: soonest due first, none last. */
   sort?: "newest" | "due_date"
+  /** true: PENDING_REVIEW and APPROVED, as the dashboard's open_tickets; false: the rest. */
+  open?: boolean
 }
 
-function ticketQuery(query: TicketListQuery): string {
+export function ticketQuery(query: TicketListQuery): string {
   const params = new URLSearchParams()
   for (const [key, value] of Object.entries(query)) {
-    if (value) params.set(key, value)
+    // Booleans are sent as "true" or "false"; empty values are left out.
+    if (value !== undefined && value !== "") params.set(key, String(value))
   }
   return params.toString()
 }
@@ -524,17 +528,6 @@ export async function getAssetById(
       return data
     },
   )
-}
-
-export async function getTicketsForPlace(
-  token: string,
-  placeId: string,
-) {
-  const response = await authFetch(`/tickets?place_id=${placeId}`, token).then(
-    (res) => res.json(),
-  )
-
-  return response.data;
 }
 
 export async function getTicketById(

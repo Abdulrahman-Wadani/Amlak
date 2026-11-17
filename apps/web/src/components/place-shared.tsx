@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import type { TicketStatus } from "@amlak/shared"
 import { Trans } from "@lingui/react/macro"
 import { S } from "@/lib/dom-style"
 
@@ -248,4 +249,38 @@ export function OverdueChip() {
       <Trans>Overdue</Trans>
     </Chip>
   )
+}
+
+/**
+ * A maintenance ticket's status. (StatusBadge is for places and support
+ * tickets.) Every status has its own case, so a new one is a type error here
+ * rather than a wrong label.
+ */
+export function TicketStatusChip({ status }: { status: TicketStatus }) {
+  switch (status) {
+    case "PENDING_REVIEW":
+      return (
+        <Chip bg="var(--warn-50)" border="var(--warn-200)" text="var(--warn-700)" dot="var(--warn)">
+          <Trans>Waiting for review</Trans>
+        </Chip>
+      )
+    case "APPROVED":
+      return (
+        <Chip bg="var(--info-50)" border="var(--info-200)" text="var(--info-700)" dot="var(--info)">
+          <Trans>Approved</Trans>
+        </Chip>
+      )
+    case "REJECTED":
+      return (
+        <Chip bg="var(--crit-50)" border="var(--crit-200)" text="var(--crit-900)" dot="var(--crit)">
+          <Trans>Rejected</Trans>
+        </Chip>
+      )
+    case "COMPLETED":
+      return (
+        <Chip bg="var(--good-50)" border="var(--good-200)" text="var(--good-700)" dot="var(--good)">
+          <Trans>Completed</Trans>
+        </Chip>
+      )
+  }
 }
