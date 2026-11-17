@@ -8,6 +8,9 @@ RUN bun install --frozen-lockfile
 COPY packages/shared packages/shared
 COPY apps/web apps/web
 WORKDIR /app/apps/web
+# Vite puts VITE_ variables into the bundle at build time.
+ARG VITE_TOMTOM_API_KEY
+ENV VITE_TOMTOM_API_KEY=$VITE_TOMTOM_API_KEY
 # Not `bun run build`: its `tsc -b` step fails on the web app's current
 # type errors. Put it back once they are fixed.
 RUN bunx vp build
