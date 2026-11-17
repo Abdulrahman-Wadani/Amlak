@@ -10,7 +10,7 @@ export const requireAuth: RequestHandler = async (req, res, next) => {
 
 	try {
 		res.locals.user = await verifyAccessToken(header.slice("Bearer ".length));
-	} catch (error){
+	} catch {
 		throw new AppError(
 			"UNAUTHENTICATED",
 			"Your session is invalid or has expired",
