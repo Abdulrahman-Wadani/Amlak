@@ -12,7 +12,6 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react"
-import { Trans, useLingui } from "@lingui/react/macro"
 
 import { useAuth } from "@/lib/auth"
 import { getContents } from "@/lib/api"
@@ -23,7 +22,7 @@ import type {
 } from "@/lib/api"
 import { S } from "@/lib/dom-style"
 
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -34,6 +33,9 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { cn } from "@/lib/utils"
+import { buttonVariants } from "@/components/ui/button"
+import { Trans } from "@lingui/react/macro"
+
 
 import "@/styles/motion.css"
 
@@ -47,7 +49,6 @@ const PAGE_SIZE = 12
 
 function ContentPage() {
   const { accessToken } = useAuth()
-  const { _ } = useLingui()
 
   const [contents, setContents] = useState<WebContent[] | null>(null)
   const [pagination, setPagination] = useState<ContentPagination | null>(null)
@@ -82,7 +83,7 @@ function ContentPage() {
         setError(
           err instanceof Error
             ? err.message
-            : _("تعذر تحميل صفحات المحتوى."),
+            : "تعذر تحميل صفحات المحتوى.",
         )
         setContents([])
       })
@@ -93,7 +94,7 @@ function ContentPage() {
     return () => {
       alive = false
     }
-  }, [accessToken, language, page, _])
+  }, [accessToken, language, page])
 
   const visible = useMemo(() => {
     if (!contents) return []
@@ -142,15 +143,14 @@ function ContentPage() {
       >
         <div>
           <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-            <Trans>إدارة المحتوى</Trans>
+            إدارة المحتوى
           </h1>
-
           <p
             style={S(
               "margin: 7px 0 0; color: var(--muted-foreground); font-size: 13px",
             )}
           >
-            <Trans>إدارة صفحات الموقع ومحتواها وحالة نشرها.</Trans>
+            إدارة صفحات الموقع ومحتواها وحالة نشرها.
           </p>
         </div>
 
@@ -158,7 +158,7 @@ function ContentPage() {
           to="/content/new"
           className={cn(buttonVariants(), "am-btn am-solid")}
           style={S(
-            "height: 44px; min-width: 44px; padding: 0 16px; font-size: 15px; font-weight: 600; box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1)",
+            "height: 44px; min-width: 44px; padding: 0 16px; font-size: 15px; font-weight: 600; box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1)"
           )}
         >
           <Plus
@@ -182,7 +182,7 @@ function ContentPage() {
               "position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)",
             )}
           >
-            <Trans>البحث في المحتوى</Trans>
+            البحث في المحتوى
           </Label>
 
           <Search
@@ -197,23 +197,22 @@ function ContentPage() {
             type="search"
             className="am-input"
             style={S("padding-inline-start: 42px")}
-            placeholder={_("ابحث بعنوان الصفحة أو الرابط...")}
+            placeholder="ابحث بعنوان الصفحة أو الرابط..."
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
         </div>
 
-        {/* Language filters */}
         <div
           role="group"
-          aria-label={_("تصفية حسب اللغة")}
+          aria-label="تصفية حسب اللغة"
           style={S("display: flex; gap: 7px; flex-wrap: wrap")}
         >
           {(
             [
-              { key: "ALL", label: _("كل اللغات") },
-              { key: "ar", label: _("العربية") },
-              { key: "en", label: _("الإنجليزية") },
+              { key: "ALL", label: "كل اللغات" },
+              { key: "ar", label: "العربية" },
+              { key: "en", label: "الإنجليزية" },
             ] as const
           ).map((item) => (
             <button
@@ -232,14 +231,14 @@ function ContentPage() {
       {/* Status tabs */}
       <div
         role="group"
-        aria-label={_("تصفية حسب حالة النشر")}
+        aria-label="تصفية حسب حالة النشر"
         style={S("display: flex; gap: 8px; flex-wrap: wrap")}
       >
         {(
           [
-            { key: "ALL", label: _("الكل") },
-            { key: "PUBLISHED", label: _("منشور") },
-            { key: "DRAFT", label: _("مسودات") },
+            { key: "ALL", label: "الكل" },
+            { key: "PUBLISHED", label: "منشور" },
+            { key: "DRAFT", label: "مسودات" },
           ] as const
         ).map((item) => (
           <button
@@ -291,19 +290,14 @@ function ContentPage() {
         <Empty style={S("padding: 40px")}>
           <EmptyHeader>
             <EmptyTitle>
-              {query || tab !== "ALL" || language !== "ALL" ? (
-                <Trans>لا توجد صفحات مطابقة</Trans>
-              ) : (
-                <Trans>لا توجد صفحات محتوى حتى الآن</Trans>
-              )}
+              {query || tab !== "ALL" || language !== "ALL"
+                ? "لا توجد صفحات مطابقة"
+                : "لا توجد صفحات محتوى حتى الآن"}
             </EmptyTitle>
-
             <EmptyDescription>
-              {query || tab !== "ALL" || language !== "ALL" ? (
-                <Trans>جرّب تغيير البحث أو الفلاتر المحددة.</Trans>
-              ) : (
-                <Trans>ابدأ بإنشاء أول صفحة محتوى.</Trans>
-              )}
+              {query || tab !== "ALL" || language !== "ALL"
+                ? "جرّب تغيير البحث أو الفلاتر المحددة."
+                : "ابدأ بإنشاء أول صفحة محتوى."}
             </EmptyDescription>
 
             {query || tab !== "ALL" || language !== "ALL" ? (
@@ -316,12 +310,12 @@ function ContentPage() {
                   changeLanguage("ALL")
                 }}
               >
-                <Trans>مسح الفلاتر</Trans>
+                مسح الفلاتر
               </Button>
             ) : (
               <Link to="/content/new" className="am-btn">
                 <Plus size={15} />
-                <Trans>إنشاء صفحة</Trans>
+                إنشاء صفحة
               </Link>
             )}
           </EmptyHeader>
@@ -362,7 +356,6 @@ function ContentPage() {
                   >
                     {content.title}
                   </div>
-
                   <div
                     dir="ltr"
                     style={S(
@@ -385,11 +378,7 @@ function ContentPage() {
                   )}
                 >
                   <Globe size={12} />
-                  {content.language === "ar" ? (
-                    <Trans>العربية</Trans>
-                  ) : (
-                    <Trans>English</Trans>
-                  )}
+                  {content.language === "ar" ? "العربية" : "English"}
                 </span>
 
                 <span
@@ -398,12 +387,7 @@ function ContentPage() {
                   )}
                 >
                   {content.is_published ? <Eye size={12} /> : <EyeOff size={12} />}
-
-                  {content.is_published ? (
-                    <Trans>منشور</Trans>
-                  ) : (
-                    <Trans>مسودة</Trans>
-                  )}
+                  {content.is_published ? "منشور" : "مسودة"}
                 </span>
               </div>
 
@@ -413,13 +397,10 @@ function ContentPage() {
                 )}
               >
                 <span>
-                  <Trans>آخر تحديث:</Trans>{" "}
+                  آخر تحديث:{" "}
                   {new Date(content.updated_at).toLocaleDateString("ar-SA")}
                 </span>
-
-                <span>
-                  <Trans>عرض التفاصيل ←</Trans>
-                </span>
+                <span>عرض التفاصيل ←</span>
               </div>
             </Link>
           ))}
@@ -434,10 +415,8 @@ function ContentPage() {
           )}
         >
           <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-            <Trans>
-              صفحة {pagination.page} من {pagination.total_pages} — إجمالي{" "}
-              {pagination.total} صفحة
-            </Trans>
+            صفحة {pagination.page} من {pagination.total_pages} — إجمالي{" "}
+            {pagination.total} صفحة
           </span>
 
           <div style={S("display: flex; gap: 8px; align-items: center")}>
@@ -449,7 +428,7 @@ function ContentPage() {
               onClick={() => setPage((current) => current - 1)}
             >
               <ChevronRight size={15} />
-              <Trans>السابق</Trans>
+              السابق
             </Button>
 
             <Button
@@ -459,7 +438,7 @@ function ContentPage() {
               disabled={page >= pagination.total_pages}
               onClick={() => setPage((current) => current + 1)}
             >
-              <Trans>التالي</Trans>
+              التالي
               <ChevronLeft size={15} />
             </Button>
           </div>

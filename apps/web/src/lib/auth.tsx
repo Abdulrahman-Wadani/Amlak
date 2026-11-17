@@ -113,6 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [])
 
   async function login(email: string, password: string) {

@@ -1616,589 +1616,256 @@ msgstr "Your password has been changed successfully. Please log in again using y
 msgid "Your places"
 msgstr "Your places"
 
-#~ msgid "آخر تحديث"
-#~ msgstr "Last Updated"
-
-#: src/routes/_authenticated/content/index.tsx:416
-msgid "آخر تحديث:"
-msgstr "Last updated:"
-
-#: src/routes/_authenticated/place/$place_id.tsx:1067
-msgid "أضافة تذكرة"
-msgstr "Add ticket"
-
-#: src/routes/_authenticated/finance.tsx:634
-msgid "إجمالي الإيرادات"
-msgstr "Total revenue"
-
-#: src/routes/_authenticated/finance.tsx:662
-msgid "إجمالي المصروفات"
-msgstr "Total expenses"
-
-#: src/routes/_authenticated/finance.tsx:625
-msgid "إجمالي الميزانية للملكيات المحددة"
-msgstr "Total budget for selected properties"
-
-#: src/routes/_authenticated/content/index.tsx:145
-msgid "إدارة المحتوى"
-msgstr "Content Management"
-
-#: src/routes/_authenticated/content/index.tsx:153
-msgid "إدارة صفحات الموقع ومحتواها وحالة نشرها."
-msgstr "Manage website pages, their content, and publication status."
-
-#: src/routes/_authenticated/finance.tsx:1115
-msgid "إرفاق الإيصال (اختياري)"
-msgstr "Attach receipt (optional)"
-
-#~ msgid "إضافة جدولة صيانة"
-#~ msgstr "Add Scheduled Maintenance"
-
-#~ msgid "إضافة عامل"
-#~ msgstr "Add Worker"
-
-#~ msgid "إضافة محتوى"
-#~ msgstr "Add Content"
-
-#: src/routes/_authenticated/finance.tsx:859
-msgid "إضافة مصروف"
-msgstr "Add Expense"
-
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:985
-msgid "إعادة تعيين المكلف"
-msgstr "Reassign"
-
-#: src/routes/_authenticated/finance.tsx:1143
-msgid "إلغاء"
-msgstr "Cancel"
-
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:648
-msgid "إلغاء الجدولة"
-msgstr "Cancel Schedule"
-
-#: src/routes/_authenticated/finance.tsx:741
-msgid "إلى تاريخ"
-msgstr "To Date"
-
-#~ msgid "إنشاء جدولة"
-#~ msgstr "Create Schedule"
-
-#~ msgid "إنشاء جدولة صيانة للأصل"
-#~ msgstr "Create a recurring maintenance schedule for an asset."
-
-#: src/routes/_authenticated/content/index.tsx:324
-msgid "إنشاء صفحة"
-msgstr "Create Page"
-
-#~ msgid "إنشاء عامل"
-#~ msgstr "Create Worker"
-
-#: src/routes/_authenticated/finance.tsx:653
-msgid "إيرادات الحجوزات خلال الفترة المحددة"
-msgstr "Booking revenue during the selected period"
-
-#: src/routes/_authenticated/content/index.tsx:305
-msgid "ابدأ بإنشاء أول صفحة محتوى."
-msgstr "Start by creating your first content page."
-
-#: src/routes/_authenticated/finance.tsx:1124
-msgid "اترك الحقل فارغًا للاحتفاظ بالإيصال الحالي."
-msgstr "Leave this field empty to keep the current receipt."
-
-#: src/routes/_authenticated/finance.tsx:576
-#: src/routes/_authenticated/finance.tsx:1046
-msgid "اختر الملكية"
-msgstr "Select Property"
-
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:997
-msgid "اكتملت التذكرة"
-msgstr "Ticket Completed"
-
-#~ msgid "الأصل"
-#~ msgstr "Asset"
-
-#: src/routes/_authenticated/finance.tsx:537
-msgid "الإدارة المالية"
-msgstr "Finance"
-
-#~ msgid "الإنجليزية"
-#~ msgstr "English"
-
-#: src/routes/_authenticated/finance.tsx:777
-msgid "الإيرادات"
-msgstr "Revenue"
-
-#: src/routes/_authenticated/finance.tsx:709
-msgid "الإيرادات ناقص المصروفات"
-msgstr "Revenue minus expenses"
-
-#~ msgid "الاسم الكامل"
-#~ msgstr "Full Name"
-
-#~ msgid "الانجليزية"
-#~ msgstr "English"
-
-#: src/routes/_authenticated/content/index.tsx:185
-msgid "البحث في المحتوى"
-msgstr "Search content"
-
-#~ msgid "البريد الإلكتروني"
-#~ msgstr "Email Address"
-
-#: src/routes/_authenticated/content/index.tsx:462
-msgid "التالي"
-msgstr "Next"
-
-#~ msgid "التحقق من البريد الإلكتروني"
-#~ msgstr "Email Verification"
-
-#~ msgid "التذكير قبل"
-#~ msgstr "Reminder Before Due Date"
-
-#: src/routes/_authenticated/finance.tsx:1055
-msgid "التصنيف"
-msgstr "Category"
-
-#: src/routes/_authenticated/finance.tsx:720
-msgid "التقرير المالي"
-msgstr "Financial Report"
-
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:607
-msgid "التنبيه قبل الموعد"
-msgstr "Reminder Before Due Date"
-
-#: src/routes/_authenticated/place/$place_id.tsx:561
-msgid "الحالة"
-msgstr "Status"
-
-#: src/routes/_authenticated/support/$support_id.tsx:237
-msgid "الرئيسية"
-msgstr "Home"
-
-#: src/routes/_authenticated/content/index.tsx:452
-msgid "السابق"
-msgstr "Previous"
-
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:673
-msgid "الصفحة السابقة"
-msgstr "Previous page"
-
-#~ msgid "الصلاحية"
-#~ msgstr "Role"
-
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:472
-msgid "الصيانة المجدولة"
-msgstr "Scheduled Maintenance"
-
-#: src/routes/_authenticated/content/index.tsx:389
-msgid "العربية"
-msgstr "Arabic"
-
-#: src/routes/_authenticated/support/$support_id.tsx:539
-msgid "العودة إلى تذاكر الدعم"
-msgstr "Back to Support Tickets"
-
-#~ msgid "اللغة"
-#~ msgstr "Language"
-
-#~ msgid "اللغة المفضلة"
-#~ msgstr "Preferred Language"
-
-#: src/routes/_authenticated/finance.tsx:1068
-msgid "المبلغ"
-msgstr "Amount"
-
-#~ msgid "المحتوى"
-#~ msgstr "Content"
-
-#~ msgid "المسار"
-#~ msgstr "Slug"
-
-#: src/routes/_authenticated/finance.tsx:786
-msgid "المصروفات"
-msgstr "Expenses"
-
-#: src/routes/_authenticated/finance.tsx:805
-msgid "المصروفات حسب التصنيف"
-msgstr "Expenses by Category"
-
-#: src/routes/_authenticated/finance.tsx:681
-msgid "المصروفات خلال الفترة المحددة"
-msgstr "Expenses during the selected period"
-
-#~ msgid "المعلومات الشخصية"
-#~ msgstr "Personal Information"
-
-#~ msgid "الملف الشخصي"
-#~ msgstr "Profile"
-
-#: src/routes/_authenticated/finance.tsx:1038
-msgid "الملكية"
-msgstr "Property"
-
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:314
-msgid "الملكية المرتبطة بالأصل"
-msgstr "Property linked to the asset"
-
-#: src/routes/_authenticated/finance.tsx:604
-msgid "الميزانية الشهرية"
-msgstr "Monthly Budget"
-
-# Arabic source strings used in the application
-#~ msgid "النص"
-#~ msgstr "Text"
-
-#~ msgid "الوحدة"
-#~ msgstr "Interval Unit"
-
-#: src/routes/_authenticated/finance.tsx:1094
-msgid "الوصف"
-msgstr "Description"
-
-#: src/routes/_authenticated/content/new.tsx:69
-msgid "انجليزي"
-msgstr "English"
-
-#~ msgid "بيانات حسابك الشخصي."
-#~ msgstr "Your account information."
-
-#~ msgid "تاريخ الإنشاء"
-#~ msgstr "Created At"
-
-#~ msgid "تاريخ التحديث"
-#~ msgstr "Updated At"
-
-#~ msgid "تاريخ الصيانة القادم"
-#~ msgstr "Next Due Date"
-
-#: src/routes/_authenticated/finance.tsx:1083
-msgid "تاريخ المصروف"
-msgstr "Expense Date"
-
-#~ msgid "تاريخ تأكيد البريد الإلكتروني"
-#~ msgstr "Email Verified At"
-
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:572
-msgid "تتكرر كل"
-msgstr "Repeats every"
-
-#~ msgid "تحديث الملف الشخصي"
-#~ msgstr "Update Profile"
-
-#: src/routes/_authenticated/place/$place_id.tsx:378
-msgid "تحديث الملكية"
-msgstr "Update Property"
-
-#: src/routes/_authenticated/support/$support_id.tsx:246
-#: src/routes/_authenticated/support/index.tsx:127
-
-#: src/routes/_authenticated/support/$support_id.tsx:287
-msgid "تذكرة دعم"
-msgstr "Support Ticket"
-
-#: src/routes/_authenticated/finance.tsx:563
-msgid "تصفية حسب الملكية"
-msgstr "Filter by Property"
-
-#: src/routes/_authenticated/finance.tsx:984
-msgid "تعديل"
-msgstr "Edit"
-
-#: src/routes/_authenticated/finance.tsx:904
-msgid "تعذر تحميل المصروفات"
-msgstr "Failed to load expenses"
-
-#: src/routes/_authenticated/support/$support_id.tsx:252
-msgid "تفاصيل التذكرة"
-msgstr "Ticket Details"
-
-#~ msgid "تكرار كل"
-#~ msgstr "Repeat Every"
-
-#~ msgid "تم التحقق"
-#~ msgstr "Verified"
-
-#~ msgid "تم حلها"
-#~ msgstr "close"
-
-#~ msgid "جارٍ تحميل الملف الشخصي..."
-#~ msgstr "Loading profile..."
-
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:499
-msgid "جدولة صيانة"
-msgstr "Schedule Maintenance"
-
-#: src/routes/_authenticated/content/index.tsx:303
-msgid "جرّب تغيير البحث أو الفلاتر المحددة."
-msgstr "Try changing your search or selected filters."
-
-#: src/routes/_authenticated/finance.tsx:847
-msgid "جميع المصروفات المسجلة للملكيات."
-msgstr "All expenses recorded for properties."
-
-#: src/routes/_authenticated/finance.tsx:582
-msgid "جميع الملكيات"
-msgstr "All Properties"
-
-#~ msgid "حالة الحساب"
-#~ msgstr "Account Status"
-
-#: src/routes/_authenticated/finance.tsx:723
-msgid "حدد الفترة الزمنية لعرض الإيرادات والمصروفات والأرباح."
-msgstr "Select a time period to view revenue, expenses, and profits."
-
-#: src/routes/_authenticated/finance.tsx:994
-msgid "حذف"
-msgstr "Delete"
-
-#~ msgid "حفظ"
-#~ msgstr "Save"
-
-#: src/routes/_authenticated/support/$support_id.tsx:377
-#: src/routes/_authenticated/support/$support_id.tsx:456
-msgid "حل التذكرة"
-msgstr "Resolve Ticket"
-
-#: src/routes/_authenticated/support/$support_id.tsx:365
-#: src/routes/_authenticated/support/$support_id.tsx:393
-#: src/routes/_authenticated/support/$support_id.tsx:504
-msgid "رد الإدارة"
-msgstr "Admin Reply"
-
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:971
-msgid "رفض التذكرة"
-msgstr "Reject Ticket"
-
-#: src/routes/_authenticated/ticket/new.tsx:234
-msgid "رفع تذكرة صيانة"
-msgstr "Submit Maintenance Ticket"
-
-#~ msgid "رقم الجوال"
-#~ msgstr "Phone Number"
-
-#: src/routes/_authenticated/finance.tsx:1105
-msgid "رقم تذكرة الصيانة (اختياري)"
-msgstr "Maintenance Ticket Number (optional)"
-
-#: src/routes/_authenticated/finance.tsx:841
-msgid "سجل المصروفات"
-msgstr "Expense History"
-
-#: src/routes/_authenticated/support/$support_id.tsx:348
-#: src/routes/_authenticated/support/$support_id.tsx:466
-msgid "صاحب التذكرة"
-msgstr "Ticket Owner"
-
-#: src/routes/_authenticated/finance.tsx:690
-#: src/routes/_authenticated/finance.tsx:795
-msgid "صافي الربح"
-msgstr "Net Profit"
-
-#. placeholder {0}: pagination.page
-#. placeholder {1}: pagination.total_pages
-#. placeholder {2}: pagination.total
-#: src/routes/_authenticated/content/index.tsx:437
-msgid "صفحة {0} من {1} — إجمالي {2} صفحة"
-msgstr "Page {0} of {1} — {2} pages total"
-
-#~ msgid "عامل"
-#~ msgstr "Worker"
-
-#: src/routes/_authenticated/content/new.tsx:69
-msgid "عربي"
-msgstr "Arabic"
-
-#: src/routes/_authenticated/finance.tsx:971
-msgid "عرض الإيصال"
-msgstr "View Receipt"
-
-#: src/routes/_authenticated/content/index.tsx:421
-msgid "عرض التفاصيل ←"
-msgstr "View Details ←"
-
-#~ msgid "غير نشط"
-#~ msgstr "Inactive"
-
-#~ msgid "فشل تحميل الملف الشخصي"
-#~ msgstr "Failed to load profile"
-
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:959
-msgid "قبول التذكرة"
-msgstr "Accept Ticket"
-
-#~ msgid "كل اللغات"
-#~ msgstr "All languages"
-
-#: src/routes/_authenticated/finance.tsx:824
-msgid "لا توجد بيانات مالية خلال الفترة المحددة."
-msgstr "No financial data for the selected period."
-
-#: src/routes/_authenticated/content/index.tsx:297
-msgid "لا توجد صفحات محتوى حتى الآن"
-msgstr "There are no content pages yet"
-
-#: src/routes/_authenticated/content/index.tsx:295
-msgid "لا توجد صفحات مطابقة"
-msgstr "No matching pages"
-
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:526
-msgid "لا توجد صيانة دورية مجدولة لهذا الأصل."
-msgstr "No periodic maintenance is scheduled for this asset."
-
-#: src/routes/_authenticated/finance.tsx:916
-msgid "لا توجد مصروفات"
-msgstr "No expenses"
-
-#: src/routes/_authenticated/finance.tsx:919
-msgid "لا توجد مصروفات تطابق خيارات التصفية المحددة."
-msgstr "No expenses match the selected filters."
-
-#~ msgid "لا يوجد مستخدمون حتى الآن"
-#~ msgstr "User not exist now"
-
-#~ msgid "لا يوجد مستخدمون لعرضهم حالياً"
-#~ msgstr "We don't have user to show it "
-
-#~ msgid "لم يتم التحقق"
-#~ msgstr "Not Verified"
-
-#: src/routes/_authenticated/finance.tsx:541
-msgid "متابعة المصروفات والميزانيات الخاصة بالملكيات."
-msgstr "Track expenses and budgets for properties."
-
-#~ msgid "مدير"
-#~ msgstr "Manager"
-
-#~ msgid "مسؤول"
-#~ msgstr "Admin"
-
-#: src/routes/_authenticated/content/index.tsx:319
-msgid "مسح الفلاتر"
-msgstr "Clear Filters"
-
-#~ msgid "مسودات"
-#~ msgstr "Draft"
-
-#: src/routes/_authenticated/content/index.tsx:405
-msgid "مسودة"
-msgstr "Draft"
-
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:248
-msgid "معلومات الأصل"
-msgstr "Asset Information"
-
-#: src/routes/_authenticated/support/$support_id.tsx:295
-msgid "معلومات التذكرة"
-msgstr "Ticket Information"
-
-#: src/routes/_authenticated/place/$place_id.tsx:642
-msgid "معلومات الملكية"
-msgstr "Property Information"
-
-#~ msgid "مفتوحة"
-#~ msgstr "open"
-
-#: src/routes/_authenticated/finance.tsx:730
-msgid "من تاريخ"
-msgstr "From Date"
-
-#: src/routes/_authenticated/content/index.tsx:403
-msgid "منشور"
-msgstr "Publish"
-
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:595
-msgid "موعد الصيانة القادمة"
-msgstr "Next Maintenance Due Date"
-
-#~ msgid "نشط"
-#~ msgstr "Active"
-
-#~ msgid "هل ينشر؟"
-#~ msgstr "Is Published?"
-
-#~ msgid "هوية المسؤول (اختياري)"
-#~ msgstr "Default Assignee ID (Optional)"
-
-#: src/routes/_authenticated/place/asset/$asset_id.tsx:611
-msgid "يوم"
-msgstr "Day"
-
-
-msgid "المستخدمون"
-msgstr "Users"
-
-msgid "الكل"
-msgstr "All"
-
-msgid "نشط"
-msgstr "Active"
-
-msgid "الدعوات"
-msgstr "Invitations"
-
-msgid "بانتظار التحقق"
-msgstr "Pending verification"
-
-msgid "غير نشط"
-msgstr "Inactive"
-
-msgid "مدير النظام"
-msgstr "Administrator"
-
-msgid "مالك"
-msgstr "Owner"
-
-msgid "عامل"
-msgstr "Worker"
-
-msgid "بحث"
-msgstr "Search"
-
-msgid "ابحث بالاسم أو البريد الإلكتروني أو الجوال أو المعرف"
-msgstr "Search by name, email, phone, or ID"
-
-msgid "تصفية حسب الحالة"
-msgstr "Filter by status"
-
-msgid "تعذر تحميل بيانات المستخدمين."
-msgstr "Failed to load users."
-
-msgid "لا يوجد مستخدمون مطابقون"
-msgstr "No matching users found"
-
-msgid "لا يوجد مستخدمون حتى الآن"
-msgstr "No users yet"
-
-msgid "جرّب تغيير كلمات البحث أو الفلتر المحدد."
-msgstr "Try changing your search terms or selected filter."
-
-msgid "لا يوجد مستخدمون لعرضهم حالياً."
-msgstr "There are currently no users to display."
-
-msgid "مسح الفلاتر"
-msgstr "Clear filters"
-
-msgid "لا يوجد رقم"
-msgstr "No phone number"
-
-msgid "أماكن"
-msgstr "Places"
-
-msgid "عرض التفاصيل"
-msgstr "View details"
-
-msgid "تذاكر الدعم"
-msgstr "Support"
-
-msgid "إضافة تذكرة"
-msgstr "add ticket"
-
-msgid "العربية"
-msgstr "Arabic"
-msgid "الإنجليزية"
-msgstr "English"
-
-msgid "العربية"
-msgstr "Arabic"
-msgid "الإنجليزية"
-msgstr "English"
+#: src/components/place-bookings.tsx:468
+msgid "Add booking"
+msgstr "Add booking"
+
+#: src/components/place-bookings.tsx:211
+msgid "Back"
+msgstr "Back"
+
+#: src/components/place-shared.tsx:147
+msgid "Cancelled"
+msgstr "Cancelled"
+
+#: src/components/place-bookings.tsx:305
+msgid "Check-in"
+msgstr "Check-in"
+
+#: src/components/place-bookings.tsx:318
+msgid "Check-out"
+msgstr "Check-out"
+
+#: src/components/place-shared.tsx:123
+msgid "Checked in"
+msgstr "Checked in"
+
+#: src/components/place-shared.tsx:135
+msgid "Checked out"
+msgstr "Checked out"
+
+#: src/components/place-bookings.tsx:246
+msgid "Close"
+msgstr "Close"
+
+#: src/components/place-shared.tsx:158
+msgid "Confirmed"
+msgstr "Confirmed"
+
+#: src/components/place-bookings.tsx:168
+msgid "Could not save the booking. Please try again."
+msgstr "Could not save the booking. Please try again."
+
+#: src/components/place-bookings.tsx:288
+msgid "Guest email"
+msgstr "Guest email"
+
+#: src/components/place-bookings.tsx:261
+msgid "Guest name"
+msgstr "Guest name"
+
+#: src/components/place-bookings.tsx:274
+msgid "Guest phone"
+msgstr "Guest phone"
+
+#: src/components/place-bookings.tsx:439
+msgid "guests"
+msgstr "guests"
+
+#: src/components/place-bookings.tsx:335
+msgid "Guests"
+msgstr "Guests"
+
+#: src/components/place-bookings.tsx:235
+msgid "Next month"
+msgstr "Next month"
+
+#: src/components/place-bookings.tsx:416
+msgid "No bookings in this month."
+msgstr "No bookings in this month."
+
+#: src/components/place-bookings.tsx:364
+msgid "Notes"
+msgstr "Notes"
+
+#: src/components/place-bookings.tsx:219
+msgid "Previous month"
+msgstr "Previous month"
+
+#: src/components/place-bookings.tsx:393
+msgid "Save booking"
+msgstr "Save booking"
+
+#: src/components/place-bookings.tsx:390
+msgid "Saving…"
+msgstr "Saving…"
+
+#: src/components/place-bookings.tsx:167
+msgid "Those dates are already booked for this property."
+msgstr "Those dates are already booked for this property."
+
+#: src/components/place-bookings.tsx:349
+msgid "Total price"
+msgstr "Total price"
+
+#: src/components/place-bookings.tsx:404
+msgid "Try again in a moment."
+msgstr "Try again in a moment."
+
+#: src/components/place-bookings.tsx:401
+msgid "We could not load the bookings for this property."
+msgstr "We could not load the bookings for this property."
+
+#: src/components/place-bookings.tsx
+msgid "Enter the guest name"
+msgstr "Enter the guest name"
+
+#: src/components/place-bookings.tsx
+msgid "Use the international phone format"
+msgstr "Use the international phone format"
+
+#: src/components/place-bookings.tsx
+msgid "Enter a valid email address"
+msgstr "Enter a valid email address"
+
+#: src/components/place-bookings.tsx
+msgid "Enter the number of guests"
+msgstr "Enter the number of guests"
+
+#: src/components/place-bookings.tsx
+msgid "Choose the check-in date"
+msgstr "Choose the check-in date"
+
+#: src/components/place-bookings.tsx
+msgid "Choose a check-out date after the check-in date"
+msgstr "Choose a check-out date after the check-in date"
+
+#: src/components/place-bookings.tsx
+msgid "Enter the total price"
+msgstr "Enter the total price"
+
+#: src/components/place-bookings.tsx
+msgid "Notes are too long"
+msgstr "Notes are too long"
+
+#: src/components/place-bookings.tsx
+msgid "All bookings"
+msgstr "All bookings"
+
+#: src/components/place-bookings.tsx
+msgid "By month"
+msgstr "By month"
+
+#: src/components/place-bookings.tsx
+msgid "Cancel booking"
+msgstr "Cancel booking"
+
+#: src/components/place-bookings.tsx
+msgid "Cancellation reason"
+msgstr "Cancellation reason"
+
+#: src/components/place-bookings.tsx
+msgid "Confirm cancel"
+msgstr "Confirm cancel"
+
+#: src/components/place-bookings.tsx
+msgid "Could not cancel the booking. Please try again."
+msgstr "Could not cancel the booking. Please try again."
+
+#: src/components/place-bookings.tsx
+msgid "Enter the reason for the cancellation"
+msgstr "Enter the reason for the cancellation"
+
+#: src/components/place-bookings.tsx
+msgid "Load more"
+msgstr "Load more"
+
+#: src/components/place-bookings.tsx
+msgid "No bookings for this property yet."
+msgstr "No bookings for this property yet."
+
+#: src/components/place-bookings.tsx
+msgid "This booking can no longer be cancelled."
+msgstr "This booking can no longer be cancelled."
+#: src/components/place-bookings.tsx
+msgid "Filter bookings by month"
+msgstr "Filter bookings by month"
+
+#: src/components/place-bookings.tsx
+msgid "Add a stay to block its dates on the calendar."
+msgstr "Add a stay to block its dates on the calendar."
+
+#: src/components/place-bookings.tsx
+msgid "Cancel this booking?"
+msgstr "Cancel this booking?"
+
+#: src/components/place-bookings.tsx
+msgid "Cancelling…"
+msgstr "Cancelling…"
+
+#: src/components/place-bookings.tsx
+msgid "Use the international format, e.g. +966512345678"
+msgstr "Use the international format, e.g. +966512345678"
+
+#: src/components/place-bookings.tsx
+msgid "Guest"
+msgstr "Guest"
+
+#: src/components/place-bookings.tsx
+msgid "Stay"
+msgstr "Stay"
+
+#: src/components/place-bookings.tsx
+msgid "Why is this stay being cancelled?"
+msgstr "Why is this stay being cancelled?"
+
+#: src/components/place-bookings.tsx
+msgid "Kept in the booking record."
+msgstr "Kept in the booking record."
+
+#: src/components/place-bookings.tsx
+msgid "Example: the guest changed their plans"
+msgstr "Example: the guest changed their plans"
+
+#: src/components/place-bookings.tsx
+msgid "Check in"
+msgstr "Check in"
+
+#: src/components/place-bookings.tsx
+msgid "Check out"
+msgstr "Check out"
+
+#: src/components/place-bookings.tsx
+msgid "Another guest has not checked out yet."
+msgstr "Another guest has not checked out yet."
+
+#: src/components/place-bookings.tsx
+msgid "This booking can no longer be moved to another state."
+msgstr "This booking can no longer be moved to another state."
+#: src/components/place-bookings.tsx
+msgid "Check-in opens on"
+msgstr "Check-in opens on"
+
+#: src/components/place-bookings.tsx
+msgid "Check this guest in?"
+msgstr "Check this guest in?"
+
+#: src/components/place-bookings.tsx
+msgid "Check this guest out?"
+msgstr "Check this guest out?"
+
+#: src/components/place-bookings.tsx
+msgid "Confirm check-in"
+msgstr "Confirm check-in"
+
+#: src/components/place-bookings.tsx
+msgid "Confirm check-out"
+msgstr "Confirm check-out"
+
+#: src/components/place-bookings.tsx
+msgid "Check-in has not opened for this stay yet."
+msgstr "Check-in has not opened for this stay yet."
+
+#: src/components/place-bookings.tsx
+msgid "Could not change the booking. Please try again."
+msgstr "Could not change the booking. Please try again."
