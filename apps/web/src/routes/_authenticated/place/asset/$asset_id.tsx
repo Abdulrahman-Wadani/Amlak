@@ -40,7 +40,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import {
   AssetStatusBadge,
-  StatusBadge,
+  TicketStatusChip,
 } from "@/components/place-shared"
 import {
   Breadcrumb,
@@ -469,7 +469,7 @@ const placeId = referrer
                       </div>
 
                       <div style={S("display: flex; align-items: center; gap: 10px")}>
-                        <StatusBadge status={String(ticket.status)} />
+                        <TicketStatusChip status={String(ticket.status)} />
                         <ArrowRight size={17} className="rtl:rotate-180" />
                       </div>
                     </Link>

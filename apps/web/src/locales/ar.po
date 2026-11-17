@@ -115,11 +115,11 @@ msgstr "التكلفة الفعلية"
 msgid "Add a stay to block its dates on the calendar."
 msgstr "أضف إقامة لحجز هذه التواريخ في التقويم."
 
-#: src/routes/_authenticated/place/$place_id.tsx:826
+#: src/routes/_authenticated/place/$place_id.tsx:817
 msgid "Add an asset to start tracking this property."
 msgstr "أضف أصلًا لبدء تتبع هذا العقار."
 
-#: src/routes/_authenticated/place/$place_id.tsx:789
+#: src/routes/_authenticated/place/$place_id.tsx:780
 #: src/routes/_authenticated/place/asset/new.tsx:149
 #: src/routes/_authenticated/support/new.tsx:51
 msgid "Add asset"
@@ -153,13 +153,13 @@ msgstr "إضافة عقار"
 msgid "Add property"
 msgstr "إضافة عقار"
 
-#: src/routes/_authenticated/place/$place_id.tsx:1051
+#: src/components/place-tickets.tsx:116
 #: src/routes/_authenticated/support/index.tsx:132
 msgid "Add ticket"
 msgstr "رفع تذكرة"
 
-#: src/routes/_authenticated/place/$place_id.tsx:922
-#: src/routes/_authenticated/place/$place_id.tsx:975
+#: src/routes/_authenticated/place/$place_id.tsx:913
+#: src/routes/_authenticated/place/$place_id.tsx:966
 #: src/routes/_authenticated/worker/new.tsx:113
 #: src/routes/_authenticated/workers.tsx:128
 #: src/routes/_authenticated/workers.tsx:274
@@ -178,8 +178,8 @@ msgstr "أضف أول عقار لتظهر هنا."
 msgid "Add your first worker to start managing your team."
 msgstr "أضف أول عامل للبدء بإدارة فريق العمل."
 
-#: src/routes/_authenticated/place/$place_id.tsx:463
-#: src/routes/_authenticated/place/$place_id.tsx:659
+#: src/routes/_authenticated/place/$place_id.tsx:454
+#: src/routes/_authenticated/place/$place_id.tsx:650
 #: src/routes/_authenticated/place/new.tsx:143
 msgid "Address"
 msgstr "العنوان"
@@ -199,6 +199,7 @@ msgstr "صور بعد الصيانة"
 msgid "Ahmed Hamad"
 msgstr "أحمد حمد"
 
+#: src/components/place-tickets.tsx:70
 #: src/routes/_authenticated/admin/index.tsx:69
 #: src/routes/_authenticated/content/index.tsx:241
 #: src/routes/_authenticated/finance.tsx:845
@@ -230,7 +231,7 @@ msgstr "كل عقاراتك وصيانتها\n"
 "وحجوزاتها في مكان\n"
 "واحد."
 
-#: src/routes/_authenticated/place/$place_id.tsx:1012
+#: src/routes/_authenticated/place/$place_id.tsx:1003
 msgid "All your workers are already assigned to this place."
 msgstr "جميع العمال مسندون لهذا العقار بالفعل."
 
@@ -282,6 +283,7 @@ msgstr "شقة"
 msgid "Approve ticket"
 msgstr "قبول التذكرة"
 
+#: src/components/place-shared.tsx:265
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:438
 msgid "Approved"
 msgstr "تمت الموافقة"
@@ -339,8 +341,8 @@ msgstr "حالة الأصل"
 msgid "Asset type"
 msgstr "نوع الأصل"
 
-#: src/routes/_authenticated/place/$place_id.tsx:698
-#: src/routes/_authenticated/place/$place_id.tsx:763
+#: src/routes/_authenticated/place/$place_id.tsx:689
+#: src/routes/_authenticated/place/$place_id.tsx:754
 #: src/routes/_authenticated/place/new.tsx:33
 #: src/routes/_authenticated/places.tsx:39
 msgid "Assets"
@@ -410,7 +412,7 @@ msgstr "إيرادات الحجوزات خلال الفترة المحددة"
 #: src/components/place-bookings.tsx:303
 #: src/routes/_authenticated/bookings.tsx:117
 #: src/routes/_authenticated/home.tsx:251
-#: src/routes/_authenticated/place/$place_id.tsx:735
+#: src/routes/_authenticated/place/$place_id.tsx:726
 msgid "Bookings"
 msgstr "الحجوزات"
 
@@ -427,7 +429,7 @@ msgid "By role"
 msgstr "حسب الدور"
 
 #: src/routes/_authenticated/finance.tsx:1118
-#: src/routes/_authenticated/place/$place_id.tsx:600
+#: src/routes/_authenticated/place/$place_id.tsx:591
 #: src/routes/_authenticated/profile.tsx:102
 #: src/routes/_authenticated/support/$support_id.tsx:436
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:1209
@@ -546,11 +548,11 @@ msgstr "حدد الفترة الزمنية لعرض الإيرادات والم�
 msgid "Choose a place"
 msgstr "اختر العقار"
 
-#: src/routes/_authenticated/place/$place_id.tsx:994
+#: src/routes/_authenticated/place/$place_id.tsx:985
 msgid "Choose a worker"
 msgstr "اختر عاملًا"
 
-#: src/routes/_authenticated/place/$place_id.tsx:982
+#: src/routes/_authenticated/place/$place_id.tsx:973
 msgid "Choose a worker (name and ID)"
 msgstr "اختر العامل (الاسم و ID)"
 
@@ -570,8 +572,8 @@ msgstr "اختر العقار أولاً"
 msgid "Choose who does the work"
 msgstr "اختر من سينفذ العمل"
 
-#: src/routes/_authenticated/place/$place_id.tsx:455
-#: src/routes/_authenticated/place/$place_id.tsx:653
+#: src/routes/_authenticated/place/$place_id.tsx:446
+#: src/routes/_authenticated/place/$place_id.tsx:644
 #: src/routes/_authenticated/place/new.tsx:142
 msgid "City"
 msgstr "المدينة"
@@ -605,6 +607,7 @@ msgstr "إغلاق"
 msgid "Complete ticket"
 msgstr "إكمال التذكرة"
 
+#: src/components/place-shared.tsx:277
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:441
 msgid "Completed"
 msgstr "مكتملة"
@@ -697,7 +700,7 @@ msgstr "المحتوى"
 msgid "Content not found"
 msgstr "لم يتم العثور على المحتوى"
 
-#: src/routes/_authenticated/place/$place_id.tsx:1087
+#: src/components/place-tickets.tsx:160
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:453
 msgid "Corrective maintenance"
 msgstr "صيانة تصحيحية"
@@ -797,7 +800,7 @@ msgstr "تعذّر حفظ العقار."
 msgid "Could not sign in"
 msgstr "تعذر الدخول"
 
-#: src/routes/_authenticated/place/$place_id.tsx:218
+#: src/routes/_authenticated/place/$place_id.tsx:209
 msgid "Could not update the place."
 msgstr "تعذر تحديث العقار."
 
@@ -849,7 +852,7 @@ msgstr "تاريخ الإنشاء: {0}"
 msgid "Creating account…"
 msgstr "جارٍ إنشاء الحساب…"
 
-#: src/routes/_authenticated/place/$place_id.tsx:521
+#: src/routes/_authenticated/place/$place_id.tsx:512
 msgid "Currency"
 msgstr "العملة"
 
@@ -886,12 +889,12 @@ msgstr "حذف الأصل"
 msgid "Delete page"
 msgstr "حذف الصفحة"
 
-#: src/routes/_authenticated/place/$place_id.tsx:374
+#: src/routes/_authenticated/place/$place_id.tsx:365
 msgid "Delete place"
 msgstr "حذف العقار"
 
 #. placeholder {0}: place.place_name
-#: src/routes/_authenticated/place/$place_id.tsx:229
+#: src/routes/_authenticated/place/$place_id.tsx:220
 msgid "Delete the place \"{0}\"? This cannot be undone."
 msgstr "هل أنت متأكد من حذف العقار \"{0}\"؟ لا يمكن التراجع عن هذا الإجراء."
 
@@ -914,7 +917,7 @@ msgstr "حذف العامل"
 
 #: src/components/asset-manage.tsx:238
 #: src/routes/_authenticated/content/$content_id.tsx:731
-#: src/routes/_authenticated/place/$place_id.tsx:374
+#: src/routes/_authenticated/place/$place_id.tsx:365
 #: src/routes/_authenticated/worker/$worker_id.tsx:742
 msgid "Deleting…"
 msgstr "جارٍ الحذف…"
@@ -925,7 +928,7 @@ msgid "description"
 msgstr "الوصف"
 
 #: src/routes/_authenticated/finance.tsx:1069
-#: src/routes/_authenticated/place/$place_id.tsx:474
+#: src/routes/_authenticated/place/$place_id.tsx:465
 #: src/routes/_authenticated/place/new.tsx:141
 #: src/routes/_authenticated/support/$support_id.tsx:313
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:721
@@ -1234,6 +1237,7 @@ msgstr "تصفية حسب العقار"
 msgid "Filter by publishing status"
 msgstr "تصفية حسب حالة النشر"
 
+#: src/components/place-tickets.tsx:95
 #: src/routes/_authenticated/admin/index.tsx:187
 #: src/routes/_authenticated/places.tsx:189
 #: src/routes/_authenticated/support/index.tsx:177
@@ -1361,7 +1365,7 @@ msgstr "عالية"
 #: src/components/app-shell.tsx:14
 #: src/routes/_authenticated/admin/$admin_id.tsx:169
 #: src/routes/_authenticated/content/$content_id.tsx:216
-#: src/routes/_authenticated/place/$place_id.tsx:315
+#: src/routes/_authenticated/place/$place_id.tsx:306
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:210
 #: src/routes/_authenticated/support/$support_id.tsx:244
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:609
@@ -1441,7 +1445,7 @@ msgstr "آخر تحديث"
 msgid "Last updated:"
 msgstr "آخر تحديث:"
 
-#: src/routes/_authenticated/place/$place_id.tsx:497
+#: src/routes/_authenticated/place/$place_id.tsx:488
 #: src/routes/_authenticated/place/new.tsx:144
 msgid "Latitude"
 msgstr "خط العرض"
@@ -1478,7 +1482,7 @@ msgstr "جارٍ تحميل إحصائيات التذاكر..."
 msgid "Loading..."
 msgstr "جارٍ التحميل..."
 
-#: src/routes/_authenticated/place/$place_id.tsx:509
+#: src/routes/_authenticated/place/$place_id.tsx:500
 #: src/routes/_authenticated/place/new.tsx:145
 msgid "Longitude"
 msgstr "خط الطول"
@@ -1510,7 +1514,7 @@ msgstr "صيانة متأخرة"
 msgid "Maintenance reminder"
 msgstr "تذكير بالصيانة"
 
-#: src/routes/_authenticated/place/$place_id.tsx:1080
+#: src/components/place-tickets.tsx:154
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:449
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:645
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:653
@@ -1521,8 +1525,8 @@ msgstr "تذكرة صيانة"
 msgid "Maintenance ticket ID (optional)"
 msgstr "رقم تذكرة الصيانة (اختياري)"
 
-#: src/routes/_authenticated/place/$place_id.tsx:724
-#: src/routes/_authenticated/place/$place_id.tsx:1031
+#: src/components/place-tickets.tsx:84
+#: src/routes/_authenticated/place/$place_id.tsx:715
 msgid "Maintenance tickets"
 msgstr "تذاكر الصيانة"
 
@@ -1576,8 +1580,8 @@ msgid "Month"
 msgstr "شهر"
 
 #: src/routes/_authenticated/finance.tsx:579
-#: src/routes/_authenticated/place/$place_id.tsx:485
-#: src/routes/_authenticated/place/$place_id.tsx:665
+#: src/routes/_authenticated/place/$place_id.tsx:476
+#: src/routes/_authenticated/place/$place_id.tsx:656
 msgid "Monthly budget"
 msgstr "الميزانية الشهرية"
 
@@ -1652,11 +1656,11 @@ msgstr "موعد الصيانة القادمة"
 msgid "No address was found for this location."
 msgstr "لم يُعثر على عنوان لهذا الموقع."
 
-#: src/routes/_authenticated/place/$place_id.tsx:1084
+#: src/components/place-tickets.tsx:157
 msgid "No asset"
 msgstr "الأصل غير محدد"
 
-#: src/routes/_authenticated/place/$place_id.tsx:819
+#: src/routes/_authenticated/place/$place_id.tsx:810
 msgid "No assets yet."
 msgstr "لا أصول بعد."
 
@@ -1749,7 +1753,7 @@ msgstr "لا يوجد مستخدمون مطابقون"
 msgid "No users yet"
 msgstr "لا يوجد مستخدمون حتى الآن"
 
-#: src/routes/_authenticated/place/$place_id.tsx:941
+#: src/routes/_authenticated/place/$place_id.tsx:932
 msgid "No workers are assigned to this place."
 msgstr "لا يوجد عمال مسندون لهذا العقار."
 
@@ -1774,7 +1778,7 @@ msgstr "غير مؤكد"
 msgid "Not overdue"
 msgstr "غير متأخرة"
 
-#: src/routes/_authenticated/place/$place_id.tsx:661
+#: src/routes/_authenticated/place/$place_id.tsx:652
 msgid "Not set"
 msgstr "غير محددة"
 
@@ -1811,6 +1815,7 @@ msgstr "رمز مثل ! أو @"
 msgid "One uppercase letter (A-Z)"
 msgstr "حرف إنجليزي كبير (A-Z)"
 
+#: src/components/place-tickets.tsx:69
 #: src/routes/_authenticated/support/index.tsx:41
 #: src/routes/_authenticated/support/index.tsx:323
 msgid "Open"
@@ -1990,26 +1995,26 @@ msgstr "صور المشكلة"
 msgid "Place"
 msgstr "العقار"
 
-#: src/routes/_authenticated/place/$place_id.tsx:622
+#: src/routes/_authenticated/place/$place_id.tsx:613
 msgid "Place information"
 msgstr "معلومات العقار"
 
-#: src/routes/_authenticated/place/$place_id.tsx:439
+#: src/routes/_authenticated/place/$place_id.tsx:430
 #: src/routes/_authenticated/place/new.tsx:135
 msgid "Place name"
 msgstr "اسم العقار"
 
-#: src/routes/_authenticated/place/$place_id.tsx:335
+#: src/routes/_authenticated/place/$place_id.tsx:326
 msgid "Place not found"
 msgstr "لم يتم العثور على العقار"
 
-#: src/routes/_authenticated/place/$place_id.tsx:447
+#: src/routes/_authenticated/place/$place_id.tsx:438
 #: src/routes/_authenticated/place/new.tsx:138
 msgid "Place type"
 msgstr "نوع العقار"
 
 #: src/components/app-shell.tsx:19
-#: src/routes/_authenticated/place/$place_id.tsx:320
+#: src/routes/_authenticated/place/$place_id.tsx:311
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:218
 #: src/routes/_authenticated/places.tsx:137
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:617
@@ -2059,7 +2064,7 @@ msgstr "اللغة المفضلة"
 msgid "Preferred Language"
 msgstr "اللغة المفضلة"
 
-#: src/routes/_authenticated/place/$place_id.tsx:1088
+#: src/components/place-tickets.tsx:161
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:454
 msgid "Preventive maintenance"
 msgstr "صيانة وقائية"
@@ -2088,7 +2093,7 @@ msgstr "الصورة الشخصية"
 msgid "Profile updated successfully."
 msgstr "تم تحديث الملف الشخصي بنجاح."
 
-#: src/routes/_authenticated/place/$place_id.tsx:647
+#: src/routes/_authenticated/place/$place_id.tsx:638
 msgid "Property type"
 msgstr "نوع العقار"
 
@@ -2142,6 +2147,7 @@ msgstr "تحديث"
 msgid "Reject ticket"
 msgstr "رفض التذكرة"
 
+#: src/components/place-shared.tsx:271
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:439
 msgid "Rejected"
 msgstr "مرفوضة"
@@ -2266,7 +2272,7 @@ msgstr "حفظ"
 
 #: src/routes/_authenticated/admin/$admin_id.tsx:661
 #: src/routes/_authenticated/content/$content_id.tsx:717
-#: src/routes/_authenticated/place/$place_id.tsx:587
+#: src/routes/_authenticated/place/$place_id.tsx:578
 #: src/routes/_authenticated/worker/$worker_id.tsx:728
 msgid "Save changes"
 msgstr "حفظ التغييرات"
@@ -2276,7 +2282,7 @@ msgid "Save Changes"
 msgstr "حفظ التغييرات"
 
 #: src/routes/_authenticated/finance.tsx:1129
-#: src/routes/_authenticated/place/$place_id.tsx:585
+#: src/routes/_authenticated/place/$place_id.tsx:576
 #: src/routes/_authenticated/profile.tsx:100
 msgid "Saving..."
 msgstr "جارٍ الحفظ..."
@@ -2416,8 +2422,8 @@ msgstr "المصروف:"
 
 #: src/components/asset-manage.tsx:180
 #: src/routes/_authenticated/content/new.tsx:70
-#: src/routes/_authenticated/place/$place_id.tsx:541
-#: src/routes/_authenticated/place/$place_id.tsx:677
+#: src/routes/_authenticated/place/$place_id.tsx:532
+#: src/routes/_authenticated/place/$place_id.tsx:668
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:312
 #: src/routes/_authenticated/place/asset/new.tsx:156
 #: src/routes/_authenticated/support/$support_id.tsx:318
@@ -2526,7 +2532,7 @@ msgstr "صيغة الرابط غير صحيحة."
 msgid "The user was updated."
 msgstr "تم تحديث بيانات المستخدم بنجاح."
 
-#: src/routes/_authenticated/place/$place_id.tsx:279
+#: src/routes/_authenticated/place/$place_id.tsx:270
 msgid "The worker was added to the place."
 msgstr "تمت إضافة العامل إلى العقار بنجاح."
 
@@ -2566,9 +2572,13 @@ msgstr "هذه الصفحة غير موجودة أو غير منشورة."
 msgid "This password reset link is invalid or incomplete. Please request a new reset link."
 msgstr "رابط إعادة تعيين كلمة المرور غير صالح أو غير مكتمل. يرجى طلب رابط جديد."
 
-#: src/routes/_authenticated/place/$place_id.tsx:1061
+#: src/components/place-tickets.tsx:135
 msgid "This place has no maintenance tickets."
 msgstr "لا توجد تذاكر صيانة لهذا العقار."
+
+#: src/components/place-tickets.tsx:133
+msgid "This place has no open tickets."
+msgstr "لا توجد تذاكر مفتوحة لهذا العقار."
 
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:770
 msgid "This ticket has no asset."
@@ -2629,7 +2639,7 @@ msgstr "تذاكر بانتظار مراجعتك"
 msgid "Tickets you open show here."
 msgstr "تظهر هنا التذاكر التي تفتحها."
 
-#: src/routes/_authenticated/place/$place_id.tsx:529
+#: src/routes/_authenticated/place/$place_id.tsx:520
 msgid "Time zone"
 msgstr "المنطقة الزمنية"
 
@@ -2638,7 +2648,7 @@ msgstr "المنطقة الزمنية"
 msgid "Timeline"
 msgstr "السجل الزمني"
 
-#: src/routes/_authenticated/place/$place_id.tsx:671
+#: src/routes/_authenticated/place/$place_id.tsx:662
 msgid "Timezone"
 msgstr "المنطقة الزمنية"
 
@@ -2740,7 +2750,7 @@ msgstr "إلغاء التحديد يحوّل الصفحة إلى مسودة."
 msgid "Upcoming"
 msgstr "القادمة"
 
-#: src/routes/_authenticated/place/$place_id.tsx:358
+#: src/routes/_authenticated/place/$place_id.tsx:349
 msgid "Update place"
 msgstr "تحديث العقار"
 
@@ -2748,7 +2758,7 @@ msgstr "تحديث العقار"
 msgid "Update Profile"
 msgstr "تحديث الملف الشخصي"
 
-#: src/routes/_authenticated/place/$place_id.tsx:415
+#: src/routes/_authenticated/place/$place_id.tsx:406
 msgid "Update property"
 msgstr "تحديث العقار"
 
@@ -2848,6 +2858,7 @@ msgstr "بيانات حسابك الشخصي"
 msgid "Villa"
 msgstr "فيلا"
 
+#: src/components/place-shared.tsx:259
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:436
 #: src/routes/_authenticated/tickets.tsx:110
 msgid "Waiting for review"
@@ -2890,6 +2901,7 @@ msgstr "حدث خطأ أثناء تحميل التذكرة"
 msgid "We could not load the ticket. Try again."
 msgstr "تعذر تحميل بيانات التذكرة. حاول مرة أخرى."
 
+#: src/components/place-tickets.tsx:126
 #: src/routes/_authenticated/tickets.tsx:188
 msgid "We could not load the tickets."
 msgstr "تعذر تحميل التذاكر."
@@ -2906,7 +2918,7 @@ msgstr "تعذر تحميل بيانات العمال."
 msgid "We could not load this page. Try again later."
 msgstr "تعذر تحميل هذه الصفحة. حاول لاحقًا."
 
-#: src/routes/_authenticated/place/$place_id.tsx:388
+#: src/routes/_authenticated/place/$place_id.tsx:379
 msgid "We could not load this property."
 msgstr "لم نتمكن من تحميل هذا العقار."
 
@@ -2959,8 +2971,8 @@ msgid "Worker status"
 msgstr "حالة العامل"
 
 #: src/components/app-shell.tsx:29
-#: src/routes/_authenticated/place/$place_id.tsx:712
-#: src/routes/_authenticated/place/$place_id.tsx:905
+#: src/routes/_authenticated/place/$place_id.tsx:703
+#: src/routes/_authenticated/place/$place_id.tsx:896
 #: src/routes/_authenticated/place/new.tsx:35
 #: src/routes/_authenticated/places.tsx:41
 #: src/routes/_authenticated/worker/$worker_id.tsx:246

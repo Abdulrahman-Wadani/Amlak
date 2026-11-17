@@ -12,13 +12,11 @@ import {
   getPlaceAssets,
   getWorkers,
   updatePlace,
-  getTicketsForPlace,
 } from "@/lib/api"
 import { S } from "@/lib/dom-style"
 import { buttonVariants, Button } from "@/components/ui/button"
 import { cn } from "cn"
 import {
-  ArrowRight,
   Building2,
   CalendarDays,
   MapPin,
@@ -42,9 +40,9 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { PlaceBookings } from "@/components/place-bookings"
+import { PlaceTickets } from "@/components/place-tickets"
 import {
   AssetStatusBadge,
-  PriorityChip,
   StatusBadge,
   TypeLabel,
 } from "@/components/place-shared"
@@ -92,7 +90,6 @@ function PlaceDetailPage() {
   const [place, setPlace] = useState<Place | null>(null)
   const [assets, setAssets] = useState<Asset[] | null>(null)
   const [workers, setWorkers] = useState<Worker[] | null>(null)
-  const [tickets, setTickets] = useState<Awaited<ReturnType<typeof getTicketsForPlace>> | null>(null)
   const [failed, setFailed] = useState(false)
   const [activeSection, setActiveSection] = useState<"assets" | "workers" | "tickets" | "bookings" | null>(null)
 
@@ -132,12 +129,6 @@ function PlaceDetailPage() {
         })
     }
 
-  getTicketsForPlace(accessToken, place_id)
-  .then((list) => alive && setTickets(list))
-  .catch((error) => {
-    console.error("Failed to load maintenance tickets:", error)
-    if (alive) setTickets([])
-  })
 
     return () => {
       alive = false
@@ -1019,91 +1010,9 @@ function getWorkerName(userId: string | null | undefined) {
 
           )}
 
-          {activeSection === "tickets" && (
-<Card
-  className="am-lift"
-  style={S("padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0")}
->
-  <CardHeader
-    style={S("padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px")}
-  >
-    <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-      <Trans>Maintenance tickets</Trans>
-      {tickets !== null && (
-        <span style={S("margin-inline-start: 8px; font-size: 12px; color: var(--muted-foreground)")}>
-          {tickets.length}
-        </span>
-      )}
-    </CardTitle>
-    <CardAction>
-                <Link
-                  to="/ticket/new"
-                  search={{ place_id }}
-                  className={cn(
-                    buttonVariants({ variant: "outline", size: "sm" }),
-                    "am-btn"
-                  )}
-                  style={S(
-                    "height: 38px; padding: 0 12px; gap: 6px; white-space: nowrap"
-                  )}
-                >
-                  <Plus size={16} />
-                  <Trans>Add ticket</Trans>
-                </Link>
-    </CardAction>
-  </CardHeader>
-
-  <CardContent style={S("padding: 20px")}>
-    {tickets === null ? (
-      <Skeleton style={S("height: 70px")} />
-    ) : tickets.length === 0 ? (
-      <p style={S("text-align: center; color: var(--muted-foreground); font-size: 14px")}>
-        <Trans>This place has no maintenance tickets.</Trans>
-      </p>
-    ) : (
-      <div style={S("display: flex; flex-direction: column; gap: 10px")}>
-        {tickets.map((ticket) => {
-          const asset = assets?.find((a) => a.id === ticket.asset_id)
-
-          return (
-            <Link
-              key={ticket.id}
-              to="/ticket/$ticket_id"
-              params={{ ticket_id: ticket.id }}
-              className="am-lift"
-              style={S(
-                "display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px; border: 1px solid var(--border); background: var(--card); text-decoration: none; color: inherit"
-              )}
-            >
-              <div style={S("display: flex; flex-direction: column; gap: 6px; min-width: 0")}>
-                <strong style={S("font-size: 14px")}>
-                  {ticket.description || t`Maintenance ticket`}
-                </strong>
-
-                <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-                  {asset?.name ?? t`No asset`}
-                  {" · "}
-                  {ticket.ticket_type === "CORRECTIVE"
-                    ? t`Corrective maintenance`
-                    : t`Preventive maintenance`}
-                </span>
-
-                <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-                  <PriorityChip priority={String(ticket.priority)} />
-                </span>
-              </div>
-
-              <div style={S("display: flex; align-items: center; gap: 10px")}>
-                <StatusBadge status={String(ticket.status)} />
-                <ArrowRight size={17} className="rtl:rotate-180" />
-              </div>
-            </Link>
-          )
-        })}
-      </div>
-    )}
-  </CardContent>
-</Card>          )}
+          {activeSection === "tickets" && accessToken && (
+            <PlaceTickets token={accessToken} placeId={place_id} assets={assets} />
+          )}
 
         </>
       )}
