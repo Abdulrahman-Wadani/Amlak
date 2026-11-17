@@ -7,7 +7,9 @@ import {
   type ReactNode,
 } from "react"
 
+import { useNavigate } from "@tanstack/react-router"
 import type { Language, User } from "@amlak/shared"
+import { rememberAccessToken, setSessionHandlers } from "@/lib/http"
 import { useLanguage } from "@/lib/i18n"
 
 type Auth = {
@@ -95,6 +97,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   const [accessToken, setAccessToken] = useState<string | null>(null)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    rememberAccessToken(accessToken)
+  }, [accessToken])
+
+  // Lets authFetch refresh an expired access token, or end the session
+  // when the refresh cookie is no longer valid.
+  useEffect(() => {
+    setSessionHandlers({
+      refresh: () =>
+        refreshOnce().then((data) => {
+          const token = (data as { access_token: string }).access_token
+          rememberAccessToken(token)
+          setAccessToken(token)
+          return token
+        }),
+      expire: () => {
+        // Parallel requests can all fail; end the session once.
+        if (!sessionStorage.getItem(USER_KEY)) return
+        logout()
+        void navigate({ to: "/signin" })
+      },
+    })
+    return () => setSessionHandlers(null)
+    // logout only uses state setters, which never change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate])
 
   // Restore the authenticated session
   useEffect(() => {

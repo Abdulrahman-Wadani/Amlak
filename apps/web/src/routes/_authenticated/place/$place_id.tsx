@@ -5,6 +5,7 @@ import { Trans } from "@lingui/react/macro"
 import { useLingui } from "@lingui/react"
 import type { Asset, Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
+import { authFetch } from "@/lib/http"
 import {
   getPlace,
   getPlaceAssets,
@@ -248,9 +249,8 @@ function getWorkerName(userId: string | null | undefined) {
       setDeleting(true)
       setDeleteError("")
 
-      const response = await fetch(`/api/v1/places/${place_id}`, {
+      const response = await authFetch(`/places/${place_id}`, accessToken, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${accessToken}` },
       })
       const result = await response.json().catch(() => null)
 
@@ -278,12 +278,8 @@ function getWorkerName(userId: string | null | undefined) {
       setWorkerError("")
       setWorkerSuccess("")
 
-      const response = await fetch(`/api/v1/places/${place_id}/workers`, {
+      const response = await authFetch(`/places/${place_id}/workers`, accessToken, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify({ worker_id: selectedWorkerId }),
       })
       const result = await response.json().catch(() => null)

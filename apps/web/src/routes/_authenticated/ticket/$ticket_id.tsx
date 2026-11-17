@@ -133,8 +133,6 @@ function TicketDetailPage() {
   const [completionNotes, setCompletionNotes] = useState("")
   const [photos, setPhotos] = useState<File[]>([])
 
-  const API_URL = import.meta.env.VITE_API_URL
-
   const S = (value: string): React.CSSProperties =>
     Object.fromEntries(
       value.split(";").filter(Boolean).map((item) => {
@@ -341,43 +339,6 @@ function TicketDetailPage() {
     document.querySelectorAll(".am-btn").forEach((btn) => {
       ;(btn as HTMLElement).style.display = ""
     })
-  }
-
-  const sendAction = async (
-    endpoint: string,
-    body: Record<string, unknown> | FormData,
-  ) => {
-    if (!accessToken) {
-      throw new Error("انتهت الجلسة، سجل الدخول مرة أخرى")
-    }
-
-    const isFormData = body instanceof FormData
-
-    const response = await fetch(
-      `${API_URL}/tickets/${ticket_id}/${endpoint}`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          ...(isFormData
-            ? {}
-            : { "Content-Type": "application/json" }),
-        },
-        body: isFormData ? body : JSON.stringify(body),
-      },
-    )
-
-    const result = await response.json().catch(() => null)
-
-    if (!response.ok) {
-      throw new Error(
-        result?.message ||
-          result?.error ||
-          `تعذر تنفيذ العملية (${response.status})`,
-      )
-    }
-
-    return result
   }
 
   const handleApprove = async () => {

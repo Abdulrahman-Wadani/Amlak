@@ -10,6 +10,8 @@ import {
   Phone,
 } from "lucide-react"
 
+import { t } from "@lingui/core/macro"
+import type { SupportTicket, SupportTicketStatus } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { getSupportTicket } from "@/lib/api"
 import { S } from "@/lib/dom-style"
@@ -34,31 +36,17 @@ export const Route = createFileRoute("/_authenticated/support/")({
   component: UsersPage,
 })
 
-
-interface Ticket {
-  id: string,
-  user_id: string,
-  subject: string,
-  description: string,
-  status: string,
-  admin_response: string,
-  resolved_by: string,
-  resolved_at: string,
-  created_at: string,
-  updated_at: string,
-}
-
 const TABS = [
   { key: "OPEN", label: "مفتوحة" },
   { key: "RESOLVED", label: "تم حلها" },
 ] as const
 
-type TabKey = (typeof TABS)[number]["key"]
+type TabKey = "ALL" | SupportTicketStatus
 
 function UsersPage() {
   const { accessToken } = useAuth()
 
-  const [ticket, setTicket] = useState<Ticket[] | null>(null)
+  const [ticket, setTicket] = useState<SupportTicket[] | null>(null)
   const [error, setError] = useState(false)
   const [query, setQuery] = useState("")
   const [tab, setTab] = useState<TabKey>("ALL")
@@ -92,9 +80,8 @@ function UsersPage() {
 
       const matchesQuery =
         !q ||
-        user.fullname.toLowerCase().includes(q) ||
-        user.email.toLowerCase().includes(q) ||
-        (user.phone ?? "").toLowerCase().includes(q)
+        user.subject.toLowerCase().includes(q) ||
+        user.description.toLowerCase().includes(q)
 
       return matchesTab && matchesQuery
     })
@@ -179,7 +166,7 @@ function UsersPage() {
             type="search"
             className="am-input"
             style={S("padding-inline-start: 44px")}
-            placeholder="ابحث بالاسم أو البريد الإلكتروني أو الجوال"
+            placeholder={t`Search by subject or description`}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -298,8 +285,8 @@ function UsersPage() {
           {visible.map((user) => (
             <Link
               key={user.id}
-              to="/support/$worker_id"
-              params={{ worker_id: user.id }}
+              to="/support/$support_id"
+              params={{ support_id: user.id }}
               className="am-lift"
               style={S(
                 "display: flex; flex-direction: column; gap: 10px; padding: 14px; min-height: 150px; text-decoration: none; color: inherit; background: #fff; border: 1px solid var(--border); box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.08)",

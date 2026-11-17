@@ -1,4 +1,5 @@
 
+import { authFetch } from "./http"
 import type { BookingInput } from "./validators"
 import type {
   Asset,
@@ -7,6 +8,7 @@ import type {
   Expense,
   ExpenseCategory,
   Place,
+  SupportTicket,
   WorkerResponse,
 } from "@amlak/shared"
 
@@ -50,17 +52,7 @@ export async function apiRequest<T>(
   token: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const res = await fetch(`/api/v1${path}`, {
-    ...options,
-    headers: {
-      Authorization: `Bearer ${token}`,
-      ...(options.body
-        ? { "Content-Type": "application/json" }
-        : {}),
-      ...options.headers,
-    },
-    credentials: "same-origin",
-  })
+  const res = await authFetch(path, token, options)
 
   const response: unknown = await res.json().catch(() => null)
 
@@ -373,11 +365,8 @@ export async function deleteWorker(
   token: string,
   workerId: string
 ): Promise<void> {
-  const response = await fetch(`/api/v1/workers/${workerId}`, {
+  const response = await authFetch(`/workers/${workerId}`, token, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
   })
 
   const result = await response.json().catch(() => null)
@@ -408,13 +397,9 @@ export async function getTicketsForPlace(
   token: string,
   placeId: string,
 ) {
-  const response = await fetch(`/api/v1/tickets?place_id=${placeId}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    credentials: "same-origin",
-  }).then((res) => res.json())
+  const response = await authFetch(`/tickets?place_id=${placeId}`, token).then(
+    (res) => res.json(),
+  )
 
   return response.data;
 }
@@ -423,13 +408,9 @@ export async function getTicketById(
   token: string,
   ticketId: string,
 ) {
-  const response = await fetch(`/api/v1/tickets/${ticketId}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    credentials: "same-origin",
-  }).then((res) => res.json())
+  const response = await authFetch(`/tickets/${ticketId}`, token).then((res) =>
+    res.json(),
+  )
 
   return response;
 }
@@ -512,13 +493,9 @@ async function expenseMultipartRequest<T>(
     formData.append("receipt", input.receipt)
   }
 
-  const response = await fetch(`/api/v1${path}`, {
+  const response = await authFetch(path, token, {
     method,
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     body: formData,
-    credentials: "same-origin",
   })
 
   const result: unknown = await response.json().catch(() => null)
@@ -627,12 +604,8 @@ export async function deleteExpense(
   token: string,
   expenseId: string,
 ): Promise<void> {
-  const response = await fetch(`/api/v1/expenses/${expenseId}`, {
+  const response = await authFetch(`/expenses/${expenseId}`, token, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    credentials: "same-origin",
   })
 
   if (!response.ok) {
@@ -702,13 +675,9 @@ export async function createTicket(
     formData.append("photos", photo)
   }
 
-  const res = await fetch(`/api/v1/places/${placeId}/tickets`, {
+  const res = await authFetch(`/places/${placeId}/tickets`, token, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
     body: formData,
-    credentials: "same-origin",
   })
 
   const response: unknown = await res.json().catch(() => null)
@@ -757,17 +726,10 @@ async function ticketRequest<T>(
 ): Promise<T> {
   const isFormData = body instanceof FormData;
 
-  const response = await fetch(
-    `/api/v1/tickets/${ticketId}/${action}`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...(isFormData ? {} : { "Content-Type": "application/json" }),
-      },
-      body: isFormData ? body : JSON.stringify(body),
-    },
-  );
+  const response = await authFetch(`/tickets/${ticketId}/${action}`, token, {
+    method: "POST",
+    body: isFormData ? body : JSON.stringify(body),
+  });
 
   const result = await response.json();
 
@@ -874,15 +836,11 @@ export async function createMaintenanceSchedule(
   assetId: string,
   input: CreateMaintenanceScheduleInput
 ) {
-  const response = await fetch(
-    `/api/v1/assets/${assetId}/maintenance-schedules`,
+  const response = await authFetch(
+    `/assets/${assetId}/maintenance-schedules`,
+    token,
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      credentials: "same-origin",
       body: JSON.stringify(input),
     }
   )
@@ -908,15 +866,10 @@ export async function handleCancelSchedule(
   token: string,
   scheduleId: string
 ) {
-  const response = await fetch(
-    `/api/v1/maintenance-schedules/${scheduleId}`,
-    {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: "same-origin",
-    }
+  const response = await authFetch(
+    `/maintenance-schedules/${scheduleId}`,
+    token,
+    { method: "DELETE" }
   )
   if (!response.ok) {
     const data: unknown = await response.json().catch(() => null)
@@ -953,11 +906,8 @@ export async function updateProfile(
     formData.append("picture", data.picture)
   }
 
-  const response = await fetch("/api/v1/users/me", {
+  const response = await authFetch("/users/me", accessToken, {
     method: "PUT",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
     body: formData,
   })
 
@@ -1005,12 +955,7 @@ export async function getUserById(
   accessToken: string,
   userId: string,
 ): Promise<UserResponse> {
-  const response = await fetch(`/api/v1/users/${userId}`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
+  const response = await authFetch(`/users/${userId}`, accessToken)
 
   const result = (await response.json().catch(() => null)) as
     | UserApiResponse
@@ -1050,12 +995,8 @@ export async function updateUser(
   userId: string,
   payload: UpdateUserInput,
 ): Promise<UserResponse> {
-  const response = await fetch(`/api/v1/users/${userId}`, {
+  const response = await authFetch(`/users/${userId}`, accessToken, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-    },
     body: JSON.stringify(payload),
   })
 
@@ -1081,8 +1022,8 @@ export async function updateUser(
     : (result as UserResponse)
 }
 
-export async function getSupportTicket(token:string){
-  return apiRequest('/support-tickets',token)
+export async function getSupportTicket(token: string) {
+  return apiRequest<SupportTicket[]>("/support-tickets", token)
 }
 
 type createSpTicket = {
@@ -1090,16 +1031,10 @@ type createSpTicket = {
   description:string
 }
 export async function createSupportTicket(token:string,input:[]){
-  const res = await fetch('/api/v1/support-tickets',
-    {
-      method:"POST",
-      headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+  const res = await authFetch("/support-tickets", token, {
+    method: "POST",
     body: JSON.stringify(input),
-    }
-  )
+  })
   return res
 }
 
@@ -1113,14 +1048,11 @@ export async function resolveSupportTicket(
   ticketId: string,
   admin_response: string
 ) {
-  const response = await fetch(
-    `/api/v1/support-tickets/${ticketId}/resolve`,
+  const response = await authFetch(
+    `/support-tickets/${ticketId}/resolve`,
+    token,
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
       body: JSON.stringify({ admin_response }),
     }
   );
@@ -1194,15 +1126,9 @@ export async function getContents(
   if (params.page) query.set("page", String(params.page))
   if (params.page_size) query.set("page_size", String(params.page_size))
 
-  const response = await fetch(
-    `/api/v1/content${query.size ? `?${query.toString()}` : ""}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: "same-origin",
-    },
+  const response = await authFetch(
+    `/content${query.size ? `?${query.toString()}` : ""}`,
+    token,
   )
 
   const result = await response.json().catch(() => null)
@@ -1260,12 +1186,8 @@ export async function deleteContent(
   token: string,
   contentId: string,
 ): Promise<void> {
-  const response = await fetch(`/api/v1/content/${contentId}`, {
+  const response = await authFetch(`/content/${contentId}`, token, {
     method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    credentials: "same-origin",
   })
 
   if (!response.ok) {
@@ -1333,15 +1255,9 @@ export async function getDashboard(
   if (params?.page) query.set("page", String(params.page))
   if (params?.page_size) query.set("page_size", String(params.page_size))
 
-  const response = await fetch(
-    `/api/v1/dashboard${query.toString() ? `?${query.toString()}` : ""}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }
+  const response = await authFetch(
+    `/dashboard${query.toString() ? `?${query.toString()}` : ""}`,
+    token,
   )
 
   const result = await response.json()
@@ -1407,14 +1323,9 @@ export async function getNotifications(
     query.set("page_size", String(params.page_size))
   }
 
-  const response = await fetch(
-    `/api/v1/notifications${query.toString() ? `?${query}` : ""}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+  const response = await authFetch(
+    `/notifications${query.toString() ? `?${query}` : ""}`,
+    token,
   )
 
   const result = await response.json()
@@ -1430,14 +1341,10 @@ export async function markNotificationAsRead(
   token: string,
   notificationId: string
 ): Promise<Notification> {
-  const response = await fetch(
-    `/api/v1/notifications/${notificationId}/read`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+  const response = await authFetch(
+    `/notifications/${notificationId}/read`,
+    token,
+    { method: "POST" }
   )
 
   const result = await response.json()
@@ -1453,12 +1360,8 @@ export async function sendAnnouncement(
   token: string,
   input: SendAnnouncementInput
 ): Promise<{ recipient_count: number }> {
-  const response = await fetch("/api/v1/notifications", {
+  const response = await authFetch("/notifications", token, {
     method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
     body: JSON.stringify(input),
   })
 
