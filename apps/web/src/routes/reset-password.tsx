@@ -1,6 +1,6 @@
 
 import { useState, type FormEvent } from "react"
-import { createFileRoute } from "@tanstack/react-router"
+import { Link, createFileRoute } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import {
   LockKeyhole,
@@ -11,7 +11,8 @@ import {
   ArrowLeft,
 } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import {
   Card,
@@ -177,11 +178,12 @@ function ResetPasswordPage() {
                   </p>
                 </div>
 
-                <Button asChild className="h-11 w-full">
-                  <a href="/signin">
-                    <Trans>Go to Login</Trans>
-                  </a>
-                </Button>
+                <Link
+                  to="/signin"
+                  className={cn(buttonVariants(), "h-11 w-full")}
+                >
+                  <Trans>Go to Login</Trans>
+                </Link>
               </div>
             ) : !email || !token ? (
               <div className="space-y-5 text-center">
@@ -194,11 +196,12 @@ function ResetPasswordPage() {
                   </p>
                 </div>
 
-                <Button asChild variant="outline" className="w-full">
-                  <a href="/forgot-password">
-                    <Trans>Request a New Link</Trans>
-                  </a>
-                </Button>
+                <Link
+                  to="/forgot-password"
+                  className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+                >
+                  <Trans>Request a New Link</Trans>
+                </Link>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
