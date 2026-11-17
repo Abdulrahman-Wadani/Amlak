@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
 import {
   ArrowRight,
   CalendarDays,
@@ -57,7 +58,9 @@ export const Route = createFileRoute(
 
 function SupportTicketDetailPage() {
   const { support_id } = Route.useParams()
-  const { accessToken } = useAuth()
+  const { accessToken, user: me } = useAuth()
+  // Only an Admin may read other users (GET /users/{id}) and resolve tickets.
+  const isAdmin = me?.role === "ADMIN"
   const [ticket, setTicket] = useState<SupportTicket | null>(null)
   const [user, setUser] = useState<TicketUser | null>(null)
   const [loading, setLoading] = useState(true)
@@ -88,16 +91,18 @@ const [resolveError, setResolveError] = useState<string | null>(null);
 
         setTicket(ticketData)
 
-        try {
-          const userData = await getUserById(
-            accessToken,
-            ticketData.user_id,
-          )
+        if (isAdmin) {
+          try {
+            const userData = await getUserById(
+              accessToken,
+              ticketData.user_id,
+            )
 
-          if (alive && userData) {
-            setUser(userData)
+            if (alive && userData) {
+              setUser(userData)
+            }
+          } catch {
           }
-        } catch {
         }
       } catch {
         if (alive) {
@@ -113,7 +118,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
     return () => {
       alive = false
     }
-  }, [accessToken, support_id])
+  }, [accessToken, support_id, isAdmin])
 
   const formatDate = (date: string | null) => {
     if (!date) return "—"
@@ -433,6 +438,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
   )}
 
   {/* زر حل التذكرة دائماً في الأسفل */}
+  {isAdmin && ticket.status === "OPEN" && (
   <div
   style={S(`
     display:flex;
@@ -456,6 +462,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
     <Trans>حل التذكرة</Trans>
   </Button>
 </div>
+  )}
 
 </div>
         {/* Ticket owner */}
@@ -489,8 +496,8 @@ const [resolveError, setResolveError] = useState<string | null>(null);
               </>
             ) : (
               <InfoField
-                label="معرّف المستخدم"
-                value={ticket.user_id}
+                label="الاسم الكامل"
+                value={ticket.user_id === me?.id ? t`You` : "—"}
               />
             )}
           </CardContent>
@@ -513,7 +520,13 @@ const [resolveError, setResolveError] = useState<string | null>(null);
 
             <InfoField
               label="تم الحل بواسطة"
-              value={ticket.resolved_by || "—"}
+              value={
+                !ticket.resolved_by
+                  ? "—"
+                  : ticket.resolved_by === me?.id
+                    ? t`You`
+                    : t`Support team`
+              }
             />
 
             <InfoField
