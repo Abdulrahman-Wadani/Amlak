@@ -145,7 +145,7 @@ msgid "Add expense"
 msgstr "Add expense"
 
 #: src/routes/_authenticated/place/new.tsx:121
-#: src/routes/_authenticated/places.tsx:150
+#: src/routes/_authenticated/places.tsx:151
 msgid "Add place"
 msgstr "Add place"
 
@@ -165,6 +165,10 @@ msgstr "Add ticket"
 #: src/routes/_authenticated/workers.tsx:274
 msgid "Add worker"
 msgstr "Add worker"
+
+#: src/routes/_authenticated/places.tsx:229
+msgid "Add your first place with the Add place button."
+msgstr "Add your first place with the Add place button."
 
 #: src/routes/_authenticated/home.tsx:398
 msgid "Add your first property to see it here."
@@ -578,7 +582,7 @@ msgstr "Cleaning"
 
 #: src/routes/_authenticated/admin/index.tsx:281
 #: src/routes/_authenticated/content/index.tsx:315
-#: src/routes/_authenticated/places.tsx:238
+#: src/routes/_authenticated/places.tsx:257
 #: src/routes/_authenticated/support/index.tsx:271
 #: src/routes/_authenticated/workers.tsx:266
 msgid "Clear filters"
@@ -1231,7 +1235,7 @@ msgid "Filter by publishing status"
 msgstr "Filter by publishing status"
 
 #: src/routes/_authenticated/admin/index.tsx:187
-#: src/routes/_authenticated/places.tsx:187
+#: src/routes/_authenticated/places.tsx:189
 #: src/routes/_authenticated/support/index.tsx:177
 #: src/routes/_authenticated/workers.tsx:172
 msgid "Filter by status"
@@ -1705,8 +1709,15 @@ msgstr "No pages match"
 msgid "No phone number"
 msgstr "No phone number"
 
+#: src/routes/_authenticated/places.tsx:242
+msgid "No places match"
+msgstr "No places match"
+
+#: src/routes/_authenticated/places.tsx:225
+msgid "No places yet"
+msgstr "No places yet"
+
 #: src/routes/_authenticated/home.tsx:395
-#: src/routes/_authenticated/places.tsx:223
 msgid "No properties yet"
 msgstr "No properties yet"
 
@@ -1779,9 +1790,9 @@ msgstr "Notes"
 msgid "Notes are too long"
 msgstr "Notes are too long"
 
-#: src/routes/_authenticated/places.tsx:226
-msgid "Nothing matches this search. Clear it to see all properties."
-msgstr "Nothing matches this search. Clear it to see all properties."
+#: src/routes/_authenticated/places.tsx:245
+msgid "Nothing matches this search. Clear it to see all places."
+msgstr "Nothing matches this search. Clear it to see all places."
 
 #: src/components/app-shell.tsx:49
 #: src/routes/_authenticated/notifications.tsx:256
@@ -2005,6 +2016,10 @@ msgstr "Place type"
 #: src/routes/_authenticated/ticket/new.tsx:206
 msgid "Places"
 msgstr "Places"
+
+#: src/routes/_authenticated/places.tsx:231
+msgid "Places your manager assigns you to show here."
+msgstr "Places your manager assigns you to show here."
 
 #: src/routes/_authenticated/place/asset/maintenance/new.tsx:231
 msgid "Please enter valid interval and lead days values"
@@ -2284,7 +2299,7 @@ msgid "Scheduled maintenance"
 msgstr "Scheduled maintenance"
 
 #: src/routes/_authenticated/admin/index.tsx:164
-#: src/routes/_authenticated/places.tsx:166
+#: src/routes/_authenticated/places.tsx:168
 #: src/routes/_authenticated/support/index.tsx:154
 #: src/routes/_authenticated/workers.tsx:149
 msgid "Search"
@@ -2298,7 +2313,7 @@ msgstr "Search by name, email or phone"
 msgid "Search by name, email, phone or ID"
 msgstr "Search by name, email, phone or ID"
 
-#: src/routes/_authenticated/places.tsx:179
+#: src/routes/_authenticated/places.tsx:181
 msgid "Search by place name or city"
 msgstr "Search by place name or city"
 
@@ -2905,7 +2920,7 @@ msgstr "We could not load this worker."
 
 #: src/routes/_authenticated/bookings.tsx:149
 #: src/routes/_authenticated/home.tsx:387
-#: src/routes/_authenticated/places.tsx:215
+#: src/routes/_authenticated/places.tsx:217
 msgid "We could not load your places."
 msgstr "We could not load your places."
 

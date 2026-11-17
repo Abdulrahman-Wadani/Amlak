@@ -136,6 +136,7 @@ function PlacesPage() {
         <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
           <Trans>Places</Trans>
         </h1>
+        {isManager && (
         <Link
           to="/place/new"
           className={cn(buttonVariants(), "am-btn am-solid")}
@@ -149,6 +150,7 @@ function PlacesPage() {
           />
           <Trans>Add place</Trans>
         </Link>
+        )}
       </div>
 
       <div
@@ -216,15 +218,32 @@ function PlacesPage() {
         </p>
       )}
 
-      {places !== null && visible.length === 0 && (
+      {places !== null && places.length === 0 && (
         <Empty style={S("padding: 40px")}>
           <EmptyHeader>
             <EmptyTitle>
-              <Trans>No properties yet</Trans>
+              <Trans>No places yet</Trans>
+            </EmptyTitle>
+            <EmptyDescription>
+              {isManager ? (
+                <Trans>Add your first place with the Add place button.</Trans>
+              ) : (
+                <Trans>Places your manager assigns you to show here.</Trans>
+              )}
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      )}
+
+      {places !== null && places.length > 0 && visible.length === 0 && (
+        <Empty style={S("padding: 40px")}>
+          <EmptyHeader>
+            <EmptyTitle>
+              <Trans>No places match</Trans>
             </EmptyTitle>
             <EmptyDescription>
               <Trans>
-                Nothing matches this search. Clear it to see all properties.
+                Nothing matches this search. Clear it to see all places.
               </Trans>
             </EmptyDescription>
             <Button
