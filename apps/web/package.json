@@ -10,7 +10,8 @@
     "lint": "vp lint .",
     "format": "vp fmt \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "preview": "vp preview"
+    "preview": "vp preview",
+    "i18n:check": "lingui extract --clean && node scripts/check-catalogs.mjs"
   },
   "dependencies": {
     "@amlak/shared": "workspace:*",
