@@ -1284,6 +1284,27 @@ export async function getContents(
   return result
 }
 
+/**
+ * A published page by language and slug, for visitors who are not signed
+ * in, so no token. Resolves with null when there is no such page.
+ */
+export async function getPublicContent(
+  language: ContentLanguage,
+  slug: string,
+): Promise<WebContent | null> {
+  const query = new URLSearchParams({ language, slug })
+  const response = await fetch(`/api/v1/content?${query.toString()}`, {
+    credentials: "same-origin",
+  })
+  const result = (await response.json().catch(() => null)) as
+    | ContentListResponse
+    | null
+  if (!response.ok || !result || !Array.isArray(result.data)) {
+    throw new Error(`Failed to get content (${response.status})`)
+  }
+  return result.data.find((page) => page.slug === slug) ?? null
+}
+
 export async function getContentById(
   token: string,
   contentId: string,
