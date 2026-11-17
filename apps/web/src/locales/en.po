@@ -1869,3 +1869,7 @@ msgstr "Check-in has not opened for this stay yet."
 #: src/components/place-bookings.tsx
 msgid "Could not change the booking. Please try again."
 msgstr "Could not change the booking. Please try again."
+
+#: src/routes/_authenticated/support/index.tsx:169
+msgid "Search by subject or description"
+msgstr "Search by subject or description"

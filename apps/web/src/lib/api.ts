@@ -8,6 +8,7 @@ import type {
   Expense,
   ExpenseCategory,
   Place,
+  SupportTicket,
   WorkerResponse,
 } from "@amlak/shared"
 
@@ -1021,8 +1022,8 @@ export async function updateUser(
     : (result as UserResponse)
 }
 
-export async function getSupportTicket(token:string){
-  return apiRequest('/support-tickets',token)
+export async function getSupportTicket(token: string) {
+  return apiRequest<SupportTicket[]>("/support-tickets", token)
 }
 
 type createSpTicket = {

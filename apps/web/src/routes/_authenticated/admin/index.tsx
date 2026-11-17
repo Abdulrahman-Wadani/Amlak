@@ -293,8 +293,8 @@ function UsersPage() {
           {visible.map((user) => (
             <Link
               key={user.id}
-              to="/admin/$worker_id"
-              params={{ worker_id: user.id }}
+              to="/admin/$admin_id"
+              params={{ admin_id: user.id }}
               className="am-lift"
               style={S(
                 "display: flex; flex-direction: column; gap: 10px; padding: 14px; min-height: 150px; text-decoration: none; color: inherit; background: #fff; border: 1px solid var(--border); box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.08)",

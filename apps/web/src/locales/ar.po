@@ -2271,3 +2271,7 @@ msgstr "لم يحِن موعد الوصول بعد."
 #: src/components/place-bookings.tsx
 msgid "Could not change the booking. Please try again."
 msgstr "تعذّر تغيير حالة الحجز. حاول مرة أخرى."
+
+#: src/routes/_authenticated/support/index.tsx:169
+msgid "Search by subject or description"
+msgstr "ابحث بالموضوع أو الوصف"

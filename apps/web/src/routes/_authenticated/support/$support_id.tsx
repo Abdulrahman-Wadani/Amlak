@@ -199,7 +199,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
             {error || "التذكرة غير موجودة"}
           </p>
           <Link
-            to="/_authenticated/support"
+            to="/support"
             style={S(`color:var(--primary); font-size:14px; text-decoration:underline;`)}
           >
             العودة إلى تذاكر الدعم
@@ -233,14 +233,14 @@ const [resolveError, setResolveError] = useState<string | null>(null);
             color:var(--muted-foreground);
           `)}
         >
-          <Link to="/_authenticated/support" className="hover:underline">
+          <Link to="/support" className="hover:underline">
             <Trans>الرئيسية</Trans>
           </Link>
 
           <span>/</span>
 
           <Link
-            to="/_authenticated/support"
+            to="/support"
             className="hover:underline"
           >
             <Trans>تذاكر الدعم</Trans>
@@ -525,7 +525,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
         </Card>
 
         <Link
-          to="/_authenticated/support"
+          to="/support"
           style={S(`
             display:flex;
             align-items:center;
