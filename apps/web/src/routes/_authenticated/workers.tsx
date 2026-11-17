@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 
 import { useAuth } from "@/lib/auth"
+import type { Worker } from "@amlak/shared"
 import { getWorkers } from "@/lib/api"
 import { S } from "@/lib/dom-style"
 
@@ -32,26 +33,6 @@ import "@/styles/motion.css"
 export const Route = createFileRoute("/_authenticated/workers")({
   component: WorkersPage,
 })
-
-type WorkerStatus =
-  | "ACTIVE"
-  | "INVITED"
-  | "PENDING_VERIFICATION"
-  | "DEACTIVATED"
-
-interface AssignedPlace {
-  id: string
-  place_name: string
-}
-
-interface Worker {
-  id: string
-  fullname: string
-  email: string
-  phone: string | null
-  status: WorkerStatus
-  assigned_places?: AssignedPlace[]
-}
 
 const TABS = [
   { key: "ALL", label: "الكل" },
@@ -388,7 +369,7 @@ function WorkersPage() {
                   >
                     {worker.assigned_places.slice(0, 2).map((place) => (
                       <span
-                        key={place.id}
+                        key={place.place_id}
                         style={S(
                           "max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 4px 7px; background: var(--muted); color: var(--muted-foreground); font-size: 10px",
                         )}

@@ -9,7 +9,7 @@ import type {
   ExpenseCategory,
   Place,
   SupportTicket,
-  WorkerResponse,
+  Worker,
 } from "@amlak/shared"
 
 // API response types
@@ -275,8 +275,8 @@ export function cancelBooking(
 // Workers
 export function getWorkers(
   token: string,
-): Promise<WorkerResponse[]> {
-  return apiRequest<WorkerResponse[]>("/workers", token).then(
+): Promise<Worker[]> {
+  return apiRequest<Worker[]>("/workers", token).then(
     (data) => {
       if (!Array.isArray(data)) {
         throw new Error("/workers returned no list")
@@ -290,8 +290,8 @@ export function getWorkers(
 export function getWorkerById(
   token: string,
   id: string,
-): Promise<WorkerResponse> {
-  return apiRequest<WorkerResponse>(`/workers/${id}`, token).then(
+): Promise<Worker> {
+  return apiRequest<Worker>(`/workers/${id}`, token).then(
     (data) => {
       if (!data || typeof data.id !== "string") {
         throw new Error("worker not found")
@@ -310,8 +310,8 @@ export async function createWorker(
     phone: string
     preferred_language?: "ar" | "en"
   },
-): Promise<WorkerResponse> {
-  const worker = await apiRequest<WorkerResponse>(
+): Promise<Worker> {
+  const worker = await apiRequest<Worker>(
     "/workers",
     accessToken,
     {
