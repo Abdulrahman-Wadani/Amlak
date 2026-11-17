@@ -10,6 +10,8 @@ import type {
   Place,
   PlaceWorker,
   SupportTicket,
+  Ticket,
+  TicketStatus,
   Worker,
 } from "@amlak/shared"
 
@@ -46,6 +48,52 @@ function unwrapResponse<T>(response: unknown): T {
   }
 
   return response as T
+}
+
+export interface Pagination {
+  page: number
+  page_size: number
+  total: number
+  total_pages: number
+}
+
+/** A list endpoint's page: the rows and the pagination the API sends. */
+export interface PageOf<T> {
+  data: T[]
+  pagination: Pagination
+}
+
+/** GET a paginated list and keep its pagination (apiRequest drops it). */
+export async function apiPage<T>(path: string, token: string): Promise<PageOf<T>> {
+  const res = await authFetch(path, token)
+  const body = (await res.json().catch(() => null)) as PageOf<T> | null
+  if (!res.ok || !body || !Array.isArray(body.data) || !body.pagination) {
+    const message =
+      body && typeof body === "object" && "message" in body
+        ? String((body as { message: unknown }).message)
+        : `${path} failed with ${res.status}`
+    throw new Error(message)
+  }
+  return body
+}
+
+/**
+ * Every page of a list, for screens that sort by a field the API does not
+ * order by. Stops after `maxPages` pages of 100.
+ */
+export async function apiAllPages<T>(
+  path: string,
+  token: string,
+  maxPages = 20,
+): Promise<T[]> {
+  const join = path.includes("?") ? "&" : "?"
+  const rows: T[] = []
+  for (let page = 1; page <= maxPages; page++) {
+    const result = await apiPage<T>(`${path}${join}page=${page}&page_size=100`, token)
+    rows.push(...result.data)
+    if (page >= result.pagination.total_pages) break
+  }
+  return rows
 }
 
 export async function apiRequest<T>(
@@ -148,6 +196,43 @@ export async function createAsset(
   }
 
   return asset
+}
+
+// Tickets
+export interface TicketListQuery {
+  status?: TicketStatus
+  assignee_id?: string
+  place_id?: string
+}
+
+function ticketQuery(query: TicketListQuery): string {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    if (value) params.set(key, value)
+  }
+  return params.toString()
+}
+
+/** One page of tickets, newest first (the API's order). */
+export function listTickets(
+  token: string,
+  query: TicketListQuery,
+  page: number,
+  pageSize = 20,
+): Promise<PageOf<Ticket>> {
+  const params = ticketQuery(query)
+  return apiPage<Ticket>(
+    `/tickets?${params}${params ? "&" : ""}page=${page}&page_size=${pageSize}`,
+    token,
+  )
+}
+
+/** Every ticket that matches, to sort by a field the API does not order by. */
+export function listAllTickets(
+  token: string,
+  query: TicketListQuery,
+): Promise<Ticket[]> {
+  return apiAllPages<Ticket>(`/tickets?${ticketQuery(query)}`, token)
 }
 
 // Create place

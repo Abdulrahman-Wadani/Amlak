@@ -211,3 +211,41 @@ export function Meta({ label, value }: { label: ReactNode; value: ReactNode }) {
     </div>
   )
 }
+
+export function PriorityChip({ priority }: { priority: string }) {
+  if (priority === "URGENT" || priority === "HIGH") {
+    return (
+      <Chip
+        bg="var(--crit-50)"
+        border="var(--crit-200)"
+        text="var(--crit-900)"
+        dot="var(--crit)"
+      >
+        {priority === "URGENT" ? <Trans>Urgent</Trans> : <Trans>High</Trans>}
+      </Chip>
+    )
+  }
+  return (
+    <Chip
+      bg="var(--muted)"
+      border="var(--border)"
+      text="var(--foreground)"
+      dot="var(--muted-foreground)"
+    >
+      {priority === "MEDIUM" ? <Trans>Medium</Trans> : <Trans>Low</Trans>}
+    </Chip>
+  )
+}
+
+export function OverdueChip() {
+  return (
+    <Chip
+      bg="var(--crit-50)"
+      border="var(--crit-200)"
+      text="var(--crit-900)"
+      dot="var(--crit)"
+    >
+      <Trans>Overdue</Trans>
+    </Chip>
+  )
+}
