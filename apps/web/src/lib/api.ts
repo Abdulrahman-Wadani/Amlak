@@ -12,6 +12,7 @@ import type {
   SupportTicket,
   Ticket,
   TicketStatus,
+  UpdateAssetInput,
   Worker,
 } from "@amlak/shared"
 
@@ -196,6 +197,27 @@ export async function createAsset(
   }
 
   return asset
+}
+
+export function updateAsset(
+  token: string,
+  assetId: string,
+  input: UpdateAssetInput,
+): Promise<Asset> {
+  return apiRequest<Asset>(`/assets/${assetId}`, token, {
+    method: "PUT",
+    body: JSON.stringify(input),
+  })
+}
+
+export async function deleteAsset(token: string, assetId: string): Promise<void> {
+  const response = await authFetch(`/assets/${assetId}`, token, {
+    method: "DELETE",
+  })
+  if (!response.ok) {
+    const result = await response.json().catch(() => null)
+    throw new Error(result?.message ?? `Delete failed (${response.status})`)
+  }
 }
 
 // Tickets
