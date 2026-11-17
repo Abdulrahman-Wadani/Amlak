@@ -117,7 +117,7 @@ msgstr "أضف إقامة لحجز هذه التواريخ في التقويم."
 
 #: src/routes/_authenticated/place/$place_id.tsx:826
 msgid "Add an asset to start tracking this property."
-msgstr "أضف أصلًا لبدء تتبع هذه الملكية."
+msgstr "أضف أصلًا لبدء تتبع هذا العقار."
 
 #: src/routes/_authenticated/place/$place_id.tsx:789
 #: src/routes/_authenticated/place/asset/new.tsx:149
@@ -137,7 +137,7 @@ msgstr "أضف ملاحظات الإنجاز"
 
 #: src/routes/_authenticated/content/index.tsx:170
 msgid "Add Content"
-msgstr "اضافة محتوى"
+msgstr "إضافة محتوى"
 
 #: src/routes/_authenticated/finance.tsx:834
 #: src/routes/_authenticated/finance.tsx:997
@@ -164,7 +164,7 @@ msgstr "رفع تذكرة"
 #: src/routes/_authenticated/workers.tsx:128
 #: src/routes/_authenticated/workers.tsx:274
 msgid "Add worker"
-msgstr "اضافة عامل"
+msgstr "إضافة عامل"
 
 #: src/routes/_authenticated/home.tsx:398
 msgid "Add your first property to see it here."
@@ -228,7 +228,7 @@ msgstr "كل عقاراتك وصيانتها\n"
 
 #: src/routes/_authenticated/place/$place_id.tsx:1012
 msgid "All your workers are already assigned to this place."
-msgstr "جميع العمال مسندون لهذه الملكية بالفعل."
+msgstr "جميع العمال مسندون لهذا العقار بالفعل."
 
 #: src/routes/signup.tsx:274
 msgid "Already have an account? <0>Sign in</0>"
@@ -803,7 +803,7 @@ msgstr "أنشئ كلمة مرور جديدة لحسابك. يجب ألا يقل
 
 #: src/routes/_authenticated/place/asset/maintenance/new.tsx:275
 msgid "Create a recurring maintenance schedule for an asset."
-msgstr "انشاء جدولة صيانة للأصل"
+msgstr "إنشاء جدولة صيانة للأصل."
 
 #: src/routes/signup.tsx:267
 msgid "Create account"
@@ -819,7 +819,7 @@ msgstr "إنشاء حساب مدير"
 
 #: src/routes/_authenticated/worker/new.tsx:243
 msgid "Create worker"
-msgstr "انشاء عامل"
+msgstr "إنشاء عامل"
 
 #: src/routes/_authenticated/content/index.tsx:302
 msgid "Create your first content page."
@@ -884,12 +884,12 @@ msgstr "حذف الصفحة"
 
 #: src/routes/_authenticated/place/$place_id.tsx:374
 msgid "Delete place"
-msgstr "حذف الملكية"
+msgstr "حذف العقار"
 
 #. placeholder {0}: place.place_name
 #: src/routes/_authenticated/place/$place_id.tsx:229
 msgid "Delete the place \"{0}\"? This cannot be undone."
-msgstr "هل أنت متأكد من حذف الملكية \"{0}\"؟ لا يمكن التراجع عن هذا الإجراء."
+msgstr "هل أنت متأكد من حذف العقار \"{0}\"؟ لا يمكن التراجع عن هذا الإجراء."
 
 #. placeholder {0}: worker.fullname
 #: src/routes/_authenticated/worker/$worker_id.tsx:162
@@ -1015,7 +1015,7 @@ msgstr "حالة التحقق من البريد"
 
 #: src/routes/_authenticated/profile.tsx:112
 msgid "Email Verified At"
-msgstr "تاريخ تأكيد البريد الاكتروني"
+msgstr "تاريخ تأكيد البريد الإلكتروني"
 
 #: src/routes/_authenticated/content/$content_id.tsx:451
 #: src/routes/_authenticated/content/index.tsx:217
@@ -1124,7 +1124,7 @@ msgstr "التكلفة التقديرية (اختياري)"
 
 #: src/routes/_authenticated/finance.tsx:822
 msgid "Every expense recorded for your places."
-msgstr "جميع المصروفات المسجلة للملكيات."
+msgstr "جميع المصروفات المسجلة للعقارات."
 
 #: src/components/place-bookings.tsx:701
 msgid "Example: the guest changed their plans"
@@ -1184,11 +1184,11 @@ msgstr "فشل تحميل الإشعارات."
 
 #: src/routes/_authenticated/place/asset/maintenance/new.tsx:129
 msgid "Failed to load places"
-msgstr "فشل تحميل الملكيات"
+msgstr "فشل تحميل العقارات"
 
 #: src/routes/_authenticated/finance.tsx:184
 msgid "Failed to load places."
-msgstr "تعذر تحميل قائمة الملكيات."
+msgstr "تعذر تحميل قائمة العقارات."
 
 #: src/routes/_authenticated/profile.tsx:94
 msgid "Failed to load profile."
@@ -1224,7 +1224,7 @@ msgstr "تصفية حسب اللغة"
 
 #: src/routes/_authenticated/finance.tsx:538
 msgid "Filter by place"
-msgstr "تصفية حسب الملكية"
+msgstr "تصفية حسب العقار"
 
 #: src/routes/_authenticated/content/index.tsx:236
 msgid "Filter by publishing status"
@@ -1431,7 +1431,7 @@ msgstr "آخر تحديث"
 
 #: src/routes/_authenticated/profile.tsx:114
 msgid "Last Updated"
-msgstr "اخر تحديث"
+msgstr "آخر تحديث"
 
 #: src/routes/_authenticated/content/index.tsx:401
 msgid "Last updated:"
@@ -1620,7 +1620,7 @@ msgstr "كلمة المرور الجديدة"
 
 #: src/routes/_authenticated/place/asset/maintenance/new.tsx:271
 msgid "New Scheduled Maintenance"
-msgstr "اضافة جدولة صيانة"
+msgstr "إضافة جدولة صيانة"
 
 #: src/routes/_authenticated/tickets.tsx:205
 msgid "New tickets will show here."
@@ -1740,7 +1740,7 @@ msgstr "لا يوجد مستخدمون حتى الآن"
 
 #: src/routes/_authenticated/place/$place_id.tsx:941
 msgid "No workers are assigned to this place."
-msgstr "لا يوجد عمال مسندون لهذه الملكية."
+msgstr "لا يوجد عمال مسندون لهذا العقار."
 
 #: src/routes/_authenticated/workers.tsx:247
 msgid "No workers match"
@@ -1981,7 +1981,7 @@ msgstr "العقار"
 
 #: src/routes/_authenticated/place/$place_id.tsx:622
 msgid "Place information"
-msgstr "معلومات الملكية"
+msgstr "معلومات العقار"
 
 #: src/routes/_authenticated/place/$place_id.tsx:439
 #: src/routes/_authenticated/place/new.tsx:135
@@ -2024,7 +2024,7 @@ msgstr "يرجى تعبئة جميع الحقول المطلوبة"
 
 #: src/routes/_authenticated/place/asset/maintenance/new.tsx:167
 msgid "Please select a place"
-msgstr "يرجى اختيار ملكية"
+msgstr "يرجى اختيار عقار"
 
 #: src/routes/_authenticated/profile.tsx:96
 msgid "Please select a valid image."
@@ -2320,7 +2320,7 @@ msgstr "عرض الكل"
 
 #: src/routes/_authenticated/finance.tsx:420
 msgid "Select a place and enter a valid amount."
-msgstr "اختر الملكية وأدخل مبلغًا صحيحًا."
+msgstr "اختر العقار وأدخل مبلغًا صحيحًا."
 
 #: src/components/location-picker.tsx:157
 msgid "Selected address"
@@ -2468,7 +2468,7 @@ msgstr "اسم العقار مستخدم بالفعل."
 
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:344
 msgid "The asset's place"
-msgstr "الملكية المرتبطة بالأصل"
+msgstr "العقار المرتبط بالأصل"
 
 #: src/components/email-verify-panel.tsx:61
 msgid "The code is valid for 10 minutes."
@@ -2513,7 +2513,7 @@ msgstr "تم تحديث بيانات المستخدم بنجاح."
 
 #: src/routes/_authenticated/place/$place_id.tsx:279
 msgid "The worker was added to the place."
-msgstr "تمت إضافة العامل إلى الملكية بنجاح."
+msgstr "تمت إضافة العامل إلى العقار بنجاح."
 
 #: src/routes/_authenticated/worker/$worker_id.tsx:704
 msgid "The worker was updated."
@@ -2553,7 +2553,7 @@ msgstr "رابط إعادة تعيين كلمة المرور غير صالح أ�
 
 #: src/routes/_authenticated/place/$place_id.tsx:1061
 msgid "This place has no maintenance tickets."
-msgstr "لا توجد تذاكر صيانة لهذه الملكية."
+msgstr "لا توجد تذاكر صيانة لهذا العقار."
 
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:770
 msgid "This ticket has no asset."
@@ -2569,7 +2569,7 @@ msgstr "لا توجد أماكن مسندة لهذا العامل."
 
 #: src/components/place-bookings.tsx:627
 msgid "Those dates are already booked for this property."
-msgstr "هذه التواريخ محجوزة بالفعل لهذه الملكية."
+msgstr "هذه التواريخ محجوزة بالفعل لهذا العقار."
 
 #: src/routes/_authenticated/places.tsx:219
 msgid "Ticket and worker counts appear once those services are wired up."
@@ -2656,7 +2656,7 @@ msgstr "عدد كبير جدًا من الطلبات. يرجى المحاولة 
 
 #: src/routes/_authenticated/finance.tsx:600
 msgid "Total budget for the selected places"
-msgstr "إجمالي الميزانية للملكيات المحددة"
+msgstr "إجمالي الميزانية للعقارات المحددة"
 
 #: src/routes/_authenticated/finance.tsx:637
 msgid "Total expenses"
@@ -2674,7 +2674,7 @@ msgstr "السعر الإجمالي"
 
 #: src/routes/_authenticated/finance.tsx:516
 msgid "Track expenses and budgets for your places."
-msgstr "متابعة المصروفات والميزانيات الخاصة بالملكيات."
+msgstr "متابعة المصروفات والميزانيات الخاصة بالعقارات."
 
 #: src/routes/forgot-password.tsx:127
 msgid "Try another email"
@@ -2731,7 +2731,7 @@ msgstr "القادمة"
 
 #: src/routes/_authenticated/place/$place_id.tsx:358
 msgid "Update place"
-msgstr "تحديث الملكية"
+msgstr "تحديث العقار"
 
 #: src/routes/_authenticated/profile.tsx:103
 msgid "Update Profile"
@@ -2739,7 +2739,7 @@ msgstr "تحديث الملف الشخصي"
 
 #: src/routes/_authenticated/place/$place_id.tsx:415
 msgid "Update property"
-msgstr "تحديث الملكية"
+msgstr "تحديث العقار"
 
 #: src/routes/_authenticated/notifications.tsx:876
 msgid "Updating..."
@@ -2831,7 +2831,7 @@ msgstr "عرض الإيصال"
 
 #: src/routes/_authenticated/profile.tsx:116
 msgid "View your account information."
-msgstr "بيانات حسابك الشحصي"
+msgstr "بيانات حسابك الشخصي"
 
 #: src/components/place-shared.tsx:192
 msgid "Villa"
@@ -2848,7 +2848,7 @@ msgstr "تعذر تحميل بيانات الأصل."
 
 #: src/components/place-bookings.tsx:355
 msgid "We could not load the bookings for this property."
-msgstr "تعذّر تحميل حجوزات هذه الملكية."
+msgstr "تعذّر تحميل حجوزات هذا العقار."
 
 #: src/routes/_authenticated/bookings.tsx:155
 msgid "We could not load the bookings for:"
