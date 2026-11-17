@@ -7,8 +7,10 @@ import { CircleAlert } from "lucide-react"
 import { S } from "@/lib/dom-style"
 import { useAuth } from "@/lib/auth"
 import {
+  getPlace,
   getPlaces,
   getPlaceAssets,
+  getPlaceWorkers,
   createMaintenanceSchedule,
 } from "@/lib/api"
 
@@ -38,12 +40,20 @@ export const Route = createFileRoute(
   component: NewMaintenancePage,
 })
 
-const INTERVAL_UNITS: { value: IntervalUnit; label: string }[] = [
-  { value: "DAY", label: t`Day` },
-  { value: "WEEK", label: t`Week` },
-  { value: "MONTH", label: t`Month` },
-  { value: "YEAR", label: t`Year` },
-]
+// A function, not a constant: t must run after Lingui has a locale, so a
+// direct load of this page does not crash.
+function intervalUnits(): { value: IntervalUnit; label: string }[] {
+  return [
+    { value: "DAY", label: t`Day` },
+    { value: "WEEK", label: t`Week` },
+    { value: "MONTH", label: t`Month` },
+    { value: "YEAR", label: t`Year` },
+  ]
+}
+
+// Base UI's Select cannot hold an empty value, so "no default assignee" has
+// its own value and is sent as undefined.
+const NO_ASSIGNEE = "none"
 
 function NewMaintenancePage() {
   const { accessToken } = useAuth()
@@ -66,6 +76,41 @@ function NewMaintenancePage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [assigneeOptions, setAssigneeOptions] = useState<
+    { value: string; label: string }[]
+  >([])
+
+  // A default assignee must be the place's owner or one of its ACTIVE workers.
+  useEffect(() => {
+    if (!accessToken || !place_id) return
+
+    let alive = true
+
+    Promise.all([
+      getPlace(accessToken, place_id),
+      getPlaceWorkers(accessToken, place_id),
+    ])
+      .then(([place, placeWorkers]) => {
+        if (!alive) return
+
+        setAssigneeOptions([
+          { value: place.owner_id, label: t`You (owner)` },
+          ...placeWorkers
+            .filter((placeWorker) => placeWorker.worker.status === "ACTIVE")
+            .map((placeWorker) => ({
+              value: placeWorker.worker.id,
+              label: placeWorker.worker.fullname,
+            })),
+        ])
+      })
+      .catch((err) => {
+        console.warn("Could not load the place's workers:", err)
+      })
+
+    return () => {
+      alive = false
+    }
+  }, [accessToken, place_id])
 
   useEffect(() => {
     if (!accessToken) return
@@ -197,7 +242,10 @@ function NewMaintenancePage() {
       interval_unit: interval_unit as IntervalUnit,
       next_due_date,
       lead_days: lead,
-      default_assignee_id: default_assignee_id || undefined,
+      default_assignee_id:
+        default_assignee_id && default_assignee_id !== NO_ASSIGNEE
+          ? default_assignee_id
+          : undefined,
     })
 
     navigate({
@@ -265,7 +313,7 @@ function NewMaintenancePage() {
       type: "select",
       required: true,
       defaultValue: "MONTH",
-      options: INTERVAL_UNITS.map((unit) => ({
+      options: intervalUnits().map((unit) => ({
         value: unit.value,
         label: unit.label,
       })),
@@ -285,7 +333,13 @@ function NewMaintenancePage() {
     },
     {
       name: "default_assignee_id",
-      label: t`Default Assignee ID`,
+      label: t`Default assignee (optional)`,
+      type: "select",
+      defaultValue: NO_ASSIGNEE,
+      options: [
+        { value: NO_ASSIGNEE, label: t`No default assignee` },
+        ...assigneeOptions,
+      ],
     },
   ]}
   args={{ accessToken }}
