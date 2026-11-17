@@ -6,6 +6,7 @@ import {
   useParams,
 } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 import type { Asset, Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
@@ -70,6 +71,9 @@ function AssetDetailPage() {
   >(null)
   const [scheduledMaintenances, setScheduledMaintenances] = useState<any[]>([])
   const [scheduledLoading, setScheduledLoading] = useState(true)
+  // Bumped after a schedule is cancelled, to load the list again.
+  const [schedulesVersion, setSchedulesVersion] = useState(0)
+  const [cancelError, setCancelError] = useState("")
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
@@ -94,7 +98,20 @@ function AssetDetailPage() {
   }
 
   loadScheduledMaintenances()
-}, [accessToken, asset_id])
+}, [accessToken, asset_id, schedulesVersion])
+
+  async function cancelSchedule(scheduleId: string) {
+    if (!accessToken) return
+    setCancelError("")
+    try {
+      await handleCancelSchedule(accessToken, scheduleId)
+      setSchedulesVersion((version) => version + 1)
+    } catch (error) {
+      setCancelError(
+        error instanceof Error ? error.message : t`Could not cancel the schedule.`,
+      )
+    }
+  }
 
   useEffect(() => {
     if (!accessToken) return
@@ -502,6 +519,11 @@ const placeId = referrer
   </CardHeader>
 
   <CardContent style={S("padding: 20px")}>
+  {cancelError && (
+    <p role="alert" style={S("margin: 0 0 12px; color: var(--destructive); font-size: 13px")}>
+      {cancelError}
+    </p>
+  )}
   {scheduledLoading ? (
     <div style={S("display: flex; flex-direction: column; gap: 12px")}>
       <Skeleton style={S("height: 100px")} />
@@ -640,7 +662,7 @@ const placeId = referrer
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => handleCancelSchedule(accessToken,maintenance.id)}
+                onClick={() => void cancelSchedule(maintenance.id)}
                 style={S(
                   "color: var(--destructive); border-color: var(--destructive)"
                 )}

@@ -2275,3 +2275,46 @@ msgstr "تعذّر تغيير حالة الحجز. حاول مرة أخرى."
 #: src/routes/_authenticated/support/index.tsx:169
 msgid "Search by subject or description"
 msgstr "ابحث بالموضوع أو الوصف"
+
+#: src/routes/_authenticated/support/$support_id.tsx:500
+#: src/routes/_authenticated/support/$support_id.tsx:527
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:570
+msgid "You"
+msgstr "أنت"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:571
+msgid "Another team member"
+msgstr "عضو آخر في الفريق"
+
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:93
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:577
+msgid "You (owner)"
+msgstr "أنت (المالك)"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:992
+msgid "Assignee"
+msgstr "المكلّف"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1001
+msgid "Choose who does the work"
+msgstr "اختر من سينفذ العمل"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1027
+msgid "Estimated cost (optional)"
+msgstr "التكلفة التقديرية (اختياري)"
+
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:332
+msgid "Default assignee (optional)"
+msgstr "المكلّف الافتراضي (اختياري)"
+
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:336
+msgid "No default assignee"
+msgstr "بدون مكلّف افتراضي"
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:111
+msgid "Could not cancel the schedule."
+msgstr "تعذر إلغاء الجدولة."
+
+#: src/routes/_authenticated/support/$support_id.tsx:528
+msgid "Support team"
+msgstr "فريق الدعم"

@@ -8,8 +8,9 @@ import type {
   Expense,
   ExpenseCategory,
   Place,
+  PlaceWorker,
   SupportTicket,
-  WorkerResponse,
+  Worker,
 } from "@amlak/shared"
 
 // API response types
@@ -272,11 +273,28 @@ export function cancelBooking(
   })
 }
 
+/** The workers assigned to a place (Manager only), at most 100. */
+export function getPlaceWorkers(
+  token: string,
+  placeId: string,
+): Promise<PlaceWorker[]> {
+  return apiRequest<PlaceWorker[]>(
+    `/places/${placeId}/workers?page_size=100`,
+    token,
+  ).then((data) => {
+    if (!Array.isArray(data)) {
+      throw new Error("/places/{placeId}/workers returned no list")
+    }
+
+    return data
+  })
+}
+
 // Workers
 export function getWorkers(
   token: string,
-): Promise<WorkerResponse[]> {
-  return apiRequest<WorkerResponse[]>("/workers", token).then(
+): Promise<Worker[]> {
+  return apiRequest<Worker[]>("/workers", token).then(
     (data) => {
       if (!Array.isArray(data)) {
         throw new Error("/workers returned no list")
@@ -290,8 +308,8 @@ export function getWorkers(
 export function getWorkerById(
   token: string,
   id: string,
-): Promise<WorkerResponse> {
-  return apiRequest<WorkerResponse>(`/workers/${id}`, token).then(
+): Promise<Worker> {
+  return apiRequest<Worker>(`/workers/${id}`, token).then(
     (data) => {
       if (!data || typeof data.id !== "string") {
         throw new Error("worker not found")
@@ -310,8 +328,8 @@ export async function createWorker(
     phone: string
     preferred_language?: "ar" | "en"
   },
-): Promise<WorkerResponse> {
-  const worker = await apiRequest<WorkerResponse>(
+): Promise<Worker> {
+  const worker = await apiRequest<Worker>(
     "/workers",
     accessToken,
     {
@@ -700,7 +718,7 @@ export async function createTicket(
 export interface ApproveTicketInput {
   assignee_id: string;
   due_date: string;
-  estimated_cost: number;
+  estimated_cost?: number;
 }
 
 export interface RejectTicketInput {
@@ -883,7 +901,7 @@ export async function handleCancelSchedule(
 
     throw new Error(message)
   }
-  return document.location.reload()
+  // 204: the schedule is stopped. The caller refreshes its list.
 }
 
 

@@ -1873,3 +1873,46 @@ msgstr "Could not change the booking. Please try again."
 #: src/routes/_authenticated/support/index.tsx:169
 msgid "Search by subject or description"
 msgstr "Search by subject or description"
+
+#: src/routes/_authenticated/support/$support_id.tsx:500
+#: src/routes/_authenticated/support/$support_id.tsx:527
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:570
+msgid "You"
+msgstr "You"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:571
+msgid "Another team member"
+msgstr "Another team member"
+
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:93
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:577
+msgid "You (owner)"
+msgstr "You (owner)"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:992
+msgid "Assignee"
+msgstr "Assignee"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1001
+msgid "Choose who does the work"
+msgstr "Choose who does the work"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:1027
+msgid "Estimated cost (optional)"
+msgstr "Estimated cost (optional)"
+
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:332
+msgid "Default assignee (optional)"
+msgstr "Default assignee (optional)"
+
+#: src/routes/_authenticated/place/asset/maintenance/new.tsx:336
+msgid "No default assignee"
+msgstr "No default assignee"
+
+#: src/routes/_authenticated/place/asset/$asset_id.tsx:111
+msgid "Could not cancel the schedule."
+msgstr "Could not cancel the schedule."
+
+#: src/routes/_authenticated/support/$support_id.tsx:528
+msgid "Support team"
+msgstr "Support team"

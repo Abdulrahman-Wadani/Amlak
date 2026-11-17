@@ -32,6 +32,16 @@ const AuthContext = createContext<Auth | null>(null)
 
 const USER_KEY = "authUser"
 
+/** The signed-in user saved for this tab, for route guards that run before render. */
+export function storedUser(): User | null {
+  try {
+    const saved = sessionStorage.getItem(USER_KEY)
+    return saved ? (JSON.parse(saved) as User) : null
+  } catch {
+    return null
+  }
+}
+
 let refreshInFlight: Promise<unknown> | null = null
 
 function refreshOnce(): Promise<unknown> {

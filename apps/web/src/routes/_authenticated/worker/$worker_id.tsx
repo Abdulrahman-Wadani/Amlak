@@ -7,7 +7,7 @@ import {
 } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { useLingui } from "@lingui/react"
-import type { WorkerResponse } from "@amlak/shared"
+import type { Worker } from "@amlak/shared"
 import {
   ArrowRight,
   Check,
@@ -59,7 +59,7 @@ function WorkerDetailPage() {
   const { i18n } = useLingui()
   const { accessToken } = useAuth()
 
-  const [worker, setWorker] = useState<WorkerResponse | null>(null)
+  const [worker, setWorker] = useState<Worker | null>(null)
   const [failed, setFailed] = useState(false)
 
   const [saving, setSaving] = useState(false)
@@ -134,8 +134,8 @@ function WorkerDetailPage() {
           ? {
               ...previous,
               fullname,
-              phone: phone || null,
-              status: status as WorkerResponse["status"],
+              phone,
+              status: status as Worker["status"],
             }
           : previous,
       )
@@ -578,7 +578,7 @@ function WorkerDetailPage() {
                 >
                   {worker.assigned_places.map((place) => (
                     <div
-                      key={place.id}
+                      key={place.place_id}
                       style={S(`
                         display: flex;
                         align-items: center;
