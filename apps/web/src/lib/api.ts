@@ -8,6 +8,7 @@ import type {
   Expense,
   ExpenseCategory,
   Place,
+  PlaceWorker,
   SupportTicket,
   Worker,
 } from "@amlak/shared"
@@ -269,6 +270,23 @@ export function cancelBooking(
   return apiRequest<Booking>(`/bookings/${bookingId}/cancel`, token, {
     method: "POST",
     body: JSON.stringify({ reason }),
+  })
+}
+
+/** The workers assigned to a place (Manager only), at most 100. */
+export function getPlaceWorkers(
+  token: string,
+  placeId: string,
+): Promise<PlaceWorker[]> {
+  return apiRequest<PlaceWorker[]>(
+    `/places/${placeId}/workers?page_size=100`,
+    token,
+  ).then((data) => {
+    if (!Array.isArray(data)) {
+      throw new Error("/places/{placeId}/workers returned no list")
+    }
+
+    return data
   })
 }
 
@@ -700,7 +718,7 @@ export async function createTicket(
 export interface ApproveTicketInput {
   assignee_id: string;
   due_date: string;
-  estimated_cost: number;
+  estimated_cost?: number;
 }
 
 export interface RejectTicketInput {

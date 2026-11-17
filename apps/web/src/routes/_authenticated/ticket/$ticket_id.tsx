@@ -20,6 +20,7 @@ import {
   Wrench,
 } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
+import { t } from "@lingui/core/macro"
 
 import { useAuth } from "@/lib/auth"
 import {
@@ -29,9 +30,10 @@ import {
   completeTicket,
   getTicketById,
   getAssetById,
-  getWorkerById,
+  getPlace,
+  getPlaceWorkers,
 } from "@/lib/api"
-import type { Asset } from "@amlak/shared"
+import type { Asset, Place, PlaceWorker } from "@amlak/shared"
 
 import {
   Breadcrumb,
@@ -101,12 +103,13 @@ function TicketDetailPage() {
     from: "/_authenticated/ticket/$ticket_id",
   })
 
-  const { accessToken } = useAuth()
+  const { accessToken, user } = useAuth()
 
   const [ticket, setTicket] = useState<Ticket | null>(null)
   const [asset, setAsset] = useState<Asset | null>(null)
-  const [reporterName, setReporterName] = useState<string | null>(null)
-  const [assigneeName, setAssigneeName] = useState<string | null>(null)
+  // Loaded for Managers only: GET /places/{placeId}/workers is Manager-only.
+  const [place, setPlace] = useState<Place | null>(null)
+  const [placeWorkers, setPlaceWorkers] = useState<PlaceWorker[]>([])
 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -115,16 +118,7 @@ function TicketDetailPage() {
   const [actionLoading, setActionLoading] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
 
-  const [assigneeId] = useState(() => {
-    if (typeof window === "undefined") return ""
-
-    try {
-      const authUser = sessionStorage.getItem("authUser")
-      return authUser ? JSON.parse(authUser).id ?? "" : ""
-    } catch {
-      return ""
-    }
-  })
+  const [assigneeId, setAssigneeId] = useState("")
 
   const [dueDate, setDueDate] = useState("")
   const [estimatedCost, setEstimatedCost] = useState("")
@@ -176,9 +170,6 @@ function TicketDetailPage() {
         if (!alive) return
 
         setTicket(selectedTicket)
-        setReporterName(selectedTicket.reporter_id)
-        setAssigneeName(selectedTicket.assignee_id || null)
-
         if (selectedTicket.asset_id) {
           try {
             const assetData = await getAssetById(
@@ -195,33 +186,19 @@ function TicketDetailPage() {
           setAsset(null)
         }
 
-        try {
-          const reporter = await getWorkerById(
-            accessToken,
-            selectedTicket.reporter_id,
-          )
-
-          if (alive) setReporterName(reporter.fullname)
-        } catch (workerError) {
-          console.warn(
-            "Could not load reporter as a worker:",
-            workerError,
-          )
-        }
-
-        if (selectedTicket.assignee_id) {
+        if (user?.role === "MANAGER") {
           try {
-            const assignee = await getWorkerById(
-              accessToken,
-              selectedTicket.assignee_id,
-            )
+            const [placeData, workersData] = await Promise.all([
+              getPlace(accessToken, selectedTicket.place_id),
+              getPlaceWorkers(accessToken, selectedTicket.place_id),
+            ])
 
-            if (alive) setAssigneeName(assignee.fullname)
-          } catch (workerError) {
-            console.warn(
-              "Could not load assignee as a worker:",
-              workerError,
-            )
+            if (alive) {
+              setPlace(placeData)
+              setPlaceWorkers(workersData)
+            }
+          } catch (peopleError) {
+            console.warn("Could not load the place's workers:", peopleError)
           }
         }
       } catch (err) {
@@ -244,7 +221,7 @@ function TicketDetailPage() {
     return () => {
       alive = false
     }
-  }, [accessToken, ticket_id])
+  }, [accessToken, ticket_id, user?.role])
 
   const loadTicketDetails = async () => {
     if (!accessToken) return
@@ -281,38 +258,6 @@ function TicketDetailPage() {
         setAsset(null)
       }
 
-      setReporterName(selectedTicket.reporter_id)
-      setAssigneeName(selectedTicket.assignee_id || null)
-
-      try {
-        const reporter = await getWorkerById(
-          accessToken,
-          selectedTicket.reporter_id,
-        )
-
-        setReporterName(reporter.fullname)
-      } catch (workerError) {
-        console.warn(
-          "Could not load reporter as a worker:",
-          workerError,
-        )
-      }
-
-      if (selectedTicket.assignee_id) {
-        try {
-          const assignee = await getWorkerById(
-            accessToken,
-            selectedTicket.assignee_id,
-          )
-
-          setAssigneeName(assignee.fullname)
-        } catch (workerError) {
-          console.warn(
-            "Could not load assignee as a worker:",
-            workerError,
-          )
-        }
-      }
     } catch (err) {
       console.error("Failed to load ticket:", err)
 
@@ -329,6 +274,7 @@ function TicketDetailPage() {
   const resetActionForm = () => {
     setAction(null)
     setActionError(null)
+    setAssigneeId("")
     setDueDate("")
     setEstimatedCost("")
     setRejectionReason("")
@@ -342,7 +288,7 @@ function TicketDetailPage() {
   }
 
   const handleApprove = async () => {
-    if (!assigneeId || !dueDate || estimatedCost === "") return
+    if (!assigneeId || !dueDate) return
 
     try {
       setActionLoading(true)
@@ -351,7 +297,10 @@ function TicketDetailPage() {
       await approveTicket(accessToken, ticket_id, {
         assignee_id: assigneeId,
         due_date: dueDate,
-        estimated_cost: Number(estimatedCost),
+        // Optional in the API: send it only when filled.
+        ...(estimatedCost.trim() === ""
+          ? {}
+          : { estimated_cost: Number(estimatedCost) }),
       })
 
       resetActionForm()
@@ -600,6 +549,41 @@ function TicketDetailPage() {
     )
   }
 
+  // The API lets only the place's Manager review and reassign, and only the
+  // assignee complete; offer only the buttons that can work.
+  const isPlaceManager =
+    user?.role === "MANAGER" && !!place && place.owner_id === user.id
+  const isAssignee = !!ticket.assignee_id && ticket.assignee_id === user?.id
+  const canReview = isPlaceManager && ticket.status === "PENDING_REVIEW"
+  const canReassign = isPlaceManager && ticket.status === "APPROVED"
+  const canComplete = isAssignee && ticket.status === "APPROVED"
+  const hasActions = canReview || canReassign || canComplete
+
+  const workerNames = new Map(
+    placeWorkers.map((placeWorker) => [
+      placeWorker.worker.id,
+      placeWorker.worker.fullname,
+    ]),
+  )
+  const personName = (id: string | null | undefined) => {
+    if (!id) return "—"
+    if (id === user?.id) return t`You`
+    return workerNames.get(id) ?? t`Another team member`
+  }
+
+  // Who can take the work: the place's owner and its ACTIVE workers.
+  const assigneeOptions = place
+    ? [
+        { id: place.owner_id, label: t`You (owner)` },
+        ...placeWorkers
+          .filter((placeWorker) => placeWorker.worker.status === "ACTIVE")
+          .map((placeWorker) => ({
+            id: placeWorker.worker.id,
+            label: placeWorker.worker.fullname,
+          })),
+      ]
+    : []
+
   return (
     <div
       style={S(
@@ -736,8 +720,11 @@ function TicketDetailPage() {
     { id: "timeline-section", title: "السجل الزمني", icon: <Clock3 size={16} /> },
     { id: "actions-section", title: "إجراءات التذكرة", icon: <Wrench size={16} /> },
     { id: "attachments-section", title: "الملحقات", icon: <Paperclip size={16} /> },
-  ].map((section) => (
+  ]
+    .filter((section) => section.id !== "actions-section" || hasActions)
+    .map((section) => (
     <Button
+  key={section.id}
   type="button"
   variant="outline"
   size="sm"
@@ -797,7 +784,9 @@ function TicketDetailPage() {
           <Grid>
             <InfoItem
               label="تمت المراجعة بواسطة"
-              value={ticket.reviewed_by}
+              value={
+                ticket.reviewed_by ? personName(ticket.reviewed_by) : null
+              }
             />
 
             <InfoItem
@@ -848,8 +837,14 @@ function TicketDetailPage() {
       <div id="people-section" style={{ display: "none" }}>
         <Section title="المسؤولون">
           <Grid>
-            <InfoItem label="مُبلّغ التذكرة" value={reporterName} />
-            <InfoItem label="المسؤول عن التنفيذ" value={assigneeName} />
+            <InfoItem
+              label="مُبلّغ التذكرة"
+              value={personName(ticket.reporter_id)}
+            />
+            <InfoItem
+              label="المسؤول عن التنفيذ"
+              value={ticket.assignee_id ? personName(ticket.assignee_id) : null}
+            />
           </Grid>
         </Section>
       </div>
@@ -908,7 +903,7 @@ function TicketDetailPage() {
               "display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:12px; padding:24px 20px",
             )}
           >
-            {ticket.status === "PENDING_REVIEW" && (
+            {canReview && (
               <>
                 <Button
                   variant="default"
@@ -934,18 +929,20 @@ function TicketDetailPage() {
               </>
             )}
 
-            {ticket.status === "APPROVED" && (
-              <>
-                <Button
-                  variant="outline"
-                  className="am-btn"
-                  onClick={() => openAction("reassign")}
-                  style={S("height:42px; padding:0 20px; gap:8px")}
-                >
-                  <UserRoundCog size={17} />
-                  <Trans>إعادة تعيين المكلف</Trans>
-                </Button>
+            {canReassign && (
+              <Button
+                variant="outline"
+                className="am-btn"
+                onClick={() => openAction("reassign")}
+                style={S("height:42px; padding:0 20px; gap:8px")}
+              >
+                <UserRoundCog size={17} />
+                <Trans>إعادة تعيين المكلف</Trans>
+              </Button>
+            )}
 
+            {canComplete && (
+              <>
                 <Button
                   variant="outline"
                   className="am-btn"
@@ -992,6 +989,28 @@ function TicketDetailPage() {
 
               {(action === "approve" || action === "reassign") && (
                 <div>
+                  <label htmlFor="ticket-assignee" style={labelStyle}>
+                    {t`Assignee`}
+                  </label>
+
+                  <select
+                    id="ticket-assignee"
+                    value={assigneeId}
+                    onChange={(event) => setAssigneeId(event.target.value)}
+                    style={fieldStyle}
+                  >
+                    <option value="">{t`Choose who does the work`}</option>
+                    {assigneeOptions.map((option) => (
+                      <option key={option.id} value={option.id}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {(action === "approve" || action === "reassign") && (
+                <div>
                   <label style={labelStyle}>تاريخ الاستحقاق</label>
 
                   <input
@@ -1006,7 +1025,7 @@ function TicketDetailPage() {
 
               {action === "approve" && (
                 <div>
-                  <label style={labelStyle}>التكلفة التقديرية</label>
+                  <label style={labelStyle}>{t`Estimated cost (optional)`}</label>
 
                   <input
                     type="number"
@@ -1118,7 +1137,6 @@ function TicketDetailPage() {
                       actionLoading ||
                       !assigneeId.trim() ||
                       !dueDate ||
-                      estimatedCost === "" ||
                       Number(estimatedCost) < 0
                     }
                   >
