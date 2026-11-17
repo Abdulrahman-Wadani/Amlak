@@ -5,6 +5,7 @@ import type {
   CreateAssetInput,
   CreatePlaceInput,
   Expense,
+  ExpenseCategory,
   Place,
   WorkerResponse,
 } from "@amlak/shared"
@@ -433,18 +434,242 @@ export async function getTicketById(
   return response;
 }
 
+// Finanace
+
+export interface ExpenseListResponse {
+  data: Expense[]
+  pagination: {
+    page: number
+    page_size: number
+    total: number
+    total_pages: number
+  }
+}
+
+export interface ExpenseInput {
+  category: ExpenseCategory
+  amount: number
+  expense_date: string
+  description?: string
+  ticket_id?: string
+  receipt?: File | null
+}
+
+export interface FinancialReportPlace {
+  place_id: string
+  place_name: string
+  currency: string
+  total_income: number
+  total_expenses: number
+  profit: number
+  expenses_by_category: Record<ExpenseCategory, number>
+}
+
+export interface FinancialReportTotal {
+  currency: string
+  total_income: number
+  total_expenses: number
+  profit: number
+}
+
+export interface FinancialReport {
+  period: {
+    from: string
+    to: string
+  }
+  places: FinancialReportPlace[]
+  totals_by_currency: FinancialReportTotal[]
+}
+
+export interface FinancialReportParams {
+  from: string
+  to: string
+  place_id?: string
+}
+
+async function expenseMultipartRequest<T>(
+  path: string,
+  token: string,
+  method: "POST" | "PUT",
+  input: Partial<ExpenseInput>,
+): Promise<T> {
+  const formData = new FormData()
+
+  if (input.category) formData.append("category", input.category)
+  if (input.amount !== undefined) {
+    formData.append("amount", String(input.amount))
+  }
+  if (input.expense_date) {
+    formData.append("expense_date", input.expense_date)
+  }
+  if (input.description !== undefined) {
+    formData.append("description", input.description)
+  }
+  if (input.ticket_id !== undefined) {
+    formData.append("ticket_id", input.ticket_id)
+  }
+  if (input.receipt) {
+    formData.append("receipt", input.receipt)
+  }
+
+  const response = await fetch(`/api/v1${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+    credentials: "same-origin",
+  })
+
+  const result: unknown = await response.json().catch(() => null)
+
+  if (!response.ok) {
+    const message =
+      result &&
+      typeof result === "object" &&
+      "message" in result
+        ? String(result.message)
+        : `Expense request failed (${response.status})`
+
+    throw new Error(message)
+  }
+
+  return unwrapResponse<T>(result)
+}
+
 export async function expenseslist(
   token: string,
   placeId: string,
+  params: {
+    from?: string
+    to?: string
+    category?: ExpenseCategory
+    page?: number
+    page_size?: number
+  } = {},
 ): Promise<Expense[]> {
-  // shortcut: first 100 expenses per place; page them when a place passes that
-  return apiRequest<Expense[]>(
-    `/places/${placeId}/expenses?page_size=100`,
+  const query = new URLSearchParams()
+
+  query.set("page", String(params.page ?? 1))
+  query.set("page_size", String(params.page_size ?? 100))
+
+  if (params.from) query.set("from", params.from)
+  if (params.to) query.set("to", params.to)
+  if (params.category) query.set("category", params.category)
+
+  const result = await apiRequest<Expense[]>(
+    `/places/${placeId}/expenses?${query.toString()}`,
     token,
   )
+
+  if (!Array.isArray(result)) {
+    throw new Error("Invalid expenses response")
+  }
+
+  return result
 }
 
-// for test now only
+export async function getExpenseById(
+  token: string,
+  expenseId: string,
+): Promise<Expense> {
+  const expense = await apiRequest<Expense>(
+    `/expenses/${expenseId}`,
+    token,
+  )
+
+  if (!expense || typeof expense.id !== "string") {
+    throw new Error("Expense not found")
+  }
+
+  return expense
+}
+
+export async function createExpense(
+  token: string,
+  placeId: string,
+  input: ExpenseInput,
+): Promise<Expense> {
+  const expense = await expenseMultipartRequest<Expense>(
+    `/places/${placeId}/expenses`,
+    token,
+    "POST",
+    input,
+  )
+
+  if (!expense || typeof expense.id !== "string") {
+    throw new Error("Expense was not created")
+  }
+
+  return expense
+}
+
+export async function updateExpense(
+  token: string,
+  expenseId: string,
+  input: Partial<ExpenseInput>,
+): Promise<Expense> {
+  const expense = await expenseMultipartRequest<Expense>(
+    `/expenses/${expenseId}`,
+    token,
+    "PUT",
+    input,
+  )
+
+  if (!expense || typeof expense.id !== "string") {
+    throw new Error("Expense was not updated")
+  }
+
+  return expense
+}
+
+export async function deleteExpense(
+  token: string,
+  expenseId: string,
+): Promise<void> {
+  const response = await fetch(`/api/v1/expenses/${expenseId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    credentials: "same-origin",
+  })
+
+  if (!response.ok) {
+    const result = await response.json().catch(() => null)
+
+    throw new Error(
+      result?.message || `Failed to delete expense (${response.status})`,
+    )
+  }
+}
+
+export async function getFinancialReport(
+  token: string,
+  params: FinancialReportParams,
+): Promise<FinancialReport> {
+  const query = new URLSearchParams({
+    from: params.from,
+    to: params.to,
+  })
+
+  if (params.place_id) {
+    query.set("place_id", params.place_id)
+  }
+
+  const report = await apiRequest<FinancialReport>(
+    `/reports/financial?${query.toString()}`,
+    token,
+  )
+
+  if (!report || !Array.isArray(report.places)) {
+    throw new Error("Invalid financial report response")
+  }
+
+  return report
+}
+
+
 export type TicketPriority = "LOW" | "MEDIUM" | "HIGH" | "URGENT"
 
 export interface CreateTicketInput {

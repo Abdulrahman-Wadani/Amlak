@@ -140,7 +140,11 @@ function AssetDetailPage() {
     i18n.locale === "ar" ? "ar" : "en",
     { dateStyle: "medium" }
   )
+const referrer = document.referrer
 
+const placeId = referrer
+  ? new URL(referrer).pathname.split("/").filter(Boolean).pop()
+  : undefined
   const ticketLabels: Record<string, string> = {
     CORRECTIVE: "صيانة تصحيحية",
     PREVENTIVE: "صيانة وقائية",

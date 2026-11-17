@@ -670,7 +670,7 @@ function TicketDetailPage() {
                   to="/place/$place_id"
                   params={{ place_id: ticket.place_id }}
                 >
-                  {ticket.place_id}
+                  <Trans>الصفحة السابقة</Trans>
                 </Link>
               }
             />
