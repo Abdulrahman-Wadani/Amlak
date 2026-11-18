@@ -28,8 +28,8 @@ import { ReportPopup } from "@/components/report-form"
 import { Panel, PanelTitle } from "@/components/panel"
 import { cn } from "cn"
 
-/** How many places the home card shows before See all. */
-const HOME_PLACES = 6
+/** How many places the home card shows: the newest active ones; See all opens the rest. */
+const HOME_PLACES = 3
 
 export const Route = createFileRoute("/_authenticated/home")({
   // Admins have no dashboard here; their start page is /admin.
@@ -357,9 +357,13 @@ function ManagerHome() {
               </Link>
             </div>
           ) : (
-            // The first places only, so nothing scrolls inside the card; See all opens the rest.
-            <div className="grid min-w-0 gap-3 [grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr))]">
-              {places.slice(0, HOME_PLACES).map((place) => (
+            // The newest active places only, so nothing scrolls inside the card; See all opens the rest.
+            <div className="grid min-w-0 gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr))]">
+              {places
+                .filter((place) => place.status === "ACTIVE")
+                .sort((a, b) => b.created_at.localeCompare(a.created_at))
+                .slice(0, HOME_PLACES)
+                .map((place) => (
                 <Link
                   key={place.id}
                   to="/place/$place_id"
