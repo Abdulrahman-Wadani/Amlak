@@ -178,10 +178,13 @@
  */
 :root {
   --band-min-h: 176px;
+  /* The figure cards (home): one minimum height for every card in a row. */
+  --stat-min-h: 0px;
 }
 @media (min-width: 70rem) {
   :root {
     --band-min-h: 206px;
+    --stat-min-h: 240px;
   }
 }
 
