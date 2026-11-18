@@ -30,7 +30,7 @@ function CompleteTask() {
   const { ticket_id } = useParams({ from: "/_authenticated/ticket/complete/$ticket_id" })
   const { accessToken } = useAuth()
   const navigate = useNavigate()
-  const { date } = useFormat()
+  const { date, currencyName } = useFormat()
   const [ticket, setTicket] = useState<Ticket | null>(null)
   const [place, setPlace] = useState<Place | null>(null)
   const [failed, setFailed] = useState(false)
@@ -121,7 +121,7 @@ function CompleteTask() {
                 <Field
                   id="c-cost"
                   label={<Trans>What the repair cost</Trans>}
-                  hint={place ? <Trans>In {place.currency}.</Trans> : undefined}
+                  hint={place ? <Trans>In {currencyName(place.currency)}.</Trans> : undefined}
                   error={errors.cost}
                 >
                   <Input

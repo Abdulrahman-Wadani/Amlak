@@ -64,6 +64,15 @@ export function formatRelative(value: DateInput, lang: string, now: Date = new D
   return formatDate(date, lang, { day: "numeric", month: "long" })
 }
 
+/** A currency's name in the interface language ("Saudi riyal" in English); the code if unknown. */
+export function currencyName(code: string, lang: string) {
+  try {
+    return new Intl.DisplayNames([intlLocale(lang)], { type: "currency" }).of(code) ?? code
+  } catch {
+    return code
+  }
+}
+
 /** The same functions, in the current interface language. */
 export function useFormat() {
   const { i18n } = useLingui()
@@ -77,6 +86,7 @@ export function useFormat() {
         formatMoney(amount, currency, lang, options),
       date: (value: DateInput, options?: Intl.DateTimeFormatOptions) => formatDate(value, lang, options),
       relative: (value: DateInput) => formatRelative(value, lang),
+      currencyName: (code: string) => currencyName(code, lang),
       numberFormat: (options?: Intl.NumberFormatOptions) => numberFormat(lang, options),
       dateFormat: (options?: Intl.DateTimeFormatOptions) => dateFormat(lang, options),
     }),

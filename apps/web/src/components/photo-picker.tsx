@@ -5,7 +5,7 @@ import { LocationPermission } from "@/components/location-permission"
 
 const ASKED = "amlak.cameraAsked"
 
-function askedBefore(): boolean {
+export function askedBefore(): boolean {
   try {
     return localStorage.getItem(ASKED) === "1"
   } catch {
@@ -13,7 +13,7 @@ function askedBefore(): boolean {
   }
 }
 
-function rememberAsked() {
+export function rememberAsked() {
   try {
     localStorage.setItem(ASKED, "1")
   } catch {

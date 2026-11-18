@@ -25,10 +25,17 @@ import {
 import { StatusBadge } from "@/components/place-shared"
 import { cn } from "cn"
 import { Page } from "@/components/page"
+import { UserSupport } from "@/components/user-support"
 
 export const Route = createFileRoute("/_authenticated/support/")({
-  component: UsersPage,
+  component: SupportPage,
 })
+
+/** Admins answer every request; everyone else sends theirs and reads the replies. */
+function SupportPage() {
+  const { user } = useAuth()
+  return user?.role === "ADMIN" ? <UsersPage /> : <UserSupport />
+}
 
 // Labels are components so they translate at render, not at import.
 const TABS = [

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { Link, createFileRoute, redirect } from "@tanstack/react-router"
-import { Building2, CalendarDays, Camera, ChevronDown, ChevronLeft, Wallet, Wrench } from "lucide-react"
+import { Building2, CalendarDays, Camera, ChevronDown, ChevronLeft, Plus, Wallet, Wrench } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
 import { plural, t } from "@lingui/core/macro"
 import type { Place, Ticket } from "@amlak/shared"
@@ -196,7 +196,18 @@ function ManagerHome() {
   })()
 
   return (
-    <Page title={greeting(now.getHours(), user?.fullname ?? "")} phoneTitle={<Trans>Home</Trans>} phoneStart="logo">
+    <Page
+      title={greeting(now.getHours(), user?.fullname ?? "")}
+      phoneTitle={<Trans>Home</Trans>}
+      phoneStart="logo"
+      phoneActions={false}
+      actions={
+        <Link to="/booking/new" className={cn(buttonVariants())}>
+          <Plus aria-hidden="true" />
+          <Trans>Add booking</Trans>
+        </Link>
+      }
+    >
       <TodayBand
         date={f.date(now, { weekday: "long", day: "numeric", month: "long" })}
         headline={loading ? null : headline}
@@ -313,7 +324,7 @@ function ManagerHome() {
                 </span>
               )}
             </div>
-            <Link to="/places" className="text-sm leading-8 font-semibold">
+            <Link to="/places" className="inline-flex min-h-11 items-center text-sm font-semibold">
               <Trans>See all</Trans>
             </Link>
           </div>

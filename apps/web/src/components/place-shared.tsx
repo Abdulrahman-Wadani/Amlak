@@ -64,7 +64,7 @@ export function StatusBadge({ status }: { status: string }) {
         text="var(--warn-900)"
         dot="var(--warn)"
       >
-        <Trans>OPEN</Trans>
+        <Trans>Open</Trans>
       </Chip>
     )
   }
@@ -76,7 +76,7 @@ export function StatusBadge({ status }: { status: string }) {
         text="var(--good-700)"
         dot="var(--good)"
       >
-        <Trans>RESOLVED</Trans>
+        <Trans>Resolved</Trans>
       </Chip>
     )
   }
@@ -152,10 +152,10 @@ export function BookingStatusChip({ status }: { status: string }) {
   if (status === "CHECKED_OUT") {
     return (
       <Chip
-        bg="var(--info-50)"
-        border="var(--info-200)"
-        text="var(--info-900)"
-        dot="var(--info)"
+        bg="var(--secondary)"
+        border="var(--border)"
+        text="var(--muted-foreground)"
+        dot="var(--muted-foreground)"
       >
         <Trans>Checked out</Trans>
       </Chip>
@@ -174,12 +174,7 @@ export function BookingStatusChip({ status }: { status: string }) {
     )
   }
   return (
-    <Chip
-      bg="var(--muted)"
-      border="var(--border)"
-      text="var(--foreground)"
-      dot="var(--muted-foreground)"
-    >
+    <Chip bg="var(--info-50)" border="var(--info-200)" text="var(--info-900)" dot="var(--info)">
       <Trans>Confirmed</Trans>
     </Chip>
   )

@@ -383,7 +383,7 @@ function ReviewPanel({
   phone?: boolean
 }) {
   const { accessToken } = useAuth()
-  const { money } = useFormat()
+  const { money, currencyName } = useFormat()
   const [cost, setCost] = useState("")
   const [assignee, setAssignee] = useState("")
   const [due, setDue] = useState("")
@@ -468,7 +468,7 @@ function ReviewPanel({
             remaining != null ? (
               <Trans>Left in this place’s budget this month: {money(remaining, place.currency, { maximumFractionDigits: 0 })}</Trans>
             ) : (
-              <Trans>Optional. In {place.currency}.</Trans>
+              <Trans>Optional. In {currencyName(place.currency)}.</Trans>
             )
           }
         >

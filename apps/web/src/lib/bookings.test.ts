@@ -4,6 +4,7 @@ import { groupBookings } from "@/lib/bookings"
 
 const booking = (id: string, status: Booking["status"], check_in_date: string, check_out_date: string): Booking => ({
   id,
+  place_id: "p1",
   guest_name: id,
   guest_phone: "+966500000000",
   guest_email: null,

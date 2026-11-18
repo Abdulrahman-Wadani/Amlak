@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import { useNavigate } from "@tanstack/react-router"
 import {
   keepPreviousData,
   useMutation,
@@ -114,6 +115,7 @@ function isConflict(error: unknown) {
 }
 
 export function PlaceBookings({ placeId }: { placeId: string }) {
+  const navigate = useNavigate()
   const { i18n } = useLingui()
   const { accessToken } = useAuth()
   const queryClient = useQueryClient()
@@ -224,11 +226,9 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
   const busy = saveMutation.isPending || cancelMutation.isPending || stayMutation.isPending
   const canLoadMore = Boolean(bookings && bookings.length >= pages * PAGE_SIZE)
 
+  // Adding a booking is its own page (the design's Add booking).
   function openAdd() {
-    saveMutation.reset()
-    setIssues([])
-    setForm({ ...EMPTY_FORM })
-    setFormOpen(true)
+    void navigate({ to: "/booking/new", search: { place_id: placeId } })
   }
 
   function openCancel(booking: Booking) {

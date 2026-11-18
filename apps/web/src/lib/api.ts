@@ -253,6 +253,9 @@ export type BookingStatus =
 
 export interface Booking {
   id: string
+  place_id: string
+  checked_in_at?: string | null
+  checked_out_at?: string | null
   guest_name: string
   guest_phone: string
   guest_email: string | null
@@ -319,6 +322,11 @@ export async function createBooking(
     method: "POST",
     body: JSON.stringify(input),
   })
+}
+
+/** One booking (Managers, and Workers of its place). */
+export function getBooking(token: string, bookingId: string): Promise<Booking> {
+  return apiRequest<Booking>(`/bookings/${bookingId}`, token)
 }
 
 export function checkInBooking(token: string, bookingId: string): Promise<Booking> {
@@ -1051,8 +1059,9 @@ export async function updateUser(
     : (result as UserResponse)
 }
 
+/** Every support ticket the user can see (their own, or all for an Admin). */
 export async function getSupportTicket(token: string) {
-  return apiRequest<SupportTicket[]>("/support-tickets", token)
+  return apiAllPages<SupportTicket>("/support-tickets", token)
 }
 
 export function createSupportTicket(
