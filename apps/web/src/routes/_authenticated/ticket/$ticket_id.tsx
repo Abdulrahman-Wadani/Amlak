@@ -28,7 +28,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "cn"
 import { Page } from "@/components/page"
-import { Field, InfoRows, NativeSelect, Panel, PanelTitle, PhoneActionBar, TwoColumns } from "@/components/panel"
+import { Field, InfoRows, NativeSelect, Panel, PanelTitle, PhoneActionBar } from "@/components/panel"
 import { PhotoTiles } from "@/components/photo-picker"
 import { PriorityText } from "@/components/home-parts"
 import { LoadError, Notice } from "@/components/states"
@@ -211,7 +211,7 @@ function TicketPage() {
 
   return (
     <Page
-      title={ticket ? <span dir="auto" className="line-clamp-2">{ticket.description}</span> : <Skeleton className="h-7 w-72" />}
+      title={ticket ? <span className="line-clamp-2"><bdi>{ticket.description}</bdi></span> : <Skeleton className="h-7 w-72" />}
       phoneTitle={<Trans>Maintenance ticket</Trans>}
       phoneSubtitle={ticket && place ? t`${place.place_name}, ${relative(ticket.created_at)}` : undefined}
       parent={
@@ -230,47 +230,12 @@ function TicketPage() {
       {ticket === null ? (
         <Skeleton className="h-96" />
       ) : (
-        <TwoColumns
-          main={
-            <>
-              {/* On the phone the details come first, as designed. */}
-              <div className="flex flex-col desk:hidden">
-                <DetailsPanel rows={detailRows} />
-              </div>
-              <Panel labelledBy="desc-title">
-                <PanelTitle id="desc-title">
-                  <Trans>Description</Trans>
-                </PanelTitle>
-                <p dir="auto" className="m-0 text-[15px] leading-[1.8] whitespace-pre-line">
-                  {ticket.description}
-                </p>
-                <PhotoTiles urls={damage} label={(n) => t`Damage photo ${n}`} />
-              </Panel>
-              {ticket.status === "REJECTED" && ticket.rejection_reason && (
-                <Panel labelledBy="reason-title">
-                  <PanelTitle id="reason-title">
-                    <Trans>Reason for rejection</Trans>
-                  </PanelTitle>
-                  <p dir="auto" className="m-0 text-[15px] leading-[1.8]">
-                    {ticket.rejection_reason}
-                  </p>
-                </Panel>
-              )}
-              {ticket.status === "COMPLETED" && (
-                <Panel labelledBy="after-title">
-                  <PanelTitle id="after-title">
-                    <Trans>After the repair</Trans>
-                  </PanelTitle>
-                  {ticket.completion_notes && (
-                    <p dir="auto" className="m-0 text-[15px] leading-[1.8]">
-                      {ticket.completion_notes}
-                    </p>
-                  )}
-                  <PhotoTiles urls={after} label={(n) => t`Photo after repair ${n}`} />
-                </Panel>
-              )}
-              {/* On the phone the review comes before the history. */}
-              {isManager && pending && place && (
+        <>
+          {/* The details and what to do next on top, side by side when there is room. */}
+          <div className="grid items-start gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr))] desk:gap-6">
+            <DetailsPanel rows={detailRows} />
+            {isManager && pending && place && (
+              <>
                 <div className="flex flex-col desk:hidden">
                   <ReviewPanel
                     ticket={ticket}
@@ -283,34 +248,6 @@ function TicketPage() {
                     phone
                   />
                 </div>
-              )}
-              <Panel labelledBy="history-title">
-                <PanelTitle id="history-title">
-                  <Trans>History</Trans>
-                </PanelTitle>
-                <ul className="m-0 flex list-none flex-col gap-3.5 p-0">
-                  {history.map((event) => (
-                    <li key={`${event.at}-${String(event.text)}`} className="flex gap-3">
-                      <span aria-hidden="true" className="mt-2.5 size-2 flex-none rounded-full bg-primary" />
-                      <span className="flex flex-col leading-[1.6]">
-                        <span>
-                          {event.who && <strong className="font-semibold">{event.who} </strong>}
-                          {event.text}
-                        </span>
-                        <span className="text-[13px] text-muted-foreground">{when(event.at)}</span>
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </Panel>
-            </>
-          }
-          side={
-            <>
-              <div className="hidden flex-col desk:flex">
-                <DetailsPanel rows={detailRows} />
-              </div>
-              {isManager && pending && place && (
                 <div className="hidden flex-col desk:flex">
                   <ReviewPanel
                     ticket={ticket}
@@ -322,26 +259,81 @@ function TicketPage() {
                     onConflict={onConflict}
                   />
                 </div>
-              )}
-              {isManager && approved && place && (
-                <ReassignPanel ticket={ticket} place={place} people={assignable} onDone={load} onConflict={onConflict} />
-              )}
-              {!isManager && approved && mine && (
-                <Panel>
-                  <Link to="/ticket/complete/$ticket_id" params={{ ticket_id: ticket.id }} className={cn(buttonVariants(), "w-full")}>
-                    <Check aria-hidden="true" />
-                    <Trans>Complete task</Trans>
-                  </Link>
-                  {due && (
-                    <span className="text-[13px] text-muted-foreground">
-                      {ticket.is_overdue ? <Trans>Was due {due}</Trans> : <Trans>Due {due}</Trans>}
+              </>
+            )}
+            {isManager && approved && place && (
+              <ReassignPanel ticket={ticket} place={place} people={assignable} onDone={load} onConflict={onConflict} />
+            )}
+            {!isManager && approved && mine && (
+              <Panel>
+                <Link to="/ticket/complete/$ticket_id" params={{ ticket_id: ticket.id }} className={cn(buttonVariants(), "w-full")}>
+                  <Check aria-hidden="true" />
+                  <Trans>Complete task</Trans>
+                </Link>
+                {due && (
+                  <span className="text-[13px] text-muted-foreground">
+                    {ticket.is_overdue ? <Trans>Was due {due}</Trans> : <Trans>Due {due}</Trans>}
+                  </span>
+                )}
+              </Panel>
+            )}
+          </div>
+
+          {/* Then one card: what happened, with its photos, and the history, a line between each part. */}
+          <Panel holdsSections className="gap-6 [&>section+section]:border-t [&>section+section]:border-border [&>section+section]:pt-6">
+            <Panel labelledBy="desc-title">
+              <PanelTitle id="desc-title">
+                <Trans>Description</Trans>
+              </PanelTitle>
+              <p className="m-0 text-[15px] leading-[1.8] whitespace-pre-line">
+                <bdi>{ticket.description}</bdi>
+              </p>
+              <PhotoTiles urls={damage} columns={4} label={(n) => t`Damage photo ${n}`} />
+            </Panel>
+            {ticket.status === "REJECTED" && ticket.rejection_reason && (
+              <Panel labelledBy="reason-title">
+                <PanelTitle id="reason-title">
+                  <Trans>Reason for rejection</Trans>
+                </PanelTitle>
+                <p className="m-0 text-[15px] leading-[1.8]">
+                  <bdi>{ticket.rejection_reason}</bdi>
+                </p>
+              </Panel>
+            )}
+            {ticket.status === "COMPLETED" && (
+              <Panel labelledBy="after-title">
+                <PanelTitle id="after-title">
+                  <Trans>After the repair</Trans>
+                </PanelTitle>
+                {ticket.completion_notes && (
+                  <p className="m-0 text-[15px] leading-[1.8]">
+                    <bdi>{ticket.completion_notes}</bdi>
+                  </p>
+                )}
+                <PhotoTiles urls={after} columns={4} label={(n) => t`Photo after repair ${n}`} />
+              </Panel>
+            )}
+            <Panel labelledBy="history-title">
+              <PanelTitle id="history-title">
+                <Trans>History</Trans>
+              </PanelTitle>
+              <ul className="m-0 flex list-none flex-col gap-3.5 p-0">
+                {history.map((event) => (
+                  <li key={`${event.at}-${String(event.text)}`} className="flex gap-3">
+                    <span aria-hidden="true" className="mt-2.5 size-2 flex-none rounded-full bg-primary" />
+                    <span className="flex flex-col leading-[1.6]">
+                      <span>
+                        {event.who && <strong className="font-semibold">{event.who} </strong>}
+                        {event.text}
+                      </span>
+                      <span className="text-[13px] text-muted-foreground">{when(event.at)}</span>
                     </span>
-                  )}
-                </Panel>
-              )}
-            </>
-          }
-        />
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          </Panel>
+        </>
       )}
     </Page>
   )
