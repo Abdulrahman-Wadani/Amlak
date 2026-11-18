@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import { useEmbedded } from "@/components/panel"
 import { useNavigate } from "@tanstack/react-router"
 import {
   keepPreviousData,
@@ -116,6 +117,7 @@ function isConflict(error: unknown) {
 }
 
 export function PlaceBookings({ placeId }: { placeId: string }) {
+  const embedded = useEmbedded()
   const navigate = useNavigate()
   const { i18n } = useLingui()
   const { accessToken } = useAuth()
@@ -290,15 +292,19 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
 
   return (
     <Card
-      className="am-lift"
-      style={S("padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0")}
+      className={embedded ? undefined : "am-lift"}
+      style={S(
+        embedded
+          ? "padding: 0; border: 0; box-shadow: none; background: transparent; overflow: visible; gap: 0"
+          : "padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0",
+      )}
     >
       <CardHeader
         style={S(
-          "padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap",
+          `${embedded ? "padding: 0 0 16px" : "padding: 18px 20px; border-bottom: 1px solid var(--border)"}; display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap`,
         )}
       >
-        <CardTitle style={S("font-size: 17px; font-weight: 750")}>
+        <CardTitle className={embedded ? "sr-only" : undefined} style={S("font-size: 17px; font-weight: 750")}>
           <CalendarDays
             size={17}
             style={S("display: inline; vertical-align: middle; margin-inline-end: 7px")}
@@ -350,7 +356,7 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
         </Select>
       </CardHeader>
 
-      <CardContent style={S("padding: 20px; display: flex; flex-direction: column; gap: 18px")}>
+      <CardContent style={S(`padding: ${embedded ? "0" : "20px"}; display: flex; flex-direction: column; gap: 18px`)}>
         {bookingsQuery.isError ? (
           <Alert variant="destructive">
             <CircleAlert />

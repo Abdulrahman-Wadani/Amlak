@@ -34,10 +34,16 @@ import {
   PanelTitle,
   ScrollHint,
   ScrollList,
-  TwoColumns,
+  TabbedPanel,
 } from "@/components/panel"
 
+const TABS = ["assets", "workers", "tickets", "bookings"] as const
+type Tab = (typeof TABS)[number]
+
 export const Route = createFileRoute("/_authenticated/place/$place_id")({
+  // The open tab is in the address, so Back returns to it.
+  validateSearch: (search: Record<string, unknown>): { tab?: Tab } =>
+    TABS.includes(search.tab as Tab) ? { tab: search.tab as Tab } : {},
   component: PlaceDetailPage,
 })
 
@@ -53,6 +59,11 @@ function PlaceDetailPage() {
   // Editing, deleting, the budget and the workers are for Managers.
   const isManager = user?.role === "MANAGER"
   const navigate = useNavigate()
+  const search = Route.useSearch()
+  // Workers are a Manager's tab; anyone else asking for it gets the assets.
+  const tab: Tab = search.tab === "workers" && !isManager ? "assets" : (search.tab ?? "assets")
+  const chooseTab = (next: Tab) =>
+    void navigate({ to: "/place/$place_id", params: { place_id }, search: next === "assets" ? {} : { tab: next } })
 
   const [place, setPlace] = useState<Place | null>(null)
   const [assets, setAssets] = useState<Asset[] | null>(null)
@@ -173,58 +184,51 @@ function PlaceDetailPage() {
 
       {!failed && (
         <>
-          <TwoColumns
-            main={
-              <>
-                {/* On the phone the budget comes first, as designed. */}
-                {budget && <div className="flex flex-col desk:hidden">{budget}</div>}
-                <AssetsPanel placeId={place_id} assets={assets} isManager={isManager} />
-                {isManager && accessToken && (
-                  <WorkersPanel
-                    token={accessToken}
-                    placeId={place_id}
-                    workers={workers}
-                    onChanged={setWorkers}
-                  />
-                )}
-              </>
-            }
-            side={
-              <>
-                {budget && <div className="hidden flex-col desk:flex">{budget}</div>}
-                <InfoPanel place={place} isManager={isManager} />
-                {!isManager && (
-                  <Panel>
-                    <Link
-                      to="/ticket/new"
-                      search={{ place_id }}
-                      className={cn(buttonVariants(), "w-full")}
-                    >
-                      <Camera aria-hidden="true" />
-                      <Trans>Report damage in this place</Trans>
-                    </Link>
-                    <span className="text-[13px] text-muted-foreground">
-                      <Trans>View only. Editing is for the manager.</Trans>
-                    </span>
-                  </Panel>
-                )}
-              </>
-            }
-          />
+          {/* The place's information on top, then one card with one list at a time. */}
+          <div className="grid items-start gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr))] desk:gap-6">
+            <InfoPanel place={place} isManager={isManager} />
+            {budget}
+            {!isManager && (
+              <Panel>
+                <Link to="/ticket/new" search={{ place_id }} className={cn(buttonVariants(), "w-full")}>
+                  <Camera aria-hidden="true" />
+                  <Trans>Report damage in this place</Trans>
+                </Link>
+                <span className="text-[13px] text-muted-foreground">
+                  <Trans>View only. Editing is for the manager.</Trans>
+                </span>
+              </Panel>
+            )}
+          </div>
 
-          {/* Not in the design; kept under its sections. */}
-          {accessToken && (
-            <TicketsSection
-              token={accessToken}
-              placeId={place_id}
-              assets={assets}
-              title={<Trans>Maintenance tickets</Trans>}
-              emptyOpen={<Trans>This place has no open tickets.</Trans>}
-              emptyAll={<Trans>This place has no maintenance tickets.</Trans>}
-              showAddTicket
-            />
-          )}
-          <PlaceBookings placeId={place_id} />
+          <TabbedPanel
+            label={t`Place sections`}
+            value={tab}
+            onChange={chooseTab}
+            tabs={[
+              { key: "assets", label: <Trans>Assets</Trans> },
+              ...(isManager ? [{ key: "workers" as const, label: <Trans>Workers</Trans> }] : []),
+              { key: "tickets", label: <Trans>Tickets</Trans> },
+              { key: "bookings", label: <Trans>Bookings</Trans> },
+            ]}
+          >
+            {tab === "assets" && <AssetsPanel placeId={place_id} assets={assets} isManager={isManager} />}
+            {tab === "workers" && isManager && accessToken && (
+              <WorkersPanel token={accessToken} placeId={place_id} workers={workers} onChanged={setWorkers} />
+            )}
+            {tab === "tickets" && accessToken && (
+              <TicketsSection
+                token={accessToken}
+                placeId={place_id}
+                assets={assets}
+                title={<Trans>Maintenance tickets</Trans>}
+                emptyOpen={<Trans>This place has no open tickets.</Trans>}
+                emptyAll={<Trans>This place has no maintenance tickets.</Trans>}
+                showAddTicket
+              />
+            )}
+            {tab === "bookings" && <PlaceBookings placeId={place_id} />}
+          </TabbedPanel>
         </>
       )}
     </Page>

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { Link, createFileRoute, redirect } from "@tanstack/react-router"
-import { Building2, CalendarDays, Camera, ChevronDown, ChevronLeft, Plus, Wallet, Wrench } from "lucide-react"
+import { Building2, CalendarDays, Camera, ChevronLeft, Plus, Wallet, Wrench } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
 import { plural, t } from "@lingui/core/macro"
 import type { Place, Ticket } from "@amlak/shared"
@@ -23,7 +23,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { BookingStatusChip, OverdueChip, StatusBadge, TicketStatusChip, TypeLabel } from "@/components/place-shared"
 import { DetailRow, DetailsLink, PlaceStatusText, PriorityText, StatCard } from "@/components/home-parts"
 import { Page } from "@/components/page"
+import { Panel, PanelTitle } from "@/components/panel"
 import { cn } from "cn"
+
+/** How many places the home card shows before See all. */
+const HOME_PLACES = 6
 
 export const Route = createFileRoute("/_authenticated/home")({
   // Admins have no dashboard here; their start page is /admin.
@@ -217,9 +221,10 @@ function ManagerHome() {
       }
     >
 
-      <div className="flex flex-wrap items-start gap-6">
-        <div className="min-w-0 flex-[999_1_560px]">
-          <div className="grid items-stretch gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))]">
+      {/* The figures, then the places in one card. */}
+      <div className="flex min-w-0 flex-col gap-4 desk:gap-6">
+        <div className="min-w-0">
+          <div className="grid items-start gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))]">
             <StatCard
               compactOnPhone
               icon={<Wrench strokeWidth={1.8} />}
@@ -313,19 +318,11 @@ function ManagerHome() {
           </div>
         </div>
 
-        <section aria-labelledby="your-places" className="am-rise flex min-w-0 flex-[1_1_320px] flex-col gap-3 desk:max-w-[360px]">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex flex-col gap-0.5">
-              <h2 id="your-places" className="m-0 text-lg leading-[1.4] font-bold">
-                <Trans>Your places</Trans>
-              </h2>
-              {(places?.length ?? 0) > 2 && (
-                <span className="inline-flex items-center gap-1 text-[13px] text-muted-foreground">
-                  <ChevronDown aria-hidden="true" className="size-4" strokeWidth={1.8} />
-                  <Trans>Scroll to see the rest</Trans>
-                </span>
-              )}
-            </div>
+        <Panel labelledBy="your-places">
+          <div className="flex items-center justify-between gap-3">
+            <PanelTitle id="your-places">
+              <Trans>Your places</Trans>
+            </PanelTitle>
             <Link to="/places" className="inline-flex min-h-11 items-center text-sm font-semibold">
               <Trans>See all</Trans>
             </Link>
@@ -337,7 +334,7 @@ function ManagerHome() {
           ) : places === null ? (
             <Skeleton className="h-[168px]" />
           ) : places.length === 0 ? (
-            <div className="flex flex-col items-start gap-3 border border-border bg-card p-[18px]">
+            <div className="flex flex-col items-start gap-3 border border-dashed border-border p-[18px]">
               <span className="text-muted-foreground">
                 <Trans>Add your first property to see it here.</Trans>
               </span>
@@ -346,23 +343,14 @@ function ManagerHome() {
               </Link>
             </div>
           ) : (
-            <div
-              role="region"
-              aria-label={t`Your places`}
-              // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrolling region must be reachable by keyboard
-              tabIndex={0}
-              className={cn(
-                "flex flex-none flex-col gap-3 overflow-y-auto overscroll-contain [scroll-snap-type:y_mandatory] [scrollbar-width:thin]",
-                places.length > 2 &&
-                  "h-[400px] pb-10 [mask-image:linear-gradient(to_bottom,#000_calc(100%-40px),transparent)]",
-              )}
-            >
-              {places.map((place) => (
+            // The first places only, so nothing scrolls inside the card; See all opens the rest.
+            <div className="grid min-w-0 gap-3 [grid-template-columns:repeat(auto-fill,minmax(min(280px,100%),1fr))]">
+              {places.slice(0, HOME_PLACES).map((place) => (
                 <Link
                   key={place.id}
                   to="/place/$place_id"
                   params={{ place_id: place.id }}
-                  className="am-lift box-border flex h-[168px] flex-none snap-start flex-col gap-3.5 border border-border bg-card p-[18px] text-foreground no-underline"
+                  className="am-lift box-border flex min-w-0 flex-col gap-3.5 border border-border bg-card p-[18px] text-foreground no-underline"
                 >
                   <span className="flex items-start gap-3">
                     <span aria-hidden="true" className="inline-flex size-11 flex-none items-center justify-center bg-secondary">
@@ -390,7 +378,7 @@ function ManagerHome() {
               ))}
             </div>
           )}
-        </section>
+        </Panel>
       </div>
     </Page>
   )
@@ -482,7 +470,7 @@ function WorkerHome() {
         </Link>
       }
     >
-      <div className="grid items-stretch gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr))]">
+      <div className="grid items-start gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr))]">
         <StatCard
           title={<Trans>My open tasks</Trans>}
           value={loading(tasks, tasksError) ? <Skeleton className="h-10 w-16" /> : tasksError ? "—" : f.number(tasks?.total ?? 0)}

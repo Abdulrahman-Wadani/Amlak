@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { createContext, useContext, useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { Check, ChevronDown } from "lucide-react"
@@ -10,6 +10,17 @@ import { useFormat } from "@/lib/format"
  * sections, the two-column layout, label-and-value rows, a list that scrolls
  * inside its card, filter tabs and the list footer.
  */
+
+/**
+ * True inside a TabbedPanel: the section is one tab of a card, so it draws no
+ * card of its own and its title is left to the tab.
+ */
+const EmbeddedContext = createContext(false)
+
+/** Whether this section sits inside a TabbedPanel (see EmbeddedContext). */
+export function useEmbedded(): boolean {
+  return useContext(EmbeddedContext)
+}
 
 /** A white card section with the hard shadow. `pad` is 24px, or 28px for a form card. */
 export function Panel({
@@ -23,20 +34,94 @@ export function Panel({
   pad?: "md" | "lg"
   labelledBy?: string
 }) {
+  const embedded = useEmbedded()
   return (
     <section
       aria-labelledby={labelledBy}
-      className={`box-border flex min-w-0 flex-col gap-3 border border-border bg-card shadow-sm ${pad === "lg" ? "p-5 desk:p-7" : "p-5 desk:p-6"} ${className}`}
+      className={
+        embedded
+          ? `flex min-w-0 flex-col gap-3 ${className}`
+          : `box-border flex min-w-0 flex-col gap-3 border border-border bg-card shadow-sm ${pad === "lg" ? "p-5 desk:p-7" : "p-5 desk:p-6"} ${className}`
+      }
     >
       {children}
     </section>
   )
 }
 
+/**
+ * One card that shows one of several lists at a time, chosen by tabs (a
+ * page shows at most one list). The sections inside draw no card of their
+ * own (see useEmbedded). The page keeps the chosen tab in the address.
+ */
+export function TabbedPanel<K extends string>({
+  label,
+  tabs,
+  value,
+  onChange,
+  children,
+}: {
+  label: string
+  tabs: { key: K; label: ReactNode; count?: number }[]
+  value: K
+  onChange: (key: K) => void
+  children: ReactNode
+}) {
+  const id = useId()
+  const { number } = useFormat()
+  const refs = useRef<Record<string, HTMLButtonElement | null>>({})
+
+  // Arrow keys move between the tabs (and choose), as in any tablist.
+  function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const keys = tabs.map((tab) => tab.key)
+    const at = keys.indexOf(value)
+    const rtl = getComputedStyle(event.currentTarget).direction === "rtl"
+    const step =
+      event.key === "ArrowRight" ? (rtl ? -1 : 1) : event.key === "ArrowLeft" ? (rtl ? 1 : -1) : 0
+    const next =
+      event.key === "Home" ? keys[0] : event.key === "End" ? keys[keys.length - 1] : step ? keys[(at + step + keys.length) % keys.length] : null
+    if (!next) return
+    event.preventDefault()
+    onChange(next)
+    refs.current[next]?.focus()
+  }
+
+  return (
+    <section aria-label={label} className="box-border flex min-w-0 flex-col gap-5 border border-border bg-card p-5 shadow-sm desk:p-6">
+      <div role="tablist" aria-label={label} onKeyDown={onKeyDown} className="flex min-w-0 flex-wrap gap-2 border-b border-border pb-4">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            ref={(el) => {
+              refs.current[tab.key] = el
+            }}
+            type="button"
+            role="tab"
+            id={`${id}-${tab.key}`}
+            aria-selected={value === tab.key}
+            aria-controls={`${id}-panel`}
+            tabIndex={value === tab.key ? 0 : -1}
+            className="am-tab"
+            onClick={() => onChange(tab.key)}
+          >
+            {tab.label}
+            {tab.count !== undefined && <span className="am-tab-count">{number(tab.count)}</span>}
+          </button>
+        ))}
+      </div>
+      <div role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${value}`} className="flex min-w-0 flex-col">
+        <EmbeddedContext.Provider value={true}>{children}</EmbeddedContext.Provider>
+      </div>
+    </section>
+  )
+}
+
 /** A card's title (18px), or 16px in a side card. */
 export function PanelTitle({ children, id, small = false }: { children: ReactNode; id?: string; small?: boolean }) {
+  // Inside a tab the tab names the list; the title stays for screen readers.
+  const embedded = useEmbedded()
   return (
-    <h2 id={id} className={`m-0 leading-[1.4] font-bold ${small ? "text-base" : "text-lg"}`}>
+    <h2 id={id} className={embedded ? "sr-only" : `m-0 leading-[1.4] font-bold ${small ? "text-base" : "text-lg"}`}>
       {children}
     </h2>
   )

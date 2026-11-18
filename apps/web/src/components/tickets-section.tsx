@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react"
+import { useEmbedded } from "@/components/panel"
 import { Link } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
@@ -45,6 +46,7 @@ export function TicketsSection({
   /** The Add ticket link (/ticket/new takes place_id only). */
   showAddTicket?: boolean
 }) {
+  const embedded = useEmbedded()
   const [filter, setFilter] = useState<Filter>("OPEN")
   const [page, setPage] = useState(1)
   const [tickets, setTickets] = useState<Ticket[] | null>(null)
@@ -90,15 +92,19 @@ export function TicketsSection({
 
   return (
     <Card
-      className="am-lift"
-      style={S("padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0")}
+      className={embedded ? undefined : "am-lift"}
+      style={S(
+        embedded
+          ? "padding: 0; border: 0; box-shadow: none; background: transparent; overflow: visible; gap: 0"
+          : "padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0",
+      )}
     >
       <CardHeader
         style={S(
-          "padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap",
+          `${embedded ? "padding: 0 0 16px" : "padding: 18px 20px; border-bottom: 1px solid var(--border)"}; display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap`,
         )}
       >
-        <CardTitle style={S("font-size: 17px; font-weight: 750")}>
+        <CardTitle className={embedded ? "sr-only" : undefined} style={S("font-size: 17px; font-weight: 750")}>
           {title}
           {total !== null && (
             <span
@@ -139,7 +145,7 @@ export function TicketsSection({
         </div>
       </CardHeader>
 
-      <CardContent style={S("padding: 20px; display: flex; flex-direction: column; gap: 14px")}>
+      <CardContent style={S(`padding: ${embedded ? "0" : "20px"}; display: flex; flex-direction: column; gap: 14px`)}>
         {failed ? (
           <LoadError card={false} title={<Trans>Could not load tickets</Trans>} />
         ) : tickets === null ? (
