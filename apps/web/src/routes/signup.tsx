@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth"
 import type { Language } from "@amlak/shared"
 import { LANGUAGE_NAMES, useLanguage } from "@/lib/i18n"
 import { ApiError, errorMessage } from "@/lib/errors"
+import { LIMITS, tooLong } from "@/lib/limits"
 import { AuthCard, AuthLayout } from "@/components/auth-layout"
 import { EmailVerifyPanel } from "@/components/email-verify-panel"
 import { PasswordInput, PasswordRules, passwordOk } from "@/components/password-field"
@@ -49,11 +50,12 @@ function SignUp() {
     const number = toE164(phone.trim())
     const next: Partial<Record<FieldKey, string>> = {}
     if (!fullname.trim()) next.fullname = t`Enter your full name`
+    else next.fullname = tooLong(fullname, LIMITS.name)
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) next.email = t`Enter a valid email`
     if (!/^\+9665[013-9]\d{7}$/.test(number)) next.phone = t`Enter a Saudi mobile number that starts with 5.`
     if (!passwordOk(password)) next.password = t`Password does not meet the requirements`
     setErrors(next)
-    if (Object.keys(next).length > 0) return
+    if (Object.values(next).some(Boolean)) return
     setFormError("")
     setLoading(true)
     register(email.trim(), fullname.trim(), number, password, lang)
@@ -130,10 +132,10 @@ function SignUp() {
       >
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
           <Field id="fullname" label={<Trans>Full name</Trans>} error={errors.fullname}>
-            <Input id="fullname" autoComplete="name" value={fullname} onChange={(e) => setFullname(e.target.value)} disabled={loading} {...invalid("fullname", "fullname")} />
+            <Input id="fullname" maxLength={LIMITS.name} autoComplete="name" value={fullname} onChange={(e) => setFullname(e.target.value)} disabled={loading} {...invalid("fullname", "fullname")} />
           </Field>
           <Field id="email" label={<Trans>Email</Trans>} error={errorLine(errors.email)}>
-            <Input id="email" type="email" dir="ltr" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} {...invalid("email", "email")} />
+            <Input id="email" type="email" maxLength={LIMITS.email} dir="ltr" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} {...invalid("email", "email")} />
           </Field>
           <Field id="phone" label={<Trans>Mobile number</Trans>} hint={<Trans>Saudi mobile starting with 5</Trans>} error={errors.phone}>
             <div dir="ltr" className="flex gap-2">

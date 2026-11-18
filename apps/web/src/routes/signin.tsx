@@ -6,6 +6,7 @@ import { Trans } from "@lingui/react/macro"
 import { signInInput } from "@/lib/validators"
 import { useAuth } from "@/lib/auth"
 import { ApiError, errorMessage } from "@/lib/errors"
+import { LIMITS } from "@/lib/limits"
 import { AuthCard, AuthLayout } from "@/components/auth-layout"
 import { Field } from "@/components/panel"
 import { Notice } from "@/components/states"
@@ -194,6 +195,7 @@ function SignIn() {
           <Field id="email" label={<Trans>Email</Trans>} error={errors.email}>
             <Input
               id="email"
+              maxLength={LIMITS.email}
               dir="ltr"
               type="email"
               autoComplete="email"

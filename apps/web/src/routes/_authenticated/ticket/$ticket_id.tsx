@@ -19,6 +19,7 @@ import {
 } from "@/lib/api"
 import { todayIn } from "@/lib/dates"
 import { ApiError, errorMessage } from "@/lib/errors"
+import { LIMITS, tooLarge, tooLong } from "@/lib/limits"
 import { useFormat } from "@/lib/format"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -401,9 +402,10 @@ function ReviewPanel({
     if (!accessToken) return
     const next: typeof errors = {}
     if (cost.trim() && !(Number(cost) >= 0)) next.cost = t`Enter an amount of 0 or more, or leave it empty.`
+    else next.cost = tooLarge(cost)
     if (!due) next.due = t`Choose the due date.`
     setErrors(next)
-    if (Object.keys(next).length > 0 || !chosen) return
+    if (Object.values(next).some(Boolean) || !chosen) return
     setBusy(true)
     setError("")
     try {
@@ -424,8 +426,9 @@ function ReviewPanel({
 
   async function reject() {
     if (!accessToken) return
-    if (!reason.trim()) {
-      setReasonError(t`Write the reason.`)
+    const reasonProblem = reason.trim() ? tooLong(reason, LIMITS.text) : t`Write the reason.`
+    if (reasonProblem) {
+      setReasonError(reasonProblem)
       return
     }
     setBusy(true)
@@ -537,7 +540,7 @@ function ReviewPanel({
               )
             }
           >
-            <Textarea id={`${prefix}reason`} rows={3} dir="auto" value={reason} onChange={(e) => setReason(e.target.value)} />
+            <Textarea id={`${prefix}reason`} rows={3} dir="auto" maxLength={LIMITS.text} value={reason} onChange={(e) => setReason(e.target.value)} />
           </Field>
           <div className="flex flex-wrap justify-end gap-2.5 pt-1">
             <Button type="button" variant="outline" disabled={busy} onClick={() => setRejecting(false)}>

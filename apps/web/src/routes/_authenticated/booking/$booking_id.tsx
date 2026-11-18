@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth"
 import { cancelBooking, checkInBooking, checkOutBooking, getBooking, getPlace, type Booking } from "@/lib/api"
 import { todayIn } from "@/lib/dates"
 import { errorMessage } from "@/lib/errors"
+import { LIMITS, tooLong } from "@/lib/limits"
 import { useFormat } from "@/lib/format"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -78,8 +79,9 @@ function BookingPage() {
 
   async function cancel() {
     if (!accessToken || !booking) return
-    if (!reason.trim()) {
-      setReasonError(t`Write the reason.`)
+    const reasonProblem = reason.trim() ? tooLong(reason, LIMITS.text) : t`Write the reason.`
+    if (reasonProblem) {
+      setReasonError(reasonProblem)
       return
     }
     setReasonError("")
@@ -238,7 +240,7 @@ function BookingPage() {
             <Trans>Cancel this booking?</Trans>
           </DialogTitle>
           <Field id="cancel-reason" label={<Trans>Reason for cancelling</Trans>} error={reasonError}>
-            <Textarea id="cancel-reason" rows={3} dir="auto" value={reason} onChange={(e) => setReason(e.target.value)} />
+            <Textarea id="cancel-reason" rows={3} dir="auto" maxLength={LIMITS.text} value={reason} onChange={(e) => setReason(e.target.value)} />
           </Field>
           <div className="flex flex-wrap justify-end gap-2.5 pt-1">
             <Button type="button" variant="outline" disabled={busy} onClick={() => setCancelling(false)}>

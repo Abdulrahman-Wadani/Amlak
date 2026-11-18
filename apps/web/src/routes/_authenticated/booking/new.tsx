@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth"
 import { createBooking, getBooking, getPlaces, listAllBookingsForPlace, type Booking } from "@/lib/api"
 import { todayIn } from "@/lib/dates"
 import { ApiError, errorMessage } from "@/lib/errors"
+import { LIMITS, tooLarge, tooLong } from "@/lib/limits"
 import { useFormat } from "@/lib/format"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -35,7 +36,7 @@ export const Route = createFileRoute("/_authenticated/booking/new")({
     typeof search.place_id === "string" && search.place_id ? { place_id: search.place_id } : {},
 })
 
-type FieldKey = "place" | "in" | "out" | "name" | "phone" | "email" | "count" | "price"
+type FieldKey = "place" | "in" | "out" | "name" | "phone" | "email" | "count" | "price" | "notes"
 
 /** Add booking: the place and dates, the guest, how many and the price; an overlap names the booking it hits. */
 function AddBooking() {
@@ -104,14 +105,17 @@ function AddBooking() {
     if (!checkOut) next.out = t`Choose the check-out date.`
     else if (checkIn && checkOut <= checkIn) next.out = t`The check-out date must be after the check-in date.`
     if (!name.trim()) next.name = t`Enter the guest's name.`
+    else next.name = tooLong(name, LIMITS.name)
     if (!phone.trim()) next.phone = t`Enter the mobile number.`
     else if (!isE164(number)) next.phone = t`Enter a valid mobile number, e.g. 501234567.`
     if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) next.email = t`Enter a valid email address.`
-    if (!Number.isInteger(guests) || guests < 1 || guests > 100) next.count = t`Enter a whole number from 1 to 100.`
+    if (!Number.isInteger(guests) || guests < 1 || guests > LIMITS.guests) next.count = t`Enter a whole number from 1 to 100.`
     if (price.trim() === "" || !(total >= 0)) next.price = t`Enter the total price.`
+    else next.price = tooLarge(total)
+    next.notes = tooLong(notes, LIMITS.text)
     setErrors(next)
     setConflict(null)
-    if (Object.keys(next).length > 0) return
+    if (Object.values(next).some(Boolean)) return
 
     setSaving(true)
     setFormError("")
@@ -214,7 +218,7 @@ function AddBooking() {
                 </Field>
               </div>
               <Field id="b-name" label={<Trans>Guest name</Trans>} error={errors.name}>
-                <Input id="b-name" dir="auto" value={name} onChange={(e) => setName(e.target.value)} {...invalid("name", "b-name")} />
+                <Input id="b-name" dir="auto" maxLength={LIMITS.name} value={name} onChange={(e) => setName(e.target.value)} {...invalid("name", "b-name")} />
               </Field>
               <Field id="b-phone" label={<Trans>Guest phone</Trans>} error={errors.phone}>
                 <div dir="ltr" className="flex gap-2">
@@ -228,6 +232,7 @@ function AddBooking() {
                 <Input
                   id="b-email"
                   type="email"
+                  maxLength={LIMITS.email}
                   dir="ltr"
                   placeholder={t`Optional`}
                   value={email}
@@ -248,8 +253,8 @@ function AddBooking() {
                   <Input id="b-price" inputMode="decimal" dir="ltr" value={price} onChange={(e) => setPrice(e.target.value)} {...invalid("price", "b-price")} />
                 </Field>
               </FieldRow>
-              <Field id="b-notes" label={<Trans>Notes</Trans>}>
-                <Textarea id="b-notes" rows={3} dir="auto" value={notes} onChange={(e) => setNotes(e.target.value)} />
+              <Field id="b-notes" label={<Trans>Notes</Trans>} error={errors.notes}>
+                <Textarea id="b-notes" rows={3} dir="auto" maxLength={LIMITS.text} {...invalid("notes", "b-notes")} value={notes} onChange={(e) => setNotes(e.target.value)} />
               </Field>
               {formError && (
                 <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">

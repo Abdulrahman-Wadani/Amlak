@@ -54,6 +54,7 @@ import {
   type BookingWindow,
 } from "@/lib/api"
 import { bookingInput, type BookingInput } from "@/lib/validators"
+import { LIMITS, tooLong } from "@/lib/limits"
 import { useAuth } from "@/lib/auth"
 import { S } from "@/lib/dom-style"
 import { dateFormat, numberFormat } from "@/lib/format"
@@ -260,8 +261,9 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
 
   function handleCancelSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (reason.trim().length < 1) {
-      setReasonIssues([{ path: ["reason"], message: t`Enter the reason for the cancellation` }])
+    const reasonProblem = reason.trim() ? tooLong(reason, LIMITS.text) : t`Enter the reason for the cancellation`
+    if (reasonProblem) {
+      setReasonIssues([{ path: ["reason"], message: reasonProblem }])
       return
     }
     setReasonIssues([])
@@ -699,6 +701,7 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
                 <Textarea
                   id="booking-cancel-reason"
                   rows={3}
+                  maxLength={LIMITS.text}
                   placeholder={t`Example: the guest changed their plans`}
                   value={reason}
                   aria-invalid={reasonIssues.length > 0}

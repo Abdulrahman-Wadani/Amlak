@@ -7,6 +7,7 @@ import type { Asset, Place, Ticket } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { createTicket, getPlaceAssets, getPlaces, listTickets, type TicketPriority } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
+import { LIMITS, tooLong } from "@/lib/limits"
 import { useFormat } from "@/lib/format"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -90,8 +91,9 @@ function ReportDamage() {
     const next: Partial<Record<FieldKey, string>> = {}
     if (!placeId) next.place = t`Choose the place.`
     if (!description.trim()) next.description = t`Write what happened.`
+    else next.description = tooLong(description, LIMITS.text)
     setErrors(next)
-    if (Object.keys(next).length > 0) return
+    if (Object.values(next).some(Boolean)) return
 
     setSending(true)
     setFormError("")
@@ -172,6 +174,7 @@ function ReportDamage() {
               <Field id="r-desc" label={<Trans>What happened?</Trans>} error={errors.description}>
                 <Textarea
                   id="r-desc"
+                  maxLength={LIMITS.text}
                   rows={3}
                   dir="auto"
                   value={description}

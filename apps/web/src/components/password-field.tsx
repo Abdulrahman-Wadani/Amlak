@@ -39,6 +39,7 @@ export function PasswordInput({
         dir="ltr"
         type={show ? "text" : "password"}
         autoComplete={autoComplete}
+        maxLength={128}
         className={rtl ? "pl-12" : "pr-12"}
         value={value}
         aria-invalid={invalid || undefined}

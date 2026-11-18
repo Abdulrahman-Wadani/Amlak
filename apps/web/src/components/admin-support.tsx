@@ -6,6 +6,7 @@ import type { SupportTicket, User } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { apiAllPages, getSupportTicket, resolveSupportTicket } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
+import { LIMITS, tooLong } from "@/lib/limits"
 import { useFormat } from "@/lib/format"
 import { roleLabel } from "@/lib/nav"
 import { Button } from "@/components/ui/button"
@@ -59,8 +60,9 @@ export function AdminSupport() {
   async function resolve(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!accessToken || !current) return
-    if (!reply.trim()) {
-      setReplyError(t`Write the reply.`)
+    const replyProblem = reply.trim() ? tooLong(reply, LIMITS.text) : t`Write the reply.`
+    if (replyProblem) {
+      setReplyError(replyProblem)
       return
     }
     setReplyError("")
@@ -137,7 +139,7 @@ export function AdminSupport() {
               ) : (
                 <form onSubmit={resolve} noValidate className="flex flex-col gap-3">
                   <Field id="reply" label={<Trans>Reply</Trans>} error={replyError}>
-                    <Textarea id="reply" rows={4} dir="auto" value={reply} aria-invalid={replyError ? true : undefined} onChange={(e) => setReply(e.target.value)} />
+                    <Textarea id="reply" rows={4} dir="auto" maxLength={LIMITS.text} value={reply} aria-invalid={replyError ? true : undefined} onChange={(e) => setReply(e.target.value)} />
                   </Field>
                   {error && (
                     <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">

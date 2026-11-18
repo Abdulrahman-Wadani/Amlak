@@ -4,6 +4,7 @@ import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { Clock3, Mail } from "lucide-react"
 import { errorMessage, readApiError } from "@/lib/errors"
+import { LIMITS } from "@/lib/limits"
 import { AuthCard, AuthLayout } from "@/components/auth-layout"
 import { Field } from "@/components/panel"
 import { Notice } from "@/components/states"
@@ -93,6 +94,7 @@ function ForgotPasswordPage() {
             <Input
               id="email"
               type="email"
+              maxLength={LIMITS.email}
               dir="ltr"
               autoComplete="email"
               value={email}

@@ -12,6 +12,7 @@ import {
 } from "@/lib/api"
 import { todayIn } from "@/lib/dates"
 import { errorMessage } from "@/lib/errors"
+import { LIMITS, tooLong } from "@/lib/limits"
 import { useFormat } from "@/lib/format"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -218,11 +219,12 @@ function ScheduleForm({
     const every = Number(count)
     const before = Number(lead)
     if (!description.trim()) next.description = t`Enter a description.`
+    else next.description = tooLong(description, LIMITS.text)
     if (!Number.isInteger(every) || every < 1 || every > 365) next.count = t`Enter a whole number from 1 to 365.`
     if (!due) next.due = t`Choose the first due date.`
     if (!Number.isInteger(before) || before < 0 || before > 60) next.lead = t`Enter a whole number from 0 to 60.`
     setErrors(next)
-    if (Object.keys(next).length > 0) return
+    if (Object.values(next).some(Boolean)) return
 
     setSaving(true)
     setFormError("")
@@ -257,6 +259,7 @@ function ScheduleForm({
         <Field id="s-description" label={<Trans>Description</Trans>} error={errors.description}>
           <Input
             id="s-description"
+            maxLength={LIMITS.text}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             {...invalid("description")}

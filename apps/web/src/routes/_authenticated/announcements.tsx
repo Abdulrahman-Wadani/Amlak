@@ -6,6 +6,7 @@ import { CircleAlert } from "lucide-react"
 import { storedUser, useAuth } from "@/lib/auth"
 import { sendAnnouncement } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
+import { LIMITS, tooLong } from "@/lib/limits"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -42,12 +43,12 @@ function Announcements() {
     event.preventDefault()
     if (!accessToken) return
     const next: Partial<Record<FieldKey, string>> = {}
-    if (!titleEn.trim()) next.titleEn = t`Write the title in English.`
-    if (!messageEn.trim()) next.messageEn = t`Write the text in English.`
-    if (!titleAr.trim()) next.titleAr = t`Write the title in Arabic.`
-    if (!messageAr.trim()) next.messageAr = t`Write the text in Arabic.`
+    next.titleEn = titleEn.trim() ? tooLong(titleEn, LIMITS.name) : t`Write the title in English.`
+    next.messageEn = messageEn.trim() ? tooLong(messageEn, LIMITS.text) : t`Write the text in English.`
+    next.titleAr = titleAr.trim() ? tooLong(titleAr, LIMITS.name) : t`Write the title in Arabic.`
+    next.messageAr = messageAr.trim() ? tooLong(messageAr, LIMITS.text) : t`Write the text in Arabic.`
     setErrors(next)
-    if (Object.keys(next).length > 0) return
+    if (Object.values(next).some(Boolean)) return
     setSending(true)
     setError("")
     try {
@@ -109,16 +110,16 @@ function Announcements() {
                 </div>
               </div>
               <Field id="a-title-en" label={<Trans>Title in English</Trans>} error={errors.titleEn}>
-                <Input id="a-title-en" lang="en" dir="ltr" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} {...invalid("titleEn", "a-title-en")} />
+                <Input id="a-title-en" maxLength={LIMITS.name} lang="en" dir="ltr" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} {...invalid("titleEn", "a-title-en")} />
               </Field>
               <Field id="a-text-en" label={<Trans>Text in English</Trans>} error={errors.messageEn}>
-                <Textarea id="a-text-en" lang="en" dir="ltr" rows={3} value={messageEn} onChange={(e) => setMessageEn(e.target.value)} {...invalid("messageEn", "a-text-en")} />
+                <Textarea id="a-text-en" maxLength={LIMITS.text} lang="en" dir="ltr" rows={3} value={messageEn} onChange={(e) => setMessageEn(e.target.value)} {...invalid("messageEn", "a-text-en")} />
               </Field>
               <Field id="a-title-ar" label={<Trans>Title in Arabic</Trans>} error={errors.titleAr}>
-                <Input id="a-title-ar" lang="ar" dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} {...invalid("titleAr", "a-title-ar")} />
+                <Input id="a-title-ar" maxLength={LIMITS.name} lang="ar" dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} {...invalid("titleAr", "a-title-ar")} />
               </Field>
               <Field id="a-text-ar" label={<Trans>Text in Arabic</Trans>} error={errors.messageAr}>
-                <Textarea id="a-text-ar" lang="ar" dir="rtl" rows={3} value={messageAr} onChange={(e) => setMessageAr(e.target.value)} {...invalid("messageAr", "a-text-ar")} />
+                <Textarea id="a-text-ar" maxLength={LIMITS.text} lang="ar" dir="rtl" rows={3} value={messageAr} onChange={(e) => setMessageAr(e.target.value)} {...invalid("messageAr", "a-text-ar")} />
               </Field>
               {error && (
                 <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">

@@ -17,6 +17,7 @@ import { Page } from "@/components/page"
 import { EmptyState, LoadError, LoadingList } from "@/components/states"
 import { FilterTabs, ListFooter } from "@/components/panel"
 import { useFormat } from "@/lib/format"
+import { LIMITS } from "@/lib/limits"
 
 export const Route = createFileRoute("/_authenticated/places")({
   component: PlacesPage,
@@ -177,6 +178,7 @@ function PlacesPage() {
           />
           <Input
             id="q"
+            maxLength={LIMITS.name}
             type="search"
             className="am-input"
             style={S("padding-inline-start: 44px")}

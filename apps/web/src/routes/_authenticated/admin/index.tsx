@@ -13,6 +13,7 @@ import { Page } from "@/components/page"
 import { Field, FilterTabs, Initial, ListFooter, NativeSelect } from "@/components/panel"
 import { UserStatusChip } from "@/components/place-shared"
 import { EmptyState, LoadError, LoadingList } from "@/components/states"
+import { LIMITS } from "@/lib/limits"
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   beforeLoad: () => {
@@ -109,6 +110,7 @@ function AdminUsers() {
           <Search aria-hidden="true" className="pointer-events-none absolute start-3.5 top-3 size-5 text-muted-foreground" strokeWidth={1.8} />
           <Input
             id="user-search"
+            maxLength={LIMITS.name}
             type="search"
             className="ps-11"
             placeholder={t`Search by name or email`}

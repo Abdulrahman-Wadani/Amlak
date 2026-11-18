@@ -6,6 +6,7 @@ import type { SupportTicket } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { createSupportTicket, getSupportTicket } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
+import { LIMITS, tooLong } from "@/lib/limits"
 import { useFormat } from "@/lib/format"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -46,9 +47,11 @@ export function UserSupport() {
     if (!accessToken) return
     const next: typeof errors = {}
     if (!subject.trim()) next.subject = t`Write a subject.`
+    else next.subject = tooLong(subject, LIMITS.name)
     if (!details.trim()) next.details = t`Write the details.`
+    else next.details = tooLong(details, LIMITS.text)
     setErrors(next)
-    if (Object.keys(next).length > 0) return
+    if (Object.values(next).some(Boolean)) return
     setSending(true)
     setFormError("")
     try {
@@ -80,10 +83,10 @@ export function UserSupport() {
             </PanelTitle>
             <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
               <Field id="s-subject" label={<Trans>Subject</Trans>} error={errors.subject}>
-                <Input id="s-subject" dir="auto" value={subject} aria-invalid={errors.subject ? true : undefined} onChange={(e) => setSubject(e.target.value)} />
+                <Input id="s-subject" dir="auto" maxLength={LIMITS.name} value={subject} aria-invalid={errors.subject ? true : undefined} onChange={(e) => setSubject(e.target.value)} />
               </Field>
               <Field id="s-details" label={<Trans>Details</Trans>} error={errors.details}>
-                <Textarea id="s-details" rows={4} dir="auto" value={details} aria-invalid={errors.details ? true : undefined} onChange={(e) => setDetails(e.target.value)} />
+                <Textarea id="s-details" rows={4} dir="auto" maxLength={LIMITS.text} value={details} aria-invalid={errors.details ? true : undefined} onChange={(e) => setDetails(e.target.value)} />
               </Field>
               {formError && (
                 <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">

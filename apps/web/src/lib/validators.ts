@@ -1,5 +1,6 @@
 import { z } from "zod"
 import {
+  LIMITS,
   createAssetSchema,
   createPlaceSchema,
   loginSchema,
@@ -18,14 +19,17 @@ export const assetInput = createAssetSchema
 // createBookingSchema lands there, delete this and re-export it instead.
 export const bookingInput = z
   .object({
-    guest_name: z.string().trim().min(1).max(200),
-    guest_phone: z.string().trim().regex(/^\+[1-9]\d{7,14}$/),
+    guest_name: z.string().trim().min(1).max(LIMITS.name),
+    guest_phone: z
+      .string()
+      .trim()
+      .regex(/^\+[1-9]\d{7,14}$/),
     guest_email: z.string().email().optional(),
-    guest_count: z.coerce.number().int().min(1).max(100),
+    guest_count: z.coerce.number().int().min(1).max(LIMITS.guests),
     check_in_date: z.iso.date(),
     check_out_date: z.iso.date(),
-    total_price: z.coerce.number().min(0),
-    notes: z.string().trim().max(2000).optional(),
+    total_price: z.coerce.number().min(0).max(LIMITS.money),
+    notes: z.string().trim().max(LIMITS.text).optional(),
   })
   .refine((input) => input.check_out_date > input.check_in_date, {
     path: ["check_out_date"],

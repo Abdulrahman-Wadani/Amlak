@@ -7,6 +7,7 @@ import type { Expense, ExpenseCategory, Place } from "@amlak/shared"
 import { apiAllPages, createExpense, getPlaceHealth, getPlaces, updateExpense, type DashboardPlace } from "@/lib/api"
 import { todayIn } from "@/lib/dates"
 import { errorMessage } from "@/lib/errors"
+import { LIMITS, tooLarge, tooLong } from "@/lib/limits"
 import { useFormat } from "@/lib/format"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,7 +18,7 @@ import { askedBefore, rememberAsked } from "@/components/photo-picker"
 import { Amount, CATEGORIES, categoryLabel } from "@/components/finance-parts"
 import { isoDay } from "@/components/booking-parts"
 
-type FieldKey = "place" | "amount" | "date"
+type FieldKey = "place" | "amount" | "date" | "description"
 
 /** Add expense and Edit expense, with the place's month at the side. */
 export function ExpenseForm({ token, expense }: { token: string; expense?: Expense }) {
@@ -83,9 +84,11 @@ export function ExpenseForm({ token, expense }: { token: string; expense?: Expen
     const next: Partial<Record<FieldKey, string>> = {}
     if (!placeId) next.place = t`Choose the place.`
     if (!/^\d+(\.\d{1,2})?$/.test(amount.trim()) || Number(amount) <= 0) next.amount = t`Enter the amount, like 640 or 640.50.`
+    else next.amount = tooLarge(amount)
     if (!day) next.date = t`Choose the date.`
+    next.description = tooLong(description, LIMITS.text)
     setErrors(next)
-    if (Object.keys(next).length > 0) return
+    if (Object.values(next).some(Boolean)) return
     setSaving(true)
     setFormError("")
     try {
@@ -168,8 +171,8 @@ export function ExpenseForm({ token, expense }: { token: string; expense?: Expen
                 <Input id="e-date" type="date" dir="ltr" value={day} onChange={(e) => setDay(e.target.value)} />
               </Field>
             </FieldRow>
-            <Field id="e-desc" label={<Trans>Description</Trans>}>
-              <Input id="e-desc" dir="auto" value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Field id="e-desc" label={<Trans>Description</Trans>} error={errors.description}>
+              <Input id="e-desc" dir="auto" maxLength={LIMITS.text} aria-invalid={errors.description ? true : undefined} value={description} onChange={(e) => setDescription(e.target.value)} />
             </Field>
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold">
