@@ -231,9 +231,8 @@ function TicketPage() {
         <Skeleton className="h-96" />
       ) : (
         <>
-          {/* The details and what to do next on top, side by side when there is room. */}
-          <div className="grid items-start gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr))] desk:gap-6">
-            <DetailsPanel rows={detailRows} />
+          {/* What to do next first (at the start: right in Arabic), then the details; side by side when there is room. */}
+          <div className="grid items-stretch gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr))] desk:gap-6 [&>div>section]:flex-1">
             {isManager && pending && place && (
               <>
                 <div className="flex flex-col desk:hidden">
@@ -277,6 +276,7 @@ function TicketPage() {
                 )}
               </Panel>
             )}
+            <DetailsPanel rows={detailRows} />
           </div>
 
           {/* Then one card: what happened, with its photos, and the history, a line between each part. */}

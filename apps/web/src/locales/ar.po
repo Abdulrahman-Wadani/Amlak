@@ -364,7 +364,7 @@ msgstr "أدمن"
 msgid "After saving"
 msgstr "بعد الحفظ"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:262
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:306
 msgid "After the repair"
 msgstr "بعد الإصلاح"
 
@@ -470,7 +470,7 @@ msgstr "يقيم ضيف آخر في العقار. سجّل خروجه أولًا
 msgid "Apartment"
 msgstr "شقة"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:451
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:443
 msgid "Approve ticket"
 msgstr "قبول التذكرة"
 
@@ -532,7 +532,7 @@ msgstr "تعيين"
 msgid "Assign an active worker"
 msgstr "تعيين عامل نشط"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:480
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:472
 msgid "Assign to"
 msgstr "تكليف"
 
@@ -628,7 +628,7 @@ msgstr "حجوزات اليوم"
 #: src/components/place-form.tsx:365
 #: src/components/states.tsx:187
 #: src/routes/_authenticated/profile.tsx:152
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:547
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:539
 #: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:149
 msgid "Cancel"
 msgstr "إلغاء"
@@ -810,7 +810,7 @@ msgstr "اختر تاريخ المغادرة."
 msgid "Choose the date."
 msgstr "اختر التاريخ."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:406
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:398
 msgid "Choose the due date."
 msgstr "اختر تاريخ الاستحقاق."
 
@@ -861,7 +861,7 @@ msgid "Close"
 msgstr "إغلاق"
 
 #: src/components/ticket-parts.tsx:112
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:333
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:271
 #: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:98
 msgid "Complete task"
 msgstr "إكمال المهمة"
@@ -1048,7 +1048,7 @@ msgstr "أصول {0} الحالية"
 msgid "Custom"
 msgstr "مخصصة"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:247
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:291
 #: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:171
 msgid "Damage photo {n}"
 msgstr "صورة العطل {n}"
@@ -1179,7 +1179,7 @@ msgstr "جارٍ الحذف…"
 #: src/components/expense-form.tsx:176
 #: src/components/place-form.tsx:223
 #: src/lib/errors.ts:112
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:242
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:286
 msgid "Description"
 msgstr "الوصف"
 
@@ -1187,7 +1187,7 @@ msgstr "الوصف"
 #: src/components/user-support.tsx:146
 #: src/routes/_authenticated/admin/$admin_id.tsx:109
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:102
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:359
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:351
 msgid "Details"
 msgstr "التفاصيل"
 
@@ -1230,13 +1230,13 @@ msgid "due {due}"
 msgstr "يستحق {due}"
 
 #: src/components/ticket-parts.tsx:90
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:337
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:275
 msgid "Due {due}"
 msgstr "يستحق {due}"
 
 #: src/lib/errors.ts:119
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:489
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:617
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:481
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:609
 msgid "Due date"
 msgstr "تاريخ الاستحقاق"
 
@@ -1339,7 +1339,7 @@ msgid "Enter a whole number from 1 to 365."
 msgstr "أدخل رقمًا صحيحًا من 1 إلى 365."
 
 #: src/components/place-form.tsx:158
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:404
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:396
 msgid "Enter an amount of 0 or more, or leave it empty."
 msgstr "أدخل مبلغًا يساوي 0 أو أكثر، أو اتركه فارغًا."
 
@@ -1412,7 +1412,7 @@ msgstr "أدخل كلمة المرور"
 
 #: src/lib/errors.ts:124
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:197
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:468
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:460
 msgid "Estimated cost"
 msgstr "التكلفة التقديرية"
 
@@ -1607,7 +1607,7 @@ msgstr "إخفاء كلمة المرور"
 msgid "High"
 msgstr "عالية"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:289
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:318
 msgid "History"
 msgstr "السجل"
 
@@ -1626,11 +1626,11 @@ msgstr "هكذا سيظهر في قائمتك"
 msgid "If the email is registered with us, a message will arrive within minutes."
 msgstr "إذا كان البريد مسجّلًا عندنا ستصلك رسالة خلال دقائق."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:512
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:504
 msgid "If you reject, we will ask for a reason and send it to {reporter}."
 msgstr "عند الرفض سنطلب منك سبب الرفض ونرسله لـ{reporter}."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:514
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:506
 msgid "If you reject, we will ask for a reason and send it to the reporter."
 msgstr "عند الرفض سنطلب منك سبب الرفض ونرسله لمن أبلغ."
 
@@ -1734,7 +1734,7 @@ msgid "Leaves {0}."
 msgstr "يغادر {0}."
 
 #. placeholder {0}: money(remaining, place.currency, { maximumFractionDigits: 0 })
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:472
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:464
 msgid "Left in this place’s budget this month: {0}"
 msgstr "المتبقي من ميزانية العقار لهذا الشهر: {0}"
 
@@ -2014,7 +2014,7 @@ msgstr "لم تُحدَّد ميزانية شهرية."
 msgid "No notifications"
 msgstr "لا توجد إشعارات"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:607
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:599
 msgid "No one else can take this ticket at this place."
 msgstr "لا يوجد شخص آخر يمكنه تولي هذه التذكرة في هذا العقار."
 
@@ -2194,7 +2194,7 @@ msgstr "اختياري. صورة واضحة للمبلغ والتاريخ."
 #. placeholder {0}: currencyName(currency)
 #. placeholder {0}: currencyName(place.currency)
 #: src/components/place-form.tsx:324
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:474
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:466
 msgid "Optional. In {0}."
 msgstr "اختياري. بـ{0}."
 
@@ -2291,7 +2291,7 @@ msgstr "صورة {0}"
 msgid "Photo after repair"
 msgstr "تصوير بعد الإصلاح"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:269
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:313
 msgid "Photo after repair {n}"
 msgstr "صورة بعد الإصلاح {n}"
 
@@ -2466,13 +2466,13 @@ msgstr "السبب"
 msgid "Reason for cancelling"
 msgstr "سبب الإلغاء"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:252
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:533
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:296
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:525
 msgid "Reason for rejection"
 msgstr "سبب الرفض"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:601
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:627
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:593
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:619
 msgid "Reassign"
 msgstr "إعادة تعيين المكلف"
 
@@ -2489,13 +2489,13 @@ msgstr "صورة الإيصال"
 msgid "Refresh"
 msgstr "تحديث"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:456
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:448
 msgid "Reject"
 msgstr "رفض"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:456
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:529
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:550
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:448
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:521
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:542
 msgid "Reject ticket"
 msgstr "رفض التذكرة"
 
@@ -2595,7 +2595,7 @@ msgstr "تم حلها"
 msgid "Rest house"
 msgstr "استراحة"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:463
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:455
 msgid "Review"
 msgstr "المراجعة"
 
@@ -2665,7 +2665,7 @@ msgstr "حفظ العقار"
 #: src/components/worker-form.tsx:205
 #: src/routes/_authenticated/admin/$admin_id.tsx:132
 #: src/routes/_authenticated/profile.tsx:227
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:627
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:619
 #: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:90
 #: src/routes/reset-password.tsx:109
 msgid "Saving…"
@@ -3101,7 +3101,7 @@ msgstr "لا توجد تذاكر مفتوحة لهذا العقار."
 msgid "This slug is already used in this language."
 msgstr "هذا المسار مستخدم بالفعل في هذه اللغة."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:418
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:410
 msgid "Ticket approved and sent to {name}."
 msgstr "تم اعتماد التذكرة وإرسالها لـ{name}."
 
@@ -3113,7 +3113,7 @@ msgstr "تم إسناد تذكرة"
 msgid "Ticket completed"
 msgstr "اكتملت التذكرة"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:589
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:581
 msgid "Ticket reassigned to {name}."
 msgstr "أُعيد تكليف التذكرة إلى {name}."
 
@@ -3121,7 +3121,7 @@ msgstr "أُعيد تكليف التذكرة إلى {name}."
 msgid "Ticket rejected"
 msgstr "رُفضت التذكرة"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:439
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:431
 msgid "Ticket rejected."
 msgstr "رُفضت التذكرة."
 
@@ -3336,7 +3336,7 @@ msgid "Wait a little, then try again."
 msgstr "انتظر قليلًا ثم حاول مرة أخرى."
 
 #: src/components/ticket-parts.tsx:89
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:337
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:275
 msgid "Was due {due}"
 msgstr "كان يستحق {due}"
 
@@ -3413,11 +3413,11 @@ msgstr "سنرسل رمز تحقق إلى بريدك بعد التسجيل."
 msgid "We will send an invitation to the worker's email."
 msgstr "سنرسل دعوة إلى بريد العامل."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:537
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:529
 msgid "We will send the reason to {reporter} with a notification."
 msgstr "سنرسل السبب إلى {reporter} مع إشعار."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:539
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:531
 msgid "We will send the reason to the reporter with a notification."
 msgstr "سنرسل السبب إلى من أبلغ مع إشعار."
 
@@ -3450,7 +3450,7 @@ msgid "When a worker reports damage, the ticket will appear here."
 msgstr "عندما يبلّغ عامل عن عطل ستظهر التذكرة هنا."
 
 #: src/lib/nav.tsx:213
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:606
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:598
 #: src/routes/_authenticated/worker/$worker_id.tsx:37
 msgid "Worker"
 msgstr "عامل"
@@ -3492,7 +3492,7 @@ msgid "Write the details."
 msgstr "اكتب التفاصيل."
 
 #: src/routes/_authenticated/booking/$booking_id.tsx:82
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:429
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:421
 msgid "Write the reason."
 msgstr "اكتب السبب."
 
