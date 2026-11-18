@@ -183,7 +183,7 @@ function WorkerCard({
   const kind = group(worker)
   const places = number(worker.assigned_places.length)
   return (
-    <div className="box-border flex min-w-0 flex-col gap-2.5 border border-border bg-card p-4 shadow-sm">
+    <div className="box-border flex h-full min-w-0 flex-col gap-2.5 border border-border bg-card p-4 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2.5">
           <Initial name={worker.fullname} />

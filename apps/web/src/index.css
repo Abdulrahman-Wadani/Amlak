@@ -171,6 +171,20 @@
   /* inherits from :root */
 }
 
+/*
+ * The navy banner (home, notifications): a fixed minimum height, whatever its
+ * content. Desktop is the Amlak-Dashboard design (about 206px); the phone value
+ * is Amlak-Dashboard-Mobile. The breakpoint is --breakpoint-desk (70rem).
+ */
+:root {
+  --band-min-h: 176px;
+}
+@media (min-width: 70rem) {
+  :root {
+    --band-min-h: 206px;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

@@ -245,7 +245,7 @@ function PlacesPage() {
       )}
 
       {/* One row of cards overflowed the page; the design's grid wraps them. */}
-      <div style={S("display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 20px")}>
+      <div style={S("display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); align-items: stretch; gap: 20px")}>
         {shown.map((p) => (
           <Link
             key={p.id}
@@ -253,7 +253,7 @@ function PlacesPage() {
             params={{ place_id: p.id }}
             className="am-lift"
             style={S(
-              "display: flex; flex-direction: column; gap: 16px; text-decoration: none; color: inherit; background: #fff; border: 1px solid var(--border); padding: 20px; box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1)"
+              "display: flex; flex-direction: column; height: 100%; box-sizing: border-box; gap: 16px; text-decoration: none; color: inherit; background: #fff; border: 1px solid var(--border); padding: 20px; box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1)"
             )}
           >
             <div
@@ -286,7 +286,7 @@ function PlacesPage() {
 
             <div
               style={S(
-                `display: grid; grid-template-columns: repeat(${stats.length}, minmax(0, 1fr)); gap: 12px; border-top: 1px solid var(--border); padding-top: 14px`
+                `display: grid; grid-template-columns: repeat(${stats.length}, minmax(0, 1fr)); gap: 12px; margin-top: auto; border-top: 1px solid var(--border); padding-top: 14px`
               )}
             >
               {stats.map((s) => (

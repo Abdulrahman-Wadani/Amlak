@@ -153,14 +153,13 @@ function NotificationsPage() {
     <Page
       title={<Trans>Notifications</Trans>}
       phoneStart="back"
-      phoneEnd="none"
-      bell={false}
-      // The page keeps its own banner (not the design), which holds the h1.
-      header={false}
+      // The page keeps its own banner (not the design), which holds the h1;
+      // the shared header only shows the bell, where it is on every page.
+      header="bell"
     >
       {/* Header: on the phone the banner stacks its parts in one column. */}
       <section
-        className="am-rise box-border flex flex-col items-stretch gap-5 bg-foreground p-6 text-white desk:flex-row desk:flex-wrap desk:items-center desk:justify-between desk:p-8"
+        className="am-rise box-border flex min-h-(--band-min-h) flex-col items-stretch justify-center gap-5 bg-foreground p-6 text-white desk:flex-row desk:flex-wrap desk:content-center desk:items-center desk:justify-between desk:p-8"
       >
         <div className="flex min-w-0 flex-col gap-2.5 desk:flex-[1_1_300px]">
           <span

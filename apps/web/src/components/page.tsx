@@ -29,7 +29,7 @@ export interface PageProps {
   phoneBack?: LinkProps
   /** Desktop: a grey line under the title. */
   description?: ReactNode
-  /** Buttons at the end of the header, after the bell. */
+  /** Buttons at the end of the header, right before the bell (the bell is always the last item). */
   actions?: ReactNode
   /** Phone: show `actions` at the top of the page. Off when the top bar has the action. */
   phoneActions?: boolean
@@ -39,8 +39,12 @@ export interface PageProps {
   phoneEnd?: "bell" | "none" | TopBarAction
   /** Desktop: the bell in the header. */
   bell?: boolean
-  /** Desktop: the shared header. Off for a page whose own banner holds the h1 (notifications). */
-  header?: boolean
+  /**
+   * Desktop: the shared header. `"bell"` keeps only the bell row, in the same
+   * place as on every other page, for a page whose own banner holds the h1
+   * (notifications). `false` hides the header.
+   */
+  header?: boolean | "bell"
   /** Phone: the bottom tabs. Forms hide them. */
   tabs?: boolean
   children: ReactNode
@@ -85,28 +89,36 @@ export function Page({
           <PhoneBar title={phoneTitle ?? title} start={start} back={back} end={end} />,
           bar,
         )}
-      <header className={header ? "hidden flex-wrap items-center justify-between gap-4 px-10 pt-8 desk:flex" : "hidden"}>
-        <div className="flex min-w-0 flex-col gap-1">
-          <h1 className="m-0 text-[28px] leading-[1.3] font-bold">{title}</h1>
-          {parent ? (
-            <div className="text-[15px] text-muted-foreground">
-              <Link
-                {...parent.link}
-                activeOptions={{ exact: true }}
-                className="relative inline-flex items-center gap-1 text-[15px] font-medium underline underline-offset-4 before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-['']"
-              >
-                <NavIcon name="back" size={16} />
-                {parent.label}
-              </Link>
+      <header className={header ? "hidden items-start justify-between gap-4 px-10 pt-8 desk:flex" : "hidden"}>
+        {header === true ? (
+          <div className="flex min-w-0 flex-1 flex-col">
+            {/* The title row is as tall as the bell, so the bell sits at the same height on every page. */}
+            <div className="flex min-h-11 items-center">
+              <h1 className="m-0 text-[28px] leading-[1.3] font-bold">{title}</h1>
             </div>
-          ) : description ? (
-            <div className="text-[15px] text-muted-foreground">{description}</div>
-          ) : null}
-        </div>
+            {parent ? (
+              <div className="text-[15px] text-muted-foreground">
+                <Link
+                  {...parent.link}
+                  activeOptions={{ exact: true }}
+                  className="relative inline-flex items-center gap-1 text-[15px] font-medium underline underline-offset-4 before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-['']"
+                >
+                  <NavIcon name="back" size={16} />
+                  {parent.label}
+                </Link>
+              </div>
+            ) : description ? (
+              <div className="text-[15px] text-muted-foreground">{description}</div>
+            ) : null}
+          </div>
+        ) : (
+          <div className="min-w-0 flex-1" />
+        )}
+        {/* The bell is always last, at the edge; the page's buttons sit right next to it. */}
         {(bell || actions) && (
-          <div className="flex flex-wrap items-center gap-3">
-            {bell && <NotificationBell />}
+          <div className="flex flex-none items-center gap-3">
             {actions}
+            {bell && <NotificationBell />}
           </div>
         )}
       </header>

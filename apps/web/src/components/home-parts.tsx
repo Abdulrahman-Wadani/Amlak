@@ -50,7 +50,7 @@ export function StatCard({
   )
   return (
     <section
-      className={`box-border flex min-w-0 flex-col border border-border bg-card shadow-sm ${compactOnPhone ? "gap-1 p-[18px] desk:gap-2 desk:p-6" : "gap-2 p-6"}`}
+      className={`box-border flex h-full min-w-0 flex-col border border-border bg-card shadow-sm ${compactOnPhone ? "gap-1 p-[18px] desk:gap-2 desk:p-6" : "gap-2 p-6"}`}
     >
       {compactOnPhone && (
         <div className="flex flex-col desk:hidden">
@@ -75,7 +75,8 @@ export function StatCard({
         {progress}
       </div>
       {details && (
-        <>
+        // Pinned to the bottom, so "Details" is on the same line in every card of a row.
+        <div className="mt-auto flex flex-col [gap:inherit]">
           <button
             type="button"
             className="am-disclose -ms-3 inline-flex h-11 cursor-pointer items-center gap-1.5 self-start border-0 bg-transparent px-3 text-sm font-semibold text-primary"
@@ -91,7 +92,7 @@ export function StatCard({
               {details}
             </div>
           )}
-        </>
+        </div>
       )}
     </section>
   )
