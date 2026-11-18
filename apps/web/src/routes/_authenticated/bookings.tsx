@@ -10,7 +10,7 @@ import { todayIn } from "@/lib/dates"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "cn"
 import { Page } from "@/components/page"
-import { Field, NativeSelect, TwoColumns } from "@/components/panel"
+import { Field, NativeSelect, Panel, TwoColumns } from "@/components/panel"
 import { EmptyState, LoadError, LoadingList } from "@/components/states"
 import { MonthBookings, MonthCalendar, isoDay } from "@/components/booking-parts"
 
@@ -91,7 +91,8 @@ function BookingsPage() {
           }
         />
       ) : (
-        <>
+        // One card holds the place, the calendar and the month's bookings.
+        <Panel className="gap-5" holdsSections>
           <div className="w-full desk:max-w-[320px]">
             <Field id="booking-place" label={<Trans>Place</Trans>}>
               <NativeSelect id="booking-place" value={placeId} onChange={setPlaceId} disabled={!places}>
@@ -115,7 +116,7 @@ function BookingsPage() {
               side={<MonthBookings bookings={bookings} />}
             />
           )}
-        </>
+        </Panel>
       )}
     </Page>
   )

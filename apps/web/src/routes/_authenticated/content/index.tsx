@@ -9,6 +9,7 @@ import { errorMessage } from "@/lib/errors"
 import { useFormat } from "@/lib/format"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "cn"
+import { Panel } from "@/components/panel"
 import { Page } from "@/components/page"
 import { ConfirmDialog, EmptyState, LoadError, LoadingList } from "@/components/states"
 import { toast } from "@/components/toast"
@@ -75,67 +76,69 @@ function SiteContent() {
         </Link>
       }
     >
-      {failed ? (
-        <LoadError title={<Trans>Could not load the pages</Trans>} onRetry={() => setReload((n) => n + 1)} />
-      ) : pages === null ? (
-        <LoadingList />
-      ) : pages.length === 0 ? (
-        <EmptyState title={<Trans>No pages yet</Trans>} text={<Trans>Add the first page with the New page button.</Trans>} />
-      ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] items-stretch gap-4">
-          {pages.map((page) => (
-            <div key={page.id} className="box-border flex h-full min-w-0 flex-col gap-3 border border-border bg-card p-4 shadow-sm">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex min-w-0 flex-col leading-[1.5]">
-                  <span lang={page.language} dir="auto" className="font-semibold [overflow-wrap:anywhere]">
-                    {page.title}
-                  </span>
-                  <span className="text-[13px] text-muted-foreground">
-                    <bdi dir="ltr">
-                      /{page.language}/{page.slug}
-                    </bdi>
-                    {t`, ${date(page.updated_at, { day: "numeric", month: "long" })}`}
-                  </span>
+      {/* One card holds the page's list, its filters and its pages. */}
+      <Panel className="gap-5">
+        {failed ? (
+          <LoadError title={<Trans>Could not load the pages</Trans>} onRetry={() => setReload((n) => n + 1)} />
+        ) : pages === null ? (
+          <LoadingList />
+        ) : pages.length === 0 ? (
+          <EmptyState title={<Trans>No pages yet</Trans>} text={<Trans>Add the first page with the New page button.</Trans>} />
+        ) : (
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] items-stretch gap-4">
+            {pages.map((page) => (
+              <div key={page.id} className="box-border flex h-full min-w-0 flex-col gap-3 border border-border bg-card p-4 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 flex-col leading-[1.5]">
+                    <span lang={page.language} dir="auto" className="font-semibold [overflow-wrap:anywhere]">
+                      {page.title}
+                    </span>
+                    <span className="text-[13px] text-muted-foreground">
+                      <bdi dir="ltr">
+                        /{page.language}/{page.slug}
+                      </bdi>
+                      {t`, ${date(page.updated_at, { day: "numeric", month: "long" })}`}
+                    </span>
+                  </div>
+                  <PublishedChip published={page.is_published} />
                 </div>
-                <PublishedChip published={page.is_published} />
+                <div className="mt-auto flex justify-end gap-2">
+                  <Link
+                    to="/content/$content_id"
+                    params={{ content_id: page.id }}
+                    aria-label={t`Edit ${page.title}`}
+                    className={cn(buttonVariants({ variant: "outline" }))}
+                  >
+                    <Trans>Edit</Trans>
+                  </Link>
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    aria-label={t`Delete ${page.title}`}
+                    onClick={() => {
+                      setError("")
+                      setToDelete(page)
+                    }}
+                  >
+                    <Trans>Delete</Trans>
+                  </Button>
+                </div>
               </div>
-              <div className="mt-auto flex justify-end gap-2">
-                <Link
-                  to="/content/$content_id"
-                  params={{ content_id: page.id }}
-                  aria-label={t`Edit ${page.title}`}
-                  className={cn(buttonVariants({ variant: "outline" }))}
-                >
-                  <Trans>Edit</Trans>
-                </Link>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  aria-label={t`Delete ${page.title}`}
-                  onClick={() => {
-                    setError("")
-                    setToDelete(page)
-                  }}
-                >
-                  <Trans>Delete</Trans>
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-      {toDelete && (
-        <ConfirmDialog
-          open
-          title={<Trans>Delete “{toDelete.title}”?</Trans>}
-          text={<Trans>Visitors can no longer open it. This cannot be undone from the app.</Trans>}
-          confirm={busy ? <Trans>Deleting…</Trans> : <Trans>Delete page</Trans>}
-          busy={busy}
-          error={error}
-          onConfirm={() => void remove()}
-          onClose={() => setToDelete(null)}
-        />
-      )}
-    </Page>
+            ))}
+          </div>
+        )}
+        {toDelete && (
+          <ConfirmDialog
+            open
+            title={<Trans>Delete “{toDelete.title}”?</Trans>}
+            text={<Trans>Visitors can no longer open it. This cannot be undone from the app.</Trans>}
+            confirm={busy ? <Trans>Deleting…</Trans> : <Trans>Delete page</Trans>}
+            busy={busy}
+            error={error}
+            onConfirm={() => void remove()}
+            onClose={() => setToDelete(null)}
+          />
+        )}
+      </Panel>    </Page>
   )
 }

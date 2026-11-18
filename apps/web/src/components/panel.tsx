@@ -16,6 +16,14 @@ import { useFormat } from "@/lib/format"
  * card of its own and its title is left to the tab.
  */
 const EmbeddedContext = createContext(false)
+/** True inside a TabbedPanel only: the tab names the section, so its title is hidden. */
+const InTabContext = createContext(false)
+
+/**
+ * True for anything inside a card (a Panel or a TabbedPanel): empty, loading
+ * and error states then draw no card of their own.
+ */
+export const InCardContext = createContext(false)
 
 /** Whether this section sits inside a TabbedPanel (see EmbeddedContext). */
 export function useEmbedded(): boolean {
@@ -28,11 +36,14 @@ export function Panel({
   className = "",
   pad = "md",
   labelledBy,
+  holdsSections = false,
 }: {
   children: ReactNode
   className?: string
   pad?: "md" | "lg"
   labelledBy?: string
+  /** The page's one card around several sections (e.g. a calendar and its list): those draw no card of their own. */
+  holdsSections?: boolean
 }) {
   const embedded = useEmbedded()
   return (
@@ -44,7 +55,9 @@ export function Panel({
           : `box-border flex min-w-0 flex-col gap-3 border border-border bg-card shadow-sm ${pad === "lg" ? "p-5 desk:p-7" : "p-5 desk:p-6"} ${className}`
       }
     >
-      {children}
+      <InCardContext.Provider value={true}>
+        {holdsSections ? <EmbeddedContext.Provider value={true}>{children}</EmbeddedContext.Provider> : children}
+      </InCardContext.Provider>
     </section>
   )
 }
@@ -110,7 +123,11 @@ export function TabbedPanel<K extends string>({
         ))}
       </div>
       <div role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${value}`} className="flex min-w-0 flex-col">
-        <EmbeddedContext.Provider value={true}>{children}</EmbeddedContext.Provider>
+        <InCardContext.Provider value={true}>
+          <EmbeddedContext.Provider value={true}>
+            <InTabContext.Provider value={true}>{children}</InTabContext.Provider>
+          </EmbeddedContext.Provider>
+        </InCardContext.Provider>
       </div>
     </section>
   )
@@ -119,9 +136,9 @@ export function TabbedPanel<K extends string>({
 /** A card's title (18px), or 16px in a side card. */
 export function PanelTitle({ children, id, small = false }: { children: ReactNode; id?: string; small?: boolean }) {
   // Inside a tab the tab names the list; the title stays for screen readers.
-  const embedded = useEmbedded()
+  const inTab = useContext(InTabContext)
   return (
-    <h2 id={id} className={embedded ? "sr-only" : `m-0 leading-[1.4] font-bold ${small ? "text-base" : "text-lg"}`}>
+    <h2 id={id} className={inTab ? "sr-only" : `m-0 leading-[1.4] font-bold ${small ? "text-base" : "text-lg"}`}>
       {children}
     </h2>
   )

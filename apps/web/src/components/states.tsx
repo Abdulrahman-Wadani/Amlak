@@ -1,4 +1,5 @@
-import type { ReactNode } from "react"
+import { useContext, type ReactNode } from "react"
+import { InCardContext } from "@/components/panel"
 import { Trans } from "@lingui/react/macro"
 import { CircleAlert, Clock3, Info, Inbox, RotateCw, TriangleAlert, WifiOff } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -24,6 +25,7 @@ export function EmptyState({
   /** false when it already sits inside a card. */
   card?: boolean
 }) {
+  const inCard = useContext(InCardContext)
   const body = (
     <div className="flex flex-col items-center gap-3 px-2 py-6 text-center">
       <span
@@ -37,7 +39,7 @@ export function EmptyState({
       {action}
     </div>
   )
-  return card ? (
+  return card && !inCard ? (
     <section className="box-border flex min-w-0 flex-col gap-4 border border-border bg-card p-6 shadow-sm">{body}</section>
   ) : (
     body
@@ -46,6 +48,7 @@ export function EmptyState({
 
 /** A list loading: grey bars in the shape of its rows. */
 export function LoadingList({ rows = 3, card = true }: { rows?: number; card?: boolean }) {
+  const inCard = useContext(InCardContext)
   const body = (
     <div aria-busy="true" aria-live="polite" className="flex flex-col">
       <span className="sr-only">
@@ -62,7 +65,7 @@ export function LoadingList({ rows = 3, card = true }: { rows?: number; card?: b
       ))}
     </div>
   )
-  return card ? (
+  return card && !inCard ? (
     <section className="box-border flex min-w-0 flex-col border border-border bg-card p-6 shadow-sm">{body}</section>
   ) : (
     body
@@ -79,6 +82,7 @@ export function LoadError({
   onRetry?: () => void
   card?: boolean
 }) {
+  const inCard = useContext(InCardContext)
   const body = (
     <div role="alert" className="flex flex-col items-center gap-3 px-2 py-6 text-center">
       <span
@@ -99,7 +103,7 @@ export function LoadError({
       )}
     </div>
   )
-  return card ? (
+  return card && !inCard ? (
     <section className="box-border flex min-w-0 flex-col gap-4 border border-border bg-card p-6 shadow-sm">{body}</section>
   ) : (
     body

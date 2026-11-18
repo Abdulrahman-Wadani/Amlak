@@ -9,7 +9,7 @@ import { getPlaces, listAllTickets, listTickets } from "@/lib/api"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "cn"
 import { Page } from "@/components/page"
-import { FilterTabs, ListFooter, NativeSelect } from "@/components/panel"
+import { FilterTabs, ListFooter, NativeSelect, Panel } from "@/components/panel"
 import { EmptyState, LoadError, LoadingList } from "@/components/states"
 import { TaskCard, TicketCard, useTicketNames } from "@/components/ticket-parts"
 
@@ -229,50 +229,98 @@ function MyTasks() {
         </Link>
       }
     >
-      <FilterTabs
-        label={t`Filter tasks`}
-        value={tab}
-        onChange={setTab}
-        tabs={[
-          { key: "ASSIGNED", label: <Trans>Assigned to me</Trans>, count: groups.ASSIGNED.length },
-          { key: "REPORTS", label: <Trans>My reports</Trans>, count: groups.REPORTS.length },
-          { key: "COMPLETED", label: <Trans>Completed</Trans>, count: groups.COMPLETED.length },
-        ]}
-      />
-
-      {failed ? (
-        <LoadError title={<Trans>Could not load tickets</Trans>} onRetry={() => setReload((n) => n + 1)} />
-      ) : tickets === null ? (
-        <LoadingList />
-      ) : shown.length === 0 ? (
-        <EmptyState
-          title={
-            tab === "ASSIGNED" ? (
-              <Trans>You have no open tasks</Trans>
-            ) : tab === "REPORTS" ? (
-              <Trans>You have not reported anything yet</Trans>
-            ) : (
-              <Trans>No completed tasks yet</Trans>
-            )
-          }
-          text={tab === "ASSIGNED" ? <Trans>Tasks your manager approves for you will appear here.</Trans> : undefined}
+      {/* One card holds the page's list, its filters and its pages. */}
+      <Panel className="gap-5">
+        <FilterTabs
+          label={t`Filter tasks`}
+          value={tab}
+          onChange={setTab}
+          tabs={[
+            { key: "ASSIGNED", label: <Trans>Assigned to me</Trans>, count: groups.ASSIGNED.length },
+            { key: "REPORTS", label: <Trans>My reports</Trans>, count: groups.REPORTS.length },
+            { key: "COMPLETED", label: <Trans>Completed</Trans>, count: groups.COMPLETED.length },
+          ]}
         />
-      ) : (
-        <div className={GRID}>
-          {shown.map((ticket) => (
-            <TaskCard
-              key={ticket.id}
-              ticket={ticket}
-              place={names.places[ticket.place_id]}
-              canComplete={tab === "ASSIGNED"}
-            />
-          ))}
-        </div>
-      )}
 
-      <p className="m-0 text-[13px] text-muted-foreground">
-        <Trans>“My reports” shows the reports you sent and their status, with photos and no costs.</Trans>
-      </p>
-    </Page>
+        {failed ? (
+          <LoadError title={<Trans>Could not load tickets</Trans>} onRetry={() => setReload((n) => n + 1)} />
+        ) : tickets === null ? (
+          <LoadingList />
+        ) : shown.length === 0 ? (
+          <EmptyState
+            title={
+              tab === "ASSIGNED" ? (
+                <Trans>You have no open tasks</Trans>
+              ) : tab === "REPORTS" ? (
+                <Trans>You have not reported anything yet</Trans>
+              ) : (
+                <Trans>No completed tasks yet</Trans>
+              )
+            }
+            text={tab === "ASSIGNED" ? <Trans>Tasks your manager approves for you will appear here.</Trans> : undefined}
+          />
+        ) : (
+          <div className={GRID}>
+            {shown.map((ticket) => (
+              <TaskCard
+                key={ticket.id}
+                ticket={ticket}
+                place={names.places[ticket.place_id]}
+                canComplete={tab === "ASSIGNED"}
+              />
+            ))}
+          </div>
+        )}
+
+        <p className="m-0 text-[13px] text-muted-foreground">
+          <Trans>“My reports” shows the reports you sent and their status, with photos and no costs.</Trans>
+        </p>
+      </Panel>      {/* One card holds the page's list, its filters and its pages. */}
+      <Panel className="gap-5">
+        <FilterTabs
+          label={t`Filter tasks`}
+          value={tab}
+          onChange={setTab}
+          tabs={[
+            { key: "ASSIGNED", label: <Trans>Assigned to me</Trans>, count: groups.ASSIGNED.length },
+            { key: "REPORTS", label: <Trans>My reports</Trans>, count: groups.REPORTS.length },
+            { key: "COMPLETED", label: <Trans>Completed</Trans>, count: groups.COMPLETED.length },
+          ]}
+        />
+
+        {failed ? (
+          <LoadError title={<Trans>Could not load tickets</Trans>} onRetry={() => setReload((n) => n + 1)} />
+        ) : tickets === null ? (
+          <LoadingList />
+        ) : shown.length === 0 ? (
+          <EmptyState
+            title={
+              tab === "ASSIGNED" ? (
+                <Trans>You have no open tasks</Trans>
+              ) : tab === "REPORTS" ? (
+                <Trans>You have not reported anything yet</Trans>
+              ) : (
+                <Trans>No completed tasks yet</Trans>
+              )
+            }
+            text={tab === "ASSIGNED" ? <Trans>Tasks your manager approves for you will appear here.</Trans> : undefined}
+          />
+        ) : (
+          <div className={GRID}>
+            {shown.map((ticket) => (
+              <TaskCard
+                key={ticket.id}
+                ticket={ticket}
+                place={names.places[ticket.place_id]}
+                canComplete={tab === "ASSIGNED"}
+              />
+            ))}
+          </div>
+        )}
+
+        <p className="m-0 text-[13px] text-muted-foreground">
+          <Trans>“My reports” shows the reports you sent and their status, with photos and no costs.</Trans>
+        </p>
+      </Panel>    </Page>
   )
 }

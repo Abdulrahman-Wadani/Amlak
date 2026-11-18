@@ -10,7 +10,7 @@ import { errorMessage } from "@/lib/errors"
 import { useFormat } from "@/lib/format"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { WorkerStatusChip } from "@/components/place-shared"
-import { FilterTabs, Initial } from "@/components/panel"
+import { FilterTabs, Initial, Panel } from "@/components/panel"
 import { cn } from "cn"
 import { Page } from "@/components/page"
 import { ConfirmDialog, EmptyState, LoadError, LoadingList } from "@/components/states"
@@ -90,77 +90,79 @@ function WorkersPage() {
         </Link>
       }
     >
-      <FilterTabs
-        label={t`Filter by status`}
-        value={tab}
-        onChange={setTab}
-        tabs={TABS.map((item) => ({ key: item.key, label: item.label, count: countFor(item.key) }))}
-      />
-
-      {actionError && (
-        <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">
-          <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
-          {actionError}
-        </p>
-      )}
-
-      {failed && (
-        <LoadError
-          title={<Trans>Could not load workers</Trans>}
-          onRetry={() => {
-            setFailed(false)
-            setReload((n) => n + 1)
-          }}
+      {/* One card holds the page's list, its filters and its pages. */}
+      <Panel className="gap-5">
+        <FilterTabs
+          label={t`Filter by status`}
+          value={tab}
+          onChange={setTab}
+          tabs={TABS.map((item) => ({ key: item.key, label: item.label, count: countFor(item.key) }))}
         />
-      )}
 
-      {workers === null && !failed && <LoadingList />}
+        {actionError && (
+          <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">
+            <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+            {actionError}
+          </p>
+        )}
 
-      {workers !== null && workers.length === 0 && (
-        <EmptyState
-          title={<Trans>No workers yet</Trans>}
-          text={<Trans>Invite your first worker with the Invite worker button.</Trans>}
-        />
-      )}
-
-      {workers !== null && workers.length > 0 && visible.length === 0 && (
-        <EmptyState title={<Trans>No workers have this status.</Trans>} />
-      )}
-
-      {toDelete && (
-        <ConfirmDialog
-          open
-          title={<Trans>Delete the invitation for {toDelete.fullname}?</Trans>}
-          text={<Trans>The invitation link stops working. You can invite the worker again later.</Trans>}
-          confirm={busy ? <Trans>Deleting…</Trans> : <Trans>Delete invitation</Trans>}
-          busy={busy !== null}
-          error={actionError}
-          onConfirm={() => void deleteInvitation(toDelete)}
-          onClose={() => setToDelete(null)}
-        />
-      )}
-
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] items-stretch gap-4">
-        {visible.map((worker) => (
-          <WorkerCard
-            key={worker.id}
-            worker={worker}
-            busy={busy === worker.id}
-            disabled={busy !== null}
-            onDeactivate={() =>
-              accessToken && void act(worker, () => updateWorker(accessToken, worker.id, { status: "DEACTIVATED" }))
-            }
-            onReactivate={() =>
-              accessToken && void act(worker, () => updateWorker(accessToken, worker.id, { status: "ACTIVE" }))
-            }
-            onDeleteInvitation={() => {
-              setActionError("")
-              setToDelete(worker)
+        {failed && (
+          <LoadError
+            title={<Trans>Could not load workers</Trans>}
+            onRetry={() => {
+              setFailed(false)
+              setReload((n) => n + 1)
             }}
           />
-        ))}
-      </div>
-    </Page>
+        )}
+
+        {workers === null && !failed && <LoadingList />}
+
+        {workers !== null && workers.length === 0 && (
+          <EmptyState
+            title={<Trans>No workers yet</Trans>}
+            text={<Trans>Invite your first worker with the Invite worker button.</Trans>}
+          />
+        )}
+
+        {workers !== null && workers.length > 0 && visible.length === 0 && (
+          <EmptyState title={<Trans>No workers have this status.</Trans>} />
+        )}
+
+        {toDelete && (
+          <ConfirmDialog
+            open
+            title={<Trans>Delete the invitation for {toDelete.fullname}?</Trans>}
+            text={<Trans>The invitation link stops working. You can invite the worker again later.</Trans>}
+            confirm={busy ? <Trans>Deleting…</Trans> : <Trans>Delete invitation</Trans>}
+            busy={busy !== null}
+            error={actionError}
+            onConfirm={() => void deleteInvitation(toDelete)}
+            onClose={() => setToDelete(null)}
+          />
+        )}
+
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] items-stretch gap-4">
+          {visible.map((worker) => (
+            <WorkerCard
+              key={worker.id}
+              worker={worker}
+              busy={busy === worker.id}
+              disabled={busy !== null}
+              onDeactivate={() =>
+                accessToken && void act(worker, () => updateWorker(accessToken, worker.id, { status: "DEACTIVATED" }))
+              }
+              onReactivate={() =>
+                accessToken && void act(worker, () => updateWorker(accessToken, worker.id, { status: "ACTIVE" }))
+              }
+              onDeleteInvitation={() => {
+                setActionError("")
+                setToDelete(worker)
+              }}
+            />
+          ))}
+        </div>
+      </Panel>    </Page>
   )
 }
 

@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { MessageBox } from "@/components/message-box"
+import { Panel } from "@/components/panel"
 import { Page } from "@/components/page"
 import { useUnread } from "@/components/shell-context"
 import { dateFormat, numberFormat } from "@/lib/format"
@@ -167,8 +168,8 @@ function NotificationsPage() {
       }
     >
 
-      {/* Notifications list */}
-      <section>
+      {/* One card holds the list, its filters and its pages. */}
+      <Panel>
         <div
           style={S(
             "display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 16px"
@@ -334,7 +335,7 @@ function NotificationsPage() {
             </Button>
           </div>
         )}
-      </section>
+      </Panel>
     </Page>
   )
 }
