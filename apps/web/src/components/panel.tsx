@@ -282,7 +282,7 @@ export function Initial({ name, size = 36 }: { name: string; size?: number }) {
   )
 }
 
-/** Filter buttons with a count each (places, workers). They wrap; on the phone they scroll sideways in their row. */
+/** Filter buttons with a count each (places, workers). They wrap onto more rows; nothing scrolls sideways. */
 export function FilterTabs<K extends string>({
   label,
   tabs,
@@ -299,7 +299,7 @@ export function FilterTabs<K extends string>({
     <div
       role="group"
       aria-label={label}
-      className="-mx-4 flex max-w-[calc(100%+2rem)] gap-2 overflow-x-auto px-4 [scrollbar-width:none] desk:mx-0 desk:max-w-full desk:flex-wrap desk:overflow-visible desk:px-0"
+      className="flex min-w-0 flex-wrap gap-2"
     >
       {tabs.map((tab) => (
         <button

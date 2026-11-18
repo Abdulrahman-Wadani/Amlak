@@ -200,20 +200,21 @@ function ReportsPage() {
             </p>
           )}
           <Chart rows={rows} lang={lang} monthLabel={(d) => dateFormat({ month: "short" }).format(d)} format={number} />
-          <section className="overflow-x-auto border border-border bg-card shadow-sm">
-            <table className="w-full min-w-[480px] border-collapse text-[15px]">
+          {/* Four narrow columns that fit the card at any width: nothing scrolls sideways. */}
+          <section className="min-w-0 border border-border bg-card shadow-sm">
+            <table className="w-full table-fixed border-collapse text-sm desk:text-[15px]">
               <thead>
                 <tr className="border-b border-border text-start text-[13px] font-semibold text-muted-foreground">
-                  <th scope="col" className="px-4 py-3 text-start font-semibold">
+                  <th scope="col" className="px-2.5 py-3 text-start font-semibold [overflow-wrap:anywhere] desk:px-4">
                     <Trans>Month</Trans>
                   </th>
-                  <th scope="col" className="px-4 py-3 text-start font-semibold">
+                  <th scope="col" className="px-2.5 py-3 text-start font-semibold [overflow-wrap:anywhere] desk:px-4">
                     <Trans>Income</Trans>
                   </th>
-                  <th scope="col" className="px-4 py-3 text-start font-semibold">
+                  <th scope="col" className="px-2.5 py-3 text-start font-semibold [overflow-wrap:anywhere] desk:px-4">
                     <Trans>Expenses</Trans>
                   </th>
-                  <th scope="col" className="px-4 py-3 text-start font-semibold">
+                  <th scope="col" className="px-2.5 py-3 text-start font-semibold [overflow-wrap:anywhere] desk:px-4">
                     <Trans>Profit</Trans>
                   </th>
                 </tr>
@@ -221,12 +222,12 @@ function ReportsPage() {
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.from} className="border-b border-border last:border-b-0">
-                    <th scope="row" className="px-4 py-3.5 text-start font-normal">
+                    <th scope="row" className="px-2.5 py-3.5 text-start font-normal [overflow-wrap:anywhere] desk:px-4">
                       {dateFormat({ month: "long" }).format(row.month)}
                     </th>
-                    <td className="px-4 py-3.5 font-mono tabular-nums">{number(row.income, { maximumFractionDigits: 2 })}</td>
-                    <td className="px-4 py-3.5 font-mono tabular-nums">{number(row.expenses, { maximumFractionDigits: 2 })}</td>
-                    <td className="px-4 py-3.5 font-mono font-bold tabular-nums">{number(row.profit, { maximumFractionDigits: 2 })}</td>
+                    <td className="px-2.5 py-3.5 font-mono tabular-nums [overflow-wrap:anywhere] desk:px-4">{number(row.income, { maximumFractionDigits: 2 })}</td>
+                    <td className="px-2.5 py-3.5 font-mono tabular-nums [overflow-wrap:anywhere] desk:px-4">{number(row.expenses, { maximumFractionDigits: 2 })}</td>
+                    <td className="px-2.5 py-3.5 font-mono font-bold tabular-nums [overflow-wrap:anywhere] desk:px-4">{number(row.profit, { maximumFractionDigits: 2 })}</td>
                   </tr>
                 ))}
               </tbody>
