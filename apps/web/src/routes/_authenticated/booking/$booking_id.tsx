@@ -37,6 +37,7 @@ function BookingPage() {
   const [cancelling, setCancelling] = useState(false)
   const [reason, setReason] = useState("")
   const [reasonError, setReasonError] = useState("")
+  const [cancelError, setCancelError] = useState("")
 
   const load = useCallback(async () => {
     if (!accessToken) return
@@ -83,7 +84,19 @@ function BookingPage() {
       return
     }
     setReasonError("")
-    if (await run(() => cancelBooking(accessToken, booking.id, reason.trim()), t`Booking cancelled.`)) setCancelling(false)
+    setCancelError("")
+    setBusy(true)
+    try {
+      await cancelBooking(accessToken, booking.id, reason.trim())
+      toast(t`Booking cancelled.`)
+      await load()
+      setCancelling(false)
+    } catch (err) {
+      // Shown inside the cancel dialog, where the user is looking.
+      setCancelError(errorMessage(err))
+    } finally {
+      setBusy(false)
+    }
   }
 
   const day = (value: string) => date(value, { weekday: "long", day: "numeric", month: "long" })
@@ -192,7 +205,10 @@ function BookingPage() {
                   <span className="text-[13px] text-muted-foreground">
                     <Trans>The check-out button appears after check-in.</Trans>
                   </span>
-                  <Button type="button" variant="destructive" className="w-full" disabled={busy} onClick={() => setCancelling(true)}>
+                  <Button type="button" variant="destructive" className="w-full" disabled={busy} onClick={() => {
+                    setCancelError("")
+                    setCancelling(true)
+                  }}>
                     <Trans>Cancel booking</Trans>
                   </Button>
                   <PhoneActionBar>{checkIn}</PhoneActionBar>
@@ -240,6 +256,11 @@ function BookingPage() {
           <Field id="cancel-reason" label={<Trans>Reason for cancelling</Trans>} error={reasonError}>
             <Textarea id="cancel-reason" rows={3} dir="auto" value={reason} onChange={(e) => setReason(e.target.value)} />
           </Field>
+          {cancelError && (
+            <p role="alert" className="m-0 text-[13px] text-destructive">
+              {cancelError}
+            </p>
+          )}
           <div className="flex flex-wrap justify-end gap-2.5 pt-1">
             <Button type="button" variant="outline" disabled={busy} onClick={() => setCancelling(false)}>
               <Trans>Back</Trans>

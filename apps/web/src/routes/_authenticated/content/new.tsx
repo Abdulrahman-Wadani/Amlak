@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { storedUser, useAuth } from "@/lib/auth"
-import { Page } from "@/components/page"
+import { FormPopup } from "@/components/form-popup"
 import { ContentForm } from "@/components/content-form"
 
 export const Route = createFileRoute("/_authenticated/content/new")({
@@ -14,8 +14,8 @@ export const Route = createFileRoute("/_authenticated/content/new")({
 function NewPage() {
   const { accessToken } = useAuth()
   return (
-    <Page title={<Trans>New page</Trans>} parent={{ label: <Trans>Site content</Trans>, link: { to: "/content" } }} bell={false} phoneEnd="none" tabs={false}>
+    <FormPopup title={<Trans>New page</Trans>} back={{ to: "/content" }}>
       {accessToken && <ContentForm token={accessToken} />}
-    </Page>
+    </FormPopup>
   )
 }

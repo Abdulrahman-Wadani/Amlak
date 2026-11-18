@@ -71,6 +71,17 @@ export default function LocationPicker({
       },
     })
 
+    // A map that fails to load (bad key, blocked network) used to show an empty box.
+    // Say so, and keep the details in the console for debugging.
+    let mapLoaded = false
+    map.mapLibreMap.once("load", () => {
+      mapLoaded = true
+    })
+    map.mapLibreMap.on("error", (event) => {
+      console.error("TomTom map error:", event.error)
+      if (!mapLoaded) setError(t`The map could not load. Check the connection and the TomTom key.`)
+    })
+
     const marker = new Marker({ draggable: true })
     markerRef.current = marker
 

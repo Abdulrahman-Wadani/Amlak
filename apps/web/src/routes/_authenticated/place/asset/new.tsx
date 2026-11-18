@@ -5,7 +5,7 @@ import type { Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { getPlace } from "@/lib/api"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Page } from "@/components/page"
+import { FormPopup } from "@/components/form-popup"
 import { Panel } from "@/components/panel"
 import { AssetForm } from "@/components/asset-form"
 
@@ -38,14 +38,9 @@ function AddAsset() {
   }, [accessToken, place_id])
 
   return (
-    <Page
+    <FormPopup
       title={<Trans>Add asset</Trans>}
-      parent={
-        place_id
-          ? { label: place?.place_name ?? <Trans>Place</Trans>, link: { to: "/place/$place_id", params: { place_id } } }
-          : { label: <Trans>Places</Trans>, link: { to: "/places" } }
-      }
-      tabs={false}
+      back={place_id ? { to: "/place/$place_id", params: { place_id } } : { to: "/places" }}
     >
       {failed ? (
         <Panel>
@@ -58,6 +53,6 @@ function AddAsset() {
       ) : (
         <Skeleton className="h-96" />
       )}
-    </Page>
+    </FormPopup>
   )
 }

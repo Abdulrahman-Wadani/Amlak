@@ -11,7 +11,7 @@ import { useFormat } from "@/lib/format"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "cn"
-import { Page } from "@/components/page"
+import { FormPopup } from "@/components/form-popup"
 import {
   Field,
   FormButtons,
@@ -118,13 +118,13 @@ function ReportDamage() {
   )
 
   return (
-    <Page
+    <FormPopup
       title={<Trans>Report damage</Trans>}
-      description={<Trans>The report goes to the place manager for review.</Trans>}
-      phoneStart="back"
-      phoneEnd="none"
-      tabs={false}
+      back={search.place_id ? { to: "/place/$place_id", params: { place_id: search.place_id } } : { to: "/tickets" }}
     >
+      <p className="m-0 text-sm text-muted-foreground">
+        <Trans>The report goes to the place manager for review.</Trans>
+      </p>
       <TwoColumns
         main={
           <Panel pad="lg">
@@ -237,7 +237,7 @@ function ReportDamage() {
           </>
         }
       />
-    </Page>
+    </FormPopup>
   )
 }
 

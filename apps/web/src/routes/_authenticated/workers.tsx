@@ -41,6 +41,7 @@ function WorkersPage() {
   const [busy, setBusy] = useState<string | null>(null)
   const [actionError, setActionError] = useState("")
   const [toDelete, setToDelete] = useState<Worker | null>(null)
+  const [toDeactivate, setToDeactivate] = useState<Worker | null>(null)
   const [reload, setReload] = useState(0)
 
   useEffect(() => {
@@ -75,6 +76,12 @@ function WorkersPage() {
     if (!accessToken) return
     await act(worker, () => deleteWorker(accessToken, worker.id))
     setToDelete(null)
+  }
+
+  async function deactivate(worker: Worker) {
+    if (!accessToken) return
+    await act(worker, () => updateWorker(accessToken, worker.id, { status: "DEACTIVATED" }))
+    setToDeactivate(null)
   }
 
   return (
@@ -140,6 +147,19 @@ function WorkersPage() {
         />
       )}
 
+      {toDeactivate && (
+        <ConfirmDialog
+          open
+          title={<Trans>Deactivate {toDeactivate.fullname}?</Trans>}
+          text={<Trans>They are signed out now and cannot sign in until you reactivate them.</Trans>}
+          confirm={busy ? <Trans>Deactivating…</Trans> : <Trans>Deactivate</Trans>}
+          busy={busy !== null}
+          error={actionError}
+          onConfirm={() => void deactivate(toDeactivate)}
+          onClose={() => setToDeactivate(null)}
+        />
+      )}
+
       <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] items-stretch gap-4">
         {visible.map((worker) => (
           <WorkerCard
@@ -147,9 +167,10 @@ function WorkersPage() {
             worker={worker}
             busy={busy === worker.id}
             disabled={busy !== null}
-            onDeactivate={() =>
-              accessToken && void act(worker, () => updateWorker(accessToken, worker.id, { status: "DEACTIVATED" }))
-            }
+            onDeactivate={() => {
+              setActionError("")
+              setToDeactivate(worker)
+            }}
             onReactivate={() =>
               accessToken && void act(worker, () => updateWorker(accessToken, worker.id, { status: "ACTIVE" }))
             }

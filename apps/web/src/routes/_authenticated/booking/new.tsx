@@ -13,7 +13,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "cn"
-import { Page } from "@/components/page"
+import { FormPopup } from "@/components/form-popup"
 import {
   Bullets,
   Field,
@@ -152,12 +152,7 @@ function AddBooking() {
     errors[key] ? { "aria-invalid": true as const, "aria-describedby": `${id}-error` } : {}
 
   return (
-    <Page
-      title={<Trans>Add booking</Trans>}
-      parent={{ label: <Trans>Bookings</Trans>, link: { to: "/bookings" } }}
-      phoneEnd="none"
-      tabs={false}
-    >
+    <FormPopup title={<Trans>Add booking</Trans>} back={{ to: "/bookings" }}>
       <TwoColumns
         main={
           <Panel pad="lg">
@@ -286,6 +281,6 @@ function AddBooking() {
           </>
         }
       />
-    </Page>
+    </FormPopup>
   )
 }

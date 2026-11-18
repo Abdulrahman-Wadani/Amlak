@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { storedUser, useAuth } from "@/lib/auth"
-import { Page } from "@/components/page"
+import { FormPopup } from "@/components/form-popup"
 import { ExpenseForm } from "@/components/expense-form"
 
 export const Route = createFileRoute("/_authenticated/expense/new")({
@@ -14,8 +14,8 @@ export const Route = createFileRoute("/_authenticated/expense/new")({
 function AddExpense() {
   const { accessToken } = useAuth()
   return (
-    <Page title={<Trans>Add expense</Trans>} parent={{ label: <Trans>Expenses</Trans>, link: { to: "/expenses" } }} phoneEnd="none" tabs={false}>
+    <FormPopup title={<Trans>Add expense</Trans>} back={{ to: "/expenses" }}>
       {accessToken && <ExpenseForm token={accessToken} />}
-    </Page>
+    </FormPopup>
   )
 }

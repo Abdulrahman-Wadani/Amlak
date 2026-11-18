@@ -59,6 +59,9 @@ function PlaceDetailPage() {
   const [workers, setWorkers] = useState<Worker[] | null>(null)
   const [health, setHealth] = useState<DashboardPlace | null>(null)
   const [failed, setFailed] = useState(false)
+  // Each list keeps its own failure, so a failed request is not shown as "empty".
+  const [assetsFailed, setAssetsFailed] = useState(false)
+  const [workersFailed, setWorkersFailed] = useState(false)
 
   const [confirming, setConfirming] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -74,13 +77,13 @@ function PlaceDetailPage() {
 
     getPlaceAssets(accessToken, place_id)
       .then((list) => alive && setAssets(list))
-      .catch(() => alive && setAssets([]))
+      .catch(() => alive && setAssetsFailed(true))
 
     // GET /workers and the dashboard's budget are Manager-only.
     if (isManager) {
       getWorkers(accessToken)
         .then((list) => alive && setWorkers(list))
-        .catch(() => alive && setWorkers([]))
+        .catch(() => alive && setWorkersFailed(true))
       getPlaceHealth(accessToken, place_id)
         .then((row) => alive && setHealth(row))
         .catch(() => {})
@@ -122,7 +125,7 @@ function PlaceDetailPage() {
     <Page
       title={
         place?.place_name ??
-        (failed ? <Trans>Place not found</Trans> : <Skeleton className="h-7 w-56" />)
+        (failed ? <Trans>Place</Trans> : <Skeleton className="h-7 w-56" />)
       }
       phoneTitle={<Trans>Place</Trans>}
       phoneSubtitle={where}
@@ -178,12 +181,13 @@ function PlaceDetailPage() {
               <>
                 {/* On the phone the budget comes first, as designed. */}
                 {budget && <div className="flex flex-col desk:hidden">{budget}</div>}
-                <AssetsPanel placeId={place_id} assets={assets} isManager={isManager} />
+                <AssetsPanel placeId={place_id} assets={assets} failed={assetsFailed} isManager={isManager} />
                 {isManager && accessToken && (
                   <WorkersPanel
                     token={accessToken}
                     placeId={place_id}
                     workers={workers}
+                    failed={workersFailed}
                     onChanged={setWorkers}
                   />
                 )}
@@ -274,10 +278,12 @@ function BudgetPanel({
 function AssetsPanel({
   placeId,
   assets,
+  failed,
   isManager,
 }: {
   placeId: string
   assets: Asset[] | null
+  failed: boolean
   isManager: boolean
 }) {
   const [scrolls, setScrolls] = useState(false)
@@ -299,7 +305,9 @@ function AssetsPanel({
           </Link>
         )}
       </div>
-      {assets === null ? (
+      {failed ? (
+        <LoadError title={<Trans>Could not load assets</Trans>} onRetry={() => window.location.reload()} />
+      ) : assets === null ? (
         <div className="flex flex-col gap-3">
           <Skeleton className="h-[76px]" />
           <Skeleton className="h-[76px]" />
@@ -351,11 +359,13 @@ function WorkersPanel({
   token,
   placeId,
   workers,
+  failed,
   onChanged,
 }: {
   token: string
   placeId: string
   workers: Worker[] | null
+  failed: boolean
   onChanged: (workers: Worker[]) => void
 }) {
   const [selected, setSelected] = useState("")
@@ -392,7 +402,9 @@ function WorkersPanel({
       <PanelTitle id="workers-title">
         <Trans>Assigned workers</Trans>
       </PanelTitle>
-      {workers === null ? (
+      {failed ? (
+        <LoadError title={<Trans>Could not load workers</Trans>} onRetry={() => window.location.reload()} />
+      ) : workers === null ? (
         <Skeleton className="h-[72px]" />
       ) : assigned.length === 0 ? (
         <p className="m-0 border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
@@ -426,7 +438,7 @@ function WorkersPanel({
         </div>
       )}
 
-      {workers !== null && (
+      {workers !== null && !failed && (
         <form
           onSubmit={handleAssign}
           className="flex flex-wrap items-end gap-2.5 border-t border-border pt-3.5"
