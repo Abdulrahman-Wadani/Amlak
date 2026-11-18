@@ -29,6 +29,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { MessageBox } from "@/components/message-box"
 import { Page } from "@/components/page"
 import { useUnread } from "@/components/shell-context"
+import { dateFormat, numberFormat } from "@/lib/format"
 
 export const Route = createFileRoute("/_authenticated/notifications")({
   component: NotificationsPage,
@@ -57,7 +58,7 @@ function NotificationsPage() {
   const [error, setError] = useState("")
   const [readingId, setReadingId] = useState<string | null>(null)
 
-  const money = (n: number) => new Intl.NumberFormat(locale).format(n)
+  const money = (n: number) => numberFormat(locale).format(n)
 
   const loadNotifications = useCallback(async () => {
     if (!accessToken) return
@@ -117,7 +118,7 @@ function NotificationsPage() {
   }
 
   const formatDate = (date: string) => {
-    return new Intl.DateTimeFormat(locale, {
+    return dateFormat(locale, {
       day: "numeric",
       month: "short",
       year: "numeric",

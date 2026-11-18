@@ -39,6 +39,7 @@ import { Trans } from "@lingui/react/macro"
 import { useLingui } from "@lingui/react"
 import { t } from "@lingui/core/macro"
 import { Page } from "@/components/page"
+import { formatDate } from "@/lib/format"
 
 
 
@@ -373,7 +374,7 @@ function ContentPage() {
               >
                 <span>
                   <Trans>Last updated:</Trans>{" "}
-                  {new Date(content.updated_at).toLocaleDateString(i18n.locale)}
+                  {formatDate(content.updated_at, i18n.locale, { year: "numeric", month: "numeric", day: "numeric" })}
                 </span>
                 <span><Trans>View details</Trans></span>
               </div>

@@ -34,6 +34,7 @@ import {
   TypeLabel,
 } from "@/components/place-shared"
 import { Page } from "@/components/page"
+import { dateFormat, numberFormat } from "@/lib/format"
 
 export const Route = createFileRoute("/_authenticated/place/$place_id")({
   component: PlaceDetailPage,
@@ -115,11 +116,11 @@ function PlaceDetailPage() {
     }
   }, [accessToken, place_id, isManager])
 
-  const money = new Intl.NumberFormat(
+  const money = numberFormat(
     i18n.locale === "ar" ? "ar" : "en"
   )
 
-  const day = new Intl.DateTimeFormat(
+  const day = dateFormat(
     i18n.locale === "ar" ? "ar" : "en",
     { dateStyle: "medium" }
   )

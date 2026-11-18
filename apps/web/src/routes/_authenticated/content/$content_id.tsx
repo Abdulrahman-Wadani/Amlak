@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/card"
 
 import { Page } from "@/components/page"
+import { formatDate } from "@/lib/format"
 
 
 export const Route = createFileRoute(
@@ -166,7 +167,7 @@ function ContentDetailsPage() {
   }
 
   const formattedDate = (date: string | Date) =>
-    new Date(date).toLocaleDateString(i18n.locale)
+    formatDate(date, i18n.locale, { year: "numeric", month: "numeric", day: "numeric" })
 
   return (
     <Page

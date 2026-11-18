@@ -32,6 +32,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Page } from "@/components/page"
 import { buttonVariants } from "@/components/ui/button"
 import { cn } from "cn"
+import { dateFormat, numberFormat } from "@/lib/format"
 
 /**
  * The manager's money pages: /expenses (the expense log) and /reports (the
@@ -104,16 +105,16 @@ export function FinancePage({ view }: { view: "expenses" | "reports" }) {
     receipt: null,
   })
 
-  const money = new Intl.NumberFormat(i18n.locale, {
+  const money = numberFormat(i18n.locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })
 
-  const dayFormatter = new Intl.DateTimeFormat(i18n.locale, {
+  const dayFormatter = dateFormat(i18n.locale, {
     dateStyle: "medium",
   })
 
-  const monthLabel = new Intl.DateTimeFormat(
+  const monthLabel = dateFormat(
     i18n.locale,
     {
       month: "long",

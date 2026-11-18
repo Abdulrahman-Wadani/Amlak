@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { MessageBox } from "@/components/message-box"
 import { Page } from "@/components/page"
+import { numberFormat } from "@/lib/format"
 
 // Admin only: sends an announcement, which reaches people as a notification.
 export const Route = createFileRoute("/_authenticated/announcements")({
@@ -43,7 +44,7 @@ function AnnouncementsPage() {
   const [titleAr, setTitleAr] = useState("")
   const [messageAr, setMessageAr] = useState("")
 
-  const money = (n: number) => new Intl.NumberFormat(locale).format(n)
+  const money = (n: number) => numberFormat(locale).format(n)
 
   async function handleSendAnnouncement() {
     if (!accessToken) return

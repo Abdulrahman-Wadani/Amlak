@@ -32,6 +32,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { StatusBadge } from "@/components/place-shared"
 import { Button } from "@/components/ui/button"
 import { Page } from "@/components/page"
+import { dateFormat } from "@/lib/format"
 
 type SupportTicket = {
   id: string
@@ -128,7 +129,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
 
     if (Number.isNaN(parsedDate.getTime())) return "—"
 
-    return new Intl.DateTimeFormat(i18n.locale, {
+    return dateFormat(i18n.locale, {
       dateStyle: "medium",
       timeStyle: "short",
     }).format(parsedDate)
