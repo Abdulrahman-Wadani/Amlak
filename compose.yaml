@@ -43,6 +43,7 @@ services:
       dockerfile: apps/web/Dockerfile
     environment:
       VITE_PROXY_TARGET: http://api:3001
+      VITE_TOMTOM_API_KEY: ${VITE_TOMTOM_API_KEY:-}
     ports:
       - "5173:5173"
     depends_on:
