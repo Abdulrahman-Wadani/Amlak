@@ -12,6 +12,8 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { WorkerStatusChip } from "@/components/place-shared"
 import { FilterTabs, Initial, Panel } from "@/components/panel"
 import { cn } from "cn"
+import { FormPopup } from "@/components/form-popup"
+import { WorkerForm } from "@/components/worker-form"
 import { Page } from "@/components/page"
 import { ConfirmDialog, EmptyState, LoadError, LoadingList } from "@/components/states"
 
@@ -42,6 +44,7 @@ function WorkersPage() {
   const [actionError, setActionError] = useState("")
   const [toDelete, setToDelete] = useState<Worker | null>(null)
   const [reload, setReload] = useState(0)
+  const [adding, setAdding] = useState(false)
 
   useEffect(() => {
     if (!accessToken) return
@@ -82,14 +85,26 @@ function WorkersPage() {
       title={<Trans>Workers</Trans>}
       description={<Trans>Accounts of the workers who work in your places.</Trans>}
       phoneActions={false}
-      phoneEnd={{ label: t`Invite worker`, icon: "plus", link: { to: "/worker/new" } }}
+      phoneEnd={{ label: t`Invite worker`, icon: "plus", onClick: () => setAdding(true) }}
       actions={
-        <Link to="/worker/new" className={cn(buttonVariants())}>
+        <Button type="button" onClick={() => setAdding(true)}>
           <Plus aria-hidden="true" />
           <Trans>Invite worker</Trans>
-        </Link>
+        </Button>
       }
     >
+      {adding && (
+        <FormPopup
+          title=<Trans>Invite worker</Trans>
+          onClose={() => setAdding(false)}
+          onSaved={() => {
+            setAdding(false)
+            setReload((n) => n + 1)
+          }}
+        >
+          {accessToken && <WorkerForm token={accessToken} />}
+        </FormPopup>
+      )}
       {/* One card holds the page's list, its filters and its pages. */}
       <Panel className="gap-5">
         <FilterTabs

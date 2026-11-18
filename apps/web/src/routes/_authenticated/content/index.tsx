@@ -10,6 +10,8 @@ import { useFormat } from "@/lib/format"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "cn"
 import { Panel } from "@/components/panel"
+import { FormPopup } from "@/components/form-popup"
+import { ContentForm } from "@/components/content-form"
 import { Page } from "@/components/page"
 import { ConfirmDialog, EmptyState, LoadError, LoadingList } from "@/components/states"
 import { toast } from "@/components/toast"
@@ -29,6 +31,7 @@ function SiteContent() {
   const [pages, setPages] = useState<WebContent[] | null>(null)
   const [failed, setFailed] = useState(false)
   const [reload, setReload] = useState(0)
+  const [adding, setAdding] = useState(false)
   const [toDelete, setToDelete] = useState<WebContent | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
@@ -68,14 +71,26 @@ function SiteContent() {
       phoneStart="logo"
       bell={false}
       phoneActions={false}
-      phoneEnd={{ label: t`New page`, icon: "plus", link: { to: "/content/new" } }}
+      phoneEnd={{ label: t`New page`, icon: "plus", onClick: () => setAdding(true) }}
       actions={
-        <Link to="/content/new" className={cn(buttonVariants())}>
+        <Button type="button" onClick={() => setAdding(true)}>
           <Plus aria-hidden="true" />
           <Trans>New page</Trans>
-        </Link>
+        </Button>
       }
     >
+      {adding && (
+        <FormPopup
+          title=<Trans>New page</Trans>
+          onClose={() => setAdding(false)}
+          onSaved={() => {
+            setAdding(false)
+            setReload((n) => n + 1)
+          }}
+        >
+          {accessToken && <ContentForm token={accessToken} />}
+        </FormPopup>
+      )}
       {/* One card holds the page's list, its filters and its pages. */}
       <Panel className="gap-5">
         {failed ? (

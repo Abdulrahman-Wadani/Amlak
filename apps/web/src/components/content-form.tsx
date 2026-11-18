@@ -5,6 +5,7 @@ import { t } from "@lingui/core/macro"
 import { CircleAlert } from "lucide-react"
 import { createContent, updateContent, type ContentLanguage, type WebContent } from "@/lib/api"
 import { ApiError, errorMessage } from "@/lib/errors"
+import { FormCancel, useFormPopup } from "@/components/form-popup"
 import { LIMITS, tooLong } from "@/lib/limits"
 import { LANGUAGE_NAMES } from "@/lib/i18n"
 import { useFormat } from "@/lib/format"
@@ -35,6 +36,7 @@ type FieldKey = "title" | "slug" | "body"
 /** New page and Edit page: language, title, link and content; saved as a draft or published. */
 export function ContentForm({ token, page }: { token: string; page?: WebContent }) {
   const navigate = useNavigate()
+  const popup = useFormPopup()
   const { date } = useFormat()
   const [current, setCurrent] = useState(page)
   const [language, setLanguage] = useState<ContentLanguage>(page?.language ?? "ar")
@@ -64,7 +66,8 @@ export function ContentForm({ token, page }: { token: string; page?: WebContent 
       } else {
         await createContent(token, { ...fields, language })
         toast(publish ? t`Page published.` : t`Draft saved.`)
-        await navigate({ to: "/content" })
+        if (popup) popup.saved()
+        else await navigate({ to: "/content" })
       }
     } catch (err) {
       setError(
@@ -149,6 +152,7 @@ export function ContentForm({ token, page }: { token: string; page?: WebContent 
               </p>
             )}
             <FormButtons>
+              {popup && <FormCancel to={{ to: "/content" }} />}
               <Button type="button" variant="outline" disabled={busy} onClick={() => void save(false)}>
                 <Trans>Save draft</Trans>
               </Button>

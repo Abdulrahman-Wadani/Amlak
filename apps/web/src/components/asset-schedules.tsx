@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react"
 import { Trans } from "@lingui/react/macro"
 import { plural, t } from "@lingui/core/macro"
-import { CircleAlert } from "lucide-react"
+import { CircleAlert, Plus } from "lucide-react"
 import type { Place, Schedule } from "@amlak/shared"
 import {
   createMaintenanceSchedule,
@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Field, FieldRow, FormButtons, NativeSelect, Panel, PanelTitle } from "@/components/panel"
+import { FormCancel, FormPopup, useFormPopup } from "@/components/form-popup"
 
 function repeats(schedule: Schedule): string {
   const count = schedule.interval_count
@@ -66,6 +67,7 @@ export function AssetSchedules({
   const { date } = useFormat()
   const [schedules, setSchedules] = useState<Schedule[] | null>(null)
   const [version, setVersion] = useState(0)
+  const [adding, setAdding] = useState(false)
   const [people, setPeople] = useState<Person[]>([])
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState("")
@@ -118,9 +120,17 @@ export function AssetSchedules({
   return (
     <>
       <Panel labelledBy="schedules-title">
-        <PanelTitle id="schedules-title">
-          <Trans>Periodic maintenance</Trans>
-        </PanelTitle>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <PanelTitle id="schedules-title">
+            <Trans>Periodic maintenance</Trans>
+          </PanelTitle>
+          {canManage && place && (
+            <Button type="button" variant="outline" onClick={() => setAdding(true)}>
+              <Plus aria-hidden="true" />
+              <Trans>Add schedule</Trans>
+            </Button>
+          )}
+        </div>
         {error && (
           <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">
             <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
@@ -172,14 +182,17 @@ export function AssetSchedules({
         )}
       </Panel>
 
-      {canManage && place && (
-        <ScheduleForm
-          token={token}
-          assetId={assetId}
-          today={todayIn(place.timezone)}
-          people={people}
-          onAdded={() => setVersion((v) => v + 1)}
-        />
+      {adding && place && (
+        <FormPopup
+          title={<Trans>Add a schedule</Trans>}
+          onClose={() => setAdding(false)}
+          onSaved={() => {
+            setAdding(false)
+            setVersion((v) => v + 1)
+          }}
+        >
+          <ScheduleForm token={token} assetId={assetId} today={todayIn(place.timezone)} people={people} />
+        </FormPopup>
       )}
     </>
   )
@@ -192,14 +205,13 @@ function ScheduleForm({
   assetId,
   today,
   people,
-  onAdded,
 }: {
   token: string
   assetId: string
   today: string
   people: Person[]
-  onAdded: () => void
 }) {
+  const popup = useFormPopup()
   const [description, setDescription] = useState("")
   const [count, setCount] = useState("1")
   const [unit, setUnit] = useState<IntervalUnit>("MONTH")
@@ -237,9 +249,7 @@ function ScheduleForm({
         lead_days: before,
         default_assignee_id: chosen || undefined,
       })
-      setDescription("")
-      setDue("")
-      onAdded()
+      popup?.saved()
     } catch (err) {
       setFormError(errorMessage(err))
     } finally {
@@ -251,10 +261,7 @@ function ScheduleForm({
     errors[key] ? { "aria-invalid": true as const, "aria-describedby": `s-${key}-error` } : {}
 
   return (
-    <Panel labelledBy="add-schedule" className="gap-4">
-      <PanelTitle id="add-schedule">
-        <Trans>Add a schedule</Trans>
-      </PanelTitle>
+    <Panel className="gap-4">
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
         <Field id="s-description" label={<Trans>Description</Trans>} error={errors.description}>
           <Input
@@ -330,6 +337,7 @@ function ScheduleForm({
           </p>
         )}
         <FormButtons>
+          <FormCancel to={{ to: "/places" }} />
           <Button type="submit" disabled={saving}>
             {saving ? <Trans>Saving…</Trans> : <Trans>Add schedule</Trans>}
           </Button>

@@ -6,10 +6,10 @@ import { CircleAlert, Info, MapPin } from "lucide-react"
 import type { Worker } from "@amlak/shared"
 import { createWorker, deleteWorker, updateWorker } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
+import { FormCancel, useFormPopup } from "@/components/form-popup"
 import { LIMITS, tooLong } from "@/lib/limits"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { cn } from "cn"
 import { WorkerStatusChip } from "@/components/place-shared"
 import { ConfirmDialog } from "@/components/states"
 import { Bullets, Field, FormButtons, Panel, PanelTitle, TwoColumns } from "@/components/panel"
@@ -46,6 +46,7 @@ export function WorkerForm({
   onSaved?: (worker: Worker) => void
 }) {
   const navigate = useNavigate()
+  const popup = useFormPopup()
   const editing = worker !== undefined
   const [name, setName] = useState(worker?.fullname ?? "")
   const [email, setEmail] = useState(worker?.email ?? "")
@@ -80,7 +81,8 @@ export function WorkerForm({
         setSaved(true)
       } else {
         await createWorker(token, { fullname: name.trim(), email: email.trim(), phone: number })
-        await navigate({ to: "/workers" })
+        if (popup) popup.saved()
+        else await navigate({ to: "/workers" })
       }
     } catch (err) {
       setFormError(errorMessage(err))
@@ -197,9 +199,7 @@ export function WorkerForm({
             )}
 
             <FormButtons>
-              <Link to="/workers" className={cn(buttonVariants({ variant: "outline" }))}>
-                <Trans>Cancel</Trans>
-              </Link>
+              <FormCancel to={{ to: "/workers" }} />
               <Button type="submit" disabled={busy !== null}>
                 {busy === "save" ? (
                   <Trans>Saving…</Trans>

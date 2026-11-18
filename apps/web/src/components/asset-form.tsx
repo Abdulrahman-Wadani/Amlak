@@ -7,6 +7,7 @@ import { ASSET_STATUSES, type Asset, type AssetStatus, type Place } from "@amlak
 import { createAsset, getPlaceAssets, updateAsset } from "@/lib/api"
 import { todayIn } from "@/lib/dates"
 import { errorMessage } from "@/lib/errors"
+import { FormCancel, useFormPopup } from "@/components/form-popup"
 import { LIMITS, tooLong } from "@/lib/limits"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -31,6 +32,7 @@ type FieldKey = "name" | "type" | "purchase_date"
 /** Add asset and Edit asset: the form, the place's current assets, and what comes after saving. */
 export function AssetForm({ token, place, asset }: { token: string; place: Place; asset?: Asset }) {
   const navigate = useNavigate()
+  const popup = useFormPopup()
   const [name, setName] = useState(asset?.name ?? "")
   const [type, setType] = useState(asset?.type ?? "")
   const [status, setStatus] = useState<AssetStatus>(asset?.status ?? "GOOD")
@@ -85,7 +87,8 @@ export function AssetForm({ token, place, asset }: { token: string; place: Place
           status,
           purchase_date: purchaseDate || undefined,
         })
-        await navigate({ to: "/place/$place_id", params: { place_id: place.id } })
+        if (popup) popup.saved()
+        else await navigate({ to: "/place/$place_id", params: { place_id: place.id } })
       }
     } catch (err) {
       setFormError(errorMessage(err))
@@ -160,9 +163,7 @@ export function AssetForm({ token, place, asset }: { token: string; place: Place
                   <Trans>Cancel</Trans>
                 </Link>
               ) : (
-                <Link to="/place/$place_id" params={{ place_id: place.id }} className={cn(buttonVariants({ variant: "outline" }))}>
-                  <Trans>Cancel</Trans>
-                </Link>
+                <FormCancel to={{ to: "/place/$place_id", params: { place_id: place.id } }} />
               )}
               <Button type="submit" disabled={saving}>
                 {saving ? <Trans>Saving…</Trans> : <Trans>Save asset</Trans>}

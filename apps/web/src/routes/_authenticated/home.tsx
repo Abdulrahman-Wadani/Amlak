@@ -18,11 +18,13 @@ import { groupBookings } from "@/lib/bookings"
 import { addDays, todayIn } from "@/lib/dates"
 import { useFormat } from "@/lib/format"
 import { placeCounts } from "@/lib/places"
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BookingStatusChip, OverdueChip, StatusBadge, TicketStatusChip, TypeLabel } from "@/components/place-shared"
 import { DetailRow, DetailsLink, PlaceStatusText, PriorityText, StatCard } from "@/components/home-parts"
 import { Page } from "@/components/page"
+import { AddBookingPopup } from "@/components/booking-form"
+import { ReportPopup } from "@/components/report-form"
 import { Panel, PanelTitle } from "@/components/panel"
 import { cn } from "cn"
 
@@ -98,6 +100,8 @@ function useHomeData() {
   const [dashboard, setDashboard] = useState<DashboardPlace[] | null>(null)
   const [placesError, setPlacesError] = useState(false)
   const [dashboardError, setDashboardError] = useState(false)
+  // Bumped after a popup saves, so the figures load again.
+  const [version, setVersion] = useState(0)
   useEffect(() => {
     if (!accessToken) return
     let alive = true
@@ -110,8 +114,8 @@ function useHomeData() {
     return () => {
       alive = false
     }
-  }, [accessToken])
-  return { places, dashboard, placesError, dashboardError }
+  }, [accessToken, version])
+  return { places, dashboard, placesError, dashboardError, refresh: () => setVersion((n) => n + 1) }
 }
 
 function sum(rows: DashboardPlace[], pick: (row: DashboardPlace) => number | undefined) {
@@ -131,7 +135,8 @@ function ManagerHome() {
   const { user, accessToken } = useAuth()
   const f = useFormat()
   const [now] = useState(() => new Date())
-  const { places, dashboard, placesError, dashboardError } = useHomeData()
+  const { places, dashboard, placesError, dashboardError, refresh } = useHomeData()
+  const [adding, setAdding] = useState(false)
   const today = useTodayBookings(places, dashboard)
 
   // Tickets waiting for review: the first three, the total and the oldest.
@@ -214,13 +219,22 @@ function ManagerHome() {
       phoneStart="logo"
       phoneActions={false}
       actions={
-        <Link to="/booking/new" className={cn(buttonVariants())}>
+        <Button type="button" onClick={() => setAdding(true)}>
           <Plus aria-hidden="true" />
           <Trans>Add booking</Trans>
-        </Link>
+        </Button>
       }
     >
 
+      {adding && (
+        <AddBookingPopup
+          onClose={() => setAdding(false)}
+          onSaved={() => {
+            setAdding(false)
+            refresh()
+          }}
+        />
+      )}
       {/* The figures, then the places in one card. */}
       <div className="flex min-w-0 flex-col gap-4 desk:gap-6">
         <div className="min-w-0">
@@ -423,7 +437,8 @@ function WorkerHome() {
   const { user, accessToken } = useAuth()
   const f = useFormat()
   const [now] = useState(() => new Date())
-  const { places, dashboard, placesError, dashboardError } = useHomeData()
+  const { places, dashboard, placesError, dashboardError, refresh } = useHomeData()
+  const [reporting, setReporting] = useState(false)
   const today = useTodayBookings(places, dashboard)
 
   // My open tasks: approved tickets assigned to me, soonest due first.
@@ -450,11 +465,6 @@ function WorkerHome() {
   const checkIns = sum(dashboard ?? [], (r) => r.today?.check_ins)
   const loading = (value: unknown, failed: boolean) => value === null && !failed
 
-  // Report damage needs a place; with one place it opens straight away.
-  const reportLink =
-    places?.length === 1
-      ? { to: "/ticket/new" as const, search: { place_id: places[0].id } }
-      : { to: "/places" as const }
 
   return (
     <Page
@@ -464,12 +474,23 @@ function WorkerHome() {
       phoneSubtitle={f.date(now, { weekday: "long", day: "numeric", month: "long" })}
       phoneStart="logo"
       actions={
-        <Link {...reportLink} className={cn(buttonVariants(), "w-full no-underline desk:w-auto")}>
+        <Button type="button" className="w-full desk:w-auto" onClick={() => setReporting(true)}>
           <Camera aria-hidden="true" strokeWidth={1.8} />
           <Trans>Report damage</Trans>
-        </Link>
+        </Button>
       }
     >
+      {/* With one place the report starts on it; otherwise the worker picks the place. */}
+      {reporting && (
+        <ReportPopup
+          placeId={places?.length === 1 ? places[0].id : undefined}
+          onClose={() => setReporting(false)}
+          onSaved={() => {
+            setReporting(false)
+            refresh()
+          }}
+        />
+      )}
       <div className="grid items-start gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr))]">
         <StatCard
           title={<Trans>My open tasks</Trans>}

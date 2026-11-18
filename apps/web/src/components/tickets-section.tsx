@@ -1,14 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react"
 import { useEmbedded } from "@/components/panel"
-import { Link } from "@tanstack/react-router"
+import { ReportPopup } from "@/components/report-form"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { Plus } from "lucide-react"
 import type { Asset, Ticket } from "@amlak/shared"
 import { listTickets } from "@/lib/api"
 import { S } from "@/lib/dom-style"
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Pager } from "@/components/pager"
 import { EmptyState, LoadError, LoadingList } from "@/components/states"
@@ -43,7 +42,7 @@ export function TicketsSection({
   title: ReactNode
   emptyOpen: ReactNode
   emptyAll: ReactNode
-  /** The Add ticket link (/ticket/new takes place_id only). */
+  /** The Add ticket button: a Report damage popup for this place. */
   showAddTicket?: boolean
 }) {
   const embedded = useEmbedded()
@@ -53,6 +52,8 @@ export function TicketsSection({
   const [total, setTotal] = useState<number | null>(null)
   const [totalPages, setTotalPages] = useState(1)
   const [failed, setFailed] = useState(false)
+  const [reporting, setReporting] = useState(false)
+  const [version, setVersion] = useState(0)
 
   useEffect(() => {
     let alive = true
@@ -78,7 +79,7 @@ export function TicketsSection({
     return () => {
       alive = false
     }
-  }, [token, placeId, assetId, filter, page])
+  }, [token, placeId, assetId, filter, page, version])
 
   function choose(next: Filter) {
     setFilter(next)
@@ -131,20 +132,25 @@ export function TicketsSection({
           </div>
           {showAddTicket && (
             <CardAction>
-              <Link
-                to="/ticket/new"
-                search={{ place_id: placeId }}
-                className={cn(buttonVariants({ variant: "outline", size: "sm" }), "am-btn")}
-                style={S("height: 44px; padding: 0 12px; gap: 6px; white-space: nowrap")}
-              >
+              <Button type="button" variant="outline" onClick={() => setReporting(true)}>
                 <Plus size={16} />
                 <Trans>Add ticket</Trans>
-              </Link>
+              </Button>
             </CardAction>
           )}
         </div>
       </CardHeader>
 
+      {reporting && (
+        <ReportPopup
+          placeId={placeId}
+          onClose={() => setReporting(false)}
+          onSaved={() => {
+            setReporting(false)
+            setVersion((n) => n + 1)
+          }}
+        />
+      )}
       <CardContent style={S(`padding: ${embedded ? "0" : "20px"}; display: flex; flex-direction: column; gap: 14px`)}>
         {failed ? (
           <LoadError card={false} title={<Trans>Could not load tickets</Trans>} />

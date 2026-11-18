@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link, createFileRoute } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { Plus } from "lucide-react"
@@ -7,9 +7,9 @@ import type { Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { getPlaces, listAllBookingsForPlace, type Booking } from "@/lib/api"
 import { todayIn } from "@/lib/dates"
-import { buttonVariants } from "@/components/ui/button"
-import { cn } from "cn"
+import { Button } from "@/components/ui/button"
 import { Page } from "@/components/page"
+import { AddBookingPopup } from "@/components/booking-form"
 import { Field, NativeSelect, Panel, TwoColumns } from "@/components/panel"
 import { EmptyState, LoadError, LoadingList } from "@/components/states"
 import { MonthBookings, MonthCalendar, isoDay } from "@/components/booking-parts"
@@ -63,22 +63,32 @@ function BookingsPage() {
   }, [accessToken, placeId, month, reload])
 
   const place = places?.find((p) => p.id === placeId)
-  const add = placeId ? { to: "/booking/new" as const, search: { place_id: placeId } } : null
+  const [adding, setAdding] = useState(false)
 
   return (
     <Page
       title={<Trans>Bookings</Trans>}
       phoneActions={false}
-      phoneEnd={add ? { label: t`Add booking`, icon: "plus", link: add } : "bell"}
+      phoneEnd={placeId ? { label: t`Add booking`, icon: "plus", onClick: () => setAdding(true) } : "bell"}
       actions={
-        add && (
-          <Link {...add} className={cn(buttonVariants())}>
+        placeId && (
+          <Button type="button" onClick={() => setAdding(true)}>
             <Plus aria-hidden="true" />
             <Trans>Add booking</Trans>
-          </Link>
+          </Button>
         )
       }
     >
+      {adding && (
+        <AddBookingPopup
+          placeId={placeId}
+          onClose={() => setAdding(false)}
+          onSaved={() => {
+            setAdding(false)
+            setReload((n) => n + 1)
+          }}
+        />
+      )}
       {places !== null && places.length === 0 ? (
         <EmptyState
           title={<Trans>No places yet</Trans>}

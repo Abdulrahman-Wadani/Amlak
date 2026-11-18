@@ -24,6 +24,9 @@ import { PlaceBookings } from "@/components/place-bookings"
 import { TicketsSection } from "@/components/tickets-section"
 import { AssetStatusBadge, StatusBadge, TypeLabel } from "@/components/place-shared"
 import { Page } from "@/components/page"
+import { FormPopup } from "@/components/form-popup"
+import { ReportPopup } from "@/components/report-form"
+import { AssetForm } from "@/components/asset-form"
 import { ConfirmDialog, LoadError } from "@/components/states"
 import {
   Field,
@@ -72,6 +75,7 @@ function PlaceDetailPage() {
   const [failed, setFailed] = useState(false)
 
   const [confirming, setConfirming] = useState(false)
+  const [reporting, setReporting] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState("")
 
@@ -190,16 +194,27 @@ function PlaceDetailPage() {
             {budget}
             {!isManager && (
               <Panel>
-                <Link to="/ticket/new" search={{ place_id }} className={cn(buttonVariants(), "w-full")}>
+                <Button type="button" className="w-full" onClick={() => setReporting(true)}>
                   <Camera aria-hidden="true" />
                   <Trans>Report damage in this place</Trans>
-                </Link>
+                </Button>
                 <span className="text-[13px] text-muted-foreground">
                   <Trans>View only. Editing is for the manager.</Trans>
                 </span>
               </Panel>
             )}
           </div>
+
+          {reporting && (
+            <ReportPopup
+              placeId={place_id}
+              onClose={() => setReporting(false)}
+              onSaved={() => {
+                setReporting(false)
+                chooseTab("tickets")
+              }}
+            />
+          )}
 
           <TabbedPanel
             label={t`Place sections`}
@@ -212,7 +227,15 @@ function PlaceDetailPage() {
               { key: "bookings", label: <Trans>Bookings</Trans> },
             ]}
           >
-            {tab === "assets" && <AssetsPanel placeId={place_id} assets={assets} isManager={isManager} />}
+            {tab === "assets" && (
+              <AssetsPanel
+                token={accessToken}
+                place={place}
+                assets={assets}
+                isManager={isManager}
+                onAdded={() => accessToken && void getPlaceAssets(accessToken, place_id).then(setAssets)}
+              />
+            )}
             {tab === "workers" && isManager && accessToken && (
               <WorkersPanel token={accessToken} placeId={place_id} workers={workers} onChanged={setWorkers} />
             )}
@@ -276,15 +299,20 @@ function BudgetPanel({
 
 /** The place's assets, scrolling inside the card when there are many. */
 function AssetsPanel({
-  placeId,
+  token,
+  place,
   assets,
   isManager,
+  onAdded,
 }: {
-  placeId: string
+  token: string | null
+  place: Place | null
   assets: Asset[] | null
   isManager: boolean
+  onAdded: () => void
 }) {
   const [scrolls, setScrolls] = useState(false)
+  const [adding, setAdding] = useState(false)
   const row =
     "box-border flex min-h-[76px] flex-none snap-start items-center justify-between gap-3 border border-border bg-card p-3.5 text-foreground no-underline"
   return (
@@ -296,11 +324,23 @@ function AssetsPanel({
           </PanelTitle>
           {scrolls && <ScrollHint />}
         </div>
-        {isManager && (
-          <Link to="/place/asset/new" search={{ place_id: placeId }} className={cn(buttonVariants({ variant: "outline" }))}>
+        {isManager && place && (
+          <Button type="button" variant="outline" onClick={() => setAdding(true)}>
             <Plus aria-hidden="true" />
             <Trans>Add asset</Trans>
-          </Link>
+          </Button>
+        )}
+        {adding && place && token && (
+          <FormPopup
+            title={<Trans>Add asset</Trans>}
+            onClose={() => setAdding(false)}
+            onSaved={() => {
+              setAdding(false)
+              onAdded()
+            }}
+          >
+            <AssetForm token={token} place={place} />
+          </FormPopup>
         )}
       </div>
       {assets === null ? (

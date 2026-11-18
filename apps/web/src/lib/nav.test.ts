@@ -29,12 +29,12 @@ describe("sectionOf", () => {
     ["/expenses", "finance"],
     ["/reports", "finance"],
     ["/workers", "workers"],
-    ["/worker/new", "workers"],
+    ["/worker/abc", "workers"],
     ["/profile", "account"],
     ["/admin/abc", "users"],
     ["/support/abc", "support"],
     ["/announcements", "announcements"],
-    ["/content/new", "content"],
+    ["/content/abc", "content"],
     ["/notifications", null],
   ])("puts %s in %s", (path, section) => {
     expect(sectionOf(path)).toBe(section)

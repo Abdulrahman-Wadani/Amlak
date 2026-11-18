@@ -133,6 +133,20 @@ export function TabbedPanel<K extends string>({
   )
 }
 
+/** True inside a popup (components/form-popup.tsx): one column, buttons at its end. */
+const InPopupContext = createContext(false)
+
+/** What a popup's form sits in: sections without cards, one column. */
+export function PopupSections({ children }: { children: ReactNode }) {
+  return (
+    <InCardContext.Provider value={true}>
+      <EmbeddedContext.Provider value={true}>
+        <InPopupContext.Provider value={true}>{children}</InPopupContext.Provider>
+      </EmbeddedContext.Provider>
+    </InCardContext.Provider>
+  )
+}
+
 /** A card's title (18px), or 16px in a side card. */
 export function PanelTitle({ children, id, small = false }: { children: ReactNode; id?: string; small?: boolean }) {
   // Inside a tab the tab names the list; the title stays for screen readers.
@@ -146,6 +160,15 @@ export function PanelTitle({ children, id, small = false }: { children: ReactNod
 
 /** The main column and the side column; the side column goes under the main one when there is no room. */
 export function TwoColumns({ main, side }: { main: ReactNode; side: ReactNode }) {
+  // A popup has no room for two columns: one under the other.
+  if (useContext(InPopupContext)) {
+    return (
+      <div className="flex min-w-0 flex-col gap-5">
+        {main}
+        {side}
+      </div>
+    )
+  }
   return (
     <div className="flex flex-wrap items-start gap-6">
       <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-4 desk:gap-6">{main}</div>
@@ -416,6 +439,8 @@ export function FormButtons({ children }: { children: ReactNode }) {
  * in place of the tabs. On the desktop the buttons stay in the form.
  */
 export function PhoneActionBar({ children }: { children: ReactNode }) {
+  // In a popup the buttons stay in it, at its end.
+  if (useContext(InPopupContext)) return <div className="flex gap-2.5 desk:hidden [&>*]:flex-1">{children}</div>
   return (
     <>
       <div aria-hidden="true" className="h-[calc(76px+env(safe-area-inset-bottom))] desk:hidden" />
