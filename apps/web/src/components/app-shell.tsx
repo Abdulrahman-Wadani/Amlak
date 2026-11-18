@@ -137,10 +137,12 @@ function PhoneTabs({ role }: { role: Role }) {
             to={item.to}
             activeOptions={{ exact: true }}
             aria-current={on ? "page" : undefined}
-            className={`flex min-w-0 flex-1 flex-col items-center justify-center gap-1 text-xs no-underline ${on ? "font-semibold text-primary" : "font-medium text-muted-foreground"}`}
+            // As in the design: flex 1 without min-width 0, so a long label
+            // (Arabic "Users", English "Announcements") widens its tab instead of being cut.
+            className={`flex flex-1 flex-col items-center justify-center gap-1 text-xs whitespace-nowrap no-underline ${on ? "font-semibold text-primary" : "font-medium text-muted-foreground"}`}
           >
             {item.icon}
-            <span className="max-w-full truncate px-0.5">{item.label}</span>
+            <span>{item.label}</span>
           </Link>
         )
       })}
