@@ -204,6 +204,18 @@ export function WorkerStatusChip({ status }: { status: string }) {
   )
 }
 
+/** Any account's status (the admin's users list): pending verification is shown too. */
+export function UserStatusChip({ status }: { status: string }) {
+  if (status === "PENDING_VERIFICATION") {
+    return (
+      <Chip bg="var(--warn-50)" border="var(--warn-200)" text="var(--warn-900)" dot="var(--warn)">
+        <Trans>Pending verification</Trans>
+      </Chip>
+    )
+  }
+  return <WorkerStatusChip status={status} />
+}
+
 export function TypeLabel({ type }: { type: string }) {
   switch (type.toUpperCase().replace(/[\s-]+/g, "_")) {
     case "APARTMENT":
