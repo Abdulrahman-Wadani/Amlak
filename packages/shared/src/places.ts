@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LIMITS } from "./limits.ts";
 
 export const PLACE_STATUSES = [
 	"ACTIVE",
@@ -42,15 +43,20 @@ const isTimeZone = (name: string) => {
 };
 
 const placeFields = z.object({
-	place_name: z.string().trim().min(1),
-	place_type: z.string().trim().min(1),
-	city: z.string().trim().min(1),
-	address: z.string().trim().min(1).nullable().optional(),
-	description: z.string().trim().min(1).nullable().optional(),
+	place_name: z.string().trim().min(1).max(LIMITS.name),
+	place_type: z.string().trim().min(1).max(LIMITS.short),
+	city: z.string().trim().min(1).max(LIMITS.short),
+	address: z.string().trim().min(1).max(LIMITS.address).nullable().optional(),
+	description: z.string().trim().min(1).max(LIMITS.text).nullable().optional(),
 	latitude: z.number().min(-90).max(90).nullable().optional(),
 	longitude: z.number().min(-180).max(180).nullable().optional(),
 	status: z.enum(PLACE_STATUSES).optional(),
-	monthly_maintenance_budget: z.number().min(0).nullable().optional(),
+	monthly_maintenance_budget: z
+		.number()
+		.min(0)
+		.max(LIMITS.money)
+		.nullable()
+		.optional(),
 	currency: z
 		.string()
 		.regex(/^[A-Z]{3}$/, "Use a 3-letter ISO 4217 code, e.g. SAR")

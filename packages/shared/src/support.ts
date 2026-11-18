@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LIMITS } from "./limits.ts";
 
 export const SUPPORT_TICKET_STATUSES = ["OPEN", "RESOLVED"] as const;
 export type SupportTicketStatus = (typeof SUPPORT_TICKET_STATUSES)[number];
@@ -27,15 +28,15 @@ export type ListSupportTicketsQuery = z.infer<
 >;
 
 export const createSupportTicketSchema = z.object({
-	subject: z.string().trim().min(1).max(200),
-	description: z.string().trim().min(1).max(5000),
+	subject: z.string().trim().min(1).max(LIMITS.name),
+	description: z.string().trim().min(1).max(LIMITS.text),
 });
 export type CreateSupportTicketInput = z.infer<
 	typeof createSupportTicketSchema
 >;
 
 export const resolveSupportTicketSchema = z.object({
-	admin_response: z.string().trim().min(1).max(5000),
+	admin_response: z.string().trim().min(1).max(LIMITS.text),
 });
 export type ResolveSupportTicketInput = z.infer<
 	typeof resolveSupportTicketSchema

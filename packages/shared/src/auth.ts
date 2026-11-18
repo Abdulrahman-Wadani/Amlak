@@ -1,7 +1,13 @@
 import { z } from "zod";
+import { LIMITS } from "./limits.ts";
 import { LANGUAGES, userSchema } from "./users.ts";
 
-export const emailSchema = z.string().trim().toLowerCase().pipe(z.email());
+export const emailSchema = z
+	.string()
+	.trim()
+	.max(LIMITS.email)
+	.toLowerCase()
+	.pipe(z.email());
 
 export const passwordSchema = z
 	.string()
@@ -20,7 +26,7 @@ export const phoneSchema = z
 	);
 
 export const registerSchema = z.object({
-	fullname: z.string().trim().min(1),
+	fullname: z.string().trim().min(1).max(LIMITS.name),
 	email: emailSchema,
 	phone: phoneSchema,
 	password: passwordSchema,
@@ -44,7 +50,7 @@ export type VerificationCodeInput = z.infer<typeof verificationCodeSchema>;
 
 export const loginSchema = z.object({
 	email: emailSchema,
-	password: z.string().min(1),
+	password: z.string().min(1).max(128),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

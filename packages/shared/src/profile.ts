@@ -1,10 +1,11 @@
 import { z } from "zod";
 import { phoneSchema } from "./auth.ts";
+import { LIMITS } from "./limits.ts";
 import { LANGUAGES } from "./users.ts";
 
 /** Every field is optional; email, role and status cannot change here. */
 export const updateProfileSchema = z.object({
-	fullname: z.string().trim().min(1).optional(),
+	fullname: z.string().trim().min(1).max(LIMITS.name).optional(),
 	phone: phoneSchema.optional(),
 	preferred_language: z.enum(LANGUAGES).optional(),
 });
