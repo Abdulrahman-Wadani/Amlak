@@ -10,9 +10,9 @@ import { todayIn } from "@/lib/dates"
 import { Button } from "@/components/ui/button"
 import { Page } from "@/components/page"
 import { AddBookingPopup } from "@/components/booking-form"
-import { Field, NativeSelect, Panel, TwoColumns } from "@/components/panel"
+import { Field, NativeSelect, Panel } from "@/components/panel"
 import { EmptyState, LoadError, LoadingList } from "@/components/states"
-import { MonthBookings, MonthCalendar, isoDay } from "@/components/booking-parts"
+import { MonthCalendar, isoDay } from "@/components/booking-parts"
 
 export const Route = createFileRoute("/_authenticated/bookings")({
   component: BookingsPage,
@@ -101,7 +101,7 @@ function BookingsPage() {
           }
         />
       ) : (
-        // One card holds the place, the calendar and the month's bookings.
+        // One card holds the place and its calendar.
         <Panel className="gap-5" holdsSections>
           <div className="w-full desk:max-w-[320px]">
             <Field id="booking-place" label={<Trans>Place</Trans>}>
@@ -119,12 +119,7 @@ function BookingsPage() {
           ) : bookings === null || !place ? (
             <LoadingList />
           ) : (
-            <TwoColumns
-              main={
-                <MonthCalendar month={month} bookings={bookings} today={todayIn(place.timezone)} onMonth={setMonth} />
-              }
-              side={<MonthBookings bookings={bookings} />}
-            />
+            <MonthCalendar month={month} bookings={bookings} today={todayIn(place.timezone)} onMonth={setMonth} />
           )}
         </Panel>
       )}

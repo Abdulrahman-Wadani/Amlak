@@ -401,7 +401,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
       }
       side={
         <>
-          {placeId && month && <MonthBookings bookings={month} />}
+          {placeId && month && month.length > 0 && <MonthBookings bookings={month} />}
           <Panel>
             <PanelTitle small>
               <Trans>Before saving</Trans>
