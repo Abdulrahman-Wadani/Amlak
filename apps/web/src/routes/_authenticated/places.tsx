@@ -286,7 +286,7 @@ function PlacesPage() {
 
             <div
               style={S(
-                `display: grid; grid-template-columns: repeat(${stats.length}, minmax(0, 1fr)); gap: 12px; border-top: 1px solid var(--border); padding-top: 14px`
+                `display: grid; grid-template-columns: repeat(${stats.length}, minmax(0, 1fr)); gap: 12px; border-top: 1px solid var(--border); padding-top: 14px; margin-top: auto`
               )}
             >
               {stats.map((s) => (

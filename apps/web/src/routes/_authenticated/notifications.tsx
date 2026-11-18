@@ -154,13 +154,10 @@ function NotificationsPage() {
       title={<Trans>Notifications</Trans>}
       phoneStart="back"
       phoneEnd="none"
-      bell={false}
-      // The page keeps its own banner (not the design), which holds the h1.
-      header={false}
     >
       {/* Header: on the phone the banner stacks its parts in one column. */}
       <section
-        className="am-rise box-border flex flex-col items-stretch gap-5 bg-foreground p-6 text-white desk:flex-row desk:flex-wrap desk:items-center desk:justify-between desk:p-8"
+        className="am-rise box-border flex min-h-[387px] flex-col items-stretch justify-center gap-5 bg-foreground p-6 text-white desk:min-h-[244px] desk:flex-row desk:flex-wrap desk:content-center desk:items-center desk:justify-between desk:p-8"
       >
         <div className="flex min-w-0 flex-col gap-2.5 desk:flex-[1_1_300px]">
           <span
@@ -172,17 +169,8 @@ function NotificationsPage() {
             <Trans>Notifications</Trans>
           </span>
 
-          {/* On the phone the top bar holds the page's h1, so the banner's title is not a second one. */}
-          <h1
-            className="hidden desk:block"
-            style={S(
-              "margin: 0; font-size: 28px; font-weight: 700; line-height: 1.35"
-            )}
-          >
-            <Trans>Your notifications</Trans>
-          </h1>
+          {/* The shared header (and the phone top bar) holds the page's h1. */}
           <p
-            className="desk:hidden"
             style={S(
               "margin: 0; font-size: 28px; font-weight: 700; line-height: 1.35"
             )}

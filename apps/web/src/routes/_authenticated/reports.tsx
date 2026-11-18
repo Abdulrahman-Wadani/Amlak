@@ -177,7 +177,7 @@ function ReportsPage() {
         <LoadingList />
       ) : (
         <>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(260px,100%),1fr))] items-start gap-4">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(260px,100%),1fr))] items-stretch gap-4">
             <Stat label={<Trans>Income</Trans>}>
               <Amount value={income} currency={currency} format={number} className="text-[32px]" />
             </Stat>
@@ -240,10 +240,10 @@ function ReportsPage() {
 
 function Stat({ label, note, children }: { label: React.ReactNode; note?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="box-border flex min-w-0 flex-col gap-1 border border-border bg-card px-5 py-6 shadow-sm">
+    <section className="box-border flex h-full min-w-0 flex-col gap-1 border border-border bg-card px-5 py-6 shadow-sm">
       <span className="text-[15px] text-muted-foreground">{label}</span>
       {children}
-      {note && <span className="text-[13px] text-muted-foreground">{note}</span>}
+      {note && <span className="mt-auto text-[13px] text-muted-foreground">{note}</span>}
     </section>
   )
 }

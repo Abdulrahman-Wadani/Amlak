@@ -65,7 +65,6 @@ function SiteContent() {
       title={<Trans>Site content</Trans>}
       description={<Trans>Public pages that visitors read.</Trans>}
       phoneStart="logo"
-      bell={false}
       phoneActions={false}
       phoneEnd={{ label: t`New page`, icon: "plus", link: { to: "/content/new" } }}
       actions={
@@ -82,7 +81,7 @@ function SiteContent() {
       ) : pages.length === 0 ? (
         <EmptyState title={<Trans>No pages yet</Trans>} text={<Trans>Add the first page with the New page button.</Trans>} />
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] gap-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] items-stretch gap-4">
           {pages.map((page) => (
             <div key={page.id} className="box-border flex min-w-0 flex-col gap-3 border border-border bg-card p-4 shadow-sm">
               <div className="flex items-start justify-between gap-3">
@@ -99,7 +98,7 @@ function SiteContent() {
                 </div>
                 <PublishedChip published={page.is_published} />
               </div>
-              <div className="flex justify-end gap-2">
+              <div className="mt-auto flex justify-end gap-2">
                 <Link
                   to="/content/$content_id"
                   params={{ content_id: page.id }}

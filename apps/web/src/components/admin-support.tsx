@@ -85,7 +85,6 @@ export function AdminSupport() {
       title={<Trans>Support requests</Trans>}
       description={tickets ? <Trans>{openCount} open.</Trans> : undefined}
       phoneStart="logo"
-      bell={false}
       phoneEnd="none"
     >
       <FilterTabs

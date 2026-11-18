@@ -81,7 +81,6 @@ function Announcements() {
       title={<Trans>Announcements</Trans>}
       description={<Trans>Arrives as an in-app notification.</Trans>}
       phoneStart="logo"
-      bell={false}
       phoneEnd="none"
     >
       <TwoColumns

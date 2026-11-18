@@ -217,7 +217,7 @@ function ManagerHome() {
 
       <div className="flex flex-wrap items-start gap-6">
         <div className="min-w-0 flex-[999_1_560px]">
-          <div className="grid items-start gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))]">
+          <div className="grid items-stretch gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))]">
             <StatCard
               compactOnPhone
               icon={<Wrench strokeWidth={1.8} />}
@@ -419,7 +419,7 @@ function TodayBand({
   return (
     <section
       aria-label={t`Today`}
-      className="am-rise box-border flex flex-wrap items-end justify-between gap-x-12 gap-y-6 bg-foreground p-6 text-white shadow-[4px_4px_0_var(--accent-brand)] desk:p-8"
+      className="am-rise box-border flex min-h-[387px] flex-wrap content-center items-end justify-between gap-x-12 gap-y-6 bg-foreground p-6 text-white shadow-[4px_4px_0_var(--accent-brand)] desk:min-h-[244px] desk:p-8"
     >
       <div className="flex min-w-0 flex-[1_1_360px] flex-col gap-3.5">
         <span className="text-sm text-info-200">
@@ -537,7 +537,7 @@ function WorkerHome() {
         </Link>
       }
     >
-      <div className="grid items-start gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr))]">
+      <div className="grid items-stretch gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr))]">
         <StatCard
           title={<Trans>My open tasks</Trans>}
           value={loading(tasks, tasksError) ? <Skeleton className="h-10 w-16" /> : tasksError ? "—" : f.number(tasks?.total ?? 0)}

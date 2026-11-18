@@ -91,7 +91,6 @@ function AdminUser() {
       title={user?.fullname ?? (failed ? <Trans>User not found</Trans> : <Skeleton className="h-7 w-56" />)}
       phoneTitle={<Trans>User</Trans>}
       parent={{ label: <Trans>Users</Trans>, link: { to: "/admin" } }}
-      bell={false}
       phoneEnd="none"
       tabs={false}
     >

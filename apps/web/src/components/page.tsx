@@ -82,11 +82,13 @@ export function Page({
     <div className="mx-auto flex w-full max-w-[1240px] min-w-0 flex-1 flex-col">
       {bar &&
         createPortal(
-          <PhoneBar title={phoneTitle ?? title} start={start} back={back} end={end} />,
+          <PhoneBar title={phoneTitle ?? title} start={start} back={back} end={end} bell={bell} />,
           bar,
         )}
+      {/* The title block always takes the height of a title and one line under it, so the bell
+          and the buttons sit at the same place on every page, whatever the title has under it. */}
       <header className={header ? "hidden flex-wrap items-center justify-between gap-4 px-10 pt-8 desk:flex" : "hidden"}>
-        <div className="flex min-w-0 flex-col gap-1">
+        <div className="flex min-h-16 min-w-0 flex-col gap-1">
           <h1 className="m-0 text-[28px] leading-[1.3] font-bold">{title}</h1>
           {parent ? (
             <div className="text-[15px] text-muted-foreground">
@@ -104,9 +106,10 @@ export function Page({
           ) : null}
         </div>
         {(bell || actions) && (
-          <div className="flex flex-wrap items-center gap-3">
-            {bell && <NotificationBell />}
+          // The bell keeps the end of the header; the page's buttons come just before it.
+          <div className="ms-auto flex flex-wrap items-center justify-end gap-3">
             {actions}
+            {bell && <NotificationBell />}
           </div>
         )}
       </header>
@@ -133,12 +136,16 @@ function PhoneBar({
   start,
   back,
   end,
+  bell,
 }: {
   title: ReactNode
   start: "logo" | "none" | "back"
   back?: LinkProps
   end: "bell" | "none" | TopBarAction
+  bell: boolean
 }) {
+  // A page's action (e.g. Add) sits just before the bell, which keeps the end of the bar.
+  const pair = typeof end === "object" && bell
   const router = useRouter()
   const icon = "am-icon inline-flex size-11 flex-none cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-foreground"
   return (
@@ -160,6 +167,8 @@ function PhoneBar({
       ) : (
         <span aria-hidden="true" className="w-11 flex-none" />
       )}
+      {/* Two buttons at the end: an empty place at the start keeps the title centred. */}
+      {pair && <span aria-hidden="true" className="w-11 flex-none" />}
       <h1 className="m-0 min-w-0 flex-1 truncate text-center text-lg leading-[1.3] font-bold">{title}</h1>
       {end === "bell" ? (
         <NotificationBell />
@@ -174,6 +183,7 @@ function PhoneBar({
           <NavIcon name={end.icon} size={22} />
         </button>
       )}
+      {pair && <NotificationBell />}
     </>
   )
 }

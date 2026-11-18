@@ -33,7 +33,6 @@ function EditPage() {
       title={page?.title ?? (failed ? <Trans>Page not found</Trans> : <Skeleton className="h-7 w-56" />)}
       phoneTitle={<Trans>Edit page</Trans>}
       parent={{ label: <Trans>Site content</Trans>, link: { to: "/content" } }}
-      bell={false}
       phoneEnd="none"
       tabs={false}
     >

@@ -147,7 +147,7 @@ export function TicketsSection({
         ) : tickets.length === 0 ? (
           <EmptyState card={false} title={filter === "OPEN" ? emptyOpen : emptyAll} />
         ) : (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-4">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] items-stretch gap-4">
             {tickets.map((ticket) => (
               <TicketCard
                 key={ticket.id}

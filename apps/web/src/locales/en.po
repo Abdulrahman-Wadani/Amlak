@@ -7,8 +7,8 @@ msgstr ""
 "X-Generator: @lingui/cli\n"
 "Language: en\n"
 
-#: src/components/admin-support.tsx:122
-#: src/components/admin-support.tsx:181
+#: src/components/admin-support.tsx:121
+#: src/components/admin-support.tsx:180
 #: src/lib/errors.ts:181
 #: src/routes/_authenticated/home.tsx:373
 #: src/routes/_authenticated/home.tsx:437
@@ -18,7 +18,7 @@ msgid ", "
 msgstr ", "
 
 #. placeholder {0}: date(page.updated_at, { day: "numeric", month: "long" })
-#: src/routes/_authenticated/content/index.tsx:97
+#: src/routes/_authenticated/content/index.tsx:96
 msgid ", {0}"
 msgstr ", {0}"
 
@@ -44,7 +44,7 @@ msgid "{0, plural, one {# place} other {# places}}, {activeCount} of them active
 msgstr "{0, plural, one {# place} other {# places}}, {activeCount} of them active."
 
 #. placeholder {0}: user.fullname
-#: src/routes/_authenticated/admin/index.tsx:167
+#: src/routes/_authenticated/admin/index.tsx:166
 msgid "{0} (you)"
 msgstr "{0} (you)"
 
@@ -132,7 +132,7 @@ msgstr "{count, plural, one {Every year} other {Every # years}}"
 msgid "{from} to {to} of {all} tickets"
 msgstr "{from} to {to} of {all} tickets"
 
-#: src/routes/_authenticated/admin/index.tsx:193
+#: src/routes/_authenticated/admin/index.tsx:192
 msgid "{from} to {to} of {all} users"
 msgstr "{from} to {to} of {all} users"
 
@@ -230,13 +230,13 @@ msgid "A symbol such as ! or @"
 msgstr "A symbol such as ! or @"
 
 #: src/lib/nav.tsx:179
-#: src/routes/_authenticated/admin/$admin_id.tsx:140
+#: src/routes/_authenticated/admin/$admin_id.tsx:139
 #: src/routes/_authenticated/profile.tsx:105
 #: src/routes/_authenticated/profile.tsx:116
 msgid "Account"
 msgstr "Account"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:197
+#: src/routes/_authenticated/admin/$admin_id.tsx:196
 msgid "Account deactivated."
 msgstr "Account deactivated."
 
@@ -245,7 +245,7 @@ msgstr "Account deactivated."
 msgid "Account language"
 msgstr "Account language"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:169
+#: src/routes/_authenticated/admin/$admin_id.tsx:168
 msgid "Account reactivated."
 msgstr "Account reactivated."
 
@@ -336,7 +336,7 @@ msgstr "Add place"
 msgid "Add schedule"
 msgstr "Add schedule"
 
-#: src/routes/_authenticated/content/index.tsx:83
+#: src/routes/_authenticated/content/index.tsx:82
 msgid "Add the first page with the New page button."
 msgstr "Add the first page with the New page button."
 
@@ -374,7 +374,7 @@ msgstr "After the repair"
 #: src/components/tickets-section.tsx:88
 #: src/routes/_authenticated/admin/index.tsx:27
 #: src/routes/_authenticated/expenses.tsx:162
-#: src/routes/_authenticated/notifications.tsx:273
+#: src/routes/_authenticated/notifications.tsx:261
 #: src/routes/_authenticated/places.tsx:26
 #: src/routes/_authenticated/tickets.tsx:36
 #: src/routes/_authenticated/workers.tsx:24
@@ -400,7 +400,7 @@ msgstr "All places"
 msgid "All places ({0})"
 msgstr "All places ({0})"
 
-#: src/routes/_authenticated/admin/index.tsx:129
+#: src/routes/_authenticated/admin/index.tsx:128
 msgid "All roles"
 msgstr "All roles"
 
@@ -444,7 +444,7 @@ msgstr "Amlak {0}"
 msgid "Amount"
 msgstr "Amount"
 
-#: src/routes/_authenticated/notifications.tsx:417
+#: src/routes/_authenticated/notifications.tsx:405
 msgid "Announcement"
 msgstr "Announcement"
 
@@ -562,8 +562,8 @@ msgstr "Assignee"
 msgid "Assigning…"
 msgstr "Assigning…"
 
-#: src/components/page.tsx:152
-#: src/components/page.tsx:156
+#: src/components/page.tsx:159
+#: src/components/page.tsx:163
 #: src/components/place-bookings.tsx:637
 #: src/components/place-bookings.tsx:736
 #: src/components/place-bookings.tsx:811
@@ -677,7 +677,7 @@ msgstr "Change email"
 msgid "Change photo"
 msgstr "Change photo"
 
-#: src/routes/_authenticated/admin/index.tsx:152
+#: src/routes/_authenticated/admin/index.tsx:151
 msgid "Change the search or the filters."
 msgstr "Change the search or the filters."
 
@@ -960,11 +960,11 @@ msgstr "Could not load expenses"
 msgid "Could not load places"
 msgstr "Could not load places"
 
-#: src/components/admin-support.tsx:104
+#: src/components/admin-support.tsx:103
 msgid "Could not load support requests"
 msgstr "Could not load support requests"
 
-#: src/routes/_authenticated/content/index.tsx:79
+#: src/routes/_authenticated/content/index.tsx:78
 msgid "Could not load the pages"
 msgstr "Could not load the pages"
 
@@ -980,7 +980,7 @@ msgstr "Could not load this booking"
 msgid "Could not load this expense"
 msgstr "Could not load this expense"
 
-#: src/routes/_authenticated/content/$content_id.tsx:41
+#: src/routes/_authenticated/content/$content_id.tsx:40
 msgid "Could not load this page"
 msgstr "Could not load this page"
 
@@ -993,7 +993,7 @@ msgstr "Could not load this place"
 msgid "Could not load this ticket"
 msgstr "Could not load this ticket"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:99
+#: src/routes/_authenticated/admin/$admin_id.tsx:98
 msgid "Could not load this user"
 msgstr "Could not load this user"
 
@@ -1003,7 +1003,7 @@ msgstr "Could not load this user"
 msgid "Could not load tickets"
 msgstr "Could not load tickets"
 
-#: src/routes/_authenticated/admin/index.tsx:148
+#: src/routes/_authenticated/admin/index.tsx:147
 msgid "Could not load users"
 msgstr "Could not load users"
 
@@ -1092,13 +1092,13 @@ msgid "Deactivate {0}"
 msgstr "Deactivate {0}"
 
 #. placeholder {0}: user.fullname
-#: src/routes/_authenticated/admin/$admin_id.tsx:191
+#: src/routes/_authenticated/admin/$admin_id.tsx:190
 msgid "Deactivate {0}’s account?"
 msgstr "Deactivate {0}’s account?"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:178
-#: src/routes/_authenticated/admin/$admin_id.tsx:187
-#: src/routes/_authenticated/admin/$admin_id.tsx:193
+#: src/routes/_authenticated/admin/$admin_id.tsx:177
+#: src/routes/_authenticated/admin/$admin_id.tsx:186
+#: src/routes/_authenticated/admin/$admin_id.tsx:192
 msgid "Deactivate account"
 msgstr "Deactivate account"
 
@@ -1118,20 +1118,20 @@ msgstr "Deactivating…"
 msgid "Default worker"
 msgstr "Default worker"
 
-#: src/routes/_authenticated/content/index.tsx:120
+#: src/routes/_authenticated/content/index.tsx:119
 #: src/routes/_authenticated/place/$place_id.tsx:149
 msgid "Delete"
 msgstr "Delete"
 
 #. placeholder {0}: place.place_name
 #. placeholder {0}: toDelete.title
-#: src/routes/_authenticated/content/index.tsx:130
+#: src/routes/_authenticated/content/index.tsx:129
 #: src/routes/_authenticated/place/$place_id.tsx:160
 msgid "Delete “{0}”?"
 msgstr "Delete “{0}”?"
 
 #. placeholder {0}: page.title
-#: src/routes/_authenticated/content/index.tsx:114
+#: src/routes/_authenticated/content/index.tsx:113
 msgid "Delete {0}"
 msgstr "Delete {0}"
 
@@ -1150,7 +1150,7 @@ msgstr "Delete expense"
 msgid "Delete invitation"
 msgstr "Delete invitation"
 
-#: src/routes/_authenticated/content/index.tsx:132
+#: src/routes/_authenticated/content/index.tsx:131
 msgid "Delete page"
 msgstr "Delete page"
 
@@ -1184,7 +1184,7 @@ msgstr "Delete worker"
 
 #: src/components/asset-manage.tsx:95
 #: src/components/worker-form.tsx:258
-#: src/routes/_authenticated/content/index.tsx:132
+#: src/routes/_authenticated/content/index.tsx:131
 #: src/routes/_authenticated/expenses.tsx:235
 #: src/routes/_authenticated/place/$place_id.tsx:166
 #: src/routes/_authenticated/workers.tsx:135
@@ -1202,7 +1202,7 @@ msgstr "Description"
 
 #: src/components/home-parts.tsx:86
 #: src/components/user-support.tsx:85
-#: src/routes/_authenticated/admin/$admin_id.tsx:107
+#: src/routes/_authenticated/admin/$admin_id.tsx:106
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:77
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:358
 msgid "Details"
@@ -1257,7 +1257,7 @@ msgstr "Each language is its own page; the language cannot change."
 msgid "Earlier reports at this place"
 msgstr "Earlier reports at this place"
 
-#: src/routes/_authenticated/content/index.tsx:109
+#: src/routes/_authenticated/content/index.tsx:108
 #: src/routes/_authenticated/place/$place_id.tsx:139
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:110
 #: src/routes/_authenticated/workers.tsx:212
@@ -1266,7 +1266,7 @@ msgstr "Edit"
 
 #. placeholder {0}: page.title
 #. placeholder {0}: worker.fullname
-#: src/routes/_authenticated/content/index.tsx:106
+#: src/routes/_authenticated/content/index.tsx:105
 #: src/routes/_authenticated/workers.tsx:209
 msgid "Edit {0}"
 msgstr "Edit {0}"
@@ -1290,7 +1290,7 @@ msgstr "Edit place"
 
 #: src/components/worker-form.tsx:130
 #: src/lib/errors.ts:68
-#: src/routes/_authenticated/admin/$admin_id.tsx:113
+#: src/routes/_authenticated/admin/$admin_id.tsx:112
 #: src/routes/_authenticated/booking/$booking_id.tsx:159
 #: src/routes/_authenticated/profile.tsx:197
 #: src/routes/account-setup.tsx:70
@@ -1441,7 +1441,7 @@ msgstr "Estimated cost"
 msgid "Every"
 msgstr "Every"
 
-#: src/routes/_authenticated/announcements.tsx:104
+#: src/routes/_authenticated/announcements.tsx:103
 msgid "Everyone"
 msgstr "Everyone"
 
@@ -1472,11 +1472,11 @@ msgstr "Expenses"
 msgid "Expenses you add for this month will appear here."
 msgstr "Expenses you add for this month will appear here."
 
-#: src/routes/_authenticated/notifications.tsx:281
+#: src/routes/_authenticated/notifications.tsx:269
 msgid "Failed to load notifications."
 msgstr "Failed to load notifications."
 
-#: src/routes/_authenticated/notifications.tsx:283
+#: src/routes/_authenticated/notifications.tsx:271
 msgid "Failed to update notification."
 msgstr "Failed to update notification."
 
@@ -1488,9 +1488,9 @@ msgstr "Filter bookings by month"
 msgid "Filter by category"
 msgstr "Filter by category"
 
-#: src/components/admin-support.tsx:92
+#: src/components/admin-support.tsx:91
 #: src/components/tickets-section.tsx:113
-#: src/routes/_authenticated/admin/index.tsx:138
+#: src/routes/_authenticated/admin/index.tsx:137
 #: src/routes/_authenticated/places.tsx:193
 #: src/routes/_authenticated/tickets.tsx:119
 #: src/routes/_authenticated/workers.tsx:94
@@ -1545,7 +1545,7 @@ msgstr "From"
 
 #: src/components/worker-form.tsx:125
 #: src/lib/errors.ts:75
-#: src/routes/_authenticated/admin/$admin_id.tsx:110
+#: src/routes/_authenticated/admin/$admin_id.tsx:109
 #: src/routes/_authenticated/profile.tsx:191
 #: src/routes/signup.tsx:132
 msgid "Full name"
@@ -1683,7 +1683,7 @@ msgstr "In days."
 msgid "Inactive"
 msgstr "Inactive"
 
-#: src/routes/_authenticated/notifications.tsx:236
+#: src/routes/_authenticated/notifications.tsx:224
 msgid "Inbox"
 msgstr "Inbox"
 
@@ -1727,7 +1727,7 @@ msgid "Its maintenance schedules stop, and its past tickets stay in the records.
 msgstr "Its maintenance schedules stop, and its past tickets stay in the records. An asset with open tickets cannot be deleted."
 
 #. placeholder {0}: date(user.created_at, { day: "numeric", month: "long" })
-#: src/routes/_authenticated/admin/index.tsx:179
+#: src/routes/_authenticated/admin/index.tsx:178
 msgid "Joined: {0}"
 msgstr "Joined: {0}"
 
@@ -1738,7 +1738,7 @@ msgstr "Kept in the booking record."
 #: src/components/content-form.tsx:105
 #: src/components/content-form.tsx:109
 #: src/lib/errors.ts:108
-#: src/routes/_authenticated/admin/$admin_id.tsx:147
+#: src/routes/_authenticated/admin/$admin_id.tsx:146
 #: src/routes/_authenticated/profile.tsx:237
 msgid "Language"
 msgstr "Language"
@@ -1807,11 +1807,11 @@ msgstr "Main menu"
 msgid "Maintenance"
 msgstr "Maintenance"
 
-#: src/routes/_authenticated/notifications.tsx:429
+#: src/routes/_authenticated/notifications.tsx:417
 msgid "Maintenance overdue"
 msgstr "Maintenance overdue"
 
-#: src/routes/_authenticated/notifications.tsx:427
+#: src/routes/_authenticated/notifications.tsx:415
 msgid "Maintenance reminder"
 msgstr "Maintenance reminder"
 
@@ -1839,7 +1839,7 @@ msgstr "Maintenance tickets for this asset"
 msgid "Manage"
 msgstr "Manage"
 
-#: src/routes/_authenticated/notifications.tsx:243
+#: src/routes/_authenticated/notifications.tsx:231
 msgid "Manage your notifications and stay up to date."
 msgstr "Manage your notifications and stay up to date."
 
@@ -1847,7 +1847,7 @@ msgstr "Manage your notifications and stay up to date."
 msgid "Manager"
 msgstr "Manager"
 
-#: src/routes/_authenticated/announcements.tsx:105
+#: src/routes/_authenticated/announcements.tsx:104
 msgid "Managers"
 msgstr "Managers"
 
@@ -1860,7 +1860,7 @@ msgstr "Map to pick the location"
 msgid "Margin {0}%"
 msgstr "Margin {0}%"
 
-#: src/routes/_authenticated/notifications.tsx:551
+#: src/routes/_authenticated/notifications.tsx:539
 msgid "Mark as read"
 msgstr "Mark as read"
 
@@ -1877,7 +1877,7 @@ msgid "Medium"
 msgstr "Medium"
 
 #: src/components/worker-form.tsx:146
-#: src/routes/_authenticated/admin/$admin_id.tsx:116
+#: src/routes/_authenticated/admin/$admin_id.tsx:115
 #: src/routes/_authenticated/profile.tsx:211
 #: src/routes/signup.tsx:138
 msgid "Mobile number"
@@ -1938,12 +1938,12 @@ msgstr "Needs maintenance"
 msgid "Net profit"
 msgstr "Net profit"
 
-#: src/routes/_authenticated/announcements.tsx:91
+#: src/routes/_authenticated/announcements.tsx:90
 msgid "New announcement"
 msgstr "New announcement"
 
-#: src/routes/_authenticated/content/index.tsx:70
-#: src/routes/_authenticated/content/index.tsx:74
+#: src/routes/_authenticated/content/index.tsx:69
+#: src/routes/_authenticated/content/index.tsx:73
 #: src/routes/_authenticated/content/new.tsx:17
 msgid "New page"
 msgstr "New page"
@@ -1952,7 +1952,7 @@ msgstr "New page"
 msgid "New password"
 msgstr "New password"
 
-#: src/components/admin-support.tsx:110
+#: src/components/admin-support.tsx:109
 msgid "New requests from managers and workers appear here."
 msgstr "New requests from managers and workers appear here."
 
@@ -1962,7 +1962,7 @@ msgstr "New support request"
 
 #: src/components/pager.tsx:46
 #: src/components/panel.tsx:225
-#: src/routes/_authenticated/notifications.tsx:389
+#: src/routes/_authenticated/notifications.tsx:377
 msgid "Next"
 msgstr "Next"
 
@@ -2036,7 +2036,7 @@ msgstr "No guests arrive today."
 msgid "No monthly budget is set."
 msgstr "No monthly budget is set."
 
-#: src/routes/_authenticated/notifications.tsx:316
+#: src/routes/_authenticated/notifications.tsx:304
 msgid "No notifications"
 msgstr "No notifications"
 
@@ -2044,11 +2044,11 @@ msgstr "No notifications"
 msgid "No one else can take this ticket at this place."
 msgstr "No one else can take this ticket at this place."
 
-#: src/components/admin-support.tsx:109
+#: src/components/admin-support.tsx:108
 msgid "No open requests"
 msgstr "No open requests"
 
-#: src/routes/_authenticated/content/index.tsx:83
+#: src/routes/_authenticated/content/index.tsx:82
 msgid "No pages yet"
 msgstr "No pages yet"
 
@@ -2065,7 +2065,7 @@ msgstr "No places yet"
 msgid "No requests yet"
 msgstr "No requests yet"
 
-#: src/components/admin-support.tsx:109
+#: src/components/admin-support.tsx:108
 msgid "No resolved requests yet"
 msgstr "No resolved requests yet"
 
@@ -2082,7 +2082,7 @@ msgstr "No tickets here"
 msgid "No tickets waiting for review"
 msgstr "No tickets waiting for review"
 
-#: src/routes/_authenticated/admin/index.tsx:152
+#: src/routes/_authenticated/admin/index.tsx:151
 msgid "No users match"
 msgstr "No users match"
 
@@ -2135,7 +2135,7 @@ msgstr "Nothing to review."
 #: src/components/account-links.tsx:35
 #: src/components/notification-bell.tsx:16
 #: src/routes/_authenticated/notifications.tsx:154
-#: src/routes/_authenticated/notifications.tsx:172
+#: src/routes/_authenticated/notifications.tsx:169
 msgid "Notifications"
 msgstr "Notifications"
 
@@ -2171,7 +2171,7 @@ msgstr "On this device."
 msgid "One close photo of the damage, and one from further back that shows where it is."
 msgstr "One close photo of the damage, and one from further back that shows where it is."
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:161
+#: src/routes/_authenticated/admin/$admin_id.tsx:160
 msgid "Only an account with a verified email can be reactivated."
 msgstr "Only an account with a verified email can be reactivated."
 
@@ -2183,7 +2183,7 @@ msgstr "Only the places assigned to them and their assets."
 msgid "Only the places assigned to you appear here."
 msgstr "Only the places assigned to you appear here."
 
-#: src/components/admin-support.tsx:99
+#: src/components/admin-support.tsx:98
 #: src/components/place-shared.tsx:67
 #: src/components/tickets-section.tsx:87
 msgid "Open"
@@ -2420,7 +2420,7 @@ msgstr "Preventive"
 
 #: src/components/pager.tsx:32
 #: src/components/panel.tsx:222
-#: src/routes/_authenticated/notifications.tsx:365
+#: src/routes/_authenticated/notifications.tsx:353
 msgid "Previous"
 msgstr "Previous"
 
@@ -2473,8 +2473,8 @@ msgstr "Reactivate"
 msgid "Reactivate {0}"
 msgstr "Reactivate {0}"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:155
-#: src/routes/_authenticated/admin/$admin_id.tsx:172
+#: src/routes/_authenticated/admin/$admin_id.tsx:154
+#: src/routes/_authenticated/admin/$admin_id.tsx:171
 msgid "Reactivate account"
 msgstr "Reactivate account"
 
@@ -2483,8 +2483,8 @@ msgstr "Reactivate account"
 msgid "Reactivating…"
 msgstr "Reactivating…"
 
-#: src/routes/_authenticated/notifications.tsx:275
-#: src/routes/_authenticated/notifications.tsx:563
+#: src/routes/_authenticated/notifications.tsx:263
+#: src/routes/_authenticated/notifications.tsx:551
 msgid "Read"
 msgstr "Read"
 
@@ -2515,7 +2515,7 @@ msgstr "Receipt"
 msgid "Receipt photo"
 msgstr "Receipt photo"
 
-#: src/routes/_authenticated/notifications.tsx:264
+#: src/routes/_authenticated/notifications.tsx:252
 msgid "Refresh"
 msgstr "Refresh"
 
@@ -2560,11 +2560,11 @@ msgstr "Remove asset"
 msgid "Repeat every"
 msgstr "Repeat every"
 
-#: src/components/admin-support.tsx:139
+#: src/components/admin-support.tsx:138
 msgid "Reply"
 msgstr "Reply"
 
-#: src/components/admin-support.tsx:133
+#: src/components/admin-support.tsx:132
 #: src/components/user-support.tsx:130
 msgid "Reply from the Amlak team:"
 msgstr "Reply from the Amlak team:"
@@ -2611,11 +2611,11 @@ msgstr "Requests you send appear here with the team’s reply."
 msgid "Resend code"
 msgstr "Resend code"
 
-#: src/components/admin-support.tsx:151
+#: src/components/admin-support.tsx:150
 msgid "Resolve and send reply"
 msgstr "Resolve and send reply"
 
-#: src/components/admin-support.tsx:100
+#: src/components/admin-support.tsx:99
 #: src/components/place-shared.tsx:79
 msgid "Resolved"
 msgstr "Resolved"
@@ -2634,8 +2634,8 @@ msgstr "Review"
 msgid "Review tickets"
 msgstr "Review tickets"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:144
-#: src/routes/_authenticated/admin/index.tsx:120
+#: src/routes/_authenticated/admin/$admin_id.tsx:143
+#: src/routes/_authenticated/admin/index.tsx:119
 #: src/routes/_authenticated/profile.tsx:179
 msgid "Role"
 msgstr "Role"
@@ -2662,7 +2662,7 @@ msgid "Save booking"
 msgstr "Save booking"
 
 #: src/components/worker-form.tsx:204
-#: src/routes/_authenticated/admin/$admin_id.tsx:130
+#: src/routes/_authenticated/admin/$admin_id.tsx:129
 #: src/routes/_authenticated/profile.tsx:225
 msgid "Save changes"
 msgstr "Save changes"
@@ -2694,7 +2694,7 @@ msgstr "Save place"
 #: src/components/place-bookings.tsx:825
 #: src/components/place-form.tsx:347
 #: src/components/worker-form.tsx:202
-#: src/routes/_authenticated/admin/$admin_id.tsx:130
+#: src/routes/_authenticated/admin/$admin_id.tsx:129
 #: src/routes/_authenticated/booking/new.tsx:148
 #: src/routes/_authenticated/profile.tsx:225
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:624
@@ -2708,12 +2708,12 @@ msgstr "Saving…"
 msgid "Scroll to see the rest"
 msgstr "Scroll to see the rest"
 
-#: src/routes/_authenticated/admin/index.tsx:107
+#: src/routes/_authenticated/admin/index.tsx:106
 #: src/routes/_authenticated/places.tsx:170
 msgid "Search"
 msgstr "Search"
 
-#: src/routes/_authenticated/admin/index.tsx:114
+#: src/routes/_authenticated/admin/index.tsx:113
 msgid "Search by name or email"
 msgstr "Search by name or email"
 
@@ -2737,7 +2737,7 @@ msgstr "Selected address"
 msgid "Send a problem or a question to the Amlak team."
 msgstr "Send a problem or a question to the Amlak team."
 
-#: src/routes/_authenticated/announcements.tsx:131
+#: src/routes/_authenticated/announcements.tsx:130
 msgid "Send announcement"
 msgstr "Send announcement"
 
@@ -2761,14 +2761,14 @@ msgstr "Send report"
 msgid "Send request"
 msgstr "Send request"
 
-#: src/routes/_authenticated/announcements.tsx:96
-#: src/routes/_authenticated/announcements.tsx:100
+#: src/routes/_authenticated/announcements.tsx:95
+#: src/routes/_authenticated/announcements.tsx:99
 msgid "Send to"
 msgstr "Send to"
 
-#: src/components/admin-support.tsx:151
+#: src/components/admin-support.tsx:150
 #: src/components/user-support.tsx:96
-#: src/routes/_authenticated/announcements.tsx:131
+#: src/routes/_authenticated/announcements.tsx:130
 #: src/routes/_authenticated/ticket/new.tsx:116
 #: src/routes/forgot-password.tsx:113
 msgid "Sending…"
@@ -2803,7 +2803,7 @@ msgstr "Sign in to continue."
 msgid "Sign out"
 msgstr "Sign out"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:146
+#: src/routes/_authenticated/admin/$admin_id.tsx:145
 msgid "Signed up"
 msgstr "Signed up"
 
@@ -2811,7 +2811,7 @@ msgstr "Signed up"
 msgid "Signing in…"
 msgstr "Signing in…"
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:181
+#: src/routes/_authenticated/admin/$admin_id.tsx:180
 msgid "Signs the user out of every device right away. Deactivating a manager also stops their workers from signing in until it is reactivated."
 msgstr "Signs the user out of every device right away. Deactivating a manager also stops their workers from signing in until it is reactivated."
 
@@ -2843,7 +2843,7 @@ msgstr "Something went wrong. Try again."
 #: src/components/content-form.tsx:167
 #: src/components/place-form.tsx:318
 #: src/lib/errors.ts:97
-#: src/routes/_authenticated/admin/$admin_id.tsx:145
+#: src/routes/_authenticated/admin/$admin_id.tsx:144
 #: src/routes/_authenticated/place/$place_id.tsx:479
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:85
 #: src/routes/_authenticated/profile.tsx:185
@@ -2856,7 +2856,7 @@ msgstr "Status"
 msgid "Stay"
 msgstr "Stay"
 
-#: src/routes/_authenticated/notifications.tsx:198
+#: src/routes/_authenticated/notifications.tsx:186
 msgid "Stay updated with your latest activity and announcements."
 msgstr "Stay updated with your latest activity and announcements."
 
@@ -2885,7 +2885,7 @@ msgstr "Support"
 msgid "Support requests"
 msgstr "Support requests"
 
-#: src/routes/_authenticated/notifications.tsx:431
+#: src/routes/_authenticated/notifications.tsx:419
 msgid "Support ticket resolved"
 msgstr "Support ticket resolved"
 
@@ -2905,11 +2905,11 @@ msgstr "Tasks your manager approves for you will appear here."
 msgid "Taxes"
 msgstr "Taxes"
 
-#: src/routes/_authenticated/announcements.tsx:120
+#: src/routes/_authenticated/announcements.tsx:119
 msgid "Text in Arabic"
 msgstr "Text in Arabic"
 
-#: src/routes/_authenticated/announcements.tsx:114
+#: src/routes/_authenticated/announcements.tsx:113
 msgid "Text in English"
 msgstr "Text in English"
 
@@ -3020,7 +3020,7 @@ msgstr "The ticket status changed."
 msgid "The two passwords do not match."
 msgstr "The two passwords do not match."
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:159
+#: src/routes/_authenticated/admin/$admin_id.tsx:158
 msgid "The user can sign in again right away."
 msgstr "The user can sign in again right away."
 
@@ -3048,7 +3048,7 @@ msgstr "Their assignments end and their past tickets stay in the records. This c
 msgid "Their tasks, their reports and the photos."
 msgstr "Their tasks, their reports and the photos."
 
-#: src/routes/_authenticated/admin/$admin_id.tsx:192
+#: src/routes/_authenticated/admin/$admin_id.tsx:191
 msgid "They are signed out at once and cannot sign in until you reactivate the account."
 msgstr "They are signed out at once and cannot sign in until you reactivate the account."
 
@@ -3144,11 +3144,11 @@ msgstr "Those dates are already booked for this property."
 msgid "Ticket approved and sent to {name}."
 msgstr "Ticket approved and sent to {name}."
 
-#: src/routes/_authenticated/notifications.tsx:421
+#: src/routes/_authenticated/notifications.tsx:409
 msgid "Ticket assigned"
 msgstr "Ticket assigned"
 
-#: src/routes/_authenticated/notifications.tsx:425
+#: src/routes/_authenticated/notifications.tsx:413
 msgid "Ticket completed"
 msgstr "Ticket completed"
 
@@ -3156,7 +3156,7 @@ msgstr "Ticket completed"
 msgid "Ticket reassigned to {name}."
 msgstr "Ticket reassigned to {name}."
 
-#: src/routes/_authenticated/notifications.tsx:423
+#: src/routes/_authenticated/notifications.tsx:411
 msgid "Ticket rejected"
 msgstr "Ticket rejected"
 
@@ -3164,7 +3164,7 @@ msgstr "Ticket rejected"
 msgid "Ticket rejected."
 msgstr "Ticket rejected."
 
-#: src/routes/_authenticated/notifications.tsx:419
+#: src/routes/_authenticated/notifications.tsx:407
 msgid "Ticket submitted"
 msgstr "Ticket submitted"
 
@@ -3189,11 +3189,11 @@ msgstr "Time zone"
 msgid "Title"
 msgstr "Title"
 
-#: src/routes/_authenticated/announcements.tsx:117
+#: src/routes/_authenticated/announcements.tsx:116
 msgid "Title in Arabic"
 msgstr "Title in Arabic"
 
-#: src/routes/_authenticated/announcements.tsx:111
+#: src/routes/_authenticated/announcements.tsx:110
 msgid "Title in English"
 msgstr "Title in English"
 
@@ -3276,12 +3276,12 @@ msgstr "Unit"
 msgid "Unpublish"
 msgstr "Unpublish"
 
-#: src/routes/_authenticated/notifications.tsx:274
-#: src/routes/_authenticated/notifications.tsx:499
+#: src/routes/_authenticated/notifications.tsx:262
+#: src/routes/_authenticated/notifications.tsx:487
 msgid "Unread"
 msgstr "Unread"
 
-#: src/routes/_authenticated/notifications.tsx:221
+#: src/routes/_authenticated/notifications.tsx:209
 msgid "Unread notifications"
 msgstr "Unread notifications"
 
@@ -3289,7 +3289,7 @@ msgstr "Unread notifications"
 msgid "Until the worker finishes setting up the account"
 msgstr "Until the worker finishes setting up the account"
 
-#: src/routes/_authenticated/notifications.tsx:549
+#: src/routes/_authenticated/notifications.tsx:537
 msgid "Updating..."
 msgstr "Updating..."
 
@@ -3370,7 +3370,7 @@ msgstr "Villa"
 msgid "Visible to the manager only."
 msgstr "Visible to the manager only."
 
-#: src/routes/_authenticated/content/index.tsx:131
+#: src/routes/_authenticated/content/index.tsx:130
 msgid "Visitors can no longer open it. This cannot be undone from the app."
 msgstr "Visitors can no longer open it. This cannot be undone from the app."
 
@@ -3506,7 +3506,7 @@ msgstr "Worker not found"
 #: src/components/account-links.tsx:26
 #: src/components/place-form.tsx:383
 #: src/lib/nav.tsx:171
-#: src/routes/_authenticated/announcements.tsx:106
+#: src/routes/_authenticated/announcements.tsx:105
 #: src/routes/_authenticated/home.tsx:383
 #: src/routes/_authenticated/places.tsx:37
 #: src/routes/_authenticated/worker/$worker_id.tsx:38
@@ -3588,7 +3588,7 @@ msgstr "You are not assigned to a place yet."
 msgid "You can schedule periodic maintenance from the asset’s page."
 msgstr "You can schedule periodic maintenance from the asset’s page."
 
-#: src/routes/_authenticated/admin/index.tsx:187
+#: src/routes/_authenticated/admin/index.tsx:186
 msgid "You cannot change the status of your own account."
 msgstr "You cannot change the status of your own account."
 
@@ -3600,7 +3600,7 @@ msgstr "You cannot sign in until the manager’s account is reactivated."
 msgid "You do not have permission to do this."
 msgstr "You do not have permission to do this."
 
-#: src/routes/_authenticated/notifications.tsx:324
+#: src/routes/_authenticated/notifications.tsx:312
 msgid "You don't have any notifications in this category."
 msgstr "You don't have any notifications in this category."
 
@@ -3644,8 +3644,7 @@ msgstr "Your email is verified."
 msgid "Your manager’s account is deactivated."
 msgstr "Your manager’s account is deactivated."
 
-#: src/routes/_authenticated/notifications.tsx:182
-#: src/routes/_authenticated/notifications.tsx:190
+#: src/routes/_authenticated/notifications.tsx:178
 msgid "Your notifications"
 msgstr "Your notifications"
 

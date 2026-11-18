@@ -179,7 +179,7 @@ function ExpensesPage() {
           text={<Trans>Expenses you add for this month will appear here.</Trans>}
         />
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] items-stretch gap-4">
           {shown.map((expense) => (
             <div key={expense.id} className="box-border flex min-w-0 flex-col gap-2.5 border border-border bg-card p-4 shadow-sm">
               <div className="flex items-start justify-between gap-3">
@@ -193,7 +193,7 @@ function ExpensesPage() {
                 </div>
                 <Amount value={expense.amount} currency={expense.currency} format={number} className="text-[17px]" />
               </div>
-              <div className="flex items-center justify-between gap-2">
+              <div className="mt-auto flex items-center justify-between gap-2">
                 <CategoryChip category={expense.category} />
                 <div className="flex items-center">
                   {expense.receipt_url && (

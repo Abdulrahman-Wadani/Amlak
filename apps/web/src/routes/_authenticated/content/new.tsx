@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_authenticated/content/new")({
 function NewPage() {
   const { accessToken } = useAuth()
   return (
-    <Page title={<Trans>New page</Trans>} parent={{ label: <Trans>Site content</Trans>, link: { to: "/content" } }} bell={false} phoneEnd="none" tabs={false}>
+    <Page title={<Trans>New page</Trans>} parent={{ label: <Trans>Site content</Trans>, link: { to: "/content" } }} phoneEnd="none" tabs={false}>
       {accessToken && <ContentForm token={accessToken} />}
     </Page>
   )
