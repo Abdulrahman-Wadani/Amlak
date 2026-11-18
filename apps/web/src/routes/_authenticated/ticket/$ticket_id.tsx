@@ -1,1314 +1,629 @@
-
-import { useEffect, useState } from "react"
-import {
-  createFileRoute,
-  useParams,
-  Link,
-} from "@tanstack/react-router"
-import {
-  CalendarDays,
-  Clock3,
-  Wallet,
-  CheckCircle,
-  XCircle,
-  UserRoundCog,
-  CheckCheck,
-  X,
-  Paperclip,
-  Building2,
-  Users,
-  Wrench,
-} from "lucide-react"
+import { useCallback, useEffect, useState, type FormEvent } from "react"
+import { Link, createFileRoute, useParams } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
-import { t } from "@lingui/core/macro"
-import { useLingui } from "@lingui/react"
-
+import { plural, t } from "@lingui/core/macro"
+import { Check, CircleAlert, RotateCw } from "lucide-react"
+import type { Asset, Place, PlaceWorker, Ticket } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
-import { errorMessage } from "@/lib/errors"
 import {
   approveTicket,
-  rejectTicket,
-  reassignTicket,
-  completeTicket,
-  getTicketById,
   getAssetById,
   getPlace,
+  getPlaceHealth,
   getPlaceWorkers,
+  getTicketById,
+  getWorkers,
+  reassignTicket,
+  rejectTicket,
+  type DashboardPlace,
 } from "@/lib/api"
-import type { Asset, Place, PlaceWorker } from "@amlak/shared"
+import { todayIn } from "@/lib/dates"
+import { ApiError, errorMessage } from "@/lib/errors"
+import { useFormat } from "@/lib/format"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { cn } from "cn"
+import { Page } from "@/components/page"
+import { Field, InfoRows, NativeSelect, Panel, PanelTitle, PhoneActionBar, TwoColumns } from "@/components/panel"
+import { PhotoTiles } from "@/components/photo-picker"
+import { PriorityText } from "@/components/home-parts"
+import { LoadError, Notice } from "@/components/states"
+import { TicketChip } from "@/components/ticket-parts"
+import { toast } from "@/components/toast"
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-
-import { Button } from "@/components/ui/button"
-
-export const Route = createFileRoute(
-  "/_authenticated/ticket/$ticket_id",
-)({
-  component: TicketDetailPage,
+export const Route = createFileRoute("/_authenticated/ticket/$ticket_id")({
+  component: TicketPage,
 })
 
-type TicketAttachment = {
-  id: string
-  attachment_type: string
-  file_url: string
-  uploaded_by: string
-  created_at: string
-  updated_at: string
-}
+type Person = { id: string; name: string }
 
-type Ticket = {
-  id: string
-  place_id: string
-  asset_id: string
-  periodic_maintenance_id: string | null
-  ticket_type: string
-  priority: string
-  status: string
-  description: string
-  reporter_id: string
-  assignee_id: string | null
-  due_date: string | null
-  is_overdue: boolean
-  estimated_cost: number | null
-  actual_cost: number | null
-  reviewed_by: string | null
-  reviewed_at: string | null
-  rejection_reason: string | null
-  completed_at: string | null
-  completion_notes: string | null
-  created_at: string
-  updated_at: string
-  attachments?: TicketAttachment[]
-}
-
-type ActionType =
-  | "approve"
-  | "reject"
-  | "reassign"
-  | "complete"
-  | null
-
-function TicketDetailPage() {
-  const { ticket_id } = useParams({
-    from: "/_authenticated/ticket/$ticket_id",
-  })
-
+/**
+ * A maintenance ticket: its description and photos, its history and
+ * details, and what the viewer can do with it: review (approve or reject)
+ * and reassign for the Manager, complete for the assigned Worker.
+ */
+function TicketPage() {
+  const { ticket_id } = useParams({ from: "/_authenticated/ticket/$ticket_id" })
   const { accessToken, user } = useAuth()
-  const { i18n } = useLingui()
+  const isManager = user?.role === "MANAGER"
+  const { date, relative, dateFormat } = useFormat()
 
   const [ticket, setTicket] = useState<Ticket | null>(null)
   const [asset, setAsset] = useState<Asset | null>(null)
-  // Loaded for Managers only: GET /places/{placeId}/workers is Manager-only.
   const [place, setPlace] = useState<Place | null>(null)
-  const [placeWorkers, setPlaceWorkers] = useState<PlaceWorker[]>([])
+  const [names, setNames] = useState<Record<string, string>>({})
+  const [assignable, setAssignable] = useState<Person[]>([])
+  const [health, setHealth] = useState<DashboardPlace | null>(null)
+  const [failed, setFailed] = useState(false)
+  const [changed, setChanged] = useState(false)
 
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const [action, setAction] = useState<ActionType>(null)
-  const [actionLoading, setActionLoading] = useState(false)
-  const [actionError, setActionError] = useState<string | null>(null)
-
-  const [assigneeId, setAssigneeId] = useState("")
-
-  const [dueDate, setDueDate] = useState("")
-  const [estimatedCost, setEstimatedCost] = useState("")
-  const [rejectionReason, setRejectionReason] = useState("")
-  const [actualCost, setActualCost] = useState("")
-  const [completionNotes, setCompletionNotes] = useState("")
-  const [photos, setPhotos] = useState<File[]>([])
-
-  const S = (value: string): React.CSSProperties =>
-    Object.fromEntries(
-      value.split(";").filter(Boolean).map((item) => {
-        const [key, ...rest] = item.split(":")
-        return [
-          key.trim().replace(/-([a-z])/g, (_, c) => c.toUpperCase()),
-          rest.join(":").trim(),
-        ]
-      }),
-    )
-
-  // Show / hide sections using DOM
-  function toggleSection(id: string) {
-  const element = document.getElementById(id)
-  if (!element) return
-
-  const isHidden = element.style.display === "none"
-  element.style.display = isHidden ? "block" : "none"
-}
+  const load = useCallback(async () => {
+    if (!accessToken) return
+    const found = await getTicketById(accessToken, ticket_id)
+    setTicket(found)
+    if (found.asset_id) getAssetById(accessToken, found.asset_id).then(setAsset).catch(() => setAsset(null))
+    return found
+  }, [accessToken, ticket_id])
 
   useEffect(() => {
+    if (!accessToken || !user) return
     let alive = true
-
-    async function loadData() {
-      if (!accessToken) return
-
-      try {
-        setLoading(true)
-        setError(null)
-
-        const ticketData = await getTicketById(accessToken, ticket_id)
-
-        const selectedTicket = (
-          Array.isArray(ticketData) ? ticketData[0] : ticketData
-        ) as Ticket
-
-        if (!selectedTicket) {
-          throw new Error("Ticket not found")
-        }
-
+    load()
+      .then(async (found) => {
+        if (!found || !alive) return
+        const p = await getPlace(accessToken, found.place_id).catch(() => null)
         if (!alive) return
-
-        setTicket(selectedTicket)
-        if (selectedTicket.asset_id) {
-          try {
-            const assetData = await getAssetById(
-              accessToken,
-              selectedTicket.asset_id,
-            )
-
-            if (alive) setAsset(assetData)
-          } catch (assetError) {
-            console.error("Failed to load asset:", assetError)
-            if (alive) setAsset(null)
-          }
-        } else if (alive) {
-          setAsset(null)
+        setPlace(p)
+        const people: Record<string, string> = { [user.id]: user.fullname }
+        if (isManager) {
+          const [workers, placeWorkers, row] = await Promise.all([
+            getWorkers(accessToken).catch(() => []),
+            getPlaceWorkers(accessToken, found.place_id).catch(() => [] as PlaceWorker[]),
+            getPlaceHealth(accessToken, found.place_id).catch(() => null),
+          ])
+          for (const worker of workers) people[worker.id] = worker.fullname
+          if (!alive) return
+          setHealth(row)
+          setAssignable([
+            ...placeWorkers
+              .filter((item) => item.worker.status === "ACTIVE")
+              .map((item) => ({ id: item.worker.id, name: item.worker.fullname })),
+            ...(p ? [{ id: p.owner_id, name: t`Me` }] : []),
+          ])
         }
-
-        if (user?.role === "MANAGER") {
-          try {
-            const [placeData, workersData] = await Promise.all([
-              getPlace(accessToken, selectedTicket.place_id),
-              getPlaceWorkers(accessToken, selectedTicket.place_id),
-            ])
-
-            if (alive) {
-              setPlace(placeData)
-              setPlaceWorkers(workersData)
-            }
-          } catch (peopleError) {
-            console.warn("Could not load the place's workers:", peopleError)
-          }
-        }
-      } catch (err) {
-        console.error("Failed to load ticket:", err)
-
-        if (alive) {
-          setError(
-            errorMessage(err),
-          )
-        }
-      } finally {
-        if (alive) setLoading(false)
-      }
-    }
-
-    loadData()
-
+        if (alive) setNames(people)
+      })
+      .catch(() => alive && setFailed(true))
     return () => {
       alive = false
     }
-  }, [accessToken, ticket_id, user?.role])
+  }, [accessToken, user, isManager, load])
 
-  const loadTicketDetails = async () => {
-    if (!accessToken) return
-
-    try {
-      setLoading(true)
-      setError(null)
-
-      const ticketData = await getTicketById(accessToken, ticket_id)
-
-      const selectedTicket = (
-        Array.isArray(ticketData) ? ticketData[0] : ticketData
-      ) as Ticket
-
-      if (!selectedTicket) {
-        throw new Error("Ticket not found")
-      }
-
-      setTicket(selectedTicket)
-
-      if (selectedTicket.asset_id) {
-        try {
-          const assetData = await getAssetById(
-            accessToken,
-            selectedTicket.asset_id,
-          )
-
-          setAsset(assetData)
-        } catch (assetError) {
-          console.error("Failed to load asset:", assetError)
-          setAsset(null)
-        }
-      } else {
-        setAsset(null)
-      }
-
-    } catch (err) {
-      console.error("Failed to load ticket:", err)
-
-      setError(
-        errorMessage(err),
-      )
-    } finally {
-      setLoading(false)
+  // Someone else acted on the ticket first: show its latest state and say so.
+  async function onConflict(err: unknown): Promise<boolean> {
+    if (err instanceof ApiError && err.status === 409) {
+      await load().catch(() => {})
+      setChanged(true)
+      return true
     }
+    return false
   }
 
-  const resetActionForm = () => {
-    setAction(null)
-    setActionError(null)
-    setAssigneeId("")
-    setDueDate("")
-    setEstimatedCost("")
-    setRejectionReason("")
-    setActualCost("")
-    setCompletionNotes("")
-    setPhotos([])
-
-    document.querySelectorAll(".am-btn").forEach((btn) => {
-      ;(btn as HTMLElement).style.display = ""
-    })
-  }
-
-  const handleApprove = async () => {
-    if (!accessToken || !assigneeId || !dueDate) return
-
-    try {
-      setActionLoading(true)
-      setActionError(null)
-
-      await approveTicket(accessToken, ticket_id, {
-        assignee_id: assigneeId,
-        due_date: dueDate,
-        // Optional in the API: send it only when filled.
-        ...(estimatedCost.trim() === ""
-          ? {}
-          : { estimated_cost: Number(estimatedCost) }),
-      })
-
-      resetActionForm()
-      await loadTicketDetails()
-    } catch (err) {
-      setActionError(
-        errorMessage(err),
-      )
-    } finally {
-      setActionLoading(false)
-    }
-  }
-
-  const handleReject = async () => {
-    if (!accessToken || !rejectionReason.trim()) return
-
-    try {
-      setActionLoading(true)
-      setActionError(null)
-
-      await rejectTicket(accessToken, ticket_id, {
-        reason: rejectionReason,
-      })
-
-      resetActionForm()
-      await loadTicketDetails()
-    } catch (err) {
-      setActionError(
-        errorMessage(err),
-      )
-    } finally {
-      setActionLoading(false)
-    }
-  }
-
-  const handleReassign = async () => {
-    if (!accessToken || !assigneeId || !dueDate) return
-
-    try {
-      setActionLoading(true)
-      setActionError(null)
-
-      await reassignTicket(accessToken, ticket_id, {
-        assignee_id: assigneeId,
-        due_date: dueDate,
-      })
-
-      resetActionForm()
-      await loadTicketDetails()
-    } catch (err) {
-      setActionError(
-        errorMessage(err),
-      )
-    } finally {
-      setActionLoading(false)
-    }
-  }
-
-  const handleComplete = async () => {
-    if (
-      !accessToken ||
-      actualCost === "" ||
-      Number(actualCost) < 0 ||
-      photos.length < 1 ||
-      photos.length > 5
-    ) {
-      return
-    }
-
-    try {
-      setActionLoading(true)
-      setActionError(null)
-
-      await completeTicket(accessToken, ticket_id, {
-        actual_cost: Number(actualCost),
-        completion_notes: completionNotes,
-        photos,
-      })
-
-      resetActionForm()
-      await loadTicketDetails()
-    } catch (err) {
-      setActionError(
-        errorMessage(err),
-      )
-    } finally {
-      setActionLoading(false)
-    }
-  }
-
-  const openAction = (nextAction: ActionType) => {
-    setAction(nextAction)
-    setActionError(null)
-
-    document.querySelectorAll(".am-btn").forEach((btn) => {
-      ;(btn as HTMLElement).style.display = "none"
-    })
-  }
-
-  const date = (value: string | null | undefined) => {
-    if (!value) return "—"
-
-    // A date without a time (due_date) is shown as a date only.
-    if (value.length === 10) {
-      return new Date(`${value}T00:00:00`).toLocaleDateString(i18n.locale, {
-        dateStyle: "medium",
-      })
-    }
-
-    const parsed = new Date(value)
-
-    if (Number.isNaN(parsed.getTime())) return value
-
-    return parsed.toLocaleString(i18n.locale, {
-      dateStyle: "medium",
-      timeStyle: "short",
-    })
-  }
-
-  const money = (value: number | null) => {
-    if (value === null || value === undefined) return "—"
-
-    return new Intl.NumberFormat(i18n.locale, {
-      style: "currency",
-      currency: place?.currency ?? "SAR",
-    }).format(Number(value))
-  }
-
-  const statusLabels: Record<string, string> = {
-    PENDING_REVIEW: t`Waiting for review`,
-    PENDING: t`Pending`,
-    APPROVED: t`Approved`,
-    REJECTED: t`Rejected`,
-    IN_PROGRESS: t`In progress`,
-    COMPLETED: t`Completed`,
-    CANCELLED: t`Cancelled`,
-  }
-
-  const priorityLabels: Record<string, string> = {
-    LOW: t`Low`,
-    MEDIUM: t`Medium`,
-    HIGH: t`High`,
-    URGENT: t`Urgent`,
-  }
-
-  const typeLabels: Record<string, string> = {
-    CORRECTIVE: t`Corrective maintenance`,
-    PREVENTIVE: t`Preventive maintenance`,
-  }
-
-  const attachmentTypeLabels: Record<string, string> = {
-    DAMAGE: t`Damage photos`,
-    BEFORE: t`Before photos`,
-    AFTER: t`After photos`,
-    COMPLETION: t`Completion photos`,
-  }
-
-  const statusColors: Record<string, string> = {
-    PENDING_REVIEW: "#d97706",
-    PENDING: "#d97706",
-    APPROVED: "#2563eb",
-    REJECTED: "#dc2626",
-    IN_PROGRESS: "#7c3aed",
-    COMPLETED: "#16a34a",
-    CANCELLED: "#6b7280",
-  }
-
-  const InfoItem = ({
-    label,
-    value,
-  }: {
-    label: string
-    value: React.ReactNode
-  }) => (
-    <div
-      style={S(
-        "display:flex; flex-direction:column; gap:6px; min-width:0",
-      )}
+  const nameOf = (id: string | null) => (id ? names[id] : undefined)
+  const due = ticket?.due_date ? date(ticket.due_date, { day: "numeric", month: "long" }) : null
+  const damage = ticket?.attachments?.filter((a) => a.attachment_type === "DAMAGE").map((a) => a.file_url) ?? []
+  const after = ticket?.attachments?.filter((a) => a.attachment_type === "AFTER_REPAIR").map((a) => a.file_url) ?? []
+  const when = (value: string) => dateFormat({ dateStyle: "medium", timeStyle: "short" }).format(new Date(value))
+  const placeLink = place && (
+    <Link
+      to="/place/$place_id"
+      params={{ place_id: place.id }}
+      className="relative underline underline-offset-4 before:absolute before:inset-x-0 before:-inset-y-3.5 before:content-['']"
     >
-      <span style={S("font-size:12px; color:var(--muted-foreground)")}>
-        {label}
-      </span>
-
-      <strong style={S("font-size:14px; overflow-wrap:anywhere")}>
-        {value || "—"}
-      </strong>
-    </div>
+      {place.place_name}
+    </Link>
   )
 
-  const Section = ({
-    title,
-    icon,
-    children,
-  }: {
-    title: string
-    icon?: React.ReactNode
-    children: React.ReactNode
-  }) => (
-    <section
-      style={S(
-        "padding:20px; border:1px solid var(--border); background:var(--card); display:flex; flex-direction:column; gap:20px",
-      )}
-    >
-      <div style={S("display:flex; align-items:center; gap:9px")}>
-        {icon}
-
-        <h2 style={S("font-size:16px; font-weight:700; margin:0")}>
-          {title}
-        </h2>
-      </div>
-
-      {children}
-    </section>
-  )
-
-  const Grid = ({ children }: { children: React.ReactNode }) => (
-    <div
-      style={S(
-        "display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:20px",
-      )}
-    >
-      {children}
-    </div>
-  )
-
-  const fieldStyle = S(
-    "width:100%; min-height:40px; padding:9px 12px; border:1px solid var(--border); background:var(--background); color:var(--foreground)",
-  )
-
-  const labelStyle = S(
-    "display:block; font-size:13px; font-weight:600; margin-bottom:7px",
-  )
-
-  const today = new Date().toISOString().slice(0, 10)
-
-  if (loading) {
+  if (failed) {
     return (
-      <div style={S("padding:32px; color:var(--muted-foreground)")}>
-        <Trans>Loading the ticket…</Trans>
-      </div>
-    )
-  }
-
-  if (error || !ticket) {
-    return (
-      <div
-        style={S(
-          "padding:32px; display:flex; flex-direction:column; gap:16px",
-        )}
+      <Page
+        title={<Trans>Maintenance ticket</Trans>}
+        parent={isManager ? { label: <Trans>Maintenance tickets</Trans>, link: { to: "/tickets" } } : { label: <Trans>My tasks</Trans>, link: { to: "/tickets" } }}
       >
-        <p style={S("color:#dc2626")}>
-          {error || t`Ticket not found`}
-        </p>
-      </div>
+        <LoadError title={<Trans>Could not load this ticket</Trans>} onRetry={() => window.location.reload()} />
+      </Page>
     )
   }
 
-  // The API lets only the place's Manager review and reassign, and only the
-  // assignee complete; offer only the buttons that can work.
-  const isPlaceManager =
-    user?.role === "MANAGER" && !!place && place.owner_id === user.id
-  const isAssignee = !!ticket.assignee_id && ticket.assignee_id === user?.id
-  const canReview = isPlaceManager && ticket.status === "PENDING_REVIEW"
-  const canReassign = isPlaceManager && ticket.status === "APPROVED"
-  const canComplete = isAssignee && ticket.status === "APPROVED"
-  const hasActions = canReview || canReassign || canComplete
+  const pending = ticket?.status === "PENDING_REVIEW"
+  const approved = ticket?.status === "APPROVED"
+  const mine = ticket?.assignee_id === user?.id
 
-  const workerNames = new Map(
-    placeWorkers.map((placeWorker) => [
-      placeWorker.worker.id,
-      placeWorker.worker.fullname,
-    ]),
-  )
-  const personName = (id: string | null | undefined) => {
-    if (!id) return "—"
-    if (id === user?.id) return t`You`
-    return workerNames.get(id) ?? t`Another team member`
+  // The ticket's history, newest first, from what the ticket records.
+  const history: { at: string; who?: string; text: React.ReactNode }[] = []
+  if (ticket) {
+    const photos = damage.length
+    history.push({
+      at: ticket.created_at,
+      who: nameOf(ticket.reporter_id),
+      text:
+        photos > 0
+          ? plural(photos, {
+              one: "created the ticket and attached one photo.",
+              other: "created the ticket and attached # photos.",
+            })
+          : t`created the ticket.`,
+    })
+    if (ticket.reviewed_at && ticket.status !== "PENDING_REVIEW") {
+      const assignee = nameOf(ticket.assignee_id)
+      history.push({
+        at: ticket.reviewed_at,
+        who: nameOf(ticket.reviewed_by),
+        text:
+          ticket.status === "REJECTED"
+            ? t`rejected the ticket.`
+            : assignee
+              ? t`approved the ticket and assigned ${assignee}.`
+              : t`approved the ticket.`,
+      })
+    }
+    if (ticket.completed_at) {
+      history.push({ at: ticket.completed_at, who: nameOf(ticket.assignee_id), text: t`completed the ticket.` })
+    }
+    history.sort((a, b) => b.at.localeCompare(a.at))
   }
 
-  // Who can take the work: the place's owner and its ACTIVE workers.
-  const assigneeOptions = place
+  const detailRows = ticket
     ? [
-        { id: place.owner_id, label: t`You (owner)` },
-        ...placeWorkers
-          .filter((placeWorker) => placeWorker.worker.status === "ACTIVE")
-          .map((placeWorker) => ({
-            id: placeWorker.worker.id,
-            label: placeWorker.worker.fullname,
-          })),
+        { label: <Trans>Status</Trans>, value: <TicketChip ticket={ticket} /> },
+        { label: <Trans>Priority</Trans>, value: <PriorityText priority={ticket.priority} /> },
+        ...(pending || ticket.status === "REJECTED"
+          ? [
+              {
+                label: <Trans>Type</Trans>,
+                value: ticket.ticket_type === "PREVENTIVE" ? <Trans>Preventive</Trans> : <Trans>Corrective</Trans>,
+              },
+            ]
+          : []),
+        ...(!pending && ticket.status !== "REJECTED" && nameOf(ticket.assignee_id)
+          ? [{ label: <Trans>Assigned to</Trans>, value: nameOf(ticket.assignee_id) }]
+          : []),
+        ...(approved && due ? [{ label: <Trans>Due</Trans>, value: due }] : []),
+        ...(approved && ticket.estimated_cost != null && place
+          ? [{ label: <Trans>Estimated cost</Trans>, value: <Amount value={ticket.estimated_cost} currency={place.currency} /> }]
+          : []),
+        ...(ticket.status === "COMPLETED" && ticket.actual_cost != null && place
+          ? [{ label: <Trans>Actual cost</Trans>, value: <Amount value={ticket.actual_cost} currency={place.currency} /> }]
+          : []),
+        { label: <Trans>Place</Trans>, value: placeLink ?? "—" },
+        ...(pending || ticket.status === "REJECTED"
+          ? [{ label: <Trans>Asset</Trans>, value: asset?.name ?? <Trans>No specific asset</Trans> }]
+          : []),
+        ...((pending || ticket.status === "REJECTED") && nameOf(ticket.reporter_id)
+          ? [{ label: <Trans>Reported by</Trans>, value: nameOf(ticket.reporter_id) }]
+          : []),
       ]
     : []
 
   return (
-    <div
-      style={S(
-        "width:100%; max-width:1100px; margin:0 auto; padding:24px; display:flex; flex-direction:column; gap:22px",
-      )}
+    <Page
+      title={ticket ? <span dir="auto" className="line-clamp-2">{ticket.description}</span> : <Skeleton className="h-7 w-72" />}
+      phoneTitle={<Trans>Maintenance ticket</Trans>}
+      phoneSubtitle={ticket && place ? t`${place.place_name}, ${relative(ticket.created_at)}` : undefined}
+      parent={
+        isManager
+          ? { label: <Trans>Maintenance tickets</Trans>, link: { to: "/tickets" } }
+          : { label: <Trans>My tasks</Trans>, link: { to: "/tickets" } }
+      }
+      phoneEnd="none"
+      tabs={!(isManager && pending)}
     >
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink render={<a href="/" />}>
-              <Trans>Home</Trans>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
+      {changed && (
+        <Notice tone="warn" icon={<RotateCw />} title={<Trans>The ticket status changed.</Trans>}>
+          <Trans>Someone else acted on it a moment ago. We reloaded it so you see the latest status.</Trans>
+        </Notice>
+      )}
+      {ticket === null ? (
+        <Skeleton className="h-96" />
+      ) : (
+        <TwoColumns
+          main={
+            <>
+              {/* On the phone the details come first, as designed. */}
+              <div className="flex flex-col desk:hidden">
+                <DetailsPanel rows={detailRows} />
+              </div>
+              <Panel labelledBy="desc-title">
+                <PanelTitle id="desc-title">
+                  <Trans>Description</Trans>
+                </PanelTitle>
+                <p dir="auto" className="m-0 text-[15px] leading-[1.8] whitespace-pre-line">
+                  {ticket.description}
+                </p>
+                <PhotoTiles urls={damage} label={(n) => t`Damage photo ${n}`} />
+              </Panel>
+              {ticket.status === "REJECTED" && ticket.rejection_reason && (
+                <Panel labelledBy="reason-title">
+                  <PanelTitle id="reason-title">
+                    <Trans>Reason for rejection</Trans>
+                  </PanelTitle>
+                  <p dir="auto" className="m-0 text-[15px] leading-[1.8]">
+                    {ticket.rejection_reason}
+                  </p>
+                </Panel>
+              )}
+              {ticket.status === "COMPLETED" && (
+                <Panel labelledBy="after-title">
+                  <PanelTitle id="after-title">
+                    <Trans>After the repair</Trans>
+                  </PanelTitle>
+                  {ticket.completion_notes && (
+                    <p dir="auto" className="m-0 text-[15px] leading-[1.8]">
+                      {ticket.completion_notes}
+                    </p>
+                  )}
+                  <PhotoTiles urls={after} label={(n) => t`Photo after repair ${n}`} />
+                </Panel>
+              )}
+              {/* On the phone the review comes before the history. */}
+              {isManager && pending && place && (
+                <div className="flex flex-col desk:hidden">
+                  <ReviewPanel
+                    ticket={ticket}
+                    place={place}
+                    people={assignable}
+                    remaining={health?.maintenance_budget?.remaining}
+                    reporter={nameOf(ticket.reporter_id)}
+                    onDone={load}
+                    onConflict={onConflict}
+                    phone
+                  />
+                </div>
+              )}
+              <Panel labelledBy="history-title">
+                <PanelTitle id="history-title">
+                  <Trans>History</Trans>
+                </PanelTitle>
+                <ul className="m-0 flex list-none flex-col gap-3.5 p-0">
+                  {history.map((event) => (
+                    <li key={`${event.at}-${String(event.text)}`} className="flex gap-3">
+                      <span aria-hidden="true" className="mt-2.5 size-2 flex-none rounded-full bg-primary" />
+                      <span className="flex flex-col leading-[1.6]">
+                        <span>
+                          {event.who && <strong className="font-semibold">{event.who} </strong>}
+                          {event.text}
+                        </span>
+                        <span className="text-[13px] text-muted-foreground">{when(event.at)}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </Panel>
+            </>
+          }
+          side={
+            <>
+              <div className="hidden flex-col desk:flex">
+                <DetailsPanel rows={detailRows} />
+              </div>
+              {isManager && pending && place && (
+                <div className="hidden flex-col desk:flex">
+                  <ReviewPanel
+                    ticket={ticket}
+                    place={place}
+                    people={assignable}
+                    remaining={health?.maintenance_budget?.remaining}
+                    reporter={nameOf(ticket.reporter_id)}
+                    onDone={load}
+                    onConflict={onConflict}
+                  />
+                </div>
+              )}
+              {isManager && approved && place && (
+                <ReassignPanel ticket={ticket} place={place} people={assignable} onDone={load} onConflict={onConflict} />
+              )}
+              {!isManager && approved && mine && (
+                <Panel>
+                  <Link to="/ticket/complete/$ticket_id" params={{ ticket_id: ticket.id }} className={cn(buttonVariants(), "w-full")}>
+                    <Check aria-hidden="true" />
+                    <Trans>Complete task</Trans>
+                  </Link>
+                  {due && (
+                    <span className="text-[13px] text-muted-foreground">
+                      {ticket.is_overdue ? <Trans>Was due {due}</Trans> : <Trans>Due {due}</Trans>}
+                    </span>
+                  )}
+                </Panel>
+              )}
+            </>
+          }
+        />
+      )}
+    </Page>
+  )
+}
 
-          <BreadcrumbSeparator />
+function Amount({ value, currency }: { value: number; currency: string }) {
+  const { money } = useFormat()
+  return <span className="font-mono tabular-nums">{money(value, currency)}</span>
+}
 
-          <BreadcrumbItem>
-            <BreadcrumbLink render={<a href="/places" />}>
-              <Trans>Places</Trans>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
+function DetailsPanel({ rows }: { rows: { label: React.ReactNode; value: React.ReactNode }[] }) {
+  return (
+    <Panel labelledBy="details-title" className="gap-2">
+      <PanelTitle id="details-title">
+        <Trans>Details</Trans>
+      </PanelTitle>
+      <InfoRows rows={rows} />
+    </Panel>
+  )
+}
 
-          <BreadcrumbSeparator />
+/** Approve (with the estimated cost, the assignee and the due date) or reject with a reason. */
+function ReviewPanel({
+  ticket,
+  place,
+  people,
+  remaining,
+  reporter,
+  onDone,
+  onConflict,
+  phone = false,
+}: {
+  ticket: Ticket
+  place: Place
+  people: Person[]
+  remaining?: number
+  reporter?: string
+  onDone: () => Promise<unknown>
+  onConflict: (err: unknown) => Promise<boolean>
+  phone?: boolean
+}) {
+  const { accessToken } = useAuth()
+  const { money, currencyName } = useFormat()
+  const [cost, setCost] = useState("")
+  const [assignee, setAssignee] = useState("")
+  const [due, setDue] = useState("")
+  const [errors, setErrors] = useState<{ cost?: string; due?: string }>({})
+  const [error, setError] = useState("")
+  const [busy, setBusy] = useState(false)
+  const [rejecting, setRejecting] = useState(false)
+  const [reason, setReason] = useState("")
+  const [reasonError, setReasonError] = useState("")
+  const chosen = assignee || people[0]?.id || ""
+  const prefix = phone ? "m-" : ""
 
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              render={
-                <Link
-                  to="/place/$place_id"
-                  params={{ place_id: ticket.place_id }}
-                >
-                  <Trans>Place</Trans>
-                </Link>
-              }
-            />
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+  async function approve(event?: FormEvent) {
+    event?.preventDefault()
+    if (!accessToken) return
+    const next: typeof errors = {}
+    if (cost.trim() && !(Number(cost) >= 0)) next.cost = t`Enter an amount of 0 or more, or leave it empty.`
+    if (!due) next.due = t`Choose the due date.`
+    setErrors(next)
+    if (Object.keys(next).length > 0 || !chosen) return
+    setBusy(true)
+    setError("")
+    try {
+      await approveTicket(accessToken, ticket.id, {
+        assignee_id: chosen,
+        due_date: due,
+        ...(cost.trim() ? { estimated_cost: Number(cost) } : {}),
+      })
+      const name = people.find((person) => person.id === chosen)?.name ?? ""
+      toast(t`Ticket approved and sent to ${name}.`)
+      await onDone()
+    } catch (err) {
+      if (!(await onConflict(err))) setError(errorMessage(err))
+    } finally {
+      setBusy(false)
+    }
+  }
 
-      <header
-        style={S(
-          "display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px",
-        )}
-      >
-        <div style={S("display:flex; flex-direction:column; gap:8px")}>
-          <h1 style={S("font-size:24px; font-weight:800; margin:0")}>
-            <Trans>Maintenance ticket</Trans>
-          </h1>
+  async function reject() {
+    if (!accessToken) return
+    if (!reason.trim()) {
+      setReasonError(t`Write the reason.`)
+      return
+    }
+    setBusy(true)
+    setReasonError("")
+    try {
+      await rejectTicket(accessToken, ticket.id, { reason: reason.trim() })
+      setRejecting(false)
+      toast(t`Ticket rejected.`)
+      await onDone()
+    } catch (err) {
+      setRejecting(false)
+      if (!(await onConflict(err))) setError(errorMessage(err))
+    } finally {
+      setBusy(false)
+    }
+  }
 
-          <p
-            style={S(
-              "font-size:13px; color:var(--muted-foreground); margin:0",
-            )}
-          >
-            {ticket.description || t`Maintenance ticket`}
-          </p>
-        </div>
+  const approveButton = (
+    <Button type="submit" form={`${prefix}review-form`} disabled={busy} className={phone ? undefined : "w-full"}>
+      <Trans>Approve ticket</Trans>
+    </Button>
+  )
+  const rejectButton = (
+    <Button type="button" variant="destructive" disabled={busy} className={phone ? undefined : "w-full"} onClick={() => setRejecting(true)}>
+      {phone ? <Trans>Reject</Trans> : <Trans>Reject ticket</Trans>}
+    </Button>
+  )
 
-        <span
-          style={{
-            padding: "7px 14px",
-            borderRadius: 20,
-            color: statusColors[ticket.status] || "var(--foreground)",
-            background: `${statusColors[ticket.status] || "#6b7280"}18`,
-            fontSize: 13,
-            fontWeight: 700,
-          }}
+  return (
+    <Panel labelledBy={`${prefix}review-title`} className="gap-4">
+      <PanelTitle id={`${prefix}review-title`}>
+        <Trans>Review</Trans>
+      </PanelTitle>
+      <form id={`${prefix}review-form`} onSubmit={approve} noValidate className="flex flex-col gap-4">
+        <Field
+          id={`${prefix}cost`}
+          label={<Trans>Estimated cost</Trans>}
+          error={errors.cost}
+          hint={
+            remaining != null ? (
+              <Trans>Left in this place’s budget this month: {money(remaining, place.currency, { maximumFractionDigits: 0 })}</Trans>
+            ) : (
+              <Trans>Optional. In {currencyName(place.currency)}.</Trans>
+            )
+          }
         >
-          {statusLabels[ticket.status] || ticket.status}
-        </span>
-      </header>
-
-      {/* First section: always visible */}
-      <Section title={t`Ticket information`}>
-        <Grid>
-          <InfoItem
-            label={t`Maintenance type`}
-            value={typeLabels[ticket.ticket_type] || ticket.ticket_type}
+          <Input id={`${prefix}cost`} inputMode="decimal" dir="ltr" value={cost} onChange={(e) => setCost(e.target.value)} />
+        </Field>
+        <Field id={`${prefix}assignee`} label={<Trans>Assign to</Trans>}>
+          <NativeSelect id={`${prefix}assignee`} value={chosen} onChange={setAssignee}>
+            {people.map((person) => (
+              <option key={person.id} value={person.id}>
+                {person.name}
+              </option>
+            ))}
+          </NativeSelect>
+        </Field>
+        <Field id={`${prefix}due`} label={<Trans>Due date</Trans>} error={errors.due}>
+          <Input
+            id={`${prefix}due`}
+            type="date"
+            dir="ltr"
+            min={todayIn(place.timezone)}
+            value={due}
+            aria-invalid={errors.due ? true : undefined}
+            onChange={(e) => setDue(e.target.value)}
           />
-
-          <InfoItem
-            label={t`Priority`}
-            value={priorityLabels[ticket.priority] || ticket.priority}
-          />
-
-          <InfoItem
-            label={t`Status`}
-            value={statusLabels[ticket.status] || ticket.status}
-          />
-
-          <InfoItem
-            label={t`Due date`}
-            value={date(ticket.due_date)}
-          />
-
-          <InfoItem
-            label={t`Overdue?`}
-            value={
-              ticket.is_overdue ? (
-                <span style={S("color:#dc2626")}><Trans>Overdue</Trans></span>
+        </Field>
+        {error && (
+          <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">
+            <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+            {error}
+          </p>
+        )}
+        {!phone && (
+          <div className="flex flex-col gap-2.5">
+            {approveButton}
+            {rejectButton}
+            <span className="text-[13px] text-muted-foreground">
+              {reporter ? (
+                <Trans>If you reject, we will ask for a reason and send it to {reporter}.</Trans>
               ) : (
-                t`Not overdue`
+                <Trans>If you reject, we will ask for a reason and send it to the reporter.</Trans>
+              )}
+            </span>
+          </div>
+        )}
+      </form>
+      {phone && (
+        <PhoneActionBar>
+          <div className="flex flex-[1] [&>*]:w-full">{rejectButton}</div>
+          <div className="flex flex-[2] [&>*]:w-full">{approveButton}</div>
+        </PhoneActionBar>
+      )}
+      <Dialog open={rejecting} onOpenChange={(open) => !open && !busy && setRejecting(false)}>
+        <DialogContent showCloseButton={false} className="box-border flex flex-col gap-3 rounded-[4px] bg-card p-6 ring-0 sm:max-w-[440px]">
+          <DialogTitle className="m-0 text-xl leading-[1.4] font-bold">
+            <Trans>Reject ticket</Trans>
+          </DialogTitle>
+          <Field
+            id={`${prefix}reason`}
+            label={<Trans>Reason for rejection</Trans>}
+            error={reasonError}
+            hint={
+              reporter ? (
+                <Trans>We will send the reason to {reporter} with a notification.</Trans>
+              ) : (
+                <Trans>We will send the reason to the reporter with a notification.</Trans>
               )
             }
-          />
-
-          <InfoItem
-            label={t`Created`}
-            value={date(ticket.created_at)}
-          />
-
-          <InfoItem
-            label={t`Last updated`}
-            value={date(ticket.updated_at)}
-          />
-        </Grid>
-
-        <div
-          style={S(
-            "border-top:1px solid var(--border); padding-top:16px",
-          )}
-        >
-          <InfoItem label={t`Description`} value={ticket.description} />
-        </div>
-      </Section>
-
-      <div style={S("display: flex; gap: 10px; flex-wrap: wrap; align-items: center")}>
-  {[
-    { id: "asset-section", title: t`Asset`, icon: <Building2 size={16} /> },
-    { id: "cost-section", title: t`Costs`, icon: <Wallet size={16} /> },
-    { id: "review-section", title: t`Review`, icon: <CheckCircle size={16} /> },
-    { id: "completion-section", title: t`Completion`, icon: <CheckCheck size={16} /> },
-    { id: "people-section", title: t`People`, icon: <Users size={16} /> },
-    { id: "timeline-section", title: t`Timeline`, icon: <Clock3 size={16} /> },
-    { id: "actions-section", title: t`Actions`, icon: <Wrench size={16} /> },
-    { id: "attachments-section", title: t`Attachments`, icon: <Paperclip size={16} /> },
-  ]
-    .filter((section) => section.id !== "actions-section" || hasActions)
-    .map((section) => (
-    <Button
-  key={section.id}
-  type="button"
-  variant="outline"
-  size="sm"
-  className="am-btn"
-  onClick={() => toggleSection(section.id)}
-  style={S(
-    "height: 40px; padding: 0 16px; gap: 8px; background: transparent; border: 1px solid var(--border); color: var(--foreground)"
-  )}
->
-  {section.icon}
-  {section.title}
-</Button>
-  ))}
-</div>
-
-      {/* Asset */}
-      <div id="asset-section" style={{ display: "none" }}>
-        <Section title={t`Asset`}>
-          {asset ? (
-            <Grid>
-              <InfoItem label={t`Asset name`} value={asset.name} />
-              <InfoItem label={t`Asset type`} value={asset.type} />
-              <InfoItem label={t`Asset status`} value={asset.status} />
-            </Grid>
-          ) : (
-            <p
-              style={S(
-                "font-size:13px; color:var(--muted-foreground); margin:0",
-              )}
-            >
-              <Trans>This ticket has no asset.</Trans>
-            </p>
-          )}
-        </Section>
-      </div>
-
-      {/* Costs */}
-      <div id="cost-section" style={{ display: "none" }}>
-        <Section title={t`Costs`} icon={<Wallet size={18} />}>
-          <Grid>
-            <InfoItem
-              label={t`Estimated cost`}
-              value={money(ticket.estimated_cost)}
-            />
-
-            <InfoItem
-              label={t`Actual cost`}
-              value={money(ticket.actual_cost)}
-            />
-          </Grid>
-        </Section>
-      </div>
-
-      {/* Review */}
-      <div id="review-section" style={{ display: "none" }}>
-        <Section title={t`Review`}>
-          <Grid>
-            <InfoItem
-              label={t`Reviewed by`}
-              value={
-                ticket.reviewed_by ? personName(ticket.reviewed_by) : null
-              }
-            />
-
-            <InfoItem
-              label={t`Reviewed on`}
-              value={date(ticket.reviewed_at)}
-            />
-          </Grid>
-
-          {ticket.rejection_reason && (
-            <div
-              style={S(
-                "padding:14px; background:#dc262610; display:flex; flex-direction:column; gap:7px",
-              )}
-            >
-              <strong style={S("font-size:13px; color:#dc2626")}>
-                <Trans>Reason for rejection</Trans>
-              </strong>
-
-              <p style={S("font-size:14px; margin:0")}>
-                {ticket.rejection_reason}
-              </p>
-            </div>
-          )}
-        </Section>
-      </div>
-
-      {/* Completion */}
-      <div id="completion-section" style={{ display: "none" }}>
-        <Section
-          title={t`Completion`}
-          icon={<CalendarDays size={18} />}
-        >
-          <Grid>
-            <InfoItem
-              label={t`Completed on`}
-              value={date(ticket.completed_at)}
-            />
-
-            <InfoItem
-              label={t`Completion notes`}
-              value={ticket.completion_notes}
-            />
-          </Grid>
-        </Section>
-      </div>
-
-      {/* People */}
-      <div id="people-section" style={{ display: "none" }}>
-        <Section title={t`People`}>
-          <Grid>
-            <InfoItem
-              label={t`Reported by`}
-              value={personName(ticket.reporter_id)}
-            />
-            <InfoItem
-              label={t`Assignee`}
-              value={ticket.assignee_id ? personName(ticket.assignee_id) : null}
-            />
-          </Grid>
-        </Section>
-      </div>
-
-      {/* Timeline */}
-      <div id="timeline-section" style={{ display: "none" }}>
-        <Section title={t`Timeline`} icon={<Clock3 size={18} />}>
-          <Grid>
-            <InfoItem
-              label={t`Created`}
-              value={date(ticket.created_at)}
-            />
-
-            <InfoItem
-              label={t`Last updated`}
-              value={date(ticket.updated_at)}
-            />
-
-            <InfoItem
-              label={t`Reviewed on`}
-              value={date(ticket.reviewed_at)}
-            />
-
-            <InfoItem
-              label={t`Completed on`}
-              value={date(ticket.completed_at)}
-            />
-          </Grid>
-        </Section>
-      </div>
-
-      {/* Actions */}
-      <div id="actions-section" style={{ display: "none" }}>
-        <Card
-          className="am-lift"
-          style={S(
-            "padding:0; border:1px solid var(--border); overflow:hidden; gap:0",
-          )}
-        >
-          <CardHeader
-            style={S(
-              "padding:20px; border-bottom:1px solid var(--border); text-align:center",
-            )}
           >
-            <CardTitle
-              style={S(
-                "font-size:17px; font-weight:750; width:100%; text-align:center",
-              )}
-            >
-              <Trans>Actions</Trans>
-            </CardTitle>
-          </CardHeader>
-
-          <div
-            style={S(
-              "display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:12px; padding:24px 20px",
-            )}
-          >
-            {canReview && (
-              <>
-                <Button
-                  variant="default"
-                  className="am-btn"
-                  onClick={() => openAction("approve")}
-                  style={S("height:42px; padding:0 20px; gap:8px")}
-                >
-                  <CheckCircle size={17} />
-                  <Trans>Approve ticket</Trans>
-                </Button>
-
-                <Button
-                  variant="outline"
-                  className="am-btn"
-                  onClick={() => openAction("reject")}
-                  style={S(
-                    "height:42px; padding:0 20px; gap:8px; color:var(--destructive); border-color:var(--destructive)",
-                  )}
-                >
-                  <XCircle size={17} />
-                  <Trans>Reject ticket</Trans>
-                </Button>
-              </>
-            )}
-
-            {canReassign && (
-              <Button
-                variant="outline"
-                className="am-btn"
-                onClick={() => openAction("reassign")}
-                style={S("height:42px; padding:0 20px; gap:8px")}
-              >
-                <UserRoundCog size={17} />
-                <Trans>Reassign</Trans>
-              </Button>
-            )}
-
-            {canComplete && (
-              <>
-                <Button
-                  variant="outline"
-                  className="am-btn"
-                  onClick={() => openAction("complete")}
-                  style={S(
-                    "height:42px; padding:0 20px; gap:8px; color:var(--chart-2); border-color:var(--chart-2)",
-                  )}
-                >
-                  <CheckCheck size={17} />
-                  <Trans>Complete ticket</Trans>
-                </Button>
-              </>
-            )}
+            <Textarea id={`${prefix}reason`} rows={3} dir="auto" value={reason} onChange={(e) => setReason(e.target.value)} />
+          </Field>
+          <div className="flex flex-wrap justify-end gap-2.5 pt-1">
+            <Button type="button" variant="outline" disabled={busy} onClick={() => setRejecting(false)}>
+              <Trans>Cancel</Trans>
+            </Button>
+            <Button type="button" variant="destructive-soft" disabled={busy} onClick={() => void reject()}>
+              <Trans>Reject ticket</Trans>
+            </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+    </Panel>
+  )
+}
 
-          {action && (
-            <div
-              style={S(
-                "margin:0 20px 20px; padding:18px; border:1px solid var(--border); display:flex; flex-direction:column; gap:16px",
-              )}
-            >
-              <div
-                style={S(
-                  "display:flex; align-items:center; justify-content:space-between; gap:12px",
-                )}
-              >
-                <strong style={S("font-size:15px")}>
-                  {action === "approve" && t`Approve ticket`}
-                  {action === "reject" && t`Reject ticket`}
-                  {action === "reassign" && t`Reassign`}
-                  {action === "complete" && t`Complete ticket`}
-                </strong>
+/** Give an approved ticket to someone else, with a new due date. */
+function ReassignPanel({
+  ticket,
+  place,
+  people,
+  onDone,
+  onConflict,
+}: {
+  ticket: Ticket
+  place: Place
+  people: Person[]
+  onDone: () => Promise<unknown>
+  onConflict: (err: unknown) => Promise<boolean>
+}) {
+  const { accessToken } = useAuth()
+  const others = people.filter((person) => person.id !== ticket.assignee_id)
+  const [assignee, setAssignee] = useState("")
+  const [due, setDue] = useState(ticket.due_date ?? "")
+  const [error, setError] = useState("")
+  const [busy, setBusy] = useState(false)
+  const chosen = assignee || others[0]?.id || ""
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={resetActionForm}
-                  disabled={actionLoading}
-                  aria-label={t`Close`}
-                >
-                  <X size={17} />
-                </Button>
-              </div>
+  async function submit(event: FormEvent) {
+    event.preventDefault()
+    if (!accessToken || !chosen || !due) return
+    setBusy(true)
+    setError("")
+    try {
+      await reassignTicket(accessToken, ticket.id, { assignee_id: chosen, due_date: due })
+      const name = people.find((person) => person.id === chosen)?.name ?? ""
+      toast(t`Ticket reassigned to ${name}.`)
+      await onDone()
+    } catch (err) {
+      if (!(await onConflict(err))) setError(errorMessage(err))
+    } finally {
+      setBusy(false)
+    }
+  }
 
-              {(action === "approve" || action === "reassign") && (
-                <div>
-                  <label htmlFor="ticket-assignee" style={labelStyle}>
-                    {t`Assignee`}
-                  </label>
-
-                  <select
-                    id="ticket-assignee"
-                    value={assigneeId}
-                    onChange={(event) => setAssigneeId(event.target.value)}
-                    style={fieldStyle}
-                  >
-                    <option value="">{t`Choose who does the work`}</option>
-                    {assigneeOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {(action === "approve" || action === "reassign") && (
-                <div>
-                  <label style={labelStyle}><Trans>Due date</Trans></label>
-
-                  <input
-                    type="date"
-                    min={today}
-                    value={dueDate}
-                    onChange={(event) => setDueDate(event.target.value)}
-                    style={fieldStyle}
-                  />
-                </div>
-              )}
-
-              {action === "approve" && (
-                <div>
-                  <label style={labelStyle}>{t`Estimated cost (optional)`}</label>
-
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={estimatedCost}
-                    onChange={(event) =>
-                      setEstimatedCost(event.target.value)
-                    }
-                    placeholder="0.00"
-                    style={fieldStyle}
-                  />
-                </div>
-              )}
-
-              {action === "reject" && (
-                <div>
-                  <label style={labelStyle}><Trans>Reason for rejection</Trans></label>
-
-                  <textarea
-                    value={rejectionReason}
-                    onChange={(event) =>
-                      setRejectionReason(event.target.value)
-                    }
-                    placeholder={t`Why is this ticket rejected?`}
-                    rows={4}
-                    style={{ ...fieldStyle, resize: "vertical" }}
-                  />
-                </div>
-              )}
-
-              {action === "complete" && (
-                <>
-                  <div>
-                    <label style={labelStyle}><Trans>Actual cost</Trans></label>
-
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={actualCost}
-                      onChange={(event) =>
-                        setActualCost(event.target.value)
-                      }
-                      placeholder="0.00"
-                      style={fieldStyle}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={labelStyle}>
-                      <Trans>Completion notes (optional)</Trans>
-                    </label>
-
-                    <textarea
-                      value={completionNotes}
-                      onChange={(event) =>
-                        setCompletionNotes(event.target.value)
-                      }
-                      placeholder={t`Add completion notes`}
-                      rows={3}
-                      style={{ ...fieldStyle, resize: "vertical" }}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={labelStyle}>
-                      <Trans>Completion photos (1 to 5)</Trans>
-                    </label>
-
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple
-                      onChange={(event) => {
-                        setPhotos(
-                          Array.from(event.target.files ?? []).slice(0, 5),
-                        )
-                      }}
-                      style={fieldStyle}
-                    />
-
-                    <p
-                      style={S(
-                        "font-size:12px; color:var(--muted-foreground); margin:6px 0 0",
-                      )}
-                    >
-                      <Trans>{photos.length} of 5 photos chosen</Trans>
-                    </p>
-                  </div>
-                </>
-              )}
-
-              {actionError && (
-                <p
-                  style={S(
-                    "margin:0; color:var(--destructive); font-size:13px",
-                  )}
-                >
-                  {actionError}
-                </p>
-              )}
-
-              <div style={S("display:flex; flex-wrap:wrap; gap:10px")}>
-                {action === "approve" && (
-                  <Button
-                    onClick={handleApprove}
-                    disabled={
-                      actionLoading ||
-                      !assigneeId.trim() ||
-                      !dueDate ||
-                      Number(estimatedCost) < 0
-                    }
-                  >
-                    {actionLoading
-                      ? t`Working…`
-                      : t`Confirm approval`}
-                  </Button>
-                )}
-
-                {action === "reject" && (
-                  <Button
-                    variant="destructive"
-                    onClick={handleReject}
-                    disabled={actionLoading || !rejectionReason.trim()}
-                  >
-                    {actionLoading
-                      ? t`Working…`
-                      : t`Confirm rejection`}
-                  </Button>
-                )}
-
-                {action === "reassign" && (
-                  <Button
-                    onClick={handleReassign}
-                    disabled={
-                      actionLoading ||
-                      !assigneeId.trim() ||
-                      !dueDate
-                    }
-                  >
-                    {actionLoading
-                      ? t`Working…`
-                      : t`Confirm reassignment`}
-                  </Button>
-                )}
-
-                {action === "complete" && (
-                  <Button
-                    onClick={handleComplete}
-                    disabled={
-                      actionLoading ||
-                      actualCost === "" ||
-                      Number(actualCost) < 0 ||
-                      photos.length < 1
-                    }
-                  >
-                    {actionLoading
-                      ? t`Working…`
-                      : t`Confirm completion`}
-                  </Button>
-                )}
-
-                <Button
-                  variant="outline"
-                  onClick={resetActionForm}
-                  disabled={actionLoading}
-                >
-                  <Trans>Cancel</Trans>
-                </Button>
-              </div>
-            </div>
-          )}
-        </Card>
-      </div>
-
-      {/* Attachments - Last section */}
-      <div id="attachments-section" style={{ display: "none" }}>
-        <Section title={t`Attachments`} icon={<Paperclip size={18} />}>
-          {ticket.attachments && ticket.attachments.length > 0 ? (
-            <>
-              <p
-                style={S(
-                  "font-size:13px; color:var(--muted-foreground); margin:0",
-                )}
-              >
-                <Trans>Attachments: {ticket.attachments.length}</Trans>
-              </p>
-
-              <div
-                style={S(
-                  "display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px",
-                )}
-              >
-                {ticket.attachments.map((attachment) => (
-                  <div
-                    key={attachment.id}
-                    style={S(
-                      "min-width:0; border:1px solid var(--border); overflow:hidden; display:flex; flex-direction:column; background:var(--background)",
-                    )}
-                  >
-                    <a
-                      href={attachment.file_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      aria-label={t`Open the full-size photo`}
-                      style={S(
-                        "display:block; width:100%; height:200px; background:var(--muted); overflow:hidden",
-                      )}
-                    >
-                      <img
-                        src={attachment.file_url}
-                        alt={
-                          attachmentTypeLabels[attachment.attachment_type] ||
-                          attachment.attachment_type
-                        }
-                        loading="lazy"
-                        style={S(
-                          "width:100%; height:100%; object-fit:cover; display:block",
-                        )}
-                      />
-                    </a>
-
-                    <div
-                      style={S(
-                        "padding:12px; display:flex; flex-direction:column; gap:8px",
-                      )}
-                    >
-                      <strong style={S("font-size:14px")}>
-                        {attachmentTypeLabels[attachment.attachment_type] ||
-                          attachment.attachment_type}
-                      </strong>
-
-                      <span
-                        style={S(
-                          "font-size:12px; color:var(--muted-foreground)",
-                        )}
-                      >
-                        <Trans>Uploaded: {date(attachment.created_at)}</Trans>
-                      </span>
-
-                      <span
-                        style={S(
-                          "font-size:11px; color:var(--muted-foreground); overflow-wrap:anywhere",
-                        )}
-                      >
-                        {attachment.attachment_type}
-                      </span>
-
-                      <a
-                        href={attachment.file_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={S(
-                          "font-size:13px; color:var(--primary); text-decoration:underline",
-                        )}
-                      >
-                        <Trans>View full size</Trans>
-                      </a>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            <p
-              style={S(
-                "font-size:13px; color:var(--muted-foreground); margin:0",
-              )}
-            >
-              <Trans>This ticket has no attachments.</Trans>
-            </p>
-          )}
-        </Section>
-      </div>
-    </div>
+  return (
+    <Panel labelledBy="reassign-title" className="gap-4">
+      <PanelTitle id="reassign-title">
+        <Trans>Reassign</Trans>
+      </PanelTitle>
+      <form onSubmit={submit} noValidate className="flex flex-col gap-4">
+        <Field
+          id="reassign-worker"
+          label={<Trans>Worker</Trans>}
+          hint={others.length === 0 ? <Trans>No one else can take this ticket at this place.</Trans> : undefined}
+        >
+          <NativeSelect id="reassign-worker" value={chosen} onChange={setAssignee} disabled={others.length === 0}>
+            {others.map((person) => (
+              <option key={person.id} value={person.id}>
+                {person.name}
+              </option>
+            ))}
+          </NativeSelect>
+        </Field>
+        <Field id="reassign-due" label={<Trans>Due date</Trans>}>
+          <Input id="reassign-due" type="date" dir="ltr" min={todayIn(place.timezone)} value={due} onChange={(e) => setDue(e.target.value)} />
+        </Field>
+        {error && (
+          <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">
+            <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+            {error}
+          </p>
+        )}
+        <Button type="submit" variant="outline" className="w-full" disabled={busy || !chosen || !due}>
+          {busy ? <Trans>Saving…</Trans> : <Trans>Reassign</Trans>}
+        </Button>
+      </form>
+    </Panel>
   )
 }

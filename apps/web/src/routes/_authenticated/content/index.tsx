@@ -1,450 +1,141 @@
-
-import { useEffect, useMemo, useState } from "react"
-import { Link, createFileRoute } from "@tanstack/react-router"
-import {
-  CircleAlert,
-  Plus,
-  Search,
-  FileText,
-  Globe,
-  Eye,
-  EyeOff,
-  ChevronRight,
-  ChevronLeft,
-} from "lucide-react"
-
-import { useAuth } from "@/lib/auth"
-import { getContents } from "@/lib/api"
-import type {
-  WebContent,
-  ContentLanguage,
-  ContentPagination,
-} from "@/lib/api"
-import { S } from "@/lib/dom-style"
-
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty"
-import { cn } from "@/lib/utils"
-import { errorMessage } from "@/lib/errors"
-import { buttonVariants } from "@/components/ui/button"
+import { useEffect, useState } from "react"
+import { Link, createFileRoute, redirect } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
-import { useLingui } from "@lingui/react"
 import { t } from "@lingui/core/macro"
-
-
-import "@/styles/motion.css"
+import { Plus } from "lucide-react"
+import { storedUser, useAuth } from "@/lib/auth"
+import { apiAllPages, deleteContent, type WebContent } from "@/lib/api"
+import { errorMessage } from "@/lib/errors"
+import { useFormat } from "@/lib/format"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn } from "cn"
+import { Page } from "@/components/page"
+import { ConfirmDialog, EmptyState, LoadError, LoadingList } from "@/components/states"
+import { toast } from "@/components/toast"
+import { PublishedChip } from "@/components/content-form"
 
 export const Route = createFileRoute("/_authenticated/content/")({
-  component: ContentPage,
+  beforeLoad: () => {
+    if (storedUser()?.role !== "ADMIN") throw redirect({ to: "/home" })
+  },
+  component: SiteContent,
 })
 
-type ContentTab = "ALL" | "PUBLISHED" | "DRAFT"
-
-const PAGE_SIZE = 12
-
-function ContentPage() {
+/** The public pages visitors read, in both languages, with their draft or published state. */
+function SiteContent() {
   const { accessToken } = useAuth()
-  const { i18n } = useLingui()
-
-  const [contents, setContents] = useState<WebContent[] | null>(null)
-  const [pagination, setPagination] = useState<ContentPagination | null>(null)
+  const { date } = useFormat()
+  const [pages, setPages] = useState<WebContent[] | null>(null)
+  const [failed, setFailed] = useState(false)
+  const [reload, setReload] = useState(0)
+  const [toDelete, setToDelete] = useState<WebContent | null>(null)
+  const [busy, setBusy] = useState(false)
   const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-
-  const [query, setQuery] = useState("")
-  const [tab, setTab] = useState<ContentTab>("ALL")
-  const [language, setLanguage] = useState<ContentLanguage | "ALL">("ALL")
-  const [page, setPage] = useState(1)
 
   useEffect(() => {
     if (!accessToken) return
-
     let alive = true
-
-    setLoading(true)
-    setError("")
-
-    getContents(accessToken, {
-      language: language === "ALL" ? undefined : language,
-      page,
-      page_size: PAGE_SIZE,
-    })
-      .then((result) => {
-        if (!alive) return
-        setContents(result.data)
-        setPagination(result.pagination)
-      })
-      .catch((err: unknown) => {
-        if (!alive) return
-        setError(
-          errorMessage(err),
-        )
-        setContents([])
-      })
-      .finally(() => {
-        if (alive) setLoading(false)
-      })
-
+    setFailed(false)
+    apiAllPages<WebContent>("/content", accessToken)
+      .then((list) => alive && setPages(list.sort((a, b) => b.updated_at.localeCompare(a.updated_at))))
+      .catch(() => alive && setFailed(true))
     return () => {
       alive = false
     }
-  }, [accessToken, language, page])
+  }, [accessToken, reload])
 
-  const visible = useMemo(() => {
-    if (!contents) return []
-
-    const q = query.trim().toLowerCase()
-
-    return contents.filter((content) => {
-      const matchesTab =
-        tab === "ALL" ||
-        (tab === "PUBLISHED" && content.is_published) ||
-        (tab === "DRAFT" && !content.is_published)
-
-      const matchesQuery =
-        !q ||
-        content.title.toLowerCase().includes(q) ||
-        content.slug.toLowerCase().includes(q)
-
-      return matchesTab && matchesQuery
-    })
-  }, [contents, query, tab])
-
-  const countFor = (key: ContentTab) =>
-    contents?.filter((content) => {
-      if (key === "ALL") return true
-      if (key === "PUBLISHED") return content.is_published
-      return !content.is_published
-    }).length ?? 0
-
-  const changeLanguage = (value: ContentLanguage | "ALL") => {
-    setLanguage(value)
-    setPage(1)
+  async function remove() {
+    if (!accessToken || !toDelete) return
+    setBusy(true)
+    setError("")
+    try {
+      await deleteContent(accessToken, toDelete.id)
+      setToDelete(null)
+      toast(t`Page deleted.`)
+      setReload((n) => n + 1)
+    } catch (err) {
+      setError(errorMessage(err))
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px",
-      )}
-    >
-      {/* Header */}
-      <div
-        style={S(
-          "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px",
-        )}
-      >
-        <div>
-          <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-            <Trans>Content</Trans>
-          </h1>
-          <p
-            style={S(
-              "margin: 7px 0 0; color: var(--muted-foreground); font-size: 13px",
-            )}
-          >
-            <Trans>Manage the site's pages, their text and whether they are published.</Trans>
-          </p>
-        </div>
-
-        <Link
-          to="/content/new"
-          className={cn(buttonVariants(), "am-btn am-solid")}
-          style={S(
-            "height: 44px; min-width: 44px; padding: 0 16px; font-size: 15px; font-weight: 600; box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1)"
-          )}
-        >
-          <Plus
-            aria-hidden="true"
-            style={S("width: 18px; height: 18px; display: block; flex: none")}
-          />
-          <Trans>Add Content</Trans>
+    <Page
+      title={<Trans>Site content</Trans>}
+      description={<Trans>Public pages that visitors read.</Trans>}
+      phoneStart="logo"
+      bell={false}
+      phoneActions={false}
+      phoneEnd={{ label: t`New page`, icon: "plus", link: { to: "/content/new" } }}
+      actions={
+        <Link to="/content/new" className={cn(buttonVariants())}>
+          <Plus aria-hidden="true" />
+          <Trans>New page</Trans>
         </Link>
-      </div>
-
-      {/* Search and filters */}
-      <div
-        style={S(
-          "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px",
-        )}
-      >
-        <div style={S("position: relative; flex: 1 1 280px; max-width: 360px")}>
-          <Label
-            htmlFor="content-search"
-            style={S(
-              "position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)",
-            )}
-          >
-            <Trans>Search content</Trans>
-          </Label>
-
-          <Search
-            aria-hidden="true"
-            style={S(
-              "position: absolute; top: 12px; inset-inline-start: 14px; width: 19px; height: 19px; color: var(--muted-foreground); pointer-events: none",
-            )}
-          />
-
-          <Input
-            id="content-search"
-            type="search"
-            className="am-input"
-            style={S("padding-inline-start: 42px")}
-            placeholder={t`Search by title or slug…`}
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-          />
-        </div>
-
-        <div
-          role="group"
-          aria-label={t`Filter by language`}
-          style={S("display: flex; gap: 7px; flex-wrap: wrap")}
-        >
-          {(
-            [
-              { key: "ALL", label: t`All languages` },
-              { key: "ar", label: t`Arabic` },
-              { key: "en", label: t`English` },
-            ] as const
-          ).map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              className="am-tab"
-              aria-pressed={language === item.key}
-              onClick={() => changeLanguage(item.key)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Status tabs */}
-      <div
-        role="group"
-        aria-label={t`Filter by publishing status`}
-        style={S("display: flex; gap: 8px; flex-wrap: wrap")}
-      >
-        {(
-          [
-            { key: "ALL", label: t`All` },
-            { key: "PUBLISHED", label: t`Published` },
-            { key: "DRAFT", label: t`Drafts` },
-          ] as const
-        ).map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            className="am-tab"
-            aria-pressed={tab === item.key}
-            onClick={() => setTab(item.key)}
-          >
-            {item.label}
-            <span className="am-tab-count">{countFor(item.key)}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Loading */}
-      {loading && (
-        <div
-          style={S(
-            "display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px",
-          )}
-        >
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div
-              key={index}
-              style={S(
-                "display: flex; flex-direction: column; gap: 12px; padding: 16px; min-height: 150px; border: 1px solid var(--border); background: #fff",
-              )}
-            >
-              <Skeleton style={S("height: 16px; width: 65%")} />
-              <Skeleton style={S("height: 12px; width: 90%")} />
-              <Skeleton style={S("height: 20px; width: 75px")} />
-              <Skeleton style={S("height: 10px; width: 45%")} />
+      }
+    >
+      {failed ? (
+        <LoadError title={<Trans>Could not load the pages</Trans>} onRetry={() => setReload((n) => n + 1)} />
+      ) : pages === null ? (
+        <LoadingList />
+      ) : pages.length === 0 ? (
+        <EmptyState title={<Trans>No pages yet</Trans>} text={<Trans>Add the first page with the New page button.</Trans>} />
+      ) : (
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] gap-4">
+          {pages.map((page) => (
+            <div key={page.id} className="box-border flex min-w-0 flex-col gap-3 border border-border bg-card p-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 flex-col leading-[1.5]">
+                  <span lang={page.language} dir="auto" className="font-semibold [overflow-wrap:anywhere]">
+                    {page.title}
+                  </span>
+                  <span className="text-[13px] text-muted-foreground">
+                    <bdi dir="ltr">
+                      /{page.language}/{page.slug}
+                    </bdi>
+                    {t`, ${date(page.updated_at, { day: "numeric", month: "long" })}`}
+                  </span>
+                </div>
+                <PublishedChip published={page.is_published} />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Link
+                  to="/content/$content_id"
+                  params={{ content_id: page.id }}
+                  aria-label={t`Edit ${page.title}`}
+                  className={cn(buttonVariants({ variant: "outline" }))}
+                >
+                  <Trans>Edit</Trans>
+                </Link>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  aria-label={t`Delete ${page.title}`}
+                  onClick={() => {
+                    setError("")
+                    setToDelete(page)
+                  }}
+                >
+                  <Trans>Delete</Trans>
+                </Button>
+              </div>
             </div>
           ))}
         </div>
       )}
-
-      {/* Error */}
-      {error && !loading && (
-        <p className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
-          <CircleAlert size={15} />
-          {error}
-        </p>
+      {toDelete && (
+        <ConfirmDialog
+          open
+          title={<Trans>Delete “{toDelete.title}”?</Trans>}
+          text={<Trans>Visitors can no longer open it. This cannot be undone from the app.</Trans>}
+          confirm={busy ? <Trans>Deleting…</Trans> : <Trans>Delete page</Trans>}
+          busy={busy}
+          error={error}
+          onConfirm={() => void remove()}
+          onClose={() => setToDelete(null)}
+        />
       )}
-
-      {/* Empty */}
-      {!loading && !error && contents !== null && visible.length === 0 && (
-        <Empty style={S("padding: 40px")}>
-          <EmptyHeader>
-            <EmptyTitle>
-              {query || tab !== "ALL" || language !== "ALL"
-                ? t`No pages match`
-                : t`No content pages yet`}
-            </EmptyTitle>
-            <EmptyDescription>
-              {query || tab !== "ALL" || language !== "ALL"
-                ? t`Try another search or other filters.`
-                : t`Create your first content page.`}
-            </EmptyDescription>
-
-            {query || tab !== "ALL" || language !== "ALL" ? (
-              <Button
-                size="sm"
-                className="am-btn"
-                onClick={() => {
-                  setQuery("")
-                  setTab("ALL")
-                  changeLanguage("ALL")
-                }}
-              >
-                <Trans>Clear filters</Trans>
-              </Button>
-            ) : (
-              <Link to="/content/new" className="am-btn">
-                <Plus size={15} />
-                <Trans>New page</Trans>
-              </Link>
-            )}
-          </EmptyHeader>
-        </Empty>
-      )}
-
-      {/* Content cards */}
-      {!loading && !error && visible.length > 0 && (
-        <div
-          style={S(
-            "display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px",
-          )}
-        >
-          {visible.map((content) => (
-            <Link
-              key={content.id}
-              to="/content/$content_id"
-              params={{ content_id: content.id }}
-              className="am-lift"
-              style={S(
-                "display: flex; flex-direction: column; gap: 12px; padding: 16px; min-height: 175px; text-decoration: none; color: inherit; background: #fff; border: 1px solid var(--border); box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.08)",
-              )}
-            >
-              <div style={S("display: flex; align-items: flex-start; gap: 10px")}>
-                <div
-                  style={S(
-                    "width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--muted); flex-shrink: 0",
-                  )}
-                >
-                  <FileText size={17} />
-                </div>
-
-                <div style={S("min-width: 0; flex: 1")}>
-                  <div
-                    style={S(
-                      "font-size: 14px; font-weight: 750; overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
-                    )}
-                  >
-                    {content.title}
-                  </div>
-                  <div
-                    style={S(
-                      "margin-top: 5px; font-size: 11px; color: var(--muted-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
-                    )}
-                  >
-                    <bdi dir="ltr">/{content.slug}</bdi>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                style={S(
-                  "display: flex; align-items: center; justify-content: space-between; gap: 8px",
-                )}
-              >
-                <span
-                  style={S(
-                    "display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; background: var(--muted); font-size: 11px; color: var(--muted-foreground)",
-                  )}
-                >
-                  <Globe size={12} />
-                  {content.language === "ar" ? t`Arabic` : t`English`}
-                </span>
-
-                <span
-                  style={S(
-                    `display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; font-size: 11px; background: ${content.is_published ? "rgba(22, 163, 74, 0.10)" : "var(--muted)"}; color: ${content.is_published ? "#15803d" : "var(--muted-foreground)"}`,
-                  )}
-                >
-                  {content.is_published ? <Eye size={12} /> : <EyeOff size={12} />}
-                  {content.is_published ? t`Published` : t`Draft`}
-                </span>
-              </div>
-
-              <div
-                style={S(
-                  "margin-top: auto; padding-top: 9px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 650; color: var(--muted-foreground)",
-                )}
-              >
-                <span>
-                  <Trans>Last updated:</Trans>{" "}
-                  {new Date(content.updated_at).toLocaleDateString(i18n.locale)}
-                </span>
-                <span><Trans>View details</Trans></span>
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {/* Pagination */}
-      {!loading && !error && pagination && pagination.total_pages > 1 && (
-        <div
-          style={S(
-            "display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding-top: 12px; border-top: 1px solid var(--border)",
-          )}
-        >
-          <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-            <Trans>
-              Page {pagination.page} of {pagination.total_pages} — {pagination.total} pages in total
-            </Trans>
-          </span>
-
-          <div style={S("display: flex; gap: 8px; align-items: center")}>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              disabled={page <= 1}
-              onClick={() => setPage((current) => current - 1)}
-            >
-              <ChevronLeft size={15} className="rtl:rotate-180" />
-              <Trans>Previous</Trans>
-            </Button>
-
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              disabled={page >= pagination.total_pages}
-              onClick={() => setPage((current) => current + 1)}
-            >
-              <Trans>Next</Trans>
-              <ChevronRight size={15} className="rtl:rotate-180" />
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
+    </Page>
   )
 }

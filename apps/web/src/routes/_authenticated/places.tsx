@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link, createFileRoute } from "@tanstack/react-router"
-import { CircleAlert, MapPin, Plus, Search } from "lucide-react"
+import { MapPin, Plus, Search } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
-import { t } from "@lingui/core/macro"
+import { plural, t } from "@lingui/core/macro"
 import type { Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { countPlaceWorkers, getDashboardRows, getPlaces } from "@/lib/api"
@@ -11,16 +11,12 @@ import { S } from "@/lib/dom-style"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty"
 import { StatusBadge, TypeLabel } from "@/components/place-shared"
 import { cn } from "cn"
-import "@/styles/motion.css"
+import { Page } from "@/components/page"
+import { EmptyState, LoadError, LoadingList } from "@/components/states"
+import { FilterTabs, ListFooter } from "@/components/panel"
+import { useFormat } from "@/lib/format"
 
 export const Route = createFileRoute("/_authenticated/places")({
   component: PlacesPage,
@@ -43,6 +39,9 @@ const STATS = [
 
 type StatKey = (typeof STATS)[number]["key"]
 
+// Three rows of three cards at 1440.
+const PAGE_SIZE = 12
+
 function PlacesPage() {
   const { accessToken, user } = useAuth()
   // Workers cannot list a place's workers, so they do not get that column.
@@ -54,6 +53,9 @@ function PlacesPage() {
   const [error, setError] = useState(false)
   const [query, setQuery] = useState("")
   const [tab, setTab] = useState<TabKey>("ALL")
+  const [page, setPage] = useState(1)
+  const [reload, setReload] = useState(0)
+  const { number } = useFormat()
 
   useEffect(() => {
     if (!accessToken) return
@@ -64,7 +66,7 @@ function PlacesPage() {
     return () => {
       alive = false
     }
-  }, [accessToken])
+  }, [accessToken, reload])
 
   const q = query.trim().toLowerCase()
   const visible = useMemo(() => {
@@ -122,37 +124,37 @@ function PlacesPage() {
   const countFor = (key: TabKey) =>
     places?.filter((p) => key === "ALL" || p.status === key).length ?? 0
 
+  // A new search or filter starts again at the first page.
+  const pages = Math.max(1, Math.ceil(visible.length / PAGE_SIZE))
+  const current = Math.min(page, pages)
+  const shown = visible.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE)
+
+  const activeCount = number(countFor("ACTIVE"))
+  const summary =
+    places && places.length > 0
+      ? isManager
+        ? t`${plural(places.length, { one: "# place", other: "# places" })}, ${activeCount} of them active.`
+        : t`Places assigned to you.`
+      : undefined
+
   return (
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px"
-      )}
-    >
-      <div
-        style={S(
-          "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px"
-        )}
-      >
-        <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-          <Trans>Places</Trans>
-        </h1>
-        {isManager && (
+    <Page
+      title={isManager ? <Trans>Places</Trans> : <Trans>My places</Trans>}
+      description={summary}
+      phoneActions={false}
+      phoneEnd={isManager ? { label: t`Add place`, icon: "plus", link: { to: "/place/new" } } : "bell"}
+      actions={isManager && (
         <Link
           to="/place/new"
           className={cn(buttonVariants(), "am-btn am-solid")}
-          style={S(
-            "height: 44px; min-width: 44px; padding: 0 16px; font-size: 15px; font-weight: 600; box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1)"
-          )}
         >
-          <Plus
-            aria-hidden="true"
-            style={S("width: 18px; height: 18px; display: block; flex: none")}
-          />
+          <Plus aria-hidden="true" />
           <Trans>Add place</Trans>
         </Link>
-        )}
-      </div>
-
+      )}
+    >
+      {/* Workers see only their own few places: no search and no filters (as designed). */}
+      {isManager && (
       <div
         style={S(
           "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px"
@@ -180,75 +182,57 @@ function PlacesPage() {
             style={S("padding-inline-start: 44px")}
             placeholder={t`Search by place name or city`}
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value)
+              setPage(1)
+            }}
           />
         </div>
 
-        <div
-          role="group"
-          aria-label={t`Filter by status`}
-          style={S("display: flex; gap: 8px; flex-wrap: wrap")}
-        >
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              type="button"
-              className="am-tab"
-              aria-pressed={tab === t.key}
-              onClick={() => setTab(t.key)}
-            >
-              {t.label}
-              <span className="am-tab-count">{countFor(t.key)}</span>
-            </button>
-          ))}
-        </div>
+        <FilterTabs
+          label={t`Filter by status`}
+          value={tab}
+          onChange={(key) => {
+            setTab(key)
+            setPage(1)
+          }}
+          tabs={TABS.map((item) => ({ key: item.key, label: item.label, count: countFor(item.key) }))}
+        />
       </div>
-
-      {places === null && !error && (
-        <div style={S("display: flex; flex-direction: column; gap: 12px")}>
-          <Skeleton style={S("height: 122px")} />
-          <Skeleton style={S("height: 122px")} />
-        </div>
       )}
 
+      {places === null && !error && <LoadingList />}
+
       {error && (
-        <p className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
-          <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
-          <Trans>We could not load your places.</Trans>
-        </p>
+        <LoadError
+          title={<Trans>Could not load places</Trans>}
+          onRetry={() => {
+            setError(false)
+            setReload((n) => n + 1)
+          }}
+        />
       )}
 
       {places !== null && places.length === 0 && (
-        <Empty style={S("padding: 40px")}>
-          <EmptyHeader>
-            <EmptyTitle>
-              <Trans>No places yet</Trans>
-            </EmptyTitle>
-            <EmptyDescription>
-              {isManager ? (
-                <Trans>Add your first place with the Add place button.</Trans>
-              ) : (
-                <Trans>Places your manager assigns you to show here.</Trans>
-              )}
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+        <EmptyState
+          title={<Trans>No places yet</Trans>}
+          text={
+            isManager ? (
+              <Trans>Add your first place with the Add place button.</Trans>
+            ) : (
+              <Trans>Places your manager assigns you to show here.</Trans>
+            )
+          }
+        />
       )}
 
       {places !== null && places.length > 0 && visible.length === 0 && (
-        <Empty style={S("padding: 40px")}>
-          <EmptyHeader>
-            <EmptyTitle>
-              <Trans>No places match</Trans>
-            </EmptyTitle>
-            <EmptyDescription>
-              <Trans>
-                Nothing matches this search. Clear it to see all places.
-              </Trans>
-            </EmptyDescription>
+        <EmptyState
+          title={<Trans>No places match</Trans>}
+          text={<Trans>Nothing matches this search. Clear it to see all places.</Trans>}
+          action={
             <Button
-              size="sm"
-              className="am-btn"
+              variant="outline"
               onClick={() => {
                 setQuery("")
                 setTab("ALL")
@@ -256,12 +240,13 @@ function PlacesPage() {
             >
               <Trans>Clear filters</Trans>
             </Button>
-          </EmptyHeader>
-        </Empty>
+          }
+        />
       )}
 
-      <div style={S("display: flex; flex-direction: row; gap: 12px")}>
-        {visible.map((p) => (
+      {/* One row of cards overflowed the page; the design's grid wraps them. */}
+      <div style={S("display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 20px")}>
+        {shown.map((p) => (
           <Link
             key={p.id}
             to="/place/$place_id"
@@ -324,6 +309,20 @@ function PlacesPage() {
           </Link>
         ))}
       </div>
-    </div>
+
+      <ListFooter
+        page={current}
+        pageSize={PAGE_SIZE}
+        total={visible.length}
+        range={(from, to, total) => t`${from} to ${to} of ${total} places`}
+        onPage={setPage}
+      />
+
+      {!isManager && places !== null && places.length > 0 && (
+        <p style={S("margin: 0; font-size: 13px; color: var(--muted-foreground)")}>
+          <Trans>Only the places assigned to you appear here.</Trans>
+        </p>
+      )}
+    </Page>
   )
 }

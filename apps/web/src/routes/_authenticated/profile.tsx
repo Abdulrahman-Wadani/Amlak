@@ -1,627 +1,264 @@
-
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
 import { createFileRoute } from "@tanstack/react-router"
-import { useEffect, useRef, useState } from "react"
+import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import { LANGUAGE_NAMES, useLanguage } from "@/lib/i18n"
-import {
-  UserRound,
-  Mail,
-  Phone,
-  ShieldCheck,
-  CalendarDays,
-  Languages,
-  Clock,
-  PencilLine,
-  Save,
-  X,
-  Camera,
-} from "lucide-react"
-
-import { S } from "@/lib/dom-style"
+import { Camera, CircleAlert } from "lucide-react"
+import type { Language, User } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { getProfile, updateProfile } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
+import { LANGUAGE_NAMES, useLanguage } from "@/lib/i18n"
+import { roleLabel } from "@/lib/nav"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Input } from "@/components/ui/input"
+import { Page } from "@/components/page"
+import { Field, FormButtons, Panel, PanelTitle, Segmented, TwoColumns } from "@/components/panel"
+import { WorkerStatusChip } from "@/components/place-shared"
+import { LoadError, LoadingList } from "@/components/states"
+import { toast } from "@/components/toast"
+import { ManageLinks, SecurityLinks } from "@/components/account-links"
+import { toE164 } from "@/components/worker-form"
 
 export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
 })
 
-interface Profile {
-  id: string
-  email: string
-  fullname: string
-  phone: string | null
-  picture_url: string | null
-  role: string
-  status: string
-  preferred_language: string
-  email_verified_at: string | null
-  manager_id: string | null
-  created_at: string
-  updated_at: string
-}
+const local = (phone: string | null) => (phone ?? "").replace(/^\+966/, "")
 
-interface ProfileForm {
-  fullname: string
-  phone: string
-  preferred_language: string
-  picture: File | null
-}
-function formatDate(value: string | null, locale: string) {
-  if (!value) return "—"
-
-  return new Date(value).toLocaleDateString(
-    locale === "ar" ? "ar-SA" : "en",
-    {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    },
-  )
-}
-
+/** Account: personal information and photo, the interface language, and security (support, sign out). */
 function ProfilePage() {
   const { accessToken } = useAuth()
   const { lang, setLang } = useLanguage()
-
-  const locale = lang
-
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const [profile, setProfile] = useState<Profile | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [editing, setEditing] = useState(false)
+  const [profile, setProfile] = useState<User | null>(null)
+  const [failed, setFailed] = useState(false)
+  const [reload, setReload] = useState(0)
+  const [fullname, setFullname] = useState("")
+  const [phone, setPhone] = useState("")
+  const [picture, setPicture] = useState<File | null>(null)
+  const [errors, setErrors] = useState<{ fullname?: string; phone?: string }>({})
   const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
-
-  const [form, setForm] = useState<ProfileForm>({
-    fullname: "",
-    phone: "",
-    preferred_language: "en",
-    picture: null,
-  })
-
-  const [preview, setPreview] = useState<string | null>(null)
-
-  const messages = {
-    loading: t`Loading...`,
-    failedLoad: t`Failed to load profile.`,
-    failedUpdate: t`Failed to update profile.`,
-    invalidImage: t`Please select a valid image.`,
-    imageTooLarge: t`Image size must not exceed 5MB.`,
-    fullNameRequired: t`Full name is required.`,
-    updated: t`Profile updated successfully.`,
-    saving: t`Saving...`,
-    save: t`Save Changes`,
-    cancel: t`Cancel`,
-    edit: t`Update Profile`,
-    chooseImage: t`Choose Image`,
-    fullName: t`Full Name`,
-    phone: t`Phone Number`,
-    language: t`Preferred Language`,
-    picture: t`Profile Picture`,
-    email: t`Email Address`,
-    role: t`Role`,
-    status: t`Account Status`,
-    verified: t`Email Verified At`,
-    created: t`Created At`,
-    updatedAt: t`Last Updated`,
-    myProfile: t`My Profile`,
-    description: t`View your account information.`,
-    editInfo: t`Edit Personal Information`,
-    personalInfo: t`Personal Information`,
-    enterName: t`Enter your full name`,
-    enterPhone: t`Enter phone number`,
-    leaveImage: t`Leave empty to keep the current picture.`,
-    active: t`Active`,
-    invited: t`Invited`,
-    pending: t`Pending Verification`,
-    deactivated: t`Deactivated`,
-    admin: t`Admin`,
-    manager: t`Manager`,
-    worker: t`Worker`,
-  }
-
-  function translateStatus(value: string) {
-    const statuses: Record<string, string> = {
-      ACTIVE: messages.active,
-      INVITED: messages.invited,
-      PENDING_VERIFICATION: messages.pending,
-      DEACTIVATED: messages.deactivated,
-    }
-
-    return statuses[value] ?? value
-  }
-
-  function translateRole(value: string) {
-    const roles: Record<string, string> = {
-      ADMIN: messages.admin,
-      MANAGER: messages.manager,
-      WORKER: messages.worker,
-    }
-
-    return roles[value] ?? value
-  }
+  const [saving, setSaving] = useState(false)
+  const input = useRef<HTMLInputElement>(null)
+  const preview = useMemo(() => (picture ? URL.createObjectURL(picture) : null), [picture])
+  useEffect(() => () => {
+    if (preview) URL.revokeObjectURL(preview)
+  }, [preview])
 
   useEffect(() => {
     if (!accessToken) return
-
     let alive = true
-
-    const loadProfile = async () => {
-      try {
-        setLoading(true)
-        setError("")
-
-        const data = await getProfile(accessToken)
-
+    setFailed(false)
+    getProfile(accessToken)
+      .then((data) => {
         if (!alive) return
-
         setProfile(data)
-        setPreview(data.picture_url)
-
-        setForm({
-          fullname: data.fullname,
-          phone: data.phone || "",
-          preferred_language: data.preferred_language || "en",
-          picture: null,
-        })
-      } catch (err) {
-        if (alive) {
-          setError(
-            errorMessage(err),
-          )
-        }
-      } finally {
-        if (alive) setLoading(false)
-      }
-    }
-
-    void loadProfile()
-
+        setFullname(data.fullname)
+        setPhone(local(data.phone))
+      })
+      .catch(() => alive && setFailed(true))
     return () => {
       alive = false
     }
-  }, [accessToken])
+  }, [accessToken, reload])
 
-  useEffect(() => {
-    return () => {
-      if (preview?.startsWith("blob:")) {
-        URL.revokeObjectURL(preview)
-      }
-    }
-  }, [preview])
-
-  const handleChange = (
-    field: keyof Omit<ProfileForm, "picture">,
-    value: string,
-  ) => {
-    setForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }))
-  }
-
-  const handleImageChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = event.target.files?.[0]
-
-    if (!file) return
-
-    if (!file.type.startsWith("image/")) {
-      setError(messages.invalidImage)
-      event.target.value = ""
-      return
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      setError(messages.imageTooLarge)
-      event.target.value = ""
-      return
-    }
-
+  async function save(changes: { fullname?: string; phone?: string; language?: Language; picture?: File | null }) {
+    if (!accessToken || !profile) return false
+    setSaving(true)
     setError("")
-
-    setForm((prev) => ({
-      ...prev,
-      picture: file,
-    }))
-
-    setPreview(URL.createObjectURL(file))
-  }
-
-  const handleEdit = () => {
-    if (!profile) return
-
-    setForm({
-      fullname: profile.fullname,
-      phone: profile.phone || "",
-      preferred_language: profile.preferred_language || "en",
-      picture: null,
-    })
-    setPreview(profile.picture_url)
-    setError("")
-    setSuccess("")
-    setEditing(true)
-  }
-
-  const handleCancel = () => {
-    if (!profile) return
-
-    setForm({
-      fullname: profile.fullname,
-      phone: profile.phone || "",
-      preferred_language: profile.preferred_language || "en",
-      picture: null,
-    })
-
-    setPreview(profile.picture_url)
-    setEditing(false)
-    setError("")
-  }
-
-  const handleUpdateProfile = async () => {
-    if (!accessToken || !profile) return
-
-    if (!form.fullname.trim()) {
-      setError(messages.fullNameRequired)
-      return
-    }
-
     try {
-      setSaving(true)
-      setError("")
-      setSuccess("")
-      const response = await updateProfile(accessToken, {
-        fullname: form.fullname.trim(),
-        phone: form.phone.trim() || null,
-        preferred_language: form.preferred_language,
-        picture: form.picture,
+      await updateProfile(accessToken, {
+        fullname: changes.fullname ?? profile.fullname,
+        phone: changes.phone ?? profile.phone,
+        preferred_language: changes.language ?? profile.preferred_language,
+        picture: changes.picture ?? null,
       })
-      const updatedProfile: Profile = response?.data
-        ? response.data
-        : response?.fullname
-          ? response
-          : {
-              ...profile,
-              fullname: form.fullname.trim(),
-              phone: form.phone.trim() || null,
-              preferred_language: form.preferred_language,
-              picture_url: form.picture
-                ? preview
-                : profile.picture_url,
-            }
-
-      if (
-        updatedProfile.preferred_language === "ar" ||
-        updatedProfile.preferred_language === "en"
-      ) {
-        setLang(updatedProfile.preferred_language)
-      }
-
-      setProfile(updatedProfile)
-
-      setForm({
-        fullname: updatedProfile.fullname,
-        phone: updatedProfile.phone || "",
-        preferred_language: updatedProfile.preferred_language,
-        picture: null,
-      })
-
-      setPreview(updatedProfile.picture_url)
-      setEditing(false)
-      setSuccess(messages.updated)
+      const fresh = await getProfile(accessToken)
+      setProfile(fresh)
+      return true
     } catch (err) {
-      setError(
-        errorMessage(err),
-      )
+      setError(errorMessage(err))
+      return false
     } finally {
       setSaving(false)
     }
   }
 
-  if (loading) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const number = toE164(phone.trim())
+    const next: typeof errors = {}
+    if (!fullname.trim()) next.fullname = t`Enter your full name`
+    if (phone.trim() && !/^\+9665[013-9]\d{7}$/.test(number)) next.phone = t`Enter a Saudi mobile number that starts with 5.`
+    setErrors(next)
+    if (Object.keys(next).length > 0) return
+    if (await save({ fullname: fullname.trim(), phone: phone.trim() ? number : undefined })) toast(t`The changes are saved.`)
+  }
+
+  async function chooseLanguage(next: Language) {
+    // The interface changes at once; the account keeps it for messages too.
+    setLang(next)
+    await save({ language: next })
+  }
+
+  if (failed) {
     return (
-      <div style={S("padding: 40px 48px 56px")}>
-        <Skeleton style={S("height: 36px; width: 220px; margin-bottom: 24px")} />
-        <Skeleton style={S("height: 180px; margin-bottom: 20px")} />
-        <Skeleton style={S("height: 300px")} />
-      </div>
+      <Page title={<Trans>Account</Trans>} phoneStart="none">
+        <LoadError title={<Trans>Could not load your account</Trans>} onRetry={() => setReload((n) => n + 1)} />
+        <SecurityLinks />
+      </Page>
     )
   }
 
-  if (error && !profile) {
-    return (
-      <div style={S("padding: 40px 48px 56px")}>
-        <div style={S("color: var(--destructive); font-size: 14px")}>
-          {error}
-        </div>
-      </div>
-    )
-  }
-
-  if (!profile) return null
-
-  const details = [
-    {
-      label: messages.email,
-      value: profile.email,
-      icon: Mail,
-    },
-    {
-      label: messages.phone,
-      value: profile.phone || "—",
-      icon: Phone,
-    },
-    {
-      label: messages.role,
-      value: translateRole(profile.role),
-      icon: ShieldCheck,
-    },
-    {
-      label: messages.status,
-      value: translateStatus(profile.status),
-      icon: UserRound,
-    },
-    {
-      label: messages.language,
-      value: profile.preferred_language.toUpperCase(),
-      icon: Languages,
-    },
-    {
-      label: messages.verified,
-      value: formatDate(profile.email_verified_at, locale),
-      icon: Mail,
-    },
-    {
-      label: messages.created,
-      value: formatDate(profile.created_at, locale),
-      icon: CalendarDays,
-    },
-    {
-      label: messages.updatedAt,
-      value: formatDate(profile.updated_at, locale),
-      icon: Clock,
-    },
-  ]
+  const photo = preview ?? profile?.picture_url ?? null
+  const initial = Array.from(profile?.fullname.trim() ?? "")[0] ?? ""
 
   return (
-    <div
-      style={S("padding: 40px 48px 56px; width: 100%; box-sizing: border-box")}
-    >
-      <div style={S("margin-bottom: 28px")}>
-        <h1 style={S("font-size: 28px; font-weight: 700; margin: 0 0 8px")}>
-          {messages.myProfile}
-        </h1>
-
-        <p style={S("color: var(--muted-foreground); margin: 0")}>
-          {messages.description}
-        </p>
-      </div>
-
-      {error && (
-        <div style={S("color: var(--destructive); font-size: 14px; margin-bottom: 16px")}>
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div style={S("color: var(--primary); font-size: 14px; margin-bottom: 16px")}>
-          {success}
-        </div>
-      )}
-
-      <div style={S("display: flex; flex-direction: column; gap: 24px")}>
-
-        {/* Profile Header */}
-        <Card>
-          <CardContent
-            style={S(
-              "padding: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap",
-            )}
-          >
-            <div
-              style={S(
-                "display: flex; align-items: center; gap: 18px; min-width: 0",
-              )}
-            >
-              <div
-                style={S(
-                  "width: 88px; height: 88px; border-radius: 50%; overflow: hidden; background: var(--muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0",
-                )}
-              >
-                {preview ? (
-                  <img
-                    src={preview}
-                    alt={profile.fullname}
-                    style={S("width: 100%; height: 100%; object-fit: cover")}
-                  />
-                ) : (
-                  <UserRound
-                    size={38}
-                    style={S("color: var(--muted-foreground)")}
-                  />
-                )}
-              </div>
-
-              <div style={S("display: flex; flex-direction: column; gap: 7px; min-width: 0")}>
-                <h2 style={S("font-size: 21px; font-weight: 700; margin: 0")}>
-                  {editing ? form.fullname : profile.fullname}
-                </h2>
-
-                <span style={S("font-size: 14px; color: var(--muted-foreground); overflow-wrap: anywhere")}>
-                  {profile.email}
-                </span>
-
-                <span style={S("font-size: 12px; font-weight: 600; color: var(--primary)")}>
-                  {translateRole(profile.role)}
-                </span>
-              </div>
-            </div>
-
-            <div style={S("display: flex; gap: 10px; flex-wrap: wrap")}>
-              {editing ? (
-                <>
-                  <Button
-                    type="button"
-                    onClick={handleUpdateProfile}
-                    disabled={saving || !form.fullname.trim()}
-                  >
-                    <Save size={16} />
-                    {saving ? messages.saving : messages.save}
-                  </Button>
-
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleCancel}
-                    disabled={saving}
-                  >
-                    <X size={16} />
-                    {messages.cancel}
-                  </Button>
-                </>
-              ) : (
-                <Button type="button" onClick={handleEdit}>
-                  <PencilLine size={16} />
-                  {messages.edit}
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Edit Form */}
-        {editing && (
-          <Card>
-            <CardHeader>
-              <CardTitle>{messages.editInfo}</CardTitle>
-            </CardHeader>
-
-            <CardContent
-              style={S(
-                "padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px",
-              )}
-            >
-              <div style={S("display: flex; flex-direction: column; gap: 8px")}>
-                <label>{messages.fullName}</label>
-                <input
-                  value={form.fullname}
-                  onChange={(e) => handleChange("fullname", e.target.value)}
-                  placeholder={messages.enterName}
-                  style={S("padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--background); color: var(--foreground)")}
-                />
-              </div>
-
-              <div style={S("display: flex; flex-direction: column; gap: 8px")}>
-                <label>{messages.phone}</label>
-                <input
-                  type="tel"
-                  value={form.phone}
-                  onChange={(e) => handleChange("phone", e.target.value)}
-                  placeholder={messages.enterPhone}
-                  style={S("padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--background); color: var(--foreground)")}
-                />
-              </div>
-
-              <div style={S("display: flex; flex-direction: column; gap: 8px")}>
-                <label>{messages.language}</label>
-                <select
-                  value={form.preferred_language}
-                  onChange={(e) => handleChange("preferred_language", e.target.value)}
-                  style={S("padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--background); color: var(--foreground)")}
-                >
-                  <option value="en">{LANGUAGE_NAMES.en}</option>
-                  <option value="ar">{LANGUAGE_NAMES.ar}</option>
-                </select>
-              </div>
-
-              <div style={S("display: flex; flex-direction: column; gap: 8px")}>
-                <label>{messages.picture}</label>
-
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  style={S("display: none")}
-                />
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Camera size={16} />
-                  {messages.chooseImage}
-                </Button>
-
-                {form.picture && (
-                  <span style={S("font-size: 12px; color: var(--muted-foreground); overflow-wrap: anywhere")}>
-                    {form.picture.name}
+    <Page title={<Trans>Account</Trans>} description={<Trans>Your details, language and account security.</Trans>} phoneStart="none">
+      {profile === null ? (
+        <LoadingList />
+      ) : (
+        <TwoColumns
+          main={
+            <>
+              <Panel labelledBy="personal-title" className="gap-4">
+                <PanelTitle id="personal-title">
+                  <Trans>Personal information</Trans>
+                </PanelTitle>
+                <div className="flex flex-wrap items-center gap-4">
+                  <span className="flex size-[72px] flex-none items-center justify-center overflow-hidden rounded-full bg-secondary text-[28px] font-bold text-primary">
+                    {photo ? <img src={photo} alt={t`Your photo`} className="size-full object-cover" /> : <span aria-hidden="true">{initial}</span>}
                   </span>
-                )}
-
-                {editing && (
-                  <span style={S("font-size: 11px; color: var(--muted-foreground)")}>
-                    {messages.leaveImage}
-                  </span>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Personal Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>{messages.personalInfo}</CardTitle>
-          </CardHeader>
-
-          <CardContent
-            style={S(
-              "padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px",
-            )}
-          >
-            {details.map((item, index) => {
-              const Icon = item.icon
-
-              return (
-                <div
-                  key={index}
-                  style={S("display: flex; align-items: flex-start; gap: 12px")}
-                >
-                  <div
-                    style={S(
-                      "width: 38px; height: 38px; border-radius: 8px; background: var(--muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0",
-                    )}
-                  >
-                    <Icon
-                      size={18}
-                      style={S("color: var(--muted-foreground)")}
-                    />
-                  </div>
-
-                  <div style={S("display: flex; flex-direction: column; gap: 6px; min-width: 0")}>
-                    <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-                      {item.label}
-                    </span>
-
-                    <strong style={S("font-size: 14px; font-weight: 600; overflow-wrap: anywhere")}>
-                      {item.value}
-                    </strong>
-                  </div>
+                  {picture ? (
+                    <div className="flex min-w-0 flex-col gap-2">
+                      <span className="text-[13px] text-muted-foreground">
+                        <Trans>This is a preview of the photo before saving.</Trans>
+                      </span>
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          disabled={saving}
+                          onClick={async () => {
+                            if (await save({ picture })) {
+                              setPicture(null)
+                              toast(t`Photo saved.`)
+                            }
+                          }}
+                        >
+                          <Trans>Save photo</Trans>
+                        </Button>
+                        <Button type="button" variant="outline" disabled={saving} onClick={() => setPicture(null)}>
+                          <Trans>Cancel</Trans>
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex min-w-0 flex-col gap-2">
+                      <Button type="button" variant="outline" className="self-start" onClick={() => input.current?.click()}>
+                        <Camera aria-hidden="true" />
+                        <Trans>Change photo</Trans>
+                      </Button>
+                      <span className="text-[13px] text-muted-foreground">
+                        <Trans>A square JPG or PNG photo.</Trans>
+                      </span>
+                    </div>
+                  )}
+                  <input
+                    ref={input}
+                    type="file"
+                    accept="image/jpeg,image/png"
+                    className="hidden"
+                    onChange={(e) => {
+                      setPicture(e.target.files?.[0] ?? null)
+                      e.target.value = ""
+                    }}
+                  />
                 </div>
-              )
-            })}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[15px]">
+                  <span>
+                    <span className="text-muted-foreground">
+                      <Trans>Role</Trans>
+                    </span>{" "}
+                    <strong className="font-semibold">{roleLabel(profile.role)}</strong>
+                  </span>
+                  <span className="inline-flex items-center gap-2">
+                    <span className="text-muted-foreground">
+                      <Trans>Status</Trans>
+                    </span>
+                    <WorkerStatusChip status={profile.status} />
+                  </span>
+                </div>
+                <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+                  <Field id="p-name" label={<Trans>Full name</Trans>} error={errors.fullname}>
+                    <Input id="p-name" autoComplete="name" value={fullname} aria-invalid={errors.fullname ? true : undefined} onChange={(e) => setFullname(e.target.value)} />
+                  </Field>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <label htmlFor="p-email" className="text-sm font-semibold">
+                        <Trans>Email</Trans>
+                      </label>
+                      {profile.email_verified_at && (
+                        <span className="inline-flex h-[26px] items-center gap-1.5 border border-good-200 bg-good-50 px-2.5 text-[13px] font-semibold text-good-700">
+                          <span aria-hidden="true" className="size-[7px] bg-good" />
+                          <Trans>Verified</Trans>
+                        </span>
+                      )}
+                    </div>
+                    <Input id="p-email" dir="ltr" value={profile.email} readOnly className="bg-secondary text-muted-foreground" aria-describedby="p-email-hint" />
+                    <span id="p-email-hint" className="text-[13px] text-muted-foreground">
+                      <Trans>To change your email, contact support.</Trans>
+                    </span>
+                  </div>
+                  <Field id="p-phone" label={<Trans>Mobile number</Trans>} error={errors.phone}>
+                    <div dir="ltr" className="flex gap-2">
+                      <span className="box-border inline-flex h-11 flex-none items-center border border-border bg-secondary px-3 text-[15px]">+966</span>
+                      <Input id="p-phone" type="tel" dir="ltr" value={phone} aria-invalid={errors.phone ? true : undefined} onChange={(e) => setPhone(e.target.value)} />
+                    </div>
+                  </Field>
+                  {error && (
+                    <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">
+                      <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+                      {error}
+                    </p>
+                  )}
+                  <FormButtons>
+                    <Button type="submit" disabled={saving}>
+                      {saving ? <Trans>Saving…</Trans> : <Trans>Save changes</Trans>}
+                    </Button>
+                  </FormButtons>
+                </form>
+              </Panel>
+              <ManageLinks />
+            </>
+          }
+          side={
+            <>
+              <Panel labelledBy="language-title" className="gap-4">
+                <PanelTitle id="language-title">
+                  <Trans>Language</Trans>
+                </PanelTitle>
+                <div className="flex flex-col gap-2">
+                  <span className="text-sm font-semibold">
+                    <Trans>Interface and message language</Trans>
+                  </span>
+                  <Segmented<Language>
+                    label={t`Interface and message language`}
+                    value={lang}
+                    onChange={(next) => void chooseLanguage(next)}
+                    options={[
+                      { key: "ar", label: <span lang="ar">{LANGUAGE_NAMES.ar}</span> },
+                      { key: "en", label: <span lang="en">{LANGUAGE_NAMES.en}</span> },
+                    ]}
+                  />
+                </div>
+                <span className="text-[13px] text-muted-foreground">
+                  <Trans>The language and page direction change as soon as you choose.</Trans>
+                </span>
+              </Panel>
+              <SecurityLinks />
+            </>
+          }
+        />
+      )}
+    </Page>
   )
 }

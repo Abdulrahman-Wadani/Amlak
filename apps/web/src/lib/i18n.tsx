@@ -72,10 +72,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     // Update the entire website direction and language
     document.documentElement.lang = next
     document.documentElement.dir = next === "ar" ? "rtl" : "ltr"
-    document.documentElement.classList.toggle(
-      "font-arabic",
-      next === "ar"
-    )
 
     // Update React context
     setLangState(next)
@@ -88,11 +84,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
     document.documentElement.lang = lang
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr"
-
-    document.documentElement.classList.toggle(
-      "font-arabic",
-      lang === "ar"
-    )
   }, [lang])
 
   const value = useMemo(

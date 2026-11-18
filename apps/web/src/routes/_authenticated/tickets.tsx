@@ -1,22 +1,17 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { Link, createFileRoute, redirect } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
-import { useLingui } from "@lingui/react"
-import { CircleAlert } from "lucide-react"
-import type { Ticket } from "@amlak/shared"
+import { plural, t } from "@lingui/core/macro"
+import { Camera } from "lucide-react"
+import type { Place, Ticket, TicketStatus } from "@amlak/shared"
 import { storedUser, useAuth } from "@/lib/auth"
-import { getPlaces, listTickets } from "@/lib/api"
-import { S } from "@/lib/dom-style"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty"
-import { OverdueChip, PriorityChip } from "@/components/place-shared"
-import { Pager } from "@/components/pager"
-import "@/styles/motion.css"
+import { getPlaces, listAllTickets, listTickets } from "@/lib/api"
+import { buttonVariants } from "@/components/ui/button"
+import { cn } from "cn"
+import { Page } from "@/components/page"
+import { FilterTabs, ListFooter, NativeSelect } from "@/components/panel"
+import { EmptyState, LoadError, LoadingList } from "@/components/states"
+import { TaskCard, TicketCard, useTicketNames } from "@/components/ticket-parts"
 
 export const Route = createFileRoute("/_authenticated/tickets")({
   // Admins cannot list tickets (GET /tickets is for Managers and Workers).
@@ -28,226 +23,256 @@ export const Route = createFileRoute("/_authenticated/tickets")({
   component: TicketsPage,
 })
 
-const PAGE_SIZE = 20
+const PAGE_SIZE = 12
+const GRID = "grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] items-stretch gap-4"
 
 function TicketsPage() {
   const { user } = useAuth()
-  return user?.role === "WORKER" ? <MyTasks /> : <WaitingForReview />
+  return user?.role === "WORKER" ? <MyTasks /> : <ManagerTickets />
 }
 
-/** The Worker's APPROVED tickets, soonest due first, paged by the API. */
-function MyTasks() {
-  const { accessToken, user } = useAuth()
-  const [tickets, setTickets] = useState<Ticket[] | null>(null)
-  const [error, setError] = useState(false)
+type Filter = "ALL" | TicketStatus
+const FILTERS: { key: Filter; label: React.ReactNode }[] = [
+  { key: "ALL", label: <Trans>All</Trans> },
+  { key: "PENDING_REVIEW", label: <Trans>Pending review</Trans> },
+  { key: "APPROVED", label: <Trans>Approved</Trans> },
+  { key: "COMPLETED", label: <Trans>Completed</Trans> },
+  { key: "REJECTED", label: <Trans>Rejected</Trans> },
+]
+
+/** The Manager's tickets, by status and place, newest first, paged by the API. */
+function ManagerTickets() {
+  const { accessToken } = useAuth()
+  const [filter, setFilter] = useState<Filter>("ALL")
+  const [placeId, setPlaceId] = useState("")
   const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const placeNames = usePlaceNames()
+  const [tickets, setTickets] = useState<Ticket[] | null>(null)
+  const [total, setTotal] = useState(0)
+  const [counts, setCounts] = useState<Partial<Record<Filter, number>>>({})
+  const [places, setPlaces] = useState<Place[]>([])
+  const [failed, setFailed] = useState(false)
+  const [reload, setReload] = useState(0)
+  const names = useTicketNames(accessToken, tickets?.map((ticket) => ticket.place_id) ?? [])
 
   useEffect(() => {
-    if (!accessToken || !user) return
+    if (!accessToken) return
+    getPlaces(accessToken)
+      .then(setPlaces)
+      .catch(() => {})
+  }, [accessToken])
+
+  // One small request per status, for the counts on the filters.
+  useEffect(() => {
+    if (!accessToken) return
+    let alive = true
+    for (const item of FILTERS) {
+      listTickets(
+        accessToken,
+        { status: item.key === "ALL" ? undefined : item.key, place_id: placeId || undefined },
+        1,
+        1,
+      )
+        .then((result) => alive && setCounts((prev) => ({ ...prev, [item.key]: result.pagination.total })))
+        .catch(() => {})
+    }
+    return () => {
+      alive = false
+    }
+  }, [accessToken, placeId, reload])
+
+  useEffect(() => {
+    if (!accessToken) return
     let alive = true
     setTickets(null)
+    setFailed(false)
     listTickets(
       accessToken,
-      { assignee_id: user.id, status: "APPROVED", sort: "due_date" },
+      { status: filter === "ALL" ? undefined : filter, place_id: placeId || undefined },
       page,
       PAGE_SIZE,
     )
       .then((result) => {
         if (!alive) return
         setTickets(result.data)
-        setTotalPages(Math.max(1, result.pagination.total_pages))
+        setTotal(result.pagination.total)
       })
-      .catch(() => alive && setError(true))
+      .catch(() => alive && setFailed(true))
     return () => {
       alive = false
     }
-  }, [accessToken, user, page])
+  }, [accessToken, filter, placeId, page, reload])
+
+  const pending = counts.PENDING_REVIEW
+  const summary =
+    pending === undefined
+      ? undefined
+      : plural(pending, {
+          0: "No tickets wait for your review.",
+          one: "One ticket waiting for your review.",
+          other: "# tickets waiting for your review.",
+        })
 
   return (
-    <TicketsLayout
-      title={<Trans>My tasks</Trans>}
-      intro={<Trans>Approved tickets assigned to you, the soonest due first.</Trans>}
-      tickets={tickets}
-      error={error}
-      empty={<Trans>You have no open tasks.</Trans>}
-      placeNames={placeNames}
-      page={page}
-      totalPages={totalPages}
-      onPage={setPage}
-    />
-  )
-}
-
-/** The Manager's tickets waiting for review, newest first, paged by the API. */
-function WaitingForReview() {
-  const { accessToken } = useAuth()
-  const [tickets, setTickets] = useState<Ticket[] | null>(null)
-  const [error, setError] = useState(false)
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const placeNames = usePlaceNames()
-
-  useEffect(() => {
-    if (!accessToken) return
-    let alive = true
-    setTickets(null)
-    listTickets(accessToken, { status: "PENDING_REVIEW" }, page, PAGE_SIZE)
-      .then((result) => {
-        if (!alive) return
-        setTickets(result.data)
-        setTotalPages(Math.max(1, result.pagination.total_pages))
-      })
-      .catch(() => alive && setError(true))
-    return () => {
-      alive = false
-    }
-  }, [accessToken, page])
-
-  return (
-    <TicketsLayout
-      title={<Trans>Waiting for review</Trans>}
-      intro={<Trans>Reported damage that needs your approval, newest first.</Trans>}
-      tickets={tickets}
-      error={error}
-      empty={<Trans>No tickets are waiting for review.</Trans>}
-      placeNames={placeNames}
-      page={page}
-      totalPages={totalPages}
-      onPage={setPage}
-    />
-  )
-}
-
-function usePlaceNames(): Record<string, string> {
-  const { accessToken } = useAuth()
-  const [names, setNames] = useState<Record<string, string>>({})
-  useEffect(() => {
-    if (!accessToken) return
-    let alive = true
-    getPlaces(accessToken)
-      .then((places) => {
-        if (alive) {
-          setNames(Object.fromEntries(places.map((p) => [p.id, p.place_name])))
-        }
-      })
-      .catch(() => {})
-    return () => {
-      alive = false
-    }
-  }, [accessToken])
-  return names
-}
-
-function TicketsLayout({
-  title,
-  intro,
-  tickets,
-  error,
-  empty,
-  placeNames,
-  page,
-  totalPages,
-  onPage,
-}: {
-  title: React.ReactNode
-  intro: React.ReactNode
-  tickets: Ticket[] | null
-  error: boolean
-  empty: React.ReactNode
-  placeNames: Record<string, string>
-  page: number
-  totalPages: number
-  onPage: (page: number) => void
-}) {
-  const { i18n } = useLingui()
-  const dateFormat = useMemo(
-    () =>
-      new Intl.DateTimeFormat(i18n.locale === "ar" ? "ar" : "en", {
-        dateStyle: "medium",
-        timeZone: "UTC",
-      }),
-    [i18n.locale],
-  )
-
-  return (
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 20px; max-width: 960px",
-      )}
-    >
-      <div style={S("display: flex; flex-direction: column; gap: 6px")}>
-        <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>{title}</h1>
-        <p style={S("margin: 0; color: var(--muted-foreground)")}>{intro}</p>
+    <Page title={<Trans>Maintenance tickets</Trans>} phoneTitle={<Trans>Maintenance</Trans>} description={summary}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <FilterTabs
+          label={t`Filter by status`}
+          value={filter}
+          onChange={(key) => {
+            setFilter(key)
+            setPage(1)
+          }}
+          tabs={FILTERS.map((item) => ({ key: item.key, label: item.label, count: counts[item.key] ?? 0 }))}
+        />
+        <div className="w-full desk:w-[220px]">
+          <label htmlFor="ticket-place" className="sr-only">
+            <Trans>Place</Trans>
+          </label>
+          <NativeSelect
+            id="ticket-place"
+            value={placeId}
+            onChange={(value) => {
+              setPlaceId(value)
+              setPage(1)
+            }}
+          >
+            <option value="">{t`All places`}</option>
+            {places.map((place) => (
+              <option key={place.id} value={place.id}>
+                {place.place_name}
+              </option>
+            ))}
+          </NativeSelect>
+        </div>
       </div>
 
-      {error && (
-        <p role="alert" className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
-          <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
-          <Trans>We could not load the tickets.</Trans>
-        </p>
-      )}
-
-      {!error && tickets === null && (
-        <div style={S("display: flex; flex-direction: column; gap: 10px")}>
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} style={S("height: 76px")} />
+      {failed ? (
+        <LoadError title={<Trans>Could not load tickets</Trans>} onRetry={() => setReload((n) => n + 1)} />
+      ) : tickets === null ? (
+        <LoadingList />
+      ) : tickets.length === 0 ? (
+        filter === "PENDING_REVIEW" ? (
+          <EmptyState
+            title={<Trans>No tickets waiting for review</Trans>}
+            text={<Trans>When a worker reports damage, the ticket will appear here.</Trans>}
+          />
+        ) : (
+          <EmptyState title={<Trans>No tickets here</Trans>} text={<Trans>Tickets with this status will appear here.</Trans>} />
+        )
+      ) : (
+        <div className={GRID}>
+          {tickets.map((ticket) => (
+            <TicketCard
+              key={ticket.id}
+              ticket={ticket}
+              place={names.places[ticket.place_id]}
+              asset={ticket.asset_id ? names.assets[ticket.asset_id] : undefined}
+            />
           ))}
         </div>
       )}
 
-      {!error && tickets?.length === 0 && (
-        <Empty style={S("padding: 40px")}>
-          <EmptyHeader>
-            <EmptyTitle>{empty}</EmptyTitle>
-            <EmptyDescription>
-              <Trans>New tickets will show here.</Trans>
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+      {tickets && tickets.length > 0 && (
+        <ListFooter
+          page={page}
+          pageSize={PAGE_SIZE}
+          total={total}
+          range={(from, to, all) => t`${from} to ${to} of ${all} tickets`}
+          onPage={setPage}
+        />
       )}
+    </Page>
+  )
+}
 
-      {!error && tickets && tickets.length > 0 && (
-        <ul style={S("list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px")}>
-          {tickets.map((ticket) => (
-            <li key={ticket.id}>
-              <Link
-                to="/ticket/$ticket_id"
-                params={{ ticket_id: ticket.id }}
-                className="am-lift"
-                data-overdue={ticket.is_overdue ? "true" : undefined}
-                style={S(
-                  `display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; text-decoration: none; color: inherit; background: var(--card); border: 1px solid ${ticket.is_overdue ? "var(--crit-200)" : "var(--border)"}; border-inline-start: 4px solid ${ticket.is_overdue ? "var(--crit)" : "var(--border)"}`,
-                )}
-              >
-                <span style={S("display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1 1 260px")}>
-                  <span style={S("font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap")}>
-                    {ticket.description}
-                  </span>
-                  <span style={S("font-size: 13px; color: var(--muted-foreground)")}>
-                    {placeNames[ticket.place_id] ?? <Trans>Place</Trans>}
-                    {" · "}
-                    {ticket.due_date ? (
-                      <Trans>Due {dateFormat.format(new Date(ticket.due_date))}</Trans>
-                    ) : (
-                      <Trans>
-                        Reported {dateFormat.format(new Date(ticket.created_at))}
-                      </Trans>
-                    )}
-                  </span>
-                </span>
-                <span style={S("display: flex; gap: 8px; flex-wrap: wrap")}>
-                  {ticket.is_overdue && <OverdueChip />}
-                  <PriorityChip priority={ticket.priority} />
-                </span>
-              </Link>
-            </li>
+type Tab = "ASSIGNED" | "REPORTS" | "COMPLETED"
+
+/** The Worker's tasks: assigned and approved, the reports they sent, and what they completed. */
+function MyTasks() {
+  const { accessToken, user } = useAuth()
+  const [tab, setTab] = useState<Tab>("ASSIGNED")
+  const [tickets, setTickets] = useState<Ticket[] | null>(null)
+  const [failed, setFailed] = useState(false)
+  const [reload, setReload] = useState(0)
+  const names = useTicketNames(accessToken, [])
+
+  useEffect(() => {
+    if (!accessToken) return
+    let alive = true
+    setFailed(false)
+    // A worker sees the tickets of their own places: few enough to read at once.
+    listAllTickets(accessToken, { sort: "due_date" })
+      .then((list) => alive && setTickets(list))
+      .catch(() => alive && setFailed(true))
+    return () => {
+      alive = false
+    }
+  }, [accessToken, reload])
+
+  const me = user?.id
+  const groups: Record<Tab, Ticket[]> = {
+    ASSIGNED: tickets?.filter((ticket) => ticket.assignee_id === me && ticket.status === "APPROVED") ?? [],
+    REPORTS: tickets?.filter((ticket) => ticket.reporter_id === me) ?? [],
+    COMPLETED: tickets?.filter((ticket) => ticket.assignee_id === me && ticket.status === "COMPLETED") ?? [],
+  }
+  const shown = groups[tab]
+
+  return (
+    <Page
+      title={<Trans>My tasks</Trans>}
+      description={<Trans>Tickets assigned to you.</Trans>}
+      phoneActions={false}
+      actions={
+        <Link to="/ticket/new" className={cn(buttonVariants())}>
+          <Camera aria-hidden="true" />
+          <Trans>Report damage</Trans>
+        </Link>
+      }
+    >
+      <FilterTabs
+        label={t`Filter tasks`}
+        value={tab}
+        onChange={setTab}
+        tabs={[
+          { key: "ASSIGNED", label: <Trans>Assigned to me</Trans>, count: groups.ASSIGNED.length },
+          { key: "REPORTS", label: <Trans>My reports</Trans>, count: groups.REPORTS.length },
+          { key: "COMPLETED", label: <Trans>Completed</Trans>, count: groups.COMPLETED.length },
+        ]}
+      />
+
+      {failed ? (
+        <LoadError title={<Trans>Could not load tickets</Trans>} onRetry={() => setReload((n) => n + 1)} />
+      ) : tickets === null ? (
+        <LoadingList />
+      ) : shown.length === 0 ? (
+        <EmptyState
+          title={
+            tab === "ASSIGNED" ? (
+              <Trans>You have no open tasks</Trans>
+            ) : tab === "REPORTS" ? (
+              <Trans>You have not reported anything yet</Trans>
+            ) : (
+              <Trans>No completed tasks yet</Trans>
+            )
+          }
+          text={tab === "ASSIGNED" ? <Trans>Tasks your manager approves for you will appear here.</Trans> : undefined}
+        />
+      ) : (
+        <div className={GRID}>
+          {shown.map((ticket) => (
+            <TaskCard
+              key={ticket.id}
+              ticket={ticket}
+              place={names.places[ticket.place_id]}
+              canComplete={tab === "ASSIGNED"}
+            />
           ))}
-        </ul>
+        </div>
       )}
 
-      <Pager page={page} totalPages={totalPages} onPage={onPage} />
-    </div>
+      <p className="m-0 text-[13px] text-muted-foreground">
+        <Trans>“My reports” shows the reports you sent and their status, with photos and no costs.</Trans>
+      </p>
+    </Page>
   )
 }

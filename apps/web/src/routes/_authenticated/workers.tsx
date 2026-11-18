@@ -1,36 +1,19 @@
-
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useState } from "react"
 import { Link, createFileRoute } from "@tanstack/react-router"
-import {
-  CircleAlert,
-  MapPin,
-  Plus,
-  Search,
-  UserRound,
-  Phone,
-} from "lucide-react"
-
-import { useAuth } from "@/lib/auth"
+import { CircleAlert, Plus } from "lucide-react"
 import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
 import type { Worker } from "@amlak/shared"
-import { getWorkers } from "@/lib/api"
-import { S } from "@/lib/dom-style"
-
+import { useAuth } from "@/lib/auth"
+import { deleteWorker, getWorkers, updateWorker } from "@/lib/api"
+import { errorMessage } from "@/lib/errors"
+import { useFormat } from "@/lib/format"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty"
-
-import { StatusBadge } from "@/components/place-shared"
+import { WorkerStatusChip } from "@/components/place-shared"
+import { FilterTabs, Initial } from "@/components/panel"
 import { cn } from "cn"
-import "@/styles/motion.css"
+import { Page } from "@/components/page"
+import { ConfirmDialog, EmptyState, LoadError, LoadingList } from "@/components/states"
 
 export const Route = createFileRoute("/_authenticated/workers")({
   component: WorkersPage,
@@ -46,364 +29,222 @@ const TABS = [
 
 type TabKey = (typeof TABS)[number]["key"]
 
+// A worker who has not set up the account yet counts as invited.
+const group = (worker: Worker): Exclude<TabKey, "ALL"> =>
+  worker.status === "ACTIVE" ? "ACTIVE" : worker.status === "DEACTIVATED" ? "DEACTIVATED" : "INVITED"
+
 function WorkersPage() {
   const { accessToken } = useAuth()
-
   const [workers, setWorkers] = useState<Worker[] | null>(null)
-  const [error, setError] = useState(false)
-  const [query, setQuery] = useState("")
+  const [failed, setFailed] = useState(false)
   const [tab, setTab] = useState<TabKey>("ALL")
+  const [busy, setBusy] = useState<string | null>(null)
+  const [actionError, setActionError] = useState("")
+  const [toDelete, setToDelete] = useState<Worker | null>(null)
+  const [reload, setReload] = useState(0)
 
   useEffect(() => {
     if (!accessToken) return
-
     let alive = true
-
     getWorkers(accessToken)
-      .then((list) => {
-        if (alive) setWorkers(list)
-      })
-      .catch(() => {
-        if (alive) setError(true)
-      })
-
+      .then((list) => alive && setWorkers(list))
+      .catch(() => alive && setFailed(true))
     return () => {
       alive = false
     }
-  }, [accessToken])
+  }, [accessToken, reload])
 
-  const q = query.trim().toLowerCase()
+  const countFor = (key: TabKey) => workers?.filter((w) => key === "ALL" || group(w) === key).length ?? 0
+  const visible = workers?.filter((w) => tab === "ALL" || group(w) === tab) ?? []
 
-  const visible = useMemo(() => {
-    if (!workers) return []
+  async function act(worker: Worker, action: () => Promise<unknown>) {
+    if (!accessToken) return
+    setBusy(worker.id)
+    setActionError("")
+    try {
+      await action()
+      setWorkers(await getWorkers(accessToken))
+    } catch (err) {
+      setActionError(errorMessage(err))
+    } finally {
+      setBusy(null)
+    }
+  }
 
-    return workers.filter((worker) => {
-      const matchesTab =
-        tab === "ALL" || worker.status === tab
-
-      const matchesQuery =
-        !q ||
-        worker.fullname.toLowerCase().includes(q) ||
-        worker.email.toLowerCase().includes(q) ||
-        (worker.phone ?? "").toLowerCase().includes(q)
-
-      return matchesTab && matchesQuery
-    })
-  }, [workers, tab, q])
-
-  const countFor = (key: TabKey) =>
-    workers?.filter(
-      (worker) => key === "ALL" || worker.status === key,
-    ).length ?? 0
+  async function deleteInvitation(worker: Worker) {
+    if (!accessToken) return
+    await act(worker, () => deleteWorker(accessToken, worker.id))
+    setToDelete(null)
+  }
 
   return (
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px",
-      )}
-    >
-      {/* Header */}
-      <div
-        style={S(
-          "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px",
-        )}
-      >
-        <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-          <Trans>Workers</Trans>
-        </h1>
-
-        <Link
-          to="/worker/new"
-          className={cn(buttonVariants(), "am-btn am-solid")}
-          style={S(
-            "height: 44px; min-width: 44px; padding: 0 16px; font-size: 15px; font-weight: 600; box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1)",
-          )}
-        >
-          <Plus
-            aria-hidden="true"
-            style={S(
-              "width: 18px; height: 18px; display: block; flex: none",
-            )}
-          />
-          <Trans>Add worker</Trans>
+    <Page
+      title={<Trans>Workers</Trans>}
+      description={<Trans>Accounts of the workers who work in your places.</Trans>}
+      phoneActions={false}
+      phoneEnd={{ label: t`Invite worker`, icon: "plus", link: { to: "/worker/new" } }}
+      actions={
+        <Link to="/worker/new" className={cn(buttonVariants())}>
+          <Plus aria-hidden="true" />
+          <Trans>Invite worker</Trans>
         </Link>
-      </div>
+      }
+    >
+      <FilterTabs
+        label={t`Filter by status`}
+        value={tab}
+        onChange={setTab}
+        tabs={TABS.map((item) => ({ key: item.key, label: item.label, count: countFor(item.key) }))}
+      />
 
-      {/* Search and Filters */}
-      <div
-        style={S(
-          "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px",
-        )}
-      >
-        <div
-          style={S(
-            "position: relative; flex: 1 1 320px; max-width: 320px",
-          )}
-        >
-          <Label
-            htmlFor="worker-search"
-            style={S(
-              "position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)",
-            )}
-          >
-            <Trans>Search</Trans>
-          </Label>
-
-          <Search
-            aria-hidden="true"
-            style={S(
-              "position: absolute; top: 12px; inset-inline-start: 14px; width: 20px; height: 20px; color: var(--muted-foreground); pointer-events: none",
-            )}
-          />
-
-          <Input
-            id="worker-search"
-            type="search"
-            className="am-input"
-            style={S("padding-inline-start: 44px")}
-            placeholder={t`Search by name, email or phone`}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-        </div>
-
-        <div
-          role="group"
-          aria-label={t`Filter by status`}
-          style={S("display: flex; gap: 8px; flex-wrap: wrap")}
-        >
-          {TABS.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              className="am-tab"
-              aria-pressed={tab === item.key}
-              onClick={() => setTab(item.key)}
-            >
-              {item.label}
-              <span className="am-tab-count">
-                {countFor(item.key)}
-              </span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Loading */}
-      {workers === null && !error && (
-        <div
-          style={S(
-            "display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px",
-          )}
-        >
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div
-              key={index}
-              style={S(
-                "display: flex; flex-direction: column; gap: 12px; padding: 14px; min-height: 150px; border: 1px solid var(--border); background: #fff",
-              )}
-            >
-              <div style={S("display: flex; align-items: center; gap: 10px")}>
-                <Skeleton
-                  style={S(
-                    "width: 36px; height: 36px; border-radius: 10px",
-                  )}
-                />
-                <div
-                  style={S(
-                    "flex: 1; display: flex; flex-direction: column; gap: 6px",
-                  )}
-                >
-                  <Skeleton style={S("height: 12px; width: 65%")} />
-                  <Skeleton style={S("height: 10px; width: 85%")} />
-                </div>
-              </div>
-
-              <Skeleton style={S("height: 20px; width: 75px")} />
-              <Skeleton style={S("height: 10px; width: 100%")} />
-              <Skeleton style={S("height: 10px; width: 45%")} />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Error */}
-      {error && (
-        <p className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
-          <CircleAlert
-            aria-hidden="true"
-            className="size-3.5 shrink-0"
-          />
-          <Trans>We could not load the workers.</Trans>
+      {actionError && (
+        <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">
+          <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+          {actionError}
         </p>
       )}
 
-      {/* Empty State */}
-      {workers !== null && !error && visible.length === 0 && (
-        <Empty style={S("padding: 40px")}>
-          <EmptyHeader>
-            <EmptyTitle>
-              {query || tab !== "ALL"
-                ? t`No workers match`
-                : t`No workers yet`}
-            </EmptyTitle>
-
-            <EmptyDescription>
-              {query || tab !== "ALL"
-                ? t`Try other search words or another filter.`
-                : t`Add your first worker to start managing your team.`}
-            </EmptyDescription>
-
-            {query || tab !== "ALL" ? (
-              <Button
-                size="sm"
-                className="am-btn"
-                onClick={() => {
-                  setQuery("")
-                  setTab("ALL")
-                }}
-              >
-                <Trans>Clear filters</Trans>
-              </Button>
-            ) : (
-              <Link
-                to="/worker/new"
-                className={cn(buttonVariants(), "am-btn am-solid")}
-              >
-                <Plus size={16} />
-                <Trans>Add worker</Trans>
-              </Link>
-            )}
-          </EmptyHeader>
-        </Empty>
+      {failed && (
+        <LoadError
+          title={<Trans>Could not load workers</Trans>}
+          onRetry={() => {
+            setFailed(false)
+            setReload((n) => n + 1)
+          }}
+        />
       )}
 
-      {/* Workers Grid */}
-      {visible.length > 0 && (
-        <div
-          style={S(
-            "display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px",
-          )}
-        >
-          {visible.map((worker) => (
+      {workers === null && !failed && <LoadingList />}
+
+      {workers !== null && workers.length === 0 && (
+        <EmptyState
+          title={<Trans>No workers yet</Trans>}
+          text={<Trans>Invite your first worker with the Invite worker button.</Trans>}
+        />
+      )}
+
+      {workers !== null && workers.length > 0 && visible.length === 0 && (
+        <EmptyState title={<Trans>No workers have this status.</Trans>} />
+      )}
+
+      {toDelete && (
+        <ConfirmDialog
+          open
+          title={<Trans>Delete the invitation for {toDelete.fullname}?</Trans>}
+          text={<Trans>The invitation link stops working. You can invite the worker again later.</Trans>}
+          confirm={busy ? <Trans>Deleting…</Trans> : <Trans>Delete invitation</Trans>}
+          busy={busy !== null}
+          error={actionError}
+          onConfirm={() => void deleteInvitation(toDelete)}
+          onClose={() => setToDelete(null)}
+        />
+      )}
+
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] items-stretch gap-4">
+        {visible.map((worker) => (
+          <WorkerCard
+            key={worker.id}
+            worker={worker}
+            busy={busy === worker.id}
+            disabled={busy !== null}
+            onDeactivate={() =>
+              accessToken && void act(worker, () => updateWorker(accessToken, worker.id, { status: "DEACTIVATED" }))
+            }
+            onReactivate={() =>
+              accessToken && void act(worker, () => updateWorker(accessToken, worker.id, { status: "ACTIVE" }))
+            }
+            onDeleteInvitation={() => {
+              setActionError("")
+              setToDelete(worker)
+            }}
+          />
+        ))}
+      </div>
+    </Page>
+  )
+}
+
+function WorkerCard({
+  worker,
+  busy,
+  disabled,
+  onDeactivate,
+  onReactivate,
+  onDeleteInvitation,
+}: {
+  worker: Worker
+  busy: boolean
+  disabled: boolean
+  onDeactivate: () => void
+  onReactivate: () => void
+  onDeleteInvitation: () => void
+}) {
+  const { number } = useFormat()
+  const kind = group(worker)
+  const places = number(worker.assigned_places.length)
+  return (
+    <div className="box-border flex min-w-0 flex-col gap-2.5 border border-border bg-card p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2.5">
+          <Initial name={worker.fullname} />
+          <span className="flex min-w-0 flex-col leading-[1.5]">
+            <span className="font-semibold [overflow-wrap:anywhere]">{worker.fullname}</span>
+            <span className="text-[13px] text-muted-foreground [overflow-wrap:anywhere]">{worker.email}</span>
+          </span>
+        </div>
+        <WorkerStatusChip status={worker.status} />
+      </div>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-muted-foreground">
+        <bdi dir="ltr">{worker.phone}</bdi>
+        <span>
+          <Trans>Assigned places: {places}</Trans>
+        </span>
+      </div>
+      <div className="mt-auto flex flex-wrap gap-2">
+        {kind === "ACTIVE" && (
+          <>
             <Link
-              key={worker.id}
               to="/worker/$worker_id"
               params={{ worker_id: worker.id }}
-              className="am-lift"
-              style={S(
-                "display: flex; flex-direction: column; gap: 10px; padding: 14px; min-height: 150px; text-decoration: none; color: inherit; background: #fff; border: 1px solid var(--border); box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.08)",
-              )}
+              aria-label={t`Edit ${worker.fullname}`}
+              className={cn(buttonVariants({ variant: "outline" }))}
             >
-              {/* Worker Info */}
-              <div
-                style={S(
-                  "display: flex; align-items: center; gap: 9px; min-width: 0",
-                )}
-              >
-                <div
-                  style={S(
-                    "width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--muted); flex-shrink: 0",
-                  )}
-                >
-                  <UserRound size={17} />
-                </div>
-
-                <div style={S("min-width: 0; flex: 1")}>
-                  <div
-                    style={S(
-                      "font-size: 13px; font-weight: 750; overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
-                    )}
-                  >
-                    {worker.fullname}
-                  </div>
-
-                  <div
-                    style={S(
-                      "margin-top: 3px; font-size: 11px; color: var(--muted-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
-                    )}
-                  >
-                    <bdi dir="ltr">{worker.email}</bdi>
-                  </div>
-                </div>
-              </div>
-
-              {/* Status */}
-              <div>
-                <StatusBadge status={worker.status} />
-              </div>
-
-              {/* Phone and Places */}
-              <div
-                style={S(
-                  "display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--muted-foreground)",
-                )}
-              >
-                <span
-                  style={S(
-                    "display: flex; align-items: center; gap: 5px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
-                  )}
-                >
-                  <Phone size={12} />
-                  <span dir="ltr">
-                    {worker.phone || t`No phone number`}
-                  </span>
-                </span>
-
-                <span
-                  style={S(
-                    "display: flex; align-items: center; gap: 4px; flex-shrink: 0",
-                  )}
-                >
-                  <MapPin size={12} />
-                  <Trans>{worker.assigned_places?.length ?? 0} places</Trans>
-                </span>
-              </div>
-
-              {/* Assigned Places */}
-              {worker.assigned_places &&
-                worker.assigned_places.length > 0 && (
-                  <div
-                    style={S(
-                      "display: flex; flex-wrap: wrap; gap: 5px",
-                    )}
-                  >
-                    {worker.assigned_places.slice(0, 2).map((place) => (
-                      <span
-                        key={place.place_id}
-                        style={S(
-                          "max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 4px 7px; background: var(--muted); color: var(--muted-foreground); font-size: 10px",
-                        )}
-                      >
-                        {place.place_name}
-                      </span>
-                    ))}
-
-                    {worker.assigned_places.length > 2 && (
-                      <span
-                        style={S(
-                          "padding: 4px 7px; background: var(--muted); color: var(--muted-foreground); font-size: 10px",
-                        )}
-                      >
-                        +{worker.assigned_places.length - 2}
-                      </span>
-                    )}
-                  </div>
-                )}
-
-              {/* Footer */}
-              <div
-                style={S(
-                  "margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 650; color: var(--muted-foreground)",
-                )}
-              >
-                <Trans>View details</Trans>
-                <span aria-hidden="true" className="inline-block rtl:rotate-180">→</span>
-              </div>
+              <Trans>Edit</Trans>
             </Link>
-          ))}
-        </div>
-      )}
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={disabled}
+              aria-label={t`Deactivate ${worker.fullname}`}
+              onClick={onDeactivate}
+            >
+              {busy ? <Trans>Deactivating…</Trans> : <Trans>Deactivate</Trans>}
+            </Button>
+          </>
+        )}
+        {kind === "INVITED" && (
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={disabled}
+            aria-label={t`Delete the invitation for ${worker.fullname}`}
+            onClick={onDeleteInvitation}
+          >
+            {busy ? <Trans>Deleting…</Trans> : <Trans>Delete invitation</Trans>}
+          </Button>
+        )}
+        {kind === "DEACTIVATED" && (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={disabled}
+            aria-label={t`Reactivate ${worker.fullname}`}
+            onClick={onReactivate}
+          >
+            {busy ? <Trans>Reactivating…</Trans> : <Trans>Reactivate</Trans>}
+          </Button>
+        )}
+      </div>
     </div>
   )
 }

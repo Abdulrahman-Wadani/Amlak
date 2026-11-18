@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react"
+import { useNavigate } from "@tanstack/react-router"
 import {
   keepPreviousData,
   useMutation,
@@ -55,6 +56,7 @@ import {
 import { bookingInput, type BookingInput } from "@/lib/validators"
 import { useAuth } from "@/lib/auth"
 import { S } from "@/lib/dom-style"
+import { dateFormat, numberFormat } from "@/lib/format"
 
 type Issue = { path: (string | number)[]; message?: string }
 
@@ -113,6 +115,7 @@ function isConflict(error: unknown) {
 }
 
 export function PlaceBookings({ placeId }: { placeId: string }) {
+  const navigate = useNavigate()
   const { i18n } = useLingui()
   const { accessToken } = useAuth()
   const queryClient = useQueryClient()
@@ -183,9 +186,9 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
   }, [bookingsQuery.data])
 
   const locale = i18n.locale === "ar" ? "ar" : "en"
-  const monthName = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric" })
-  const dayName = new Intl.DateTimeFormat(locale, { month: "long", day: "numeric" })
-  const money = new Intl.NumberFormat(locale)
+  const monthName = dateFormat(locale, { month: "long", year: "numeric" })
+  const dayName = dateFormat(locale, { month: "long", day: "numeric" })
+  const money = numberFormat(locale)
 
   // shortcut: the month filter runs on loaded pages (100 at a time); move from/to into the query when a place passes that
   const monthRange =
@@ -223,11 +226,9 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
   const busy = saveMutation.isPending || cancelMutation.isPending || stayMutation.isPending
   const canLoadMore = Boolean(bookings && bookings.length >= pages * PAGE_SIZE)
 
+  // Adding a booking is its own page (the design's Add booking).
   function openAdd() {
-    saveMutation.reset()
-    setIssues([])
-    setForm({ ...EMPTY_FORM })
-    setFormOpen(true)
+    void navigate({ to: "/booking/new", search: { place_id: placeId } })
   }
 
   function openCancel(booking: Booking) {
@@ -276,8 +277,8 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
   const stayLabel = (booking: Booking) => {
     const from = new Date(`${booking.check_in_date}T00:00:00`)
     const to = new Date(`${booking.check_out_date}T00:00:00`)
-    const day = new Intl.DateTimeFormat(locale, { day: "numeric" })
-    const month = new Intl.DateTimeFormat(locale, { month: "long" })
+    const day = dateFormat(locale, { day: "numeric" })
+    const month = dateFormat(locale, { month: "long" })
     const sameMonth =
       from.getFullYear() === to.getFullYear() && from.getMonth() === to.getMonth()
     return sameMonth
@@ -322,7 +323,7 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
           <SelectTrigger
             size="sm"
             aria-label={t`Filter bookings by month`}
-            style={S("height: 40px; min-width: 190px")}
+            style={S("height: 44px; min-width: 190px")}
           >
             <SelectValue>
               {(value: string | null) =>

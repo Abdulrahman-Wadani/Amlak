@@ -114,14 +114,9 @@ export async function apiRequest<T>(
 }
 
 // Places
+/** Every place (the API sends 20 a page by default; this reads all pages, 100 at a time). */
 export function getPlaces(token: string): Promise<Place[]> {
-  return apiRequest<Place[]>("/places", token).then((data) => {
-    if (!Array.isArray(data)) {
-      throw new Error("/places returned no list")
-    }
-
-    return data.map(normalizePlace)
-  })
+  return apiAllPages<Place>("/places", token).then((data) => data.map(normalizePlace))
 }
 
 export function getPlace(
@@ -139,20 +134,12 @@ export function getPlace(
   )
 }
 
+/** Every asset of a place (all pages, 100 at a time). */
 export function getPlaceAssets(
   token: string,
   placeId: string,
 ): Promise<Asset[]> {
-  return apiRequest<Asset[]>(
-    `/places/${placeId}/assets`,
-    token,
-  ).then((data) => {
-    if (!Array.isArray(data)) {
-      throw new Error("/assets returned no list")
-    }
-
-    return data
-  })
+  return apiAllPages<Asset>(`/places/${placeId}/assets`, token)
 }
 
 export async function createAsset(
@@ -218,6 +205,12 @@ export function ticketQuery(query: TicketListQuery): string {
   return params.toString()
 }
 
+/** Every ticket matching the query (all pages, 100 at a time). */
+export function listAllTickets(token: string, query: TicketListQuery): Promise<Ticket[]> {
+  const params = ticketQuery(query)
+  return apiAllPages<Ticket>(`/tickets${params ? `?${params}` : ""}`, token)
+}
+
 /** One page of tickets, in the order `query.sort` asks for. */
 export function listTickets(
   token: string,
@@ -260,6 +253,9 @@ export type BookingStatus =
 
 export interface Booking {
   id: string
+  place_id: string
+  checked_in_at?: string | null
+  checked_out_at?: string | null
   guest_name: string
   guest_phone: string
   guest_email: string | null
@@ -328,6 +324,11 @@ export async function createBooking(
   })
 }
 
+/** One booking (Managers, and Workers of its place). */
+export function getBooking(token: string, bookingId: string): Promise<Booking> {
+  return apiRequest<Booking>(`/bookings/${bookingId}`, token)
+}
+
 export function checkInBooking(token: string, bookingId: string): Promise<Booking> {
   return apiRequest<Booking>(`/bookings/${bookingId}/check-in`, token, {
     method: "POST",
@@ -368,19 +369,33 @@ export function getPlaceWorkers(
   })
 }
 
-// Workers
-export function getWorkers(
-  token: string,
-): Promise<Worker[]> {
-  return apiRequest<Worker[]>("/workers", token).then(
-    (data) => {
-      if (!Array.isArray(data)) {
-        throw new Error("/workers returned no list")
-      }
+/** Assigns one of the Manager's workers to a place. */
+export async function assignPlaceWorker(token: string, placeId: string, workerId: string): Promise<void> {
+  const response = await authFetch(`/places/${placeId}/workers`, token, {
+    method: "POST",
+    body: JSON.stringify({ worker_id: workerId }),
+  })
+  const result = await response.json().catch(() => null)
+  if (!response.ok) throw apiError(response.status, result)
+}
 
-      return data
-    },
-  )
+/** Ends a worker's assignment to a place. */
+export async function unassignPlaceWorker(token: string, placeId: string, workerId: string): Promise<void> {
+  const response = await authFetch(`/places/${placeId}/workers/${workerId}`, token, { method: "DELETE" })
+  const result = await response.json().catch(() => null)
+  if (!response.ok) throw apiError(response.status, result)
+}
+
+/** A place's dashboard row (its maintenance budget for this month, for Managers). */
+export async function getPlaceHealth(token: string, placeId: string): Promise<DashboardPlace | null> {
+  const result = await apiPage<DashboardPlace>(`/dashboard?place_id=${placeId}`, token)
+  return result.data[0] ?? null
+}
+
+// Workers
+/** Every worker of the Manager (all pages, 100 at a time). */
+export function getWorkers(token: string): Promise<Worker[]> {
+  return apiAllPages<Worker>("/workers", token)
 }
 
 export function getWorkerById(
@@ -456,6 +471,18 @@ export async function updatePlace(
   return normalizePlace(place)
 }
 
+/** Changes a worker's name or phone, or deactivates (DEACTIVATED) or reactivates (ACTIVE) the account. */
+export async function updateWorker(
+  token: string,
+  workerId: string,
+  input: { fullname?: string; phone?: string; status?: "ACTIVE" | "DEACTIVATED" },
+): Promise<Worker> {
+  return apiRequest<Worker>(`/workers/${workerId}`, token, {
+    method: "PUT",
+    body: JSON.stringify(input),
+  })
+}
+
 export async function deleteWorker(
   token: string,
   workerId: string
@@ -484,15 +511,9 @@ export async function getAssetById(
   )
 }
 
-export async function getTicketById(
-  token: string,
-  ticketId: string,
-) {
-  const response = await authFetch(`/tickets/${ticketId}`, token).then((res) =>
-    res.json(),
-  )
-
-  return response;
+/** One ticket, with its photos (signed links that work for an hour). */
+export function getTicketById(token: string, ticketId: string): Promise<Ticket> {
+  return apiRequest<Ticket>(`/tickets/${ticketId}`, token)
 }
 
 // Finanace
@@ -1038,8 +1059,9 @@ export async function updateUser(
     : (result as UserResponse)
 }
 
+/** Every support ticket the user can see (their own, or all for an Admin). */
 export async function getSupportTicket(token: string) {
-  return apiRequest<SupportTicket[]>("/support-tickets", token)
+  return apiAllPages<SupportTicket>("/support-tickets", token)
 }
 
 export function createSupportTicket(

@@ -1,177 +1,285 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, type FormEvent } from "react"
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import { CircleAlert } from "lucide-react"
-import type { Asset } from "@amlak/shared"
-
-import { S } from "@/lib/dom-style"
+import { Camera, CircleAlert, TriangleAlert, Wrench } from "lucide-react"
+import type { Asset, Place, Ticket } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
-import { createTicket, getPlaceAssets } from "@/lib/api"
-import type { TicketPriority } from "@/lib/api"
+import { createTicket, getPlaceAssets, getPlaces, listTickets, type TicketPriority } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
+import { useFormat } from "@/lib/format"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { cn } from "cn"
+import { Page } from "@/components/page"
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import Form, { type FormValues } from "@/components/form"
+  Field,
+  FormButtons,
+  NativeSelect,
+  Panel,
+  PanelTitle,
+  PhoneActionBar,
+  Segmented,
+  TwoColumns,
+} from "@/components/panel"
+import { PhotoPicker } from "@/components/photo-picker"
+import { TicketChip } from "@/components/ticket-parts"
 
 export const Route = createFileRoute("/_authenticated/ticket/new")({
-  component: AddTicket,
-  validateSearch: (search: Record<string, unknown>) => ({
-    place_id: typeof search.place_id === "string" ? search.place_id : "",
-  }),
+  component: ReportDamage,
+  validateSearch: (search: Record<string, unknown>): { place_id?: string } =>
+    typeof search.place_id === "string" && search.place_id ? { place_id: search.place_id } : {},
 })
 
-function AddTicket() {
+type FieldKey = "place" | "description"
+
+/** Report damage: the place (chosen here, or given by the place page), the asset, photos, what happened and how urgent. */
+function ReportDamage() {
   const { accessToken } = useAuth()
   const navigate = useNavigate()
-  const { place_id } = Route.useSearch()
+  const search = Route.useSearch()
 
+  const [places, setPlaces] = useState<Place[] | null>(null)
+  const [placeId, setPlaceId] = useState(search.place_id ?? "")
   const [assets, setAssets] = useState<Asset[]>([])
+  const [assetId, setAssetId] = useState("")
+  const [photos, setPhotos] = useState<File[]>([])
+  const [description, setDescription] = useState("")
+  const [priority, setPriority] = useState<TicketPriority>("MEDIUM")
+  const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [formError, setFormError] = useState("")
+  const [sending, setSending] = useState(false)
+  const [earlier, setEarlier] = useState<Ticket[] | null>(null)
 
   useEffect(() => {
-    if (!accessToken || !place_id) return
-
+    if (!accessToken) return
     let alive = true
-
-    getPlaceAssets(accessToken, place_id)
+    getPlaces(accessToken)
       .then((list) => {
-        if (alive) setAssets(list)
+        if (!alive) return
+        setPlaces(list)
+        // One place: nothing to choose.
+        if (!search.place_id && list.length === 1) setPlaceId(list[0].id)
       })
-      .catch((error) => {
-        console.error("Failed to load assets:", error)
-        if (alive) setAssets([])
-      })
-
+      .catch(() => alive && setPlaces([]))
     return () => {
       alive = false
     }
-  }, [accessToken, place_id])
+  }, [accessToken, search.place_id])
 
-  async function handleSubmit(values: FormValues) {
+  useEffect(() => {
+    setAssetId("")
+    setAssets([])
+    setEarlier(null)
+    if (!accessToken || !placeId) return
+    let alive = true
+    getPlaceAssets(accessToken, placeId)
+      .then((list) => alive && setAssets(list))
+      .catch(() => {})
+    listTickets(accessToken, { place_id: placeId }, 1, 3)
+      .then((result) => alive && setEarlier(result.data))
+      .catch(() => alive && setEarlier([]))
+    return () => {
+      alive = false
+    }
+  }, [accessToken, placeId])
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
     if (!accessToken) return
-    const text = (name: string) =>
-      typeof values[name] === "string" ? (values[name] as string).trim() : ""
-    const photos = Array.isArray(values.photos) ? values.photos : []
+    const next: Partial<Record<FieldKey, string>> = {}
+    if (!placeId) next.place = t`Choose the place.`
+    if (!description.trim()) next.description = t`Write what happened.`
+    setErrors(next)
+    if (Object.keys(next).length > 0) return
 
-    if (!place_id) {
-      setFormError(t`Choose the place first`)
-      return
-    }
-    if (photos.length > 5) {
-      setFormError(t`You can add up to 5 photos`)
-      return
-    }
-
+    setSending(true)
     setFormError("")
     try {
-      await createTicket(accessToken, place_id, {
-        asset_id: text("assetId") || undefined,
-        priority: (text("priority") || undefined) as TicketPriority | undefined,
-        description: text("description") || undefined,
+      const created = (await createTicket(accessToken, placeId, {
+        asset_id: assetId || undefined,
+        priority,
+        description: description.trim(),
         photos,
-      })
-
-      void navigate({ to: "/place/$place_id", params: { place_id } })
-    } catch (error) {
-      setFormError(errorMessage(error))
+      })) as Partial<Ticket> | null
+      if (created?.id) await navigate({ to: "/ticket/$ticket_id", params: { ticket_id: created.id } })
+      else await navigate({ to: "/tickets" })
+    } catch (err) {
+      setFormError(errorMessage(err))
+    } finally {
+      setSending(false)
     }
   }
 
+  const send = (
+    <Button type="submit" form="report-form" disabled={sending}>
+      {sending ? <Trans>Sending…</Trans> : <Trans>Send report</Trans>}
+    </Button>
+  )
+
   return (
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 720px; width: 100%",
-      )}
+    <Page
+      title={<Trans>Report damage</Trans>}
+      description={<Trans>The report goes to the place manager for review.</Trans>}
+      phoneStart="back"
+      phoneEnd="none"
+      tabs={false}
     >
-<Breadcrumb>
-  <BreadcrumbList>
-  <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/" />}><Trans>Home</Trans></BreadcrumbLink>
-    </BreadcrumbItem>
-    <BreadcrumbSeparator />
-    <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/places" />}><Trans>Places</Trans></BreadcrumbLink>
-    </BreadcrumbItem>
-    <BreadcrumbSeparator />
-    <BreadcrumbItem>
-            <BreadcrumbLink
-        render={
-          <Link
-            to="/place/$place_id"
-            params={{ place_id: place_id }}
-          >
-            <Trans>Place</Trans>
-          </Link>
+      <TwoColumns
+        main={
+          <Panel pad="lg">
+            <form id="report-form" onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+              <Field id="r-place" label={<Trans>Place</Trans>} error={errors.place}>
+                <NativeSelect id="r-place" value={placeId} onChange={setPlaceId} invalid={Boolean(errors.place)}>
+                  <option value="" disabled>
+                    {places === null ? t`Loading…` : t`Choose the place`}
+                  </option>
+                  {places?.map((place) => (
+                    <option key={place.id} value={place.id}>
+                      {place.place_name}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </Field>
+
+              <Field
+                id="r-asset"
+                label={<Trans>Asset</Trans>}
+                hint={<Trans>Choose “No specific asset” if the problem is general.</Trans>}
+              >
+                <NativeSelect id="r-asset" value={assetId} onChange={setAssetId} disabled={!placeId}>
+                  <option value="">{t`No specific asset`}</option>
+                  {assets.map((asset) => (
+                    <option key={asset.id} value={asset.id}>
+                      {asset.name}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </Field>
+
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-semibold">
+                  <Trans>Photos</Trans>
+                </span>
+                <PhotoPicker
+                  photos={photos}
+                  onChange={setPhotos}
+                  label={<Trans>Take a photo</Trans>}
+                  hint={<Trans>Add photos that show the damage.</Trans>}
+                />
+              </div>
+
+              <Field id="r-desc" label={<Trans>What happened?</Trans>} error={errors.description}>
+                <Textarea
+                  id="r-desc"
+                  rows={3}
+                  dir="auto"
+                  value={description}
+                  aria-invalid={errors.description ? true : undefined}
+                  aria-describedby={errors.description ? "r-desc-error" : undefined}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+              </Field>
+
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-semibold">
+                  <Trans>Priority</Trans>
+                </span>
+                <Segmented
+                  label={t`Priority`}
+                  value={priority}
+                  onChange={setPriority}
+                  options={[
+                    { key: "LOW", label: <Trans>Low</Trans> },
+                    { key: "MEDIUM", label: <Trans>Medium</Trans> },
+                    { key: "HIGH", label: <Trans>High</Trans> },
+                    { key: "URGENT", label: <Trans>Urgent</Trans> },
+                  ]}
+                />
+              </div>
+
+              {formError && (
+                <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">
+                  <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+                  {formError}
+                </p>
+              )}
+
+              <div className="hidden desk:block">
+                <FormButtons>
+                  <Link to="/tickets" className={cn(buttonVariants({ variant: "outline" }))}>
+                    <Trans>Cancel</Trans>
+                  </Link>
+                  {send}
+                </FormButtons>
+              </div>
+            </form>
+            <PhoneActionBar>{send}</PhoneActionBar>
+          </Panel>
+        }
+        side={
+          <>
+            <Panel>
+              <PanelTitle small>
+                <Trans>For a clearer report</Trans>
+              </PanelTitle>
+              <Tip icon={<Camera />} tone="info">
+                <Trans>One close photo of the damage, and one from further back that shows where it is.</Trans>
+              </Tip>
+              <Tip icon={<Wrench />} tone="info">
+                <Trans>Pick the asset if you know it, so the report is linked to it.</Trans>
+              </Tip>
+              <Tip icon={<TriangleAlert />} tone="warn">
+                <Trans>“Urgent” only when a guest or the place is affected right now.</Trans>
+              </Tip>
+            </Panel>
+            {placeId && earlier && earlier.length > 0 && <EarlierReports tickets={earlier} />}
+          </>
         }
       />
-    </BreadcrumbItem>
-  </BreadcrumbList>
-</Breadcrumb>
-<center>
-      <div style={S("display:flex; flex-direction:column; gap:6px")}>
-        <h1 style={S("font-size:30px; font-weight:800; margin:0")}>
-          <Trans>Report damage</Trans>
-        </h1>
+    </Page>
+  )
+}
 
-        <p style={S("font-size:14px; color:var(--muted-foreground); margin:0")}>
-          <Trans>Report new damage for maintenance</Trans>
-        </p>
-      </div>
-        <Form
-  fields={[
-    {
-      name: "assetId",
-      label: t`Asset`,
-      type: "select",
-      options: assets.map((asset) => ({
-        value: asset.id,
-        label: asset.name,
-      })),
-    },
-    {
-      name: "priority",
-      label: t`Priority`,
-      type: "select",
-      required: true,
-      defaultValue: "MEDIUM",
-      options: [
-        { value: "LOW", label: t`Low` },
-        { value: "MEDIUM", label: t`Medium` },
-        { value: "HIGH", label: t`High` },
-        { value: "URGENT", label: t`Urgent` },
-      ],
-    },
-    {
-      name: "description",
-      label: t`Description`,
-      type: "text",
-      required: true,
-    },
-    {
-      name: "photos",
-      label: t`Photos of the damage`,
-      type: "file",
-      accept: "image/*",
-      multiple: true,
-    },
-  ]}
-  onSubmit={handleSubmit}
-/>
-        {formError && (
-          <p role="alert" className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900" style={S("margin-top: 12px")}>
-            <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
-            {formError}
-          </p>
-        )}
-
-  </center>
-
+function Tip({ icon, tone, children }: { icon: React.ReactNode; tone: "info" | "warn"; children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-2.5 text-sm leading-[1.6]">
+      <span
+        aria-hidden="true"
+        className={`inline-flex size-8 flex-none items-center justify-center [&_svg]:size-4 [&_svg]:stroke-[1.8] ${tone === "warn" ? "bg-warn-50 text-warn" : "bg-info-50 text-info"}`}
+      >
+        {icon}
+      </span>
+      <span>{children}</span>
     </div>
+  )
+}
+
+function EarlierReports({ tickets }: { tickets: Ticket[] }) {
+  const { relative } = useFormat()
+  return (
+    <Panel>
+      <PanelTitle small>
+        <Trans>Earlier reports at this place</Trans>
+      </PanelTitle>
+      <div className="flex flex-col gap-3">
+        {tickets.map((ticket) => (
+          <Link
+            key={ticket.id}
+            to="/ticket/$ticket_id"
+            params={{ ticket_id: ticket.id }}
+            className="am-lift box-border flex flex-col gap-2 border border-border bg-card p-3.5 text-foreground no-underline"
+          >
+            <span dir="auto" className="truncate font-semibold">
+              {ticket.description}
+            </span>
+            <span className="flex flex-wrap items-center justify-between gap-2 text-[13px] text-muted-foreground">
+              {relative(ticket.created_at)}
+              <TicketChip ticket={ticket} />
+            </span>
+          </Link>
+        ))}
+      </div>
+    </Panel>
   )
 }

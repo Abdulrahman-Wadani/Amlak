@@ -1,203 +1,153 @@
-import type { ReactNode } from "react"
-import { Link, Outlet } from "@tanstack/react-router"
+import { Link, Outlet, useLocation } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 import { useAuth } from "@/lib/auth"
-import { S } from "@/lib/dom-style"
+import {
+  currentTab,
+  desktopNav,
+  mobileTabs,
+  roleLabel,
+  sectionOf,
+  type Role,
+} from "@/lib/nav"
+import { ShellProvider, useShell } from "@/components/shell-context"
+import { Toasts } from "@/components/toast"
 
-type NavItem = { to: string; label: ReactNode; d: string }
-
-const NAV: NavItem[] = [
-  {
-    to: "/home",
-    label: <Trans>Home</Trans>,
-    d: "M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z",
-  },
-  {
-    to: "/places",
-    label: <Trans>Places</Trans>,
-    d: "M4 3h16v18H4zM9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M10 21v-3h4v3",
-  },
-  {
-    to: "/finance",
-    label: <Trans>Finance</Trans>,
-    d: "M3 7h18v13H3zM5 7V6a2 2 0 0 1 2-2h10v3M16.5 13.5",
-  },
-  {
-    to: "/workers",
-    label: <Trans>Workers</Trans>,
-    d: "M9 8a3.5 3.5 0 1 0 0-0M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6",
-  },
-  {
-    to: "/admin",
-    label: <Trans>Admin</Trans>,
-    d: "M9 8a3.5 3.5 0 1 0 0-0M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6",
-  },
-  {
-    to: "/support",
-    label: <Trans>Support</Trans>,
-    d: "M9 8a3.5 3.5 0 1 0 0-0M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6",
-  },
-  {
-    to: "/content",
-    label: <Trans>Content</Trans>,
-    d: "",
-  },
-  {
-    to: "/notifications",
-    label: <Trans>Notifications</Trans>,
-    d: "",
-  },
-]
-
-const NAV_STYLE =
-  "display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; white-space: nowrap; text-decoration: none; color: var(--foreground); font-size: 14px; font-weight: 500"
-
-const ICON_STYLE = S("display: block; flex: none; width: 18px; height: 18px")
-
-function Icon({ d, children }: { d?: string; children?: ReactNode }) {
+/**
+ * The signed-in layout. From 1120px: a 72px top bar with the role's links and
+ * the user at the end. Below 1120px (the phone layout): a 60px top bar with
+ * the page title, and bottom tabs.
+ */
+export function AppShell({ role }: { role: Role }) {
   return (
-    <svg
+    <ShellProvider>
+      <Shell role={role} />
+    </ShellProvider>
+  )
+}
+
+function Shell({ role }: { role: Role }) {
+  useLingui() // re-render the labels when the language changes
+  const { tabs, setBar } = useShell()
+  return (
+    <div className="flex min-h-screen flex-col bg-background font-sans text-[15px] leading-[1.6] text-foreground">
+      <DesktopBar role={role} />
+      <Toasts />
+      {/* The phone top bar: each page portals its title and buttons into it (components/page.tsx). */}
+      <header
+        ref={setBar}
+        className="sticky top-0 z-20 box-border flex h-[60px] flex-none items-center justify-between gap-2 border-b border-border bg-card px-2 desk:hidden"
+      />
+      <div className={tabs ? "flex-1 min-w-0 pb-[calc(68px+env(safe-area-inset-bottom))] desk:pb-0" : "flex-1 min-w-0"}>
+        <Outlet />
+      </div>
+      {tabs && <PhoneTabs role={role} />}
+    </div>
+  )
+}
+
+export function Brand({ size }: { size: "desk" | "phone" }) {
+  const tile =
+    size === "desk"
+      ? "size-[30px] text-base"
+      : "size-7 text-[15px]"
+  return (
+    <span
       aria-hidden="true"
-      width="18"
-      height="18"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={ICON_STYLE}
+      className={`${tile} flex flex-none items-center justify-center bg-foreground leading-none font-extrabold text-white`}
     >
-      {d ? <path d={d} /> : children}
-    </svg>
+      <Trans comment="Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ">
+        A
+      </Trans>
+    </span>
   )
 }
 
-export function AppShell({ role }: { role: "MANAGER" | "WORKER" | "ADMIN" }) {
-  useLingui() // subscribe so strings refresh on language flip
-  const { user, logout } = useAuth()
-  void role
-  let visibleNAV: NavItem[] = NAV
-
-if (role === "ADMIN") {
-  visibleNAV = NAV.filter(
-    (item) =>
-      !["/home", "/places", "/finance", "/workers"].includes(item.to)
-  )
-}
-else if(role == "WORKER"){
-  visibleNAV = NAV.filter(
-    (item) =>
-      !["/home", "/finance","/workers","/admin","/content",].includes(item.to)
-  )
-}
-else{
-  visibleNAV = NAV.filter(
-    (item) =>
-      !["/admin","/content",].includes(item.to)
-  )
-}
-
+function DesktopBar({ role }: { role: Role }) {
+  const { user } = useAuth()
+  const pathname = useLocation({ select: (l) => l.pathname })
+  const section = sectionOf(pathname)
+  const name = user?.fullname ?? ""
+  const initial = Array.from(name.trim())[0] ?? ""
+  const roleName = roleLabel(role)
   return (
-    <div
-      style={S(
-        "min-height: 100vh; display: flex; flex-direction: column; background: var(--background); color: var(--foreground); font-family: var(--font-sans); font-size: 15px; line-height: 1.6"
-      )}
+    <nav
+      aria-label={t`Main menu`}
+      className="hidden flex-none border-b border-border bg-card text-foreground desk:block"
     >
-      <nav
-        aria-label={t`Main menu`}
-        style={S(
-          "position: sticky; top: 0; z-index: 20; box-sizing: border-box; flex: none; display: flex; align-items: center; gap: 20px; height: 56px; padding: 0 20px; background: var(--card); color: var(--foreground); border-block-end: 1px solid var(--border)"
-        )}
-      >
+      <div className="mx-auto box-border flex min-h-[72px] max-w-[1240px] items-center gap-8 px-10">
+        <div className="flex items-center gap-2.5">
+          <Brand size="desk" />
+          <span className="text-[23px] leading-none font-extrabold text-foreground">
+            <Trans>Amlak</Trans>
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-1">
+          {desktopNav(role).map((item) => {
+            const current = item.section === section
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                activeOptions={{ exact: true }}
+                aria-current={current ? "page" : undefined}
+                className={`am-nav flex h-11 items-center gap-2 px-3 whitespace-nowrap text-foreground no-underline ${current ? "bg-secondary font-semibold" : "font-medium"}`}
+              >
+                {item.icon}
+                {item.label}
+              </Link>
+            )
+          })}
+        </div>
         <Link
-          to="/home"
-          style={S(
-            "display: flex; align-items: center; gap: 8px; text-decoration: none; flex: none"
-          )}
+          to="/profile"
+          activeOptions={{ exact: true }}
+          aria-label={t`Account, ${name}, ${roleName}`}
+          aria-current={section === "account" ? "page" : undefined}
+          className={`am-nav ms-auto flex h-[52px] items-center gap-2.5 px-3 text-foreground no-underline ${section === "account" ? "bg-secondary" : ""}`}
         >
           <span
             aria-hidden="true"
-            style={S(
-              "width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: var(--foreground); color: var(--card); font-family: var(--font-sans); font-size: 14px; font-weight: 800; line-height: 1"
-            )}
+            className="inline-flex size-9 flex-none items-center justify-center rounded-full bg-secondary text-[15px] font-bold text-primary"
           >
-            <Trans comment="Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ">
-              A
-            </Trans>
+            {initial}
           </span>
-          <span
-            style={S(
-              "font-family: var(--font-sans); font-size: 19px; font-weight: 800; line-height: 1; color: var(--foreground)"
-            )}
-          >
-            <Trans>Amlak</Trans>
+          <span aria-hidden="true" className="flex flex-col leading-[1.4]">
+            <span className="text-sm font-semibold">{name}</span>
+            <span className="text-[13px] text-muted-foreground">{roleName}</span>
           </span>
         </Link>
-
-        <div
-          style={S(
-            "display: flex; align-items: center; gap: 2px; min-width: 0; overflow-x: auto; scrollbar-width: none"
-          )}
-        >
-          {visibleNAV.map((item) => (
-            <Link
-              key={item.to}
-              to={item.to}
-              className="am-nav"
-              activeProps={{ "aria-current": "page" }}
-              style={S(NAV_STYLE)}
-            >
-              <Icon d={item.d} />
-              {item.label}
-            </Link>
-          ))}
-        </div>
-
-        <div
-          style={S(
-            "margin-inline-start: auto; display: flex; align-items: center; gap: 10px; flex: none"
-          )}
-        >
-          <Link
-            to="/profile"
-            className="am-nav"
-            activeProps={{ "aria-current": "page" }}
-            style={S(NAV_STYLE)}
-          >
-            <Icon>
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 21a8 8 0 0 1 16 0" />
-            </Icon>
-            <Trans>Account</Trans>
-          </Link>
-          <span
-            style={S(
-              "display: flex; align-items: center; gap: 10px; border-inline-start: 1px solid var(--border); padding-inline-start: 12px"
-            )}
-          >
-            <span style={S("font-size: 13px; font-weight: 600")}>
-              {user?.fullname}
-            </span>
-            <button
-              type="button"
-              className="am-btn"
-              onClick={() => logout()}
-              style={S(
-                "height: 30px; padding: 0 10px; border: 1px solid var(--foreground); background: transparent; color: var(--foreground); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer"
-              )}
-            >
-              <Trans>Sign out</Trans>
-            </button>
-          </span>
-        </div>
-      </nav>
-
-      <div style={S("flex: 1 1 auto; min-width: 0; box-sizing: border-box")}>
-        <Outlet />
       </div>
-    </div>
+    </nav>
+  )
+}
+
+function PhoneTabs({ role }: { role: Role }) {
+  const pathname = useLocation({ select: (l) => l.pathname })
+  const current = currentTab(role, sectionOf(pathname))
+  return (
+    <nav
+      aria-label={t`Main menu`}
+      className="fixed inset-x-0 bottom-0 z-20 flex h-[calc(68px+env(safe-area-inset-bottom))] border-t border-border bg-card pb-[env(safe-area-inset-bottom)] desk:hidden"
+    >
+      {mobileTabs(role).map((item) => {
+        const on = item.section === current
+        return (
+          <Link
+            key={item.to}
+            to={item.to}
+            activeOptions={{ exact: true }}
+            aria-current={on ? "page" : undefined}
+            // As in the design: flex 1 without min-width 0, so a long label
+            // (Arabic "Users", English "Announcements") widens its tab instead of being cut.
+            className={`flex flex-1 flex-col items-center justify-center gap-1 text-xs whitespace-nowrap no-underline ${on ? "font-semibold text-primary" : "font-medium text-muted-foreground"}`}
+          >
+            {item.icon}
+            <span>{item.label}</span>
+          </Link>
+        )
+      })}
+    </nav>
   )
 }

@@ -1,35 +1,29 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { Link, createFileRoute, redirect } from "@tanstack/react-router"
-import { CalendarDays, ChevronDown, ChevronUp, Ticket, Wallet, Wrench, AlertTriangle, CheckCircle2 } from "lucide-react"
+import { Building2, CalendarDays, Camera, ChevronDown, ChevronLeft, Plus, Wallet, Wrench } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
-import { t } from "@lingui/core/macro"
-import { useLingui } from "@lingui/react"
-import type { Place } from "@amlak/shared"
+import { plural, t } from "@lingui/core/macro"
+import type { Place, Ticket } from "@amlak/shared"
 import { storedUser, useAuth } from "@/lib/auth"
 import {
-  getPlaces,
+  countPlaceWorkers,
   getDashboard,
+  getPlaces,
+  listAllBookingsForPlace,
+  listTickets,
+  type Booking,
   type DashboardPlace,
 } from "@/lib/api"
-import { S } from "@/lib/dom-style"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { cn } from "cn"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { groupBookings } from "@/lib/bookings"
+import { addDays, todayIn } from "@/lib/dates"
+import { useFormat } from "@/lib/format"
+import { placeCounts } from "@/lib/places"
+import { buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty"
-import { StatusBadge, TypeLabel } from "@/components/place-shared"
-import "@/styles/motion.css"
+import { BookingStatusChip, OverdueChip, StatusBadge, TicketStatusChip, TypeLabel } from "@/components/place-shared"
+import { DetailRow, DetailsLink, PlaceStatusText, PriorityText, StatCard } from "@/components/home-parts"
+import { Page } from "@/components/page"
+import { cn } from "cn"
 
 export const Route = createFileRoute("/_authenticated/home")({
   // Admins have no dashboard here; their start page is /admin.
@@ -41,609 +35,584 @@ export const Route = createFileRoute("/_authenticated/home")({
   component: HomePage,
 })
 
-function greeting(hour: number): ReactNode {
-  if (hour < 12) return <Trans>Good morning</Trans>
-  if (hour < 17) return <Trans>Good afternoon</Trans>
-  return <Trans>Good evening</Trans>
+function greeting(hour: number, name: string): ReactNode {
+  if (hour < 12) return <Trans>Good morning, {name}</Trans>
+  if (hour < 17) return <Trans>Good afternoon, {name}</Trans>
+  return <Trans>Good evening, {name}</Trans>
 }
 
 function HomePage() {
-  const { i18n } = useLingui()
-  const { user, accessToken } = useAuth()
+  const { user } = useAuth()
+  return user?.role === "WORKER" ? <WorkerHome /> : <ManagerHome />
+}
 
+const DAY_MS = 24 * 60 * 60 * 1000
+
+type TodayRow = { booking: Booking; place: Place }
+
+/**
+ * Today's arrivals and departures. The dashboard counts them per place; only
+ * places with any are loaded (there is no endpoint across places).
+ */
+function useTodayBookings(places: Place[] | null, dashboard: DashboardPlace[] | null) {
+  const { accessToken } = useAuth()
+  const [rows, setRows] = useState<{ checkIns: TodayRow[]; checkOuts: TodayRow[] } | null>(null)
+  useEffect(() => {
+    if (!accessToken || !places || !dashboard) return
+    let alive = true
+    const busy = new Set(
+      dashboard.filter((d) => (d.today?.check_ins ?? 0) + (d.today?.check_outs ?? 0) > 0).map((d) => d.place_id),
+    )
+    Promise.all(
+      places
+        .filter((place) => busy.has(place.id))
+        .map(async (place) => {
+          const today = todayIn(place.timezone)
+          const bookings = await listAllBookingsForPlace(accessToken, place.id, { from: addDays(today, -1), to: today })
+          const groups = groupBookings(bookings, today, today)
+          return { place, groups }
+        }),
+    )
+      .then((results) => {
+        if (!alive) return
+        setRows({
+          checkIns: results.flatMap(({ place, groups }) => groups.checkIns.map((booking) => ({ booking, place }))),
+          checkOuts: results.flatMap(({ place, groups }) => groups.checkOuts.map((booking) => ({ booking, place }))),
+        })
+      })
+      .catch(() => alive && setRows({ checkIns: [], checkOuts: [] }))
+    return () => {
+      alive = false
+    }
+  }, [accessToken, places, dashboard])
+  return rows
+}
+
+function useHomeData() {
+  const { accessToken } = useAuth()
   const [places, setPlaces] = useState<Place[] | null>(null)
   const [dashboard, setDashboard] = useState<DashboardPlace[] | null>(null)
-
   const [placesError, setPlacesError] = useState(false)
   const [dashboardError, setDashboardError] = useState(false)
-
-  const [now] = useState(() => new Date())
-
-  const isWorker = String(user?.role ?? "").toUpperCase() === "WORKER"
-
   useEffect(() => {
     if (!accessToken) return
-
     let alive = true
-
-    Promise.all([
-      getPlaces(accessToken),
-      getDashboard(accessToken),
-    ])
-      .then(([placesResult, dashboardResult]) => {
-        if (!alive) return
-
-        setPlaces(placesResult)
-        setDashboard(dashboardResult.data)
-      })
-      .catch(() => {
-        if (!alive) return
-      })
-
     getPlaces(accessToken)
-      .then((result) => {
-        if (alive) setPlaces(result)
-      })
-      .catch(() => {
-        if (alive) setPlacesError(true)
-      })
-
+      .then((result) => alive && setPlaces(result))
+      .catch(() => alive && setPlacesError(true))
     getDashboard(accessToken)
-      .then((result) => {
-        if (alive) setDashboard(result.data)
-      })
-      .catch(() => {
-        if (alive) setDashboardError(true)
-      })
+      .then((result) => alive && setDashboard(result.data))
+      .catch(() => alive && setDashboardError(true))
+    return () => {
+      alive = false
+    }
+  }, [accessToken])
+  return { places, dashboard, placesError, dashboardError }
+}
 
+function sum(rows: DashboardPlace[], pick: (row: DashboardPlace) => number | undefined) {
+  return rows.reduce((total, row) => total + (pick(row) ?? 0), 0)
+}
+
+/** "One check-in and one check-out", from the two counts. */
+function arrivalsNote(checkIns: number, checkOuts: number) {
+  const ins = plural(checkIns, { 0: "No check-ins", one: "One check-in", other: "# check-ins" })
+  const outs = plural(checkOuts, { 0: "no check-outs", one: "one check-out", other: "# check-outs" })
+  return t`${ins} and ${outs}`
+}
+
+// ─── Manager ────────────────────────────────────────────────────────────────
+
+function ManagerHome() {
+  const { user, accessToken } = useAuth()
+  const f = useFormat()
+  const [now] = useState(() => new Date())
+  const { places, dashboard, placesError, dashboardError } = useHomeData()
+  const today = useTodayBookings(places, dashboard)
+
+  // Tickets waiting for review: the first three, the total and the oldest.
+  const [pending, setPending] = useState<{ items: Ticket[]; total: number; oldest: Ticket | null } | null>(null)
+  useEffect(() => {
+    if (!accessToken) return
+    let alive = true
+    listTickets(accessToken, { status: "PENDING_REVIEW" }, 1, 3)
+      .then(async (first) => {
+        const total = first.pagination.total
+        // The list is newest first, so the oldest is alone on the last page of one.
+        const oldest =
+          total > 3 ? ((await listTickets(accessToken, { status: "PENDING_REVIEW" }, total, 1)).data[0] ?? null) : (first.data.at(-1) ?? null)
+        if (alive) setPending({ items: first.data, total, oldest })
+      })
+      .catch(() => alive && setPending({ items: [], total: 0, oldest: null }))
     return () => {
       alive = false
     }
   }, [accessToken])
 
-
-  const locale = i18n.locale === "ar" ? "ar" : "en"
-
-  const today = new Intl.DateTimeFormat(locale, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  }).format(now)
-
-  const money = (n: number) =>
-    new Intl.NumberFormat(locale).format(n)
-
-  const stats = useMemo(() => {
-    const rows = dashboard ?? []
-
-    const pendingTickets = rows.reduce(
-      (sum, p) => sum + (p.open_tickets?.PENDING_REVIEW ?? 0),
-      0
-    )
-
-    const approvedTickets = rows.reduce(
-      (sum, p) => sum + (p.open_tickets?.APPROVED ?? 0),
-      0
-    )
-
-    const overdueTickets = rows.reduce(
-      (sum, p) => sum + (p.open_tickets?.overdue ?? 0),
-      0
-    )
-
-    const checkIns = rows.reduce(
-      (sum, p) => sum + (p.today?.check_ins ?? 0),
-      0
-    )
-
-    const checkOuts = rows.reduce(
-      (sum, p) => sum + (p.today?.check_outs ?? 0),
-      0
-    )
-
-    const budgets = rows
-      .map((p) => p.maintenance_budget)
-      .filter((budget) => budget !== null)
-
-    const budgetTotal = budgets.reduce(
-      (sum, budget) => sum + (budget?.budget ?? 0),
-      0
-    )
-
-    const budgetSpent = budgets.reduce(
-      (sum, budget) => sum + (budget?.spent ?? 0),
-      0
-    )
-
-    const budgetRemaining = budgets.reduce(
-      (sum, budget) => sum + (budget?.remaining ?? 0),
-      0
-    )
-
-    const currency = budgets[0]?.currency ?? "SAR"
-
-    return {
-      pendingTickets,
-      approvedTickets,
-      overdueTickets,
-      checkIns,
-      checkOuts,
-      bookings: checkIns + checkOuts,
-      budgetTotal,
-      budgetSpent,
-      budgetRemaining,
-      currency,
+  // Workers per place, for the place cards.
+  const [workerCounts, setWorkerCounts] = useState<Record<string, number>>({})
+  useEffect(() => {
+    if (!accessToken || !places) return
+    let alive = true
+    for (const place of places) {
+      countPlaceWorkers(accessToken, place.id)
+        .then((n) => alive && setWorkerCounts((current) => ({ ...current, [place.id]: n })))
+        .catch(() => {})
     }
-  }, [dashboard])
+    return () => {
+      alive = false
+    }
+  }, [accessToken, places])
 
-  const dashboardLoading = dashboard === null && !dashboardError
-  const placesLoading = places === null && !placesError
+  const rows = useMemo(() => dashboard ?? [], [dashboard])
+  const pendingCount = pending?.total ?? sum(rows, (r) => r.open_tickets?.PENDING_REVIEW)
+  const checkIns = sum(rows, (r) => r.today?.check_ins)
+  const checkOuts = sum(rows, (r) => r.today?.check_outs)
+  const budgets = rows.filter((r) => r.maintenance_budget && r.maintenance_budget.budget > 0)
+  const currency = budgets[0]?.maintenance_budget?.currency ?? places?.[0]?.currency ?? "SAR"
+  const budgetTotal = sum(budgets, (r) => r.maintenance_budget?.budget)
+  const budgetSpent = sum(budgets, (r) => r.maintenance_budget?.spent)
+  const percent = budgetTotal > 0 ? Math.round((budgetSpent / budgetTotal) * 100) : null
+  const counts = useMemo(() => placeCounts(rows), [rows])
+  const placeNames = useMemo(() => new Map((places ?? []).map((p) => [p.id, p.place_name])), [places])
+  const loading = dashboard === null && !dashboardError
+  const number = (n: number) => (loading ? <Skeleton className="h-10 w-16" /> : dashboardError ? "—" : f.number(n))
 
-  const dashboardByPlace = useMemo(
-    () => new Map((dashboard ?? []).map((p) => [p.place_id, p])),
-    [dashboard]
-  )
+  const oldestDays = pending?.oldest ? Math.max(0, Math.floor((now.getTime() - new Date(pending.oldest.created_at).getTime()) / DAY_MS)) : null
+  const month = f.date(now, { month: "long" })
+
+  const headline = (() => {
+    const guests = plural(checkIns, {
+      0: "No guests arrive today",
+      one: "One guest arrives today",
+      other: "# guests arrive today",
+    })
+    const tickets = plural(pendingCount, {
+      0: "no tickets wait for your decision",
+      one: "one ticket waits for your decision",
+      other: "# tickets wait for your decision",
+    })
+    return t`${guests}, and ${tickets}.`
+  })()
 
   return (
-    <div
-      style={S(
-        "max-width: 1240px; margin-inline: auto; padding: 28px 40px 56px; display: flex; flex-direction: column; gap: 24px; box-sizing: border-box"
-      )}
+    <Page
+      title={greeting(now.getHours(), user?.fullname ?? "")}
+      phoneTitle={<Trans>Home</Trans>}
+      phoneStart="logo"
+      phoneActions={false}
+      actions={
+        <Link to="/booking/new" className={cn(buttonVariants())}>
+          <Plus aria-hidden="true" />
+          <Trans>Add booking</Trans>
+        </Link>
+      }
     >
-      {/* Welcome section */}
-      <section
-        aria-label={t`Today`}
-        className="am-rise"
-        style={S(
-          "background: var(--foreground); color: #fff; padding: 32px; display: flex; flex-wrap: wrap; gap: 24px 48px; align-items: flex-end; justify-content: space-between; box-sizing: border-box"
-        )}
-      >
-        <div
-          style={S(
-            "flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 14px"
+      <TodayBand
+        date={f.date(now, { weekday: "long", day: "numeric", month: "long" })}
+        headline={loading ? null : headline}
+        rows={today}
+        primary={{ to: "/tickets", label: <Trans>Review tickets</Trans> }}
+      />
+
+      <div className="flex flex-wrap items-start gap-6">
+        <div className="min-w-0 flex-[999_1_560px]">
+          <div className="grid items-start gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))]">
+            <StatCard
+              compactOnPhone
+              icon={<Wrench strokeWidth={1.8} />}
+              iconTone="warn"
+              title={<Trans>Tickets waiting for your review</Trans>}
+              value={number(pendingCount)}
+              note={
+                oldestDays === null ? (
+                  <Trans>Nothing to review.</Trans>
+                ) : oldestDays === 0 ? (
+                  <Trans>The oldest arrived today</Trans>
+                ) : (
+                  plural(oldestDays, { one: "The oldest is # day old", other: "The oldest is # days old" })
+                )
+              }
+              details={
+                pending && pending.items.length > 0 ? (
+                  <>
+                    {pending.items.map((ticket) => (
+                      <DetailRow
+                        key={ticket.id}
+                        title={<span dir="auto" className="line-clamp-1">{ticket.description}</span>}
+                        sub={placeNames.get(ticket.place_id)}
+                        end={<PriorityText priority={ticket.priority} />}
+                      />
+                    ))}
+                    <Link to="/tickets" className="no-underline">
+                      <DetailsLink>
+                        <Trans>Review tickets</Trans>
+                        <ChevronLeft aria-hidden="true" className="size-4 ltr:rotate-180" />
+                      </DetailsLink>
+                    </Link>
+                  </>
+                ) : undefined
+              }
+            />
+            <StatCard
+              compactOnPhone
+              icon={<CalendarDays strokeWidth={1.8} />}
+              iconTone="info"
+              title={<Trans>Bookings today</Trans>}
+              value={number(checkIns + checkOuts)}
+              note={arrivalsNote(checkIns, checkOuts)}
+              details={checkIns + checkOuts > 0 ? <TodayDetails rows={today} /> : undefined}
+            />
+            <StatCard
+              compactOnPhone
+              icon={<Wallet strokeWidth={1.8} />}
+              iconTone="good"
+              title={<Trans>Maintenance spending in {month}</Trans>}
+              value={loading ? <Skeleton className="h-10 w-20" /> : percent === null ? "—" : `${f.number(percent)}%`}
+              note={
+                percent === null ? (
+                  <Trans>No monthly budget is set.</Trans>
+                ) : (
+                  <Trans>
+                    {f.number(budgetSpent)} of {f.money(budgetTotal, currency, { maximumFractionDigits: 0 })}
+                  </Trans>
+                )
+              }
+              bar={percent}
+              details={
+                budgets.length > 0 ? (
+                  <>
+                    {budgets.map((row) => (
+                      <DetailRow
+                        key={row.place_id}
+                        title={row.place_name}
+                        sub={
+                          <Trans>
+                            of a{" "}
+                            {f.money(row.maintenance_budget?.budget ?? 0, row.maintenance_budget?.currency ?? currency, {
+                              maximumFractionDigits: 0,
+                            })}{" "}
+                            budget
+                          </Trans>
+                        }
+                        end={
+                          <span className="font-mono font-semibold tabular-nums">
+                            {f.money(row.maintenance_budget?.spent ?? 0, row.maintenance_budget?.currency ?? currency, {
+                              maximumFractionDigits: 0,
+                            })}
+                          </span>
+                        }
+                      />
+                    ))}
+                  </>
+                ) : undefined
+              }
+            />
+          </div>
+        </div>
+
+        <section aria-labelledby="your-places" className="am-rise flex min-w-0 flex-[1_1_320px] flex-col gap-3 desk:max-w-[360px]">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-0.5">
+              <h2 id="your-places" className="m-0 text-lg leading-[1.4] font-bold">
+                <Trans>Your places</Trans>
+              </h2>
+              {(places?.length ?? 0) > 2 && (
+                <span className="inline-flex items-center gap-1 text-[13px] text-muted-foreground">
+                  <ChevronDown aria-hidden="true" className="size-4" strokeWidth={1.8} />
+                  <Trans>Scroll to see the rest</Trans>
+                </span>
+              )}
+            </div>
+            <Link to="/places" className="inline-flex min-h-11 items-center text-sm font-semibold">
+              <Trans>See all</Trans>
+            </Link>
+          </div>
+          {placesError ? (
+            <p className="m-0 text-muted-foreground">
+              <Trans>We could not load your places.</Trans>
+            </p>
+          ) : places === null ? (
+            <Skeleton className="h-[168px]" />
+          ) : places.length === 0 ? (
+            <div className="flex flex-col items-start gap-3 border border-border bg-card p-[18px]">
+              <span className="text-muted-foreground">
+                <Trans>Add your first property to see it here.</Trans>
+              </span>
+              <Link to="/place/new" className={cn(buttonVariants(), "no-underline")}>
+                <Trans>Add place</Trans>
+              </Link>
+            </div>
+          ) : (
+            <div
+              role="region"
+              aria-label={t`Your places`}
+              // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrolling region must be reachable by keyboard
+              tabIndex={0}
+              className={cn(
+                "flex flex-none flex-col gap-3 overflow-y-auto overscroll-contain [scroll-snap-type:y_mandatory] [scrollbar-width:thin]",
+                places.length > 2 &&
+                  "h-[400px] pb-10 [mask-image:linear-gradient(to_bottom,#000_calc(100%-40px),transparent)]",
+              )}
+            >
+              {places.map((place) => (
+                <Link
+                  key={place.id}
+                  to="/place/$place_id"
+                  params={{ place_id: place.id }}
+                  className="am-lift box-border flex h-[168px] flex-none snap-start flex-col gap-3.5 border border-border bg-card p-[18px] text-foreground no-underline"
+                >
+                  <span className="flex items-start gap-3">
+                    <span aria-hidden="true" className="inline-flex size-11 flex-none items-center justify-center bg-secondary">
+                      <Building2 className="size-5" strokeWidth={1.8} />
+                    </span>
+                    <span className="flex min-w-0 flex-1 flex-col leading-[1.4]">
+                      <span className="truncate text-base font-semibold">{place.place_name}</span>
+                      <span className="text-[13px] text-muted-foreground">
+                        <TypeLabel type={place.place_type} />
+                        {t`, `}
+                        {place.city}
+                      </span>
+                      <PlaceStatusText status={place.status} />
+                    </span>
+                  </span>
+                  <span className="flex gap-3 border-t border-border pt-3">
+                    <PlaceStat label={<Trans>Assets</Trans>} value={counts[place.id] ? f.number(counts[place.id].assets) : "—"} />
+                    <PlaceStat label={<Trans>Open tickets</Trans>} value={counts[place.id] ? f.number(counts[place.id].openTickets) : "—"} />
+                    <PlaceStat
+                      label={<Trans>Workers</Trans>}
+                      value={workerCounts[place.id] === undefined ? "—" : f.number(workerCounts[place.id])}
+                    />
+                  </span>
+                </Link>
+              ))}
+            </div>
           )}
-        >
-          <span style={S("font-size: 14px; color: var(--info-200)")}>
-            <Trans>Today</Trans>, {today}
-          </span>
+        </section>
+      </div>
+    </Page>
+  )
+}
 
-          <p
-            style={S(
-              "margin: 0; font-size: 28px; font-weight: 700; line-height: 1.35"
-            )}
-          >
-            {greeting(now.getHours())}, {user?.fullname}
-          </p>
+function PlaceStat({ label, value }: { label: ReactNode; value: ReactNode }) {
+  return (
+    <span className="flex flex-1 flex-col leading-[1.35]">
+      <span className="text-[13px] text-muted-foreground">{label}</span>
+      <span className="font-mono text-lg font-semibold tabular-nums">{value}</span>
+    </span>
+  )
+}
 
-          <span style={S("font-size: 14px; color: var(--info-200)")}>
-            
-          </span>
-        </div>
-
-        <div style={S("display: flex; flex-wrap: wrap; gap: 10px")}>
-          <Link
-            to="/tickets"
-            className={cn(buttonVariants(), "am-btn")}
-            style={S(
-              "height: 44px; padding: 0 16px; background: #fff; color: var(--foreground); border: 1px solid #fff; font-size: 15px; font-weight: 600"
-            )}
-          >
-            {isWorker ? <Trans>My tasks</Trans> : <Trans>Review tickets</Trans>}
-          </Link>
-
-          <Link
-            to="/bookings"
-            className={cn(buttonVariants({ variant: "outline" }), "am-btn")}
-            style={S(
-              "height: 44px; padding: 0 16px; background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.45); font-size: 15px; font-weight: 600"
-            )}
-          >
-            <Trans>Bookings</Trans>
-          </Link>
-        </div>
-      </section>
-
-      {/* Statistics */}
-      <div
-        style={S(
-          "display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; align-items: stretch"
-        )}
-      >
-        <StatCard
-          icon={<Ticket size={20} />}
-          iconBg="var(--warn-50)"
-          iconFg="var(--warn)"
-          title={<Trans>Tickets waiting for your review</Trans>}
-          value={
-            dashboardLoading ? (
-              <Skeleton style={S("height: 40px; width: 100px")} />
-            ) : dashboardError ? (
-              "—"
-            ) : (
-              money(stats.pendingTickets)
-            )
-          }
-          note={
-            dashboardLoading ? (
-              <Trans>Loading ticket statistics...</Trans>
-            ) : (
-              <span>
-                <Trans>Approved:</Trans> {money(stats.approvedTickets)}
-                {" · "}
-                <span style={S("color: var(--danger)")}>
-                  <Trans>Overdue:</Trans> {money(stats.overdueTickets)}
+/** The dark band: today's date, one sentence, who arrives and leaves, and two buttons. */
+function TodayBand({
+  date,
+  headline,
+  rows,
+  primary,
+}: {
+  date: string
+  headline: ReactNode
+  rows: { checkIns: TodayRow[]; checkOuts: TodayRow[] } | null
+  primary: { to: "/tickets"; label: ReactNode }
+}) {
+  const people = rows ? [...rows.checkIns.map((r) => ({ ...r, in: true })), ...rows.checkOuts.map((r) => ({ ...r, in: false }))] : []
+  return (
+    <section
+      aria-label={t`Today`}
+      className="am-rise box-border flex flex-wrap items-end justify-between gap-x-12 gap-y-6 bg-foreground p-6 text-white shadow-[4px_4px_0_var(--accent-brand)] desk:p-8"
+    >
+      <div className="flex min-w-0 flex-[1_1_360px] flex-col gap-3.5">
+        <span className="text-sm text-info-200">
+          <Trans>Today, {date}</Trans>
+        </span>
+        {headline && <p className="m-0 text-[22px] leading-[1.35] font-bold desk:text-[28px]">{headline}</p>}
+        {people.length > 0 && (
+          <ul className="m-0 flex list-none flex-col gap-1.5 p-0 text-[15px]">
+            {people.slice(0, 4).map(({ booking, place, in: arriving }) => (
+              <li key={`${booking.id}-${arriving}`}>
+                <strong className="font-semibold">
+                  {arriving ? <Trans>{booking.guest_name} arrives</Trans> : <Trans>{booking.guest_name} leaves</Trans>}
+                </strong>
+                <span className="text-info-200">
+                  {t`, `}
+                  {place.place_name}
                 </span>
-              </span>
-            )
-          }
-        />
-
-        <StatCard
-          icon={<CalendarDays size={20} />}
-          iconBg="var(--info-50)"
-          iconFg="var(--info-700)"
-          title={<Trans>Bookings today</Trans>}
-          value={
-            dashboardLoading ? (
-              <Skeleton style={S("height: 40px; width: 100px")} />
-            ) : dashboardError ? (
-              "—"
-            ) : (
-              money(stats.bookings)
-            )
-          }
-          note={
-            dashboardLoading ? (
-              <Trans>Loading booking statistics...</Trans>
-            ) : (
-              <span>
-                <Trans>Check-ins:</Trans> {money(stats.checkIns)}
-                {" · "}
-                <Trans>Check-outs:</Trans> {money(stats.checkOuts)}
-              </span>
-            )
-          }
-        />
-
-        {!isWorker && (
-          <StatCard
-            icon={<Wallet size={20} />}
-            iconBg="var(--good-50)"
-            iconFg="var(--good)"
-            title={<Trans>Monthly maintenance budget</Trans>}
-            value={
-              dashboardLoading ? (
-                <Skeleton style={S("height: 40px; width: 140px")} />
-              ) : dashboardError ? (
-                "—"
-              ) : (
-                `${money(stats.budgetTotal)} ${stats.currency}`
-              )
-            }
-            note={
-              dashboardLoading ? (
-                <Trans>Loading budget statistics...</Trans>
-              ) : (
-                <span>
-                  <Trans>Spent:</Trans> {money(stats.budgetSpent)} {stats.currency}
-                  {" · "}
-                  <Trans>Remaining:</Trans> {money(stats.budgetRemaining)}{" "}
-                  {stats.currency}
-                </span>
-              )
-            }
-          >
-            {dashboard !== null && dashboard.length > 0 && (
-              <BudgetDetails
-                dashboard={dashboard}
-                money={money}
-              />
-            )}
-          </StatCard>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
-
-      {/* Places */}
-      <section>
-        <div
-          style={S(
-            "display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px"
-          )}
+      <div className="flex flex-wrap gap-2.5">
+        <Link
+          to={primary.to}
+          className="inline-flex h-11 items-center justify-center gap-2 border border-white bg-white px-4 text-[15px] font-semibold whitespace-nowrap text-foreground no-underline"
         >
-          <h2 style={S("font-size: 16px; font-weight: 700; margin: 0")}>
-            <Trans>Your places</Trans>
-          </h2>
-
-          <Link
-            to="/places"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "sm" }),
-              "am-btn"
-            )}
-          >
-            <Trans>See all</Trans>
-          </Link>
-        </div>
-
-        {placesLoading && (
-          <div style={S("display: flex; flex-direction: column; gap: 10px")}>
-            <Skeleton style={S("height: 120px")} />
-            <Skeleton style={S("height: 120px")} />
-          </div>
-        )}
-
-        {placesError && (
-          <p style={S("color: var(--muted-foreground)")}>
-            <Trans>We could not load your places.</Trans>
-          </p>
-        )}
-
-        {places !== null && places.length === 0 && !placesError && (
-          <Empty style={S("padding: 32px")}>
-            <EmptyHeader>
-              <EmptyTitle>
-                <Trans>No properties yet</Trans>
-              </EmptyTitle>
-              <EmptyDescription>
-                <Trans>Add your first property to see it here.</Trans>
-              </EmptyDescription>
-              <Link
-                to="/places"
-                className={cn(buttonVariants({ size: "sm" }), "am-btn")}
-              >
-                <Trans>Add property</Trans>
-              </Link>
-            </EmptyHeader>
-          </Empty>
-        )}
-
-        <div style={S("display: flex; flex-direction: column; gap: 10px")}>
-          {(places ?? []).map((p) => {
-            const dashboardPlace = dashboardByPlace.get(p.id)
-
-            return (
-              <Link
-                key={p.id}
-                to="/place/$place_id"
-                params={{ place_id: p.id }}
-                className="am-lift"
-                style={S(
-                  "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; background: var(--card); border: 1px solid var(--border); padding: 16px 18px; text-decoration: none; color: inherit; box-shadow: 2px 2px 0 rgba(27,36,48,0.10)"
-                )}
-              >
-                <span
-                  style={S(
-                    "display: flex; flex-direction: column; gap: 4px; min-width: 0"
-                  )}
-                >
-                  <span style={S("font-size: 16px; font-weight: 700")}>
-                    {p.place_name}
-                  </span>
-
-                  <span
-                    style={S(
-                      "font-size: 13px; color: var(--muted-foreground)"
-                    )}
-                  >
-                    <TypeLabel type={p.place_type} />, {p.city}
-                  </span>
-
-                  {dashboardPlace && (
-                    <span
-                      style={S(
-                        "display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; font-size: 12px; color: var(--muted-foreground)"
-                      )}
-                    >
-                      <span>
-                        <CheckCircle2
-                          size={13}
-                          style={{ display: "inline", verticalAlign: "middle" }}
-                        />{" "}
-                        <Trans>Good:</Trans>{" "}
-                        {money(dashboardPlace.assets?.GOOD ?? 0)}
-                      </span>
-
-                      <span>
-                        <Wrench
-                          size={13}
-                          style={{ display: "inline", verticalAlign: "middle" }}
-                        />{" "}
-                        <Trans>Needs maintenance:</Trans>
-                        {money(dashboardPlace.assets?.NEEDS_MAINTENANCE ?? 0)}
-                      </span>
-
-                      <span>
-                        <AlertTriangle
-                          size={13}
-                          style={{ display: "inline", verticalAlign: "middle" }}
-                        />{" "}
-                        <Trans>Out of service:</Trans>
-                        {money(dashboardPlace.assets?.OUT_OF_SERVICE ?? 0)}
-                      </span>
-                    </span>
-                  )}
-                </span>
-
-                <span
-                  style={S(
-                    "display: flex; align-items: center; flex-wrap: wrap; gap: 14px; flex: none"
-                  )}
-                >
-                  {!isWorker && (
-                    <span
-                      style={S(
-                        "font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 14px"
-                      )}
-                    >
-                      {p.monthly_maintenance_budget == null
-                        ? "—"
-                        : `${money(p.monthly_maintenance_budget)} ${p.currency}`}
-                    </span>
-                  )}
-
-                  <StatusBadge status={p.status} />
-                </span>
-              </Link>
-            )
-          })}
-        </div>
-      </section>
-    </div>
+          {primary.label}
+        </Link>
+        <Link
+          to="/bookings"
+          className="inline-flex h-11 items-center justify-center gap-2 border border-white/45 bg-transparent px-4 text-[15px] font-semibold whitespace-nowrap text-white no-underline hover:text-white"
+        >
+          <Trans>Bookings</Trans>
+        </Link>
+      </div>
+    </section>
   )
 }
 
-function StatCard({
-  icon,
-  iconBg,
-  iconFg,
-  title,
-  value,
-  note,
-  children,
-}: {
-  icon: ReactNode
-  iconBg: string
-  iconFg: string
-  title: ReactNode
-  value: ReactNode
-  note: ReactNode
-  children?: ReactNode
-}) {
-  return (
-    <Card
-      className="am-lift"
-      style={S(
-        "padding: 24px; gap: 8px; border: 1px solid var(--border); box-shadow: 2px 2px 0 rgba(27,36,48,0.10); display: flex; flex-direction: column"
-      )}
-    >
-      <CardHeader style={S("padding: 0; gap: 6px")}>
-        <div
-          style={S(
-            "display: flex; align-items: center; justify-content: space-between; gap: 12px"
-          )}
-        >
-          <CardTitle
-            style={S(
-              "font-size: 15px; font-weight: 500; color: #5B636E"
-            )}
-          >
-            {title}
-          </CardTitle>
-
-          <span
-            aria-hidden="true"
-            style={S(
-              `width: 40px; height: 40px; flex: none; display: inline-flex; align-items: center; justify-content: center; background: ${iconBg}; color: ${iconFg}`
-            )}
-          >
-            {icon}
-          </span>
-        </div>
-
-        <span
-          style={S(
-            "font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-size: 40px; font-weight: 700; line-height: 1.15"
-          )}
-        >
-          {value}
-        </span>
-
-        <CardDescription style={S("font-size: 14px; color: #5B636E")}>
-          {note}
-        </CardDescription>
-      </CardHeader>
-
-      {children && (
-        <CardContent style={S("padding: 0")}>
-          {children}
-        </CardContent>
-      )}
-    </Card>
-  )
-}
-function BudgetDetails({
-  dashboard,
-  money,
-}: {
-  dashboard: DashboardPlace[]
-  money: (n: number) => string
-}) {
-  const [open, setOpen] = useState(false)
-  
-
-
-  const placesWithBudget = dashboard.filter(
-    (p) => p.maintenance_budget !== null
-  )
-
+function TodayDetails({ rows }: { rows: { checkIns: TodayRow[]; checkOuts: TodayRow[] } | null }) {
+  if (!rows) return <Skeleton className="my-2 h-10" />
   return (
     <>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="am-disclose"
-        aria-expanded={open}
-        aria-controls="budget-details"
-        onClick={() => setOpen(!open)}
-        style={S(
-          "align-self: flex-start; margin-inline-start: -12px; color: var(--info-700); font-size: 14px; font-weight: 600; height: 44px"
-        )}
-      >
-        {open ? <Trans>Hide details</Trans> : <Trans>Details</Trans>}
-        {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-      </Button>
-        
-      {open && (
-        <div
-          id="budget-details"
-          className="am-reveal"
-          style={S(
-            "display: flex; flex-direction: column; border-top: 1px solid var(--border); padding-top: 8px"
-          )}
-        >
-          {placesWithBudget.map((p) => {
-            const budget = p.maintenance_budget
-
-            if (!budget) return null
-
-            return (
-              <div
-                key={p.place_id}
-                style={S(
-                  "display: flex; flex-direction: column; gap: 6px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px"
-                )}
-              >
-                <span style={S("font-weight: 600")}>
-                  {p.place_name}
-                </span>
-
-                <div
-                  style={S(
-                    "display: flex; flex-wrap: wrap; gap: 12px; color: var(--muted-foreground)"
-                  )}
-                >
-                  <span>
-                    <Trans>Budget:</Trans>{" "}
-                    {money(budget.budget)} {budget.currency}
-                  </span>
-
-                  <span>
-                    <Trans>Spent:</Trans>{" "}
-                    {money(budget.spent)} {budget.currency}
-                  </span>
-
-                  <span>
-                    <Trans>Remaining:</Trans>{" "}
-                    {money(budget.remaining)} {budget.currency}
-                  </span>
-                </div>
-              </div>
-            )
-          })}
-          
-        </div>
-      )}
+      {rows.checkIns.map(({ booking, place }) => (
+        <DetailRow
+          key={`in-${booking.id}`}
+          title={<Trans>Check-in: {booking.guest_name}</Trans>}
+          sub={place.place_name}
+          end={<BookingStatusChip status={booking.status} />}
+        />
+      ))}
+      {rows.checkOuts.map(({ booking, place }) => (
+        <DetailRow
+          key={`out-${booking.id}`}
+          title={<Trans>Check-out: {booking.guest_name}</Trans>}
+          sub={place.place_name}
+          end={<BookingStatusChip status={booking.status} />}
+        />
+      ))}
     </>
+  )
+}
+
+// ─── Worker ─────────────────────────────────────────────────────────────────
+
+function WorkerHome() {
+  const { user, accessToken } = useAuth()
+  const f = useFormat()
+  const [now] = useState(() => new Date())
+  const { places, dashboard, placesError, dashboardError } = useHomeData()
+  const today = useTodayBookings(places, dashboard)
+
+  // My open tasks: approved tickets assigned to me, soonest due first.
+  const [tasks, setTasks] = useState<{ items: Ticket[]; total: number } | null>(null)
+  const [tasksError, setTasksError] = useState(false)
+  useEffect(() => {
+    if (!accessToken || !user) return
+    let alive = true
+    listTickets(accessToken, { assignee_id: user.id, status: "APPROVED", sort: "due_date" }, 1, 100)
+      .then((result) => alive && setTasks({ items: result.data, total: result.pagination.total }))
+      .catch(() => alive && setTasksError(true))
+    return () => {
+      alive = false
+    }
+  }, [accessToken, user])
+
+  const placeById = useMemo(() => new Map((places ?? []).map((p) => [p.id, p])), [places])
+  const isOverdue = (ticket: Ticket) => {
+    if (!ticket.due_date) return false
+    const place = placeById.get(ticket.place_id)
+    return ticket.due_date.slice(0, 10) < todayIn(place?.timezone ?? "Asia/Riyadh")
+  }
+  const overdue = tasks?.items.filter(isOverdue).length ?? 0
+  const checkIns = sum(dashboard ?? [], (r) => r.today?.check_ins)
+  const loading = (value: unknown, failed: boolean) => value === null && !failed
+
+  // Report damage needs a place; with one place it opens straight away.
+  const reportLink =
+    places?.length === 1
+      ? { to: "/ticket/new" as const, search: { place_id: places[0].id } }
+      : { to: "/places" as const }
+
+  return (
+    <Page
+      title={greeting(now.getHours(), user?.fullname ?? "")}
+      description={f.date(now, { weekday: "long", day: "numeric", month: "long" })}
+      phoneTitle={<Trans>Home</Trans>}
+      phoneSubtitle={f.date(now, { weekday: "long", day: "numeric", month: "long" })}
+      phoneStart="logo"
+      actions={
+        <Link {...reportLink} className={cn(buttonVariants(), "w-full no-underline desk:w-auto")}>
+          <Camera aria-hidden="true" strokeWidth={1.8} />
+          <Trans>Report damage</Trans>
+        </Link>
+      }
+    >
+      <div className="grid items-start gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr))]">
+        <StatCard
+          title={<Trans>My open tasks</Trans>}
+          value={loading(tasks, tasksError) ? <Skeleton className="h-10 w-16" /> : tasksError ? "—" : f.number(tasks?.total ?? 0)}
+          note={
+            overdue === 0
+              ? <Trans>None of them is overdue</Trans>
+              : plural(overdue, { one: "One of them is overdue", other: "# of them are overdue" })
+          }
+          details={
+            tasks && tasks.items.length > 0 ? (
+              <>
+                {tasks.items.slice(0, 3).map((ticket) => {
+                  const late = isOverdue(ticket)
+                  const place = placeById.get(ticket.place_id)?.place_name ?? ""
+                  const due = ticket.due_date ? f.date(ticket.due_date.slice(0, 10), { day: "numeric", month: "long" }) : null
+                  return (
+                    <DetailRow
+                      key={ticket.id}
+                      title={<span dir="auto" className="line-clamp-1">{ticket.description}</span>}
+                      sub={
+                        due === null
+                          ? place
+                          : late
+                            ? <Trans>{place}, was due {due}</Trans>
+                            : <Trans>{place}, due {due}</Trans>
+                      }
+                      end={late ? <OverdueChip /> : <TicketStatusChip status={ticket.status} />}
+                    />
+                  )
+                })}
+                <Link to="/tickets" className="no-underline">
+                  <DetailsLink>
+                    <Trans>Open my tasks</Trans>
+                    <ChevronLeft aria-hidden="true" className="size-4 ltr:rotate-180" />
+                  </DetailsLink>
+                </Link>
+              </>
+            ) : undefined
+          }
+        />
+        <StatCard
+          title={<Trans>Guests arriving today</Trans>}
+          value={loading(dashboard, dashboardError) ? <Skeleton className="h-10 w-16" /> : dashboardError ? "—" : f.number(checkIns)}
+          note={
+            today && today.checkIns.length > 0
+              ? [...new Set(today.checkIns.map((r) => r.place.place_name))].join(t`, `)
+              : <Trans>No guests arrive today.</Trans>
+          }
+          details={today && today.checkIns.length > 0 ? <TodayDetails rows={{ checkIns: today.checkIns, checkOuts: [] }} /> : undefined}
+        />
+        <StatCard
+          title={<Trans>My places</Trans>}
+          value={loading(places, placesError) ? <Skeleton className="h-10 w-16" /> : placesError ? "—" : f.number(places?.length ?? 0)}
+          note={
+            places && places.length > 0
+              ? places.map((p) => p.place_name).join(t`, `)
+              : <Trans>You are not assigned to a place yet.</Trans>
+          }
+          details={
+            places && places.length > 0 ? (
+              <>
+                {places.map((place) => (
+                  <DetailRow key={place.id} title={place.place_name} sub={place.city} end={<StatusBadge status={place.status} />} />
+                ))}
+                <Link to="/places" className="no-underline">
+                  <DetailsLink>
+                    <Trans>Open my places</Trans>
+                    <ChevronLeft aria-hidden="true" className="size-4 ltr:rotate-180" />
+                  </DetailsLink>
+                </Link>
+              </>
+            ) : undefined
+          }
+        />
+      </div>
+    </Page>
   )
 }

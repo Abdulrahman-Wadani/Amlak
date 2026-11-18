@@ -7,7 +7,7 @@ import { TicketStatusChip } from "@/components/place-shared"
 
 describe("TicketStatusChip", () => {
   it.each<[TicketStatus, string]>([
-    ["PENDING_REVIEW", "Waiting for review"],
+    ["PENDING_REVIEW", "Pending review"],
     ["APPROVED", "Approved"],
     ["REJECTED", "Rejected"],
     ["COMPLETED", "Completed"],
