@@ -151,13 +151,13 @@ function AdminUsers() {
       ) : users.length === 0 ? (
         <EmptyState title={<Trans>No users match</Trans>} text={<Trans>Change the search or the filters.</Trans>} />
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] gap-4">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] items-stretch gap-4">
           {users.map((user) => (
             <Link
               key={user.id}
               to="/admin/$admin_id"
               params={{ admin_id: user.id }}
-              className="am-lift box-border flex min-w-0 flex-col gap-2.5 border border-border bg-card p-4 text-foreground no-underline shadow-sm"
+              className="am-lift box-border flex h-full min-w-0 flex-col gap-2.5 border border-border bg-card p-4 text-foreground no-underline shadow-sm"
             >
               <span className="flex items-start justify-between gap-3">
                 <span className="flex min-w-0 items-center gap-2.5">
@@ -173,7 +173,7 @@ function AdminUsers() {
                 </span>
                 <UserStatusChip status={user.status} />
               </span>
-              <span className="flex flex-wrap gap-x-4 text-[13px] text-muted-foreground">
+              <span className="mt-auto flex flex-wrap gap-x-4 text-[13px] text-muted-foreground">
                 <span>{roleLabel(user.role)}</span>
                 <span>
                   <Trans>Joined: {date(user.created_at, { day: "numeric", month: "long" })}</Trans>
