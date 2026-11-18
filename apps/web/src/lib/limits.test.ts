@@ -10,7 +10,7 @@ describe("tooLong", () => {
   })
 
   it("refuses one character more, naming the limit", () => {
-    expect(tooLong("a".repeat(LIMITS.text + 1), LIMITS.text)).toBe("Use 1000 characters or fewer.")
+    expect(tooLong("a".repeat(LIMITS.text + 1), LIMITS.text)).toBe("Use 1,000 characters or fewer.")
   })
 })
 
