@@ -1,6 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from "react"
 import { Trans } from "@lingui/react/macro"
-import { S } from "@/lib/dom-style"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -77,16 +76,13 @@ export default function Form({ fields, onSubmit }: FormProps) {
     <div>
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-4"
-        style={S(
-          "display: flex; max-width:50%; min-width:50%; flex-direction: column; gap: 16px; background: #fff; border: 1px solid var(--border); padding: 24px; box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1)",
-        )}
+        className="box-border flex w-full min-w-0 flex-col gap-5 border border-border bg-card p-7 shadow-sm"
       >
         {fields.map((field) => {
           if (field.hidden) return null
 
           return (
-            <div key={field.name} className="flex flex-col gap-2">
+            <div key={field.name} className="flex min-w-0 flex-col gap-2">
               <Label htmlFor={field.name} className="text-sm font-semibold">
                 {field.label}
               </Label>
@@ -96,7 +92,7 @@ export default function Form({ fields, onSubmit }: FormProps) {
                   value={text(field.name)}
                   onValueChange={(value) => set(field.name, value ?? "")}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id={field.name} className="w-full">
                     <SelectValue placeholder={field.label} />
                   </SelectTrigger>
 
@@ -141,7 +137,7 @@ export default function Form({ fields, onSubmit }: FormProps) {
           )
         })}
 
-        <Button type="submit" className="w-full">
+        <Button type="submit" className="w-full desk:w-auto desk:self-start">
           <Trans>Save</Trans>
         </Button>
       </form>
