@@ -195,9 +195,17 @@ function ManagerHome() {
     return t`${guests}, and ${tickets}.`
   })()
 
+  const todayDate = f.date(now, { weekday: "long", day: "numeric", month: "long" })
+
   return (
     <Page
       title={greeting(now.getHours(), user?.fullname ?? "")}
+      description={
+        <>
+          <Trans>Today, {todayDate}</Trans>
+          {!loading && <>{t` · `}{headline}</>}
+        </>
+      }
       phoneTitle={<Trans>Home</Trans>}
       phoneStart="logo"
       phoneActions={false}
@@ -208,12 +216,6 @@ function ManagerHome() {
         </Link>
       }
     >
-      <TodayBand
-        date={f.date(now, { weekday: "long", day: "numeric", month: "long" })}
-        headline={loading ? null : headline}
-        rows={today}
-        primary={{ to: "/tickets", label: <Trans>Review tickets</Trans> }}
-      />
 
       <div className="flex flex-wrap items-start gap-6">
         <div className="min-w-0 flex-[999_1_560px]">
@@ -400,63 +402,6 @@ function PlaceStat({ label, value }: { label: ReactNode; value: ReactNode }) {
       <span className="text-[13px] text-muted-foreground">{label}</span>
       <span className="font-mono text-lg font-semibold tabular-nums">{value}</span>
     </span>
-  )
-}
-
-/** The dark band: today's date, one sentence, who arrives and leaves, and two buttons. */
-function TodayBand({
-  date,
-  headline,
-  rows,
-  primary,
-}: {
-  date: string
-  headline: ReactNode
-  rows: { checkIns: TodayRow[]; checkOuts: TodayRow[] } | null
-  primary: { to: "/tickets"; label: ReactNode }
-}) {
-  const people = rows ? [...rows.checkIns.map((r) => ({ ...r, in: true })), ...rows.checkOuts.map((r) => ({ ...r, in: false }))] : []
-  return (
-    <section
-      aria-label={t`Today`}
-      className="am-rise box-border flex min-h-(--band-min-h) flex-wrap content-center items-center justify-between gap-x-12 gap-y-6 bg-foreground p-6 text-white shadow-[4px_4px_0_var(--accent-brand)] desk:p-8"
-    >
-      <div className="flex min-w-0 flex-[1_1_360px] flex-col gap-3.5">
-        <span className="text-sm text-info-200">
-          <Trans>Today, {date}</Trans>
-        </span>
-        {headline && <p className="m-0 text-[22px] leading-[1.35] font-bold desk:text-[28px]">{headline}</p>}
-        {people.length > 0 && (
-          <ul className="m-0 flex list-none flex-col gap-1.5 p-0 text-[15px]">
-            {people.slice(0, 4).map(({ booking, place, in: arriving }) => (
-              <li key={`${booking.id}-${arriving}`}>
-                <strong className="font-semibold">
-                  {arriving ? <Trans>{booking.guest_name} arrives</Trans> : <Trans>{booking.guest_name} leaves</Trans>}
-                </strong>
-                <span className="text-info-200">
-                  {t`, `}
-                  {place.place_name}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      <div className="flex flex-wrap gap-2.5">
-        <Link
-          to={primary.to}
-          className="inline-flex h-11 items-center justify-center gap-2 border border-white bg-white px-4 text-[15px] font-semibold whitespace-nowrap text-foreground no-underline"
-        >
-          {primary.label}
-        </Link>
-        <Link
-          to="/bookings"
-          className="inline-flex h-11 items-center justify-center gap-2 border border-white/45 bg-transparent px-4 text-[15px] font-semibold whitespace-nowrap text-white no-underline hover:text-white"
-        >
-          <Trans>Bookings</Trans>
-        </Link>
-      </div>
-    </section>
   )
 }
 

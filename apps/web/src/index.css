@@ -172,8 +172,8 @@
 }
 
 /*
- * The navy banner (home, notifications): a fixed minimum height, whatever its
- * content. Desktop is the Amlak-Dashboard design (about 206px); the phone value
+ * The navy band at the top of every signed-in page (components/page.tsx): a
+ * fixed minimum height, whatever its content. Desktop is the Amlak-Dashboard design (about 206px); the phone value
  * is Amlak-Dashboard-Mobile. The breakpoint is --breakpoint-desk (70rem).
  */
 :root {
@@ -194,5 +194,27 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/*
+ * Inside the navy band, buttons are white and the bell is white. These sit in
+ * the base layer with motion.css, so they need !important to beat the
+ * utilities and motion.css's own hover colour.
+ */
+@layer base {
+  .am-band .am-btn {
+    border-color: #fff !important;
+    background-color: #fff !important;
+    color: var(--foreground) !important;
+  }
+  .am-band .am-btn:hover {
+    filter: brightness(0.94);
+  }
+  .am-band .am-icon {
+    color: #fff !important;
+  }
+  .am-band .am-icon:hover {
+    background-color: rgb(255 255 255 / 0.12) !important;
   }
 }

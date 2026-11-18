@@ -129,7 +129,6 @@ function BookingPage() {
       title={title ?? <Skeleton className="h-7 w-72" />}
       phoneTitle={<Trans>Booking</Trans>}
       parent={{ label: <Trans>Bookings</Trans>, link: { to: "/bookings" } }}
-      header
       phoneEnd="none"
       tabs={false}
     >
