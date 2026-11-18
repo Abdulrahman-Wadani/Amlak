@@ -177,7 +177,8 @@ function WorkersPage() {
             />
           ))}
         </div>
-      </Panel>    </Page>
+      </Panel>
+    </Page>
   )
 }
 

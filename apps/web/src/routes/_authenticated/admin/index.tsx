@@ -197,6 +197,7 @@ function AdminUsers() {
           range={(from, to, all) => t`${from} to ${to} of ${all} users`}
           onPage={setPage}
         />
-      </Panel>    </Page>
+      </Panel>
+    </Page>
   )
 }

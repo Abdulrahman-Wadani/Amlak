@@ -154,6 +154,7 @@ function SiteContent() {
             onClose={() => setToDelete(null)}
           />
         )}
-      </Panel>    </Page>
+      </Panel>
+    </Page>
   )
 }

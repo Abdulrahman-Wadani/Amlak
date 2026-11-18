@@ -191,6 +191,7 @@ export function AdminSupport() {
             }
           />
         )}
-      </Panel>    </Page>
+      </Panel>
+    </Page>
   )
 }
