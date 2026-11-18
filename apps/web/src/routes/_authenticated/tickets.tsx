@@ -9,7 +9,7 @@ import { getPlaces, listAllTickets, listTickets } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Page } from "@/components/page"
 import { ReportPopup } from "@/components/report-form"
-import { FilterTabs, ListFooter, NativeSelect, Panel } from "@/components/panel"
+import { FilterTabs, ListFooter, ListToolbar, Panel, ToolbarSelect } from "@/components/panel"
 import { EmptyState, LoadError, LoadingList } from "@/components/states"
 import { TaskCard, TicketCard, useTicketNames } from "@/components/ticket-parts"
 
@@ -116,37 +116,36 @@ function ManagerTickets() {
     <Page title={<Trans>Maintenance tickets</Trans>} phoneTitle={<Trans>Maintenance</Trans>} description={summary}>
       {/* One card holds the page's list, its filters and its pages. */}
       <Panel className="gap-5">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <FilterTabs
-            label={t`Filter by status`}
-            value={filter}
-            onChange={(key) => {
-              setFilter(key)
-              setPage(1)
-            }}
-            tabs={FILTERS.map((item) => ({ key: item.key, label: item.label, count: counts[item.key] ?? 0 }))}
-          />
-          <div className="w-full desk:w-[220px]">
-            <label htmlFor="ticket-place" className="sr-only">
-              <Trans>Place</Trans>
-            </label>
-            <NativeSelect
-              id="ticket-place"
-              value={placeId}
-              onChange={(value) => {
-                setPlaceId(value)
+        <ListToolbar
+          filters={
+            <FilterTabs
+              label={t`Filter by status`}
+              value={filter}
+              onChange={(key) => {
+                setFilter(key)
                 setPage(1)
               }}
-            >
-              <option value="">{t`All places`}</option>
-              {places.map((place) => (
-                <option key={place.id} value={place.id}>
-                  {place.place_name}
-                </option>
-              ))}
-            </NativeSelect>
-          </div>
-        </div>
+              tabs={FILTERS.map((item) => ({ key: item.key, label: item.label, count: counts[item.key] ?? 0 }))}
+            />
+          }
+        >
+          <ToolbarSelect
+            id="ticket-place"
+            label={t`Place`}
+            value={placeId}
+            onChange={(value) => {
+              setPlaceId(value)
+              setPage(1)
+            }}
+          >
+            <option value="">{t`All places`}</option>
+            {places.map((place) => (
+              <option key={place.id} value={place.id}>
+                {place.place_name}
+              </option>
+            ))}
+          </ToolbarSelect>
+        </ListToolbar>
 
         {failed ? (
           <LoadError title={<Trans>Could not load tickets</Trans>} onRetry={() => setReload((n) => n + 1)} />

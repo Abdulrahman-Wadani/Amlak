@@ -2,15 +2,13 @@ import { useEffect, useState } from "react"
 import { Link, createFileRoute, redirect } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import { Search } from "lucide-react"
 import type { Role, User, UserStatus } from "@amlak/shared"
 import { storedUser, useAuth } from "@/lib/auth"
 import { apiPage } from "@/lib/api"
 import { roleLabel } from "@/lib/nav"
 import { useFormat } from "@/lib/format"
-import { Input } from "@/components/ui/input"
 import { Page } from "@/components/page"
-import { Field, FilterTabs, Initial, ListFooter, NativeSelect, Panel } from "@/components/panel"
+import { FilterTabs, Initial, ListFooter, ListToolbar, Panel, ToolbarSearch, ToolbarSelect } from "@/components/panel"
 import { UserStatusChip } from "@/components/place-shared"
 import { EmptyState, LoadError, LoadingList } from "@/components/states"
 import { LIMITS } from "@/lib/limits"
@@ -104,49 +102,42 @@ function AdminUsers() {
     >
       {/* One card holds the page's list, its filters and its pages. */}
       <Panel className="gap-5">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="relative w-full desk:w-[320px]">
-            <label htmlFor="user-search" className="sr-only">
-              <Trans>Search</Trans>
-            </label>
-            <Search aria-hidden="true" className="pointer-events-none absolute start-3.5 top-3 size-5 text-muted-foreground" strokeWidth={1.8} />
-            <Input
-              id="user-search"
-              maxLength={LIMITS.title}
-              type="search"
-              className="ps-11"
-              placeholder={t`Search by name or email`}
-              value={typed}
-              onChange={(e) => setTyped(e.target.value)}
+        <ListToolbar
+          filters={
+            <FilterTabs
+              label={t`Filter by status`}
+              value={filter}
+              onChange={(key) => {
+                setFilter(key)
+                setPage(1)
+              }}
+              tabs={FILTERS.map((item) => ({ key: item.key, label: item.label, count: counts[item.key] ?? 0 }))}
             />
-          </div>
-          <div className="w-full desk:w-[200px]">
-            <Field id="user-role" label={<Trans>Role</Trans>}>
-              <NativeSelect
-                id="user-role"
-                value={role}
-                onChange={(value) => {
-                  setRole(value as "" | Role)
-                  setPage(1)
-                }}
-              >
-                <option value="">{t`All roles`}</option>
-                <option value="MANAGER">{roleLabel("MANAGER")}</option>
-                <option value="WORKER">{roleLabel("WORKER")}</option>
-                <option value="ADMIN">{roleLabel("ADMIN")}</option>
-              </NativeSelect>
-            </Field>
-          </div>
-        </div>
-        <FilterTabs
-          label={t`Filter by status`}
-          value={filter}
-          onChange={(key) => {
-            setFilter(key)
-            setPage(1)
-          }}
-          tabs={FILTERS.map((item) => ({ key: item.key, label: item.label, count: counts[item.key] ?? 0 }))}
-        />
+          }
+        >
+          <ToolbarSearch
+            id="user-search"
+            label={t`Search`}
+            placeholder={t`Search by name or email`}
+            maxLength={LIMITS.title}
+            value={typed}
+            onChange={setTyped}
+          />
+          <ToolbarSelect
+            id="user-role"
+            label={t`Role`}
+            value={role}
+            onChange={(value) => {
+              setRole(value as "" | Role)
+              setPage(1)
+            }}
+          >
+            <option value="">{t`All roles`}</option>
+            <option value="MANAGER">{roleLabel("MANAGER")}</option>
+            <option value="WORKER">{roleLabel("WORKER")}</option>
+            <option value="ADMIN">{roleLabel("ADMIN")}</option>
+          </ToolbarSelect>
+        </ListToolbar>
 
         {failed ? (
           <LoadError title={<Trans>Could not load users</Trans>} onRetry={() => setReload((n) => n + 1)} />

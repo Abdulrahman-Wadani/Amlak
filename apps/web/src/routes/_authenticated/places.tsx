@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link, createFileRoute } from "@tanstack/react-router"
-import { MapPin, Plus, Search } from "lucide-react"
+import { MapPin, Plus } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
 import { plural, t } from "@lingui/core/macro"
 import type { Place } from "@amlak/shared"
@@ -9,13 +9,11 @@ import { countPlaceWorkers, getDashboardRows, getPlaces } from "@/lib/api"
 import { placeCounts, type PlaceCounts } from "@/lib/places"
 import { S } from "@/lib/dom-style"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { StatusBadge, TypeLabel } from "@/components/place-shared"
 import { cn } from "cn"
 import { Page } from "@/components/page"
 import { EmptyState, LoadError, LoadingList } from "@/components/states"
-import { FilterTabs, ListFooter, Panel } from "@/components/panel"
+import { FilterTabs, ListFooter, ListToolbar, Panel, ToolbarSearch } from "@/components/panel"
 import { useFormat } from "@/lib/format"
 import { LIMITS } from "@/lib/limits"
 
@@ -158,51 +156,31 @@ function PlacesPage() {
       <Panel className="gap-5">
         {/* Workers see only their own few places: no search and no filters (as designed). */}
         {isManager && (
-        <div
-          style={S(
-            "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px"
-          )}
-        >
-          <div style={S("position: relative; flex: 1 1 320px; max-width: 320px")}>
-            <Label
-              htmlFor="q"
-              style={S(
-                "position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)"
-              )}
-            >
-              <Trans>Search</Trans>
-            </Label>
-            <Search
-              aria-hidden="true"
-              style={S(
-                "position: absolute; top: 12px; inset-inline-start: 14px; width: 20px; height: 20px; color: var(--muted-foreground); pointer-events: none"
-              )}
-            />
-            <Input
+          <ListToolbar
+            filters={
+              <FilterTabs
+                label={t`Filter by status`}
+                value={tab}
+                onChange={(key) => {
+                  setTab(key)
+                  setPage(1)
+                }}
+                tabs={TABS.map((item) => ({ key: item.key, label: item.label, count: countFor(item.key) }))}
+              />
+            }
+          >
+            <ToolbarSearch
               id="q"
-              maxLength={LIMITS.short}
-              type="search"
-              className="am-input"
-              style={S("padding-inline-start: 44px")}
+              label={t`Search`}
               placeholder={t`Search by place name or city`}
+              maxLength={LIMITS.short}
               value={query}
-              onChange={(e) => {
-                setQuery(e.target.value)
+              onChange={(value) => {
+                setQuery(value)
                 setPage(1)
               }}
             />
-          </div>
-
-          <FilterTabs
-            label={t`Filter by status`}
-            value={tab}
-            onChange={(key) => {
-              setTab(key)
-              setPage(1)
-            }}
-            tabs={TABS.map((item) => ({ key: item.key, label: item.label, count: countFor(item.key) }))}
-          />
-        </div>
+          </ListToolbar>
         )}
 
         {places === null && !error && <LoadingList />}

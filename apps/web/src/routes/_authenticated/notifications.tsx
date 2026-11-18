@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { MessageBox } from "@/components/message-box"
-import { Panel } from "@/components/panel"
+import { ListToolbar, Panel } from "@/components/panel"
 import { Page } from "@/components/page"
 import { useUnread } from "@/components/shell-context"
 import { dateFormat, numberFormat } from "@/lib/format"
@@ -169,55 +169,22 @@ function NotificationsPage() {
     >
 
       {/* One card holds the list, its filters and its pages. */}
-      <Panel>
-        <div
-          style={S(
-            "display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 16px"
-          )}
-        >
-          <div>
-            <h2 style={S("font-size: 18px; font-weight: 700; margin: 0")}>
-              <Trans>Inbox</Trans>
-            </h2>
-            <p
-              style={S(
-                "font-size: 13px; color: var(--muted-foreground); margin: 5px 0 0"
-              )}
-            >
-              <Trans>
-                Manage your notifications and stay up to date.
-              </Trans>
-            </p>
-          </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="am-btn"
-            onClick={loadNotifications}
-            disabled={loading}
-            style={S(
-              "height: 40px; background: transparent; border: 1px solid var(--border); color: var(--foreground)"
-            )}
-          >
-            <RefreshCw
-              size={15}
-              className={loading ? "animate-spin" : ""}
-            />
-            <Trans>Refresh</Trans>
-          </Button>
-        </div>
-
-        <div
-          style={S(
-            "display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px"
-          )}
-        >
-          {filterButton("all", <Trans>All</Trans>)}
-          {filterButton("unread", <Trans>Unread</Trans>)}
-          {filterButton("read", <Trans>Read</Trans>)}
-        </div>
+      <Panel className="gap-5">
+        <ListToolbar
+          end={
+            <Button type="button" variant="outline" onClick={loadNotifications} disabled={loading}>
+              <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+              <Trans>Refresh</Trans>
+            </Button>
+          }
+          filters={
+            <div role="group" aria-label={t`Filter notifications`} className="flex min-w-0 flex-wrap gap-2">
+              {filterButton("all", <Trans>All</Trans>)}
+              {filterButton("unread", <Trans>Unread</Trans>)}
+              {filterButton("read", <Trans>Read</Trans>)}
+            </div>
+          }
+        />
 
         {error && (
           <MessageBox type="error">

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { FormPopup } from "@/components/form-popup"
 import { ExpenseForm } from "@/components/expense-form"
 import { Page } from "@/components/page"
-import { Field, FilterTabs, NativeSelect, Panel } from "@/components/panel"
+import { FilterTabs, ListToolbar, Panel, ToolbarSelect } from "@/components/panel"
 import { ConfirmDialog, EmptyState, LoadError, LoadingList } from "@/components/states"
 import { toast } from "@/components/toast"
 import { Amount, CATEGORIES, CategoryChip, categoryLabel } from "@/components/finance-parts"
@@ -156,20 +156,13 @@ function ExpensesPage() {
 
       {/* The month total above; one card holds the filters and the list. */}
       <Panel className="gap-5">
-        <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
-          <div className="w-full desk:w-[240px]">
-            <Field id="expense-place" label={<Trans>Place</Trans>}>
-              <NativeSelect id="expense-place" value={placeId} onChange={setPlaceId}>
-                <option value="">{t`All places`}</option>
-                {places?.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.place_name}
-                  </option>
-                ))}
-              </NativeSelect>
-            </Field>
-          </div>
-          <div className="w-full min-w-0 desk:w-auto desk:flex-1">
+        <ListToolbar
+          end={
+            <Link to="/reports" className="inline-flex min-h-11 items-center text-[15px] font-semibold text-foreground underline underline-offset-4">
+              <Trans>Financial reports</Trans>
+            </Link>
+          }
+          filters={
             <FilterTabs
               label={t`Filter by category`}
               value={filter}
@@ -179,11 +172,17 @@ function ExpensesPage() {
                 ...CATEGORIES.map((c) => ({ key: c as Filter, label: categoryLabel(c), count: countFor(c) })),
               ]}
             />
-          </div>
-          <Link to="/reports" className="inline-flex min-h-11 items-center text-[15px] font-semibold text-foreground underline underline-offset-4">
-            <Trans>Financial reports</Trans>
-          </Link>
-        </div>
+          }
+        >
+          <ToolbarSelect id="expense-place" label={t`Place`} value={placeId} onChange={setPlaceId}>
+            <option value="">{t`All places`}</option>
+            {places?.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.place_name}
+              </option>
+            ))}
+          </ToolbarSelect>
+        </ListToolbar>
 
         {failed ? (
           <LoadError title={<Trans>Could not load expenses</Trans>} onRetry={() => setReload((n) => n + 1)} />

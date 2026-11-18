@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import { Check, ChevronDown } from "lucide-react"
+import { Check, ChevronDown, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useFormat } from "@/lib/format"
 
@@ -301,6 +301,98 @@ export function Initial({ name, size = 36 }: { name: string; size?: number }) {
     >
       {name.trim().charAt(0).toUpperCase()}
     </span>
+  )
+}
+
+/**
+ * The bar above a list, the same on every page: the search and the pickers
+ * in the first row from the start (a page link or button at its end), then
+ * the filter buttons in their own row under them.
+ */
+export function ListToolbar({
+  children,
+  filters,
+  end,
+}: {
+  /** ToolbarSearch and ToolbarSelect, in that order. */
+  children?: ReactNode
+  /** FilterTabs (or a Segmented choice). */
+  filters?: ReactNode
+  end?: ReactNode
+}) {
+  return (
+    <div className="flex min-w-0 flex-col gap-3">
+      {(children || end) && (
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
+          {children}
+          {end && <div className="ms-auto flex items-center gap-3">{end}</div>}
+        </div>
+      )}
+      {filters}
+    </div>
+  )
+}
+
+/** The search box of a ListToolbar: 320px on the desktop, full width on the phone. */
+export function ToolbarSearch({
+  id,
+  label,
+  placeholder,
+  value,
+  onChange,
+  maxLength,
+}: {
+  id: string
+  label: string
+  placeholder: string
+  value: string
+  onChange: (value: string) => void
+  maxLength: number
+}) {
+  return (
+    <div className="relative w-full desk:w-[320px]">
+      <label htmlFor={id} className="sr-only">
+        {label}
+      </label>
+      <Search aria-hidden="true" className="pointer-events-none absolute start-3.5 top-3 size-5 text-muted-foreground" strokeWidth={1.8} />
+      <input
+        id={id}
+        type="search"
+        maxLength={maxLength}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="box-border h-11 w-full min-w-0 border border-input bg-card ps-11 pe-3.5 text-[15px] text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:shadow-[0_0_0_3px_rgba(77,114,150,0.2)]"
+      />
+    </div>
+  )
+}
+
+/** A picker of a ListToolbar (a place, a role): 240px on the desktop, full width on the phone; its first option names it. */
+export function ToolbarSelect({
+  id,
+  label,
+  value,
+  onChange,
+  disabled,
+  children,
+}: {
+  id: string
+  label: string
+  value: string
+  onChange: (value: string) => void
+  disabled?: boolean
+  children: ReactNode
+}) {
+  return (
+    <div className="w-full desk:w-[240px]">
+      <label htmlFor={id} className="sr-only">
+        {label}
+      </label>
+      <NativeSelect id={id} value={value} onChange={onChange} disabled={disabled}>
+        {children}
+      </NativeSelect>
+    </div>
   )
 }
 

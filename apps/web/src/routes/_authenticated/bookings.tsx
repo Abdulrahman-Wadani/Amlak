@@ -10,7 +10,7 @@ import { todayIn } from "@/lib/dates"
 import { Button } from "@/components/ui/button"
 import { Page } from "@/components/page"
 import { AddBookingPopup } from "@/components/booking-form"
-import { Field, NativeSelect, Panel } from "@/components/panel"
+import { ListToolbar, Panel, ToolbarSelect } from "@/components/panel"
 import { EmptyState, LoadError, LoadingList } from "@/components/states"
 import { MonthCalendar, isoDay } from "@/components/booking-parts"
 
@@ -103,17 +103,15 @@ function BookingsPage() {
       ) : (
         // One card holds the place and its calendar.
         <Panel className="gap-5" holdsSections>
-          <div className="w-full desk:max-w-[320px]">
-            <Field id="booking-place" label={<Trans>Place</Trans>}>
-              <NativeSelect id="booking-place" value={placeId} onChange={setPlaceId} disabled={!places}>
-                {places?.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.place_name}
-                  </option>
-                ))}
-              </NativeSelect>
-            </Field>
-          </div>
+          <ListToolbar>
+            <ToolbarSelect id="booking-place" label={t`Place`} value={placeId} onChange={setPlaceId} disabled={!places}>
+              {places?.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.place_name}
+                </option>
+              ))}
+            </ToolbarSelect>
+          </ListToolbar>
           {failed ? (
             <LoadError title={<Trans>Could not load bookings</Trans>} onRetry={() => setReload((n) => n + 1)} />
           ) : bookings === null || !place ? (

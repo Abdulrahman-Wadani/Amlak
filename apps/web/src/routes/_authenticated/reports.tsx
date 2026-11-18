@@ -10,7 +10,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "cn"
 import { Page } from "@/components/page"
-import { Field, NativeSelect, Panel, Segmented } from "@/components/panel"
+import { Field, ListToolbar, Panel, Segmented, ToolbarSelect } from "@/components/panel"
 import { LoadError, LoadingList } from "@/components/states"
 import { Amount } from "@/components/finance-parts"
 import { isoDay } from "@/components/booking-parts"
@@ -127,12 +127,9 @@ function ReportsPage() {
         </Link>
       }
     >
-      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
-        <div className="flex min-w-0 flex-[1_1_480px] flex-col gap-2">
-          <span className="text-sm font-semibold">
-            <Trans>Period</Trans>
-          </span>
-          <div className="[&>div]:grid-cols-2 desk:[&>div]:grid-cols-4">
+      <ListToolbar
+        filters={
+          <div className="[&>div]:grid-cols-2 desk:max-w-[640px] desk:[&>div]:grid-cols-4">
             <Segmented
               label={t`Period`}
               value={period}
@@ -145,20 +142,17 @@ function ReportsPage() {
               ]}
             />
           </div>
-        </div>
-        <div className="w-full desk:w-[420px]">
-          <Field id="report-place" label={<Trans>Places</Trans>}>
-            <NativeSelect id="report-place" value={placeId} onChange={setPlaceId}>
-              <option value="">{t`All places (${number(places?.length ?? 0)})`}</option>
-              {places?.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.place_name}
-                </option>
-              ))}
-            </NativeSelect>
-          </Field>
-        </div>
-      </div>
+        }
+      >
+        <ToolbarSelect id="report-place" label={t`Places`} value={placeId} onChange={setPlaceId}>
+          <option value="">{t`All places (${number(places?.length ?? 0)})`}</option>
+          {places?.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.place_name}
+            </option>
+          ))}
+        </ToolbarSelect>
+      </ListToolbar>
 
       {period === "CUSTOM" && (
         <div className="grid grid-cols-2 gap-3 desk:max-w-[480px]">
