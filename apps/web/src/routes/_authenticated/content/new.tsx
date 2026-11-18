@@ -7,8 +7,9 @@ import { t } from "@lingui/core/macro"
 import { useAuth } from "@/lib/auth"
 import { createContent } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
-import { S } from "@/lib/dom-style"
 import Form, { type FormValues } from "@/components/form"
+import { Page } from "@/components/page"
+import { Trans } from "@lingui/react/macro"
 
 export const Route = createFileRoute("/_authenticated/content/new")({
   component: NewContentPage,
@@ -40,11 +41,10 @@ function NewContentPage() {
   }
 
   return (
-    <center>
-    <div
-      style={S(
-        "padding: 40px 48px 56px; max-width: 1000px; display: flex; flex-direction: column; gap: 24px",
-      )}
+    <Page
+      title={<Trans>Add Content</Trans>}
+      parent={{ label: <Trans>Site content</Trans>, link: { to: "/content" } }}
+      tabs={false}
     >
 
     <Form
@@ -74,8 +74,6 @@ function NewContentPage() {
         {error}
       </p>
     )}
-      
-    </div>
-    </center>
+    </Page>
   )
 }

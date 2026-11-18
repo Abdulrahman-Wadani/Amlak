@@ -1,7 +1,6 @@
 
 import { useEffect, useState, type ReactNode } from "react"
 import {
-  Link,
   createFileRoute,
   useNavigate,
 } from "@tanstack/react-router"
@@ -10,7 +9,6 @@ import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 import type { Worker } from "@amlak/shared"
 import {
-  ArrowLeft,
   Check,
   CircleAlert,
   Mail,
@@ -25,8 +23,7 @@ import { useAuth } from "@/lib/auth"
 import { authFetch } from "@/lib/http"
 import { getWorkerById } from "@/lib/api"
 import { S } from "@/lib/dom-style"
-import { buttonVariants, Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import { apiError, errorMessage } from "@/lib/errors"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -37,10 +34,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 
 import { StatusBadge } from "@/components/place-shared"
-import "@/styles/motion.css"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute(
   "/_authenticated/worker/$worker_id",
@@ -184,91 +180,14 @@ function WorkerDetailPage() {
     new Date(date).toLocaleDateString(i18n.locale)
 
   return (
-    <div
-      style={S(`
-        width: 100%;
-        max-width: 1000px;
-        padding: 40px 48px 56px;
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-      `)}
+    <Page
+      title={
+        worker?.fullname ??
+        (failed ? <Trans>Worker not found</Trans> : <Skeleton style={S("width: 220px; height: 30px")} />)
+      }
+      phoneTitle={<Trans>Worker</Trans>}
+      parent={{ label: <Trans>Workers</Trans>, link: { to: "/workers" } }}
     >
-      {/* Header */}
-      <div
-        style={S(`
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          flex-wrap: wrap;
-          gap: 16px;
-        `)}
-      >
-        <div
-          style={S(`
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            min-width: 0;
-          `)}
-        >
-          <div
-            style={S(`
-              display: flex;
-              align-items: center;
-              gap: 8px;
-              color: var(--muted-foreground);
-              font-size: 13px;
-            `)}
-          >
-<Breadcrumb>
-  <BreadcrumbList>
-    <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/" />}><Trans>Home</Trans></BreadcrumbLink>
-    </BreadcrumbItem>
-    <BreadcrumbSeparator />
-    <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/workers" />}>
-        <Trans>Workers</Trans>
-      </BreadcrumbLink>
-    </BreadcrumbItem>
-  </BreadcrumbList>
-</Breadcrumb>
-          </div>
-
-          <h1
-            style={S(`
-              margin: 0;
-              font-size: 28px;
-              font-weight: 800;
-              letter-spacing: -0.5px;
-            `)}
-          >
-            {worker?.fullname ??
-              (failed ? (
-                <Trans>Worker not found</Trans>
-              ) : (
-                <Skeleton style={S("width: 220px; height: 30px")} />
-              ))}
-          </h1>
-        </div>
-
-        <Link
-          to="/workers"
-          className={cn(
-            buttonVariants({ variant: "outline", size: "sm" }),
-            "am-btn",
-          )}
-          style={S(`
-            height: 40px;
-            gap: 8px;
-          `)}
-        >
-          <ArrowLeft size={16} className="rtl:rotate-180" />
-          <Trans>Workers</Trans>
-        </Link>
-      </div>
-
       {/* Error */}
       {failed && (
         <div
@@ -731,7 +650,7 @@ function WorkerDetailPage() {
           </div>
         </>
       )}
-    </div>
+    </Page>
   )
 }
 

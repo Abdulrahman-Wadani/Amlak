@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/empty"
 import { OverdueChip, PriorityChip } from "@/components/place-shared"
 import { Pager } from "@/components/pager"
-import "@/styles/motion.css"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute("/_authenticated/tickets")({
   // Admins cannot list tickets (GET /tickets is for Managers and Workers).
@@ -172,15 +172,7 @@ function TicketsLayout({
   )
 
   return (
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 20px; max-width: 960px",
-      )}
-    >
-      <div style={S("display: flex; flex-direction: column; gap: 6px")}>
-        <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>{title}</h1>
-        <p style={S("margin: 0; color: var(--muted-foreground)")}>{intro}</p>
-      </div>
+    <Page title={title} description={intro}>
 
       {error && (
         <p role="alert" className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
@@ -248,6 +240,6 @@ function TicketsLayout({
       )}
 
       <Pager page={page} totalPages={totalPages} onPage={onPage} />
-    </div>
+    </Page>
   )
 }

@@ -3,12 +3,12 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
 import { CircleAlert } from "lucide-react"
-import { S } from "@/lib/dom-style"
 import { useAuth } from "@/lib/auth"
 import { createAsset } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
 import { assetInput } from "@/lib/validators"
 import Form, { type FormValues } from "@/components/form"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute("/_authenticated/place/asset/new")({
   component: AddAsset,
@@ -109,15 +109,11 @@ function AddAsset() {
     "flex items-center gap-1.5 text-[13px] leading-5 text-crit-900"
 
   return (
-    <center>
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 640px"
-      )}
+    <Page
+      title={<Trans>Add asset</Trans>}
+      parent={{ label: <Trans>Place</Trans>, link: { to: "/place/$place_id", params: { place_id } } }}
+      tabs={false}
     >
-      <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-        <Trans>Add asset</Trans>
-      </h1>
       <Form
         fields={[
           { name: "name", label: t`Asset name`, type: "text" },
@@ -133,7 +129,6 @@ function AddAsset() {
           {formError}
         </p>
       )}
-    </div>
-  </center>
+    </Page>
   )
 }

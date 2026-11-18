@@ -33,7 +33,7 @@ import {
   StatusBadge,
   TypeLabel,
 } from "@/components/place-shared"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute("/_authenticated/place/$place_id")({
   component: PlaceDetailPage,
@@ -236,96 +236,34 @@ function PlaceDetailPage() {
   }
 
   return (
-    <center>
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 80%"
-      )}
-    >
-      <div
-        style={S(
-          "display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px"
-        )}
-      >
-        <div
-          style={S(
-            "display: flex; flex-direction: column; gap: 6px; min-width: 0"
-          )}
-        >
-          <div
-            style={S(
-              "display: flex; align-items: center; gap: 8px; color: var(--muted-foreground); font-size: 13px"
-            )}
-          >
-            <Breadcrumb>
-  <BreadcrumbList>
-    <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/" />}><Trans>Home</Trans></BreadcrumbLink>
-    </BreadcrumbItem>
-    <BreadcrumbSeparator />
-    <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/places" />}>
-        <Trans>Places</Trans>
-      </BreadcrumbLink>
-    </BreadcrumbItem>
-  </BreadcrumbList>
-</Breadcrumb>
-
-          </div>
-
-          <h1
-            style={S(
-              "font-size: 28px; font-weight: 800; margin: 0; line-height: 1.3"
-            )}
-          >
-            {place?.place_name ??
-              (failed ? (
-                <Trans>Place not found</Trans>
-              ) : (
-                <Skeleton style={S("width: 220px; height: 28px")} />
-              ))}
-          </h1>
-        </div>
-
-        <div
-          style={S(
-            "display: flex; align-items: center; gap: 8px; flex-wrap: wrap"
-          )}
-        >
-          {place && isManager && (
-            <button
-              type="button"
-              id="update"
-              onClick={openEditForm}
-              className="am-btn"
-              style={S(
-                "height: 40px; padding: 0 16px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: var(--card)"
-              )}
-            >
-              <Pencil size={16} />
+    <Page
+      title={
+        place?.place_name ??
+        (failed ? <Trans>Place not found</Trans> : <Skeleton style={S("width: 220px; height: 28px")} />)
+      }
+      phoneTitle={<Trans>Place</Trans>}
+      parent={{ label: <Trans>Places</Trans>, link: { to: "/places" } }}
+      actions={
+        place && isManager && (
+          <>
+            <Button type="button" variant="outline" id="update" onClick={openEditForm}>
+              <Pencil size={16} aria-hidden="true" />
               <Trans>Update place</Trans>
-            </button>
-          )}
-
-          {place && isManager && (
-            <button
+            </Button>
+            <Button
               type="button"
-              onClick={handleDelete}
+              variant="destructive"
               id="remove"
+              onClick={handleDelete}
               disabled={deleting || saving}
-              className="am-btn"
-              style={S(
-                "height: 40px; padding: 0 16px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--destructive); color: var(--destructive); background: var(--card); opacity: deleting ? .6 : 1"
-              )}
             >
-              <Trash2 size={16} />
+              <Trash2 size={16} aria-hidden="true" />
               {deleting ? t`Deleting…` : t`Delete place`}
-            </button>
-          )}
-
-        </div>
-      </div>
-
+            </Button>
+          </>
+        )
+      }
+    >
       {failed && (
         <Card style={S("padding: 18px; border: 1px solid var(--border)")}>
           <p
@@ -998,8 +936,7 @@ function PlaceDetailPage() {
 
         </>
       )}
-    </div>
-    </center>
+    </Page>
   )
 }
 

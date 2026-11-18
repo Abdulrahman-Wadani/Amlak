@@ -13,7 +13,7 @@ import { S } from "@/lib/dom-style"
 import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BookingStatusChip } from "@/components/place-shared"
-import "@/styles/motion.css"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute("/_authenticated/bookings")({
   // Bookings belong to places; Admins have none (the API refuses them).
@@ -106,21 +106,12 @@ function BookingsPage() {
     loaded.flatMap((entry) => (entry.groups ? entry.groups[key].map((booking) => ({ booking, place: entry.place })) : []))
 
   return (
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 1000px",
-      )}
+    <Page
+      title={<Trans>Bookings</Trans>}
+      description={<Trans>Today's arrivals and departures, and stays starting in the next {UPCOMING_DAYS} days.</Trans>}
+      phoneEnd="none"
     >
       <div style={S("display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px")}>
-        <div style={S("display: flex; flex-direction: column; gap: 6px")}>
-          <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-            <Trans>Bookings</Trans>
-          </h1>
-          <p style={S("margin: 0; color: var(--muted-foreground)")}>
-            <Trans>Today's arrivals and departures, and stays starting in the next {UPCOMING_DAYS} days.</Trans>
-          </p>
-        </div>
-
         <div style={S("display: flex; flex-direction: column; gap: 6px; min-width: 220px")}>
           <Label htmlFor="booking-place">
             <Trans>Place</Trans>
@@ -185,7 +176,7 @@ function BookingsPage() {
           />
         </>
       )}
-    </div>
+    </Page>
   )
 }
 

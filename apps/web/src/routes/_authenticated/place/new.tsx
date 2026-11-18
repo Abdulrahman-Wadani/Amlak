@@ -10,6 +10,7 @@ import { createPlace } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
 import Form, { type FormValues } from "@/components/form"
 import LocationPicker, { type LocationData } from "@/components/location-picker"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute("/_authenticated/place/new")({
   component: AddPlace,
@@ -86,23 +87,20 @@ function handleLocationSelect(location: LocationData) {
   const errorText = "flex items-center gap-1.5 text-[13px] leading-5 text-crit-900"
 
   return (
-  <div
-    style={S(
-      "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; width: 100%; box-sizing: border-box"
-    )}
+  <Page
+    title={<Trans>Add place</Trans>}
+    parent={{ label: <Trans>Places</Trans>, link: { to: "/places" } }}
+    tabs={false}
   >
-    <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-      <Trans>Add place</Trans>
-    </h1>
-
+    {/* The form and the map sit side by side, and stack on narrow screens. */}
     <div
       style={S(
-        "width: 100%; max-width: 1500px; margin: 0 auto; display: flex; flex-direction: row; align-items: flex-start; gap: 28px"
+        "display: flex; flex-wrap: wrap; align-items: flex-start; gap: 24px"
       )}
     >
       {/* Form */}
       <div
-        style={S("flex: 1 1 35%; min-width: 0")}
+        style={S("flex: 1 1 320px; min-width: 0")}
       >
         <Form
           fields={[
@@ -136,12 +134,12 @@ function handleLocationSelect(location: LocationData) {
       {/* Map */}
       <div
         style={S(
-          "flex: 1 1 65%; min-width: 0; position: sticky; top: 24px"
+          "flex: 2 1 420px; min-width: 0; position: sticky; top: 24px"
         )}
       >
         <LocationPicker onLocationSelect={handleLocationSelect} />
       </div>
     </div>
-  </div>
+  </Page>
 )
 }

@@ -30,7 +30,7 @@ import {
 
 import { StatusBadge } from "@/components/place-shared"
 import { cn } from "cn"
-import "@/styles/motion.css"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute("/_authenticated/workers")({
   component: WorkersPage,
@@ -97,37 +97,17 @@ function WorkersPage() {
     ).length ?? 0
 
   return (
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px",
-      )}
-    >
-      {/* Header */}
-      <div
-        style={S(
-          "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px",
-        )}
-      >
-        <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-          <Trans>Workers</Trans>
-        </h1>
-
-        <Link
-          to="/worker/new"
-          className={cn(buttonVariants(), "am-btn am-solid")}
-          style={S(
-            "height: 44px; min-width: 44px; padding: 0 16px; font-size: 15px; font-weight: 600; box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1)",
-          )}
-        >
-          <Plus
-            aria-hidden="true"
-            style={S(
-              "width: 18px; height: 18px; display: block; flex: none",
-            )}
-          />
+    <Page
+      title={<Trans>Workers</Trans>}
+      phoneActions={false}
+      phoneEnd={{ label: t`Add worker`, icon: "plus", link: { to: "/worker/new" } }}
+      actions={
+        <Link to="/worker/new" className={cn(buttonVariants(), "am-btn am-solid")}>
+          <Plus aria-hidden="true" />
           <Trans>Add worker</Trans>
         </Link>
-      </div>
+      }
+    >
 
       {/* Search and Filters */}
       <div
@@ -404,6 +384,6 @@ function WorkersPage() {
           ))}
         </div>
       )}
-    </div>
+    </Page>
   )
 }

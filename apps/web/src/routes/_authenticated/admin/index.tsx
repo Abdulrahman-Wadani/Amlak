@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/empty"
 
 import { StatusBadge } from "@/components/place-shared"
-import "@/styles/motion.css"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   component: UsersPage,
@@ -91,22 +91,7 @@ function UsersPage() {
     ).length ?? 0
 
   return (
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px",
-      )}
-    >
-      {/* Header */}
-      <div
-        style={S(
-          "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px",
-        )}
-      >
-        <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-          <Trans>Users</Trans>
-        </h1>
-
-      </div>
+    <Page title={<Trans>Users</Trans>} phoneStart="logo" phoneEnd="none">
 
       {/* Search and Filters */}
       <div
@@ -348,6 +333,6 @@ function UsersPage() {
           ))}
         </div>
       )}
-    </div>
+    </Page>
   )
 }

@@ -38,9 +38,9 @@ import { buttonVariants } from "@/components/ui/button"
 import { Trans } from "@lingui/react/macro"
 import { useLingui } from "@lingui/react"
 import { t } from "@lingui/core/macro"
+import { Page } from "@/components/page"
 
 
-import "@/styles/motion.css"
 
 export const Route = createFileRoute("/_authenticated/content/")({
   component: ContentPage,
@@ -131,44 +131,19 @@ function ContentPage() {
   }
 
   return (
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px",
-      )}
-    >
-      {/* Header */}
-      <div
-        style={S(
-          "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px",
-        )}
-      >
-        <div>
-          <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-            <Trans>Content</Trans>
-          </h1>
-          <p
-            style={S(
-              "margin: 7px 0 0; color: var(--muted-foreground); font-size: 13px",
-            )}
-          >
-            <Trans>Manage the site's pages, their text and whether they are published.</Trans>
-          </p>
-        </div>
-
-        <Link
-          to="/content/new"
-          className={cn(buttonVariants(), "am-btn am-solid")}
-          style={S(
-            "height: 44px; min-width: 44px; padding: 0 16px; font-size: 15px; font-weight: 600; box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1)"
-          )}
-        >
-          <Plus
-            aria-hidden="true"
-            style={S("width: 18px; height: 18px; display: block; flex: none")}
-          />
+    <Page
+      title={<Trans>Content</Trans>}
+      description={<Trans>Manage the site's pages, their text and whether they are published.</Trans>}
+      phoneStart="logo"
+      phoneActions={false}
+      phoneEnd={{ label: t`Add Content`, icon: "plus", link: { to: "/content/new" } }}
+      actions={
+        <Link to="/content/new" className={cn(buttonVariants(), "am-btn am-solid")}>
+          <Plus aria-hidden="true" />
           <Trans>Add Content</Trans>
         </Link>
-      </div>
+      }
+    >
 
       {/* Search and filters */}
       <div
@@ -445,6 +420,6 @@ function ContentPage() {
           </div>
         </div>
       )}
-    </div>
+    </Page>
   )
 }
