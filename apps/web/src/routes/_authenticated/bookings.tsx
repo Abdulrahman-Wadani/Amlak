@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BookingStatusChip } from "@/components/place-shared"
 import { Page } from "@/components/page"
+import { dateFormat } from "@/lib/format"
 
 export const Route = createFileRoute("/_authenticated/bookings")({
   // Bookings belong to places; Admins have none (the API refuses them).
@@ -201,16 +202,16 @@ function BookingSection({
   rows: { booking: Booking; place: Place }[]
 }) {
   const { i18n } = useLingui()
-  const dateFormat = useMemo(
+  const dayFormat = useMemo(
     () =>
-      new Intl.DateTimeFormat(i18n.locale === "ar" ? "ar" : "en", {
+      dateFormat(i18n.locale === "ar" ? "ar" : "en", {
         day: "numeric",
         month: "short",
         timeZone: "UTC",
       }),
     [i18n.locale],
   )
-  const day = (date: string) => dateFormat.format(new Date(date))
+  const day = (date: string) => dayFormat.format(new Date(date))
 
   return (
     <section style={S("display: flex; flex-direction: column; gap: 10px")}>

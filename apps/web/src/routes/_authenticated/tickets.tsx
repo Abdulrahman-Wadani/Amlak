@@ -17,6 +17,7 @@ import {
 import { OverdueChip, PriorityChip } from "@/components/place-shared"
 import { Pager } from "@/components/pager"
 import { Page } from "@/components/page"
+import { dateFormat } from "@/lib/format"
 
 export const Route = createFileRoute("/_authenticated/tickets")({
   // Admins cannot list tickets (GET /tickets is for Managers and Workers).
@@ -162,9 +163,9 @@ function TicketsLayout({
   onPage: (page: number) => void
 }) {
   const { i18n } = useLingui()
-  const dateFormat = useMemo(
+  const dayFormat = useMemo(
     () =>
-      new Intl.DateTimeFormat(i18n.locale === "ar" ? "ar" : "en", {
+      dateFormat(i18n.locale === "ar" ? "ar" : "en", {
         dateStyle: "medium",
         timeZone: "UTC",
       }),
@@ -221,10 +222,10 @@ function TicketsLayout({
                     {placeNames[ticket.place_id] ?? <Trans>Place</Trans>}
                     {" · "}
                     {ticket.due_date ? (
-                      <Trans>Due {dateFormat.format(new Date(ticket.due_date))}</Trans>
+                      <Trans>Due {dayFormat.format(new Date(ticket.due_date))}</Trans>
                     ) : (
                       <Trans>
-                        Reported {dateFormat.format(new Date(ticket.created_at))}
+                        Reported {dayFormat.format(new Date(ticket.created_at))}
                       </Trans>
                     )}
                   </span>

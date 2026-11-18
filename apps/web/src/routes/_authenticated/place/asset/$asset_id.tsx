@@ -37,6 +37,7 @@ import { TicketsSection } from "@/components/tickets-section"
 import { todayIn } from "@/lib/dates"
 import { errorMessage } from "@/lib/errors"
 import { Page } from "@/components/page"
+import { dateFormat } from "@/lib/format"
 
 
 export const Route = createFileRoute("/_authenticated/place/asset/$asset_id")({
@@ -130,7 +131,7 @@ function AssetDetailPage() {
     }
   }, [accessToken, asset_id])
 
-  const day = new Intl.DateTimeFormat(
+  const day = dateFormat(
     i18n.locale === "ar" ? "ar" : "en",
     { dateStyle: "medium" }
   )

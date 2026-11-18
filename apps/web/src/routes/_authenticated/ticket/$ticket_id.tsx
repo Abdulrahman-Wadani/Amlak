@@ -45,6 +45,8 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { Page } from "@/components/page"
+import { numberFormat } from "@/lib/format"
+import { formatDate } from "@/lib/format"
 
 export const Route = createFileRoute(
   "/_authenticated/ticket/$ticket_id",
@@ -397,16 +399,14 @@ function TicketDetailPage() {
 
     // A date without a time (due_date) is shown as a date only.
     if (value.length === 10) {
-      return new Date(`${value}T00:00:00`).toLocaleDateString(i18n.locale, {
-        dateStyle: "medium",
-      })
+      return formatDate(value, i18n.locale, { dateStyle: "medium" })
     }
 
     const parsed = new Date(value)
 
     if (Number.isNaN(parsed.getTime())) return value
 
-    return parsed.toLocaleString(i18n.locale, {
+    return formatDate(parsed, i18n.locale, {
       dateStyle: "medium",
       timeStyle: "short",
     })
@@ -415,7 +415,7 @@ function TicketDetailPage() {
   const money = (value: number | null) => {
     if (value === null || value === undefined) return "—"
 
-    return new Intl.NumberFormat(i18n.locale, {
+    return numberFormat(i18n.locale, {
       style: "currency",
       currency: place?.currency ?? "SAR",
     }).format(Number(value))

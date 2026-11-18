@@ -3,12 +3,13 @@ import { t } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 import { NavIcon } from "@/lib/nav"
 import { useUnread } from "@/components/shell-context"
+import { formatNumber } from "@/lib/format"
 
 /** The bell: a 44px link to the notifications, with the unread count from the API. */
 export function NotificationBell() {
   const { i18n } = useLingui()
   const { unread } = useUnread()
-  const count = new Intl.NumberFormat(i18n.locale === "ar" ? "ar-SA-u-nu-latn" : "en").format(unread)
+  const count = formatNumber(unread, i18n.locale)
   return (
     <Link
       to="/notifications"

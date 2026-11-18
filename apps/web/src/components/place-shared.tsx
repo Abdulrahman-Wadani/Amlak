@@ -145,7 +145,7 @@ export function BookingStatusChip({ status }: { status: string }) {
         text="var(--good-700)"
         dot="var(--good)"
       >
-        <Trans>Checked in</Trans>
+        <Trans>Staying</Trans>
       </Chip>
     )
   }

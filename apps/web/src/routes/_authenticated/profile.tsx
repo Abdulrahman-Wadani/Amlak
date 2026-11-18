@@ -26,6 +26,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Page } from "@/components/page"
 import { ManageLinks, SecurityLinks } from "@/components/account-links"
+import { formatDate } from "@/lib/format"
 
 export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
@@ -52,17 +53,9 @@ interface ProfileForm {
   preferred_language: string
   picture: File | null
 }
-function formatDate(value: string | null, locale: string) {
+function longDate(value: string | null, locale: string) {
   if (!value) return "—"
-
-  return new Date(value).toLocaleDateString(
-    locale === "ar" ? "ar-SA" : "en",
-    {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    },
-  )
+  return formatDate(value, locale, { year: "numeric", month: "long", day: "numeric" })
 }
 
 function ProfilePage() {
@@ -379,17 +372,17 @@ function ProfilePage() {
     },
     {
       label: messages.verified,
-      value: formatDate(profile.email_verified_at, locale),
+      value: longDate(profile.email_verified_at, locale),
       icon: Mail,
     },
     {
       label: messages.created,
-      value: formatDate(profile.created_at, locale),
+      value: longDate(profile.created_at, locale),
       icon: CalendarDays,
     },
     {
       label: messages.updatedAt,
-      value: formatDate(profile.updated_at, locale),
+      value: longDate(profile.updated_at, locale),
       icon: Clock,
     },
   ]

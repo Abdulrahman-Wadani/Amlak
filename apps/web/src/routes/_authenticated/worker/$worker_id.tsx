@@ -37,6 +37,7 @@ import {
 
 import { StatusBadge } from "@/components/place-shared"
 import { Page } from "@/components/page"
+import { formatDate } from "@/lib/format"
 
 export const Route = createFileRoute(
   "/_authenticated/worker/$worker_id",
@@ -177,7 +178,7 @@ function WorkerDetailPage() {
   }
 
   const formattedDate = (date: string | Date) =>
-    new Date(date).toLocaleDateString(i18n.locale)
+    formatDate(date, i18n.locale, { year: "numeric", month: "numeric", day: "numeric" })
 
   return (
     <Page
