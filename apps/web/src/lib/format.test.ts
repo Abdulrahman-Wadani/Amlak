@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { formatDate, formatMoney, formatNumber, intlLocale } from "@/lib/format"
+import { formatDate, formatMoney, formatNumber, formatRelative, intlLocale } from "@/lib/format"
 
 const ARABIC_INDIC = /[\u0660-\u0669\u06F0-\u06F9]/
 
@@ -52,5 +52,20 @@ describe("formatDate", () => {
 
   it("returns an empty string for an invalid date", () => {
     expect(formatDate("not a date", "en")).toBe("")
+  })
+})
+
+describe("formatRelative", () => {
+  const now = new Date(2026, 10, 18, 15, 0)
+  it("says minutes and hours for today", () => {
+    expect(formatRelative(new Date(2026, 10, 18, 14, 55), "en", now)).toBe("5 minutes ago")
+    expect(formatRelative(new Date(2026, 10, 18, 13, 0), "en", now)).toBe("2 hours ago")
+  })
+  it("says Yesterday, then the day", () => {
+    expect(formatRelative(new Date(2026, 10, 17, 9, 0), "en", now)).toBe("Yesterday")
+    expect(formatRelative(new Date(2026, 9, 18, 9, 0), "en", now)).toBe("October 18")
+  })
+  it("uses Western digits in Arabic", () => {
+    expect(formatRelative(new Date(2026, 10, 18, 12, 0), "ar", now)).toMatch(/3/)
   })
 })

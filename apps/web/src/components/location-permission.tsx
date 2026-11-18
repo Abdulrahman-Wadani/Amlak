@@ -1,22 +1,25 @@
 import { Trans } from "@lingui/react/macro"
-import { MapPin } from "lucide-react"
+import { Camera, MapPin } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog"
 
 /**
- * Asked before the browser's own location prompt (the design's "Location
- * permission" screen, shown over the form): why the location is needed and
- * that it is not kept.
+ * Asked before the browser's own location or camera prompt (the design's
+ * "Location permission" and "Camera permission" screens, shown over the
+ * form): why it is needed and that nothing is kept or taken in the background.
  */
 export function LocationPermission({
   open,
   onAllow,
   onClose,
+  kind = "location",
 }: {
   open: boolean
   onAllow: () => void
   onClose: () => void
+  kind?: "location" | "camera"
 }) {
+  const camera = kind === "camera"
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
       <DialogContent
@@ -25,16 +28,27 @@ export function LocationPermission({
       >
         <div className="flex flex-col items-center gap-4 px-2 py-6 text-center">
           <span aria-hidden="true" className="flex size-20 items-center justify-center rounded-full bg-secondary text-primary">
-            <MapPin className="size-9" strokeWidth={1.6} />
+            {camera ? <Camera className="size-9" strokeWidth={1.6} /> : <MapPin className="size-9" strokeWidth={1.6} />}
           </span>
           <DialogTitle className="m-0 text-2xl leading-[1.4] font-bold">
-            <Trans>We need your location to place the property</Trans>
+            {camera ? (
+              <Trans>We need the camera to photograph the damage</Trans>
+            ) : (
+              <Trans>We need your location to place the property</Trans>
+            )}
           </DialogTitle>
           <DialogDescription className="m-0 max-w-[26em] text-[15px] leading-[1.8] text-muted-foreground">
-            <Trans>
-              We use your location once to drop the place’s pin on the map. We do not track your location or keep it
-              afterwards.
-            </Trans>
+            {camera ? (
+              <Trans>
+                We use it only when you tap “Take a photo” to attach damage and receipt photos. We never take photos in
+                the background.
+              </Trans>
+            ) : (
+              <Trans>
+                We use your location once to drop the place’s pin on the map. We do not track your location or keep it
+                afterwards.
+              </Trans>
+            )}
           </DialogDescription>
           <span className="text-[13px] text-muted-foreground">
             <Trans>
@@ -47,7 +61,7 @@ export function LocationPermission({
             <Trans>Not now</Trans>
           </Button>
           <Button type="button" className="h-13 flex-[2]" onClick={onAllow}>
-            <Trans>Allow location</Trans>
+            {camera ? <Trans>Allow camera</Trans> : <Trans>Allow location</Trans>}
           </Button>
         </div>
       </DialogContent>

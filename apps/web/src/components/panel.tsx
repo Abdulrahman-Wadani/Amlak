@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import { ChevronDown } from "lucide-react"
+import { Check, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useFormat } from "@/lib/format"
 
@@ -307,4 +307,52 @@ export function NativeSelect({
 /** The form's buttons, at the end of the row. */
 export function FormButtons({ children }: { children: ReactNode }) {
   return <div className="flex flex-wrap justify-end gap-3">{children}</div>
+}
+
+/**
+ * The phone's bottom bar for a form's main buttons (Send report, Approve),
+ * in place of the tabs. On the desktop the buttons stay in the form.
+ */
+export function PhoneActionBar({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <div aria-hidden="true" className="h-[calc(76px+env(safe-area-inset-bottom))] desk:hidden" />
+      <div className="fixed inset-x-0 bottom-0 z-30 flex gap-2.5 border-t border-border bg-card px-4 pt-4 pb-[calc(16px+env(safe-area-inset-bottom))] desk:hidden [&>*]:flex-1">
+        {children}
+      </div>
+    </>
+  )
+}
+
+/** A choice of a few options as large buttons in a grid (priority). */
+export function Segmented<K extends string>({
+  label,
+  options,
+  value,
+  onChange,
+}: {
+  label: string
+  options: { key: K; label: ReactNode }[]
+  value: K
+  onChange: (key: K) => void
+}) {
+  return (
+    <div role="group" aria-label={label} className="grid grid-cols-2 gap-2">
+      {options.map((option) => {
+        const on = option.key === value
+        return (
+          <button
+            key={option.key}
+            type="button"
+            aria-pressed={on}
+            onClick={() => onChange(option.key)}
+            className={`am-seg flex h-12 cursor-pointer items-center justify-center gap-1.5 border px-3 text-[15px] ${on ? "border-primary bg-primary/8 font-semibold text-primary" : "border-border bg-card font-medium text-foreground"}`}
+          >
+            {on && <Check aria-hidden="true" className="size-4" strokeWidth={1.8} />}
+            {option.label}
+          </button>
+        )
+      })}
+    </div>
+  )
 }

@@ -2,16 +2,16 @@ import { useEffect, useState, type ReactNode } from "react"
 import { Link } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import { ArrowRight, CircleAlert, Plus } from "lucide-react"
+import { Plus } from "lucide-react"
 import type { Asset, Ticket } from "@amlak/shared"
 import { listTickets } from "@/lib/api"
 import { S } from "@/lib/dom-style"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { PriorityChip, TicketStatusChip } from "@/components/place-shared"
 import { Pager } from "@/components/pager"
+import { EmptyState, LoadError, LoadingList } from "@/components/states"
+import { TicketCard } from "@/components/ticket-parts"
 
 const PAGE_SIZE = 20
 
@@ -141,56 +141,20 @@ export function TicketsSection({
 
       <CardContent style={S("padding: 20px; display: flex; flex-direction: column; gap: 14px")}>
         {failed ? (
-          <p role="alert" className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
-            <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
-            <Trans>We could not load the tickets.</Trans>
-          </p>
+          <LoadError card={false} title={<Trans>Could not load tickets</Trans>} />
         ) : tickets === null ? (
-          <Skeleton style={S("height: 70px")} />
+          <LoadingList card={false} rows={2} />
         ) : tickets.length === 0 ? (
-          <p style={S("text-align: center; color: var(--muted-foreground); font-size: 14px")}>
-            {filter === "OPEN" ? emptyOpen : emptyAll}
-          </p>
+          <EmptyState card={false} title={filter === "OPEN" ? emptyOpen : emptyAll} />
         ) : (
-          <div style={S("display: flex; flex-direction: column; gap: 10px")}>
-            {tickets.map((ticket) => {
-              const asset = assets?.find((a) => a.id === ticket.asset_id)
-              return (
-                <Link
-                  key={ticket.id}
-                  to="/ticket/$ticket_id"
-                  params={{ ticket_id: ticket.id }}
-                  className="am-lift"
-                  style={S(
-                    "display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px; border: 1px solid var(--border); background: var(--card); text-decoration: none; color: inherit",
-                  )}
-                >
-                  <div style={S("display: flex; flex-direction: column; gap: 6px; min-width: 0")}>
-                    <strong style={S("font-size: 14px")}>
-                      {ticket.description || t`Maintenance ticket`}
-                    </strong>
-                    <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-                      {!assetId && (
-                        <>
-                          {asset?.name ?? t`No asset`}
-                          {" · "}
-                        </>
-                      )}
-                      {ticket.ticket_type === "CORRECTIVE"
-                        ? t`Corrective maintenance`
-                        : t`Preventive maintenance`}
-                    </span>
-                    <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-                      <PriorityChip priority={ticket.priority} />
-                    </span>
-                  </div>
-                  <div style={S("display: flex; align-items: center; gap: 10px")}>
-                    <TicketStatusChip status={ticket.status} />
-                    <ArrowRight size={17} className="rtl:rotate-180" />
-                  </div>
-                </Link>
-              )
-            })}
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-4">
+            {tickets.map((ticket) => (
+              <TicketCard
+                key={ticket.id}
+                ticket={ticket}
+                asset={assetId ? undefined : assets?.find((a) => a.id === ticket.asset_id)?.name}
+              />
+            ))}
           </div>
         )}
         <Pager page={page} totalPages={totalPages} onPage={setPage} />

@@ -45,6 +45,7 @@ import { Route as PLangSlugRouteImport } from './routes/p/$lang/$slug'
 import { Route as AuthenticatedPlaceAssetAsset_idRouteImport } from './routes/_authenticated/place/asset/$asset_id'
 import { Route as AuthenticatedPlaceAssetNewRouteImport } from './routes/_authenticated/place/asset/new'
 import { Route as AuthenticatedPlaceEditPlace_idRouteImport } from './routes/_authenticated/place/edit/$place_id'
+import { Route as AuthenticatedTicketCompleteTicket_idRouteImport } from './routes/_authenticated/ticket/complete/$ticket_id'
 import { Route as AuthenticatedPlaceAssetEditAsset_idRouteImport } from './routes/_authenticated/place/asset/edit/$asset_id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -239,6 +240,12 @@ const AuthenticatedPlaceEditPlace_idRoute =
     path: '/place/edit/$place_id',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedTicketCompleteTicket_idRoute =
+  AuthenticatedTicketCompleteTicket_idRouteImport.update({
+    id: '/ticket/complete/$ticket_id',
+    path: '/ticket/complete/$ticket_id',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedPlaceAssetEditAsset_idRoute =
   AuthenticatedPlaceAssetEditAsset_idRouteImport.update({
     id: '/place/asset/edit/$asset_id',
@@ -282,6 +289,7 @@ export interface FileRoutesByFullPath {
   '/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
   '/place/edit/$place_id': typeof AuthenticatedPlaceEditPlace_idRoute
+  '/ticket/complete/$ticket_id': typeof AuthenticatedTicketCompleteTicket_idRoute
   '/place/asset/edit/$asset_id': typeof AuthenticatedPlaceAssetEditAsset_idRoute
 }
 export interface FileRoutesByTo {
@@ -320,6 +328,7 @@ export interface FileRoutesByTo {
   '/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
   '/place/edit/$place_id': typeof AuthenticatedPlaceEditPlace_idRoute
+  '/ticket/complete/$ticket_id': typeof AuthenticatedTicketCompleteTicket_idRoute
   '/place/asset/edit/$asset_id': typeof AuthenticatedPlaceAssetEditAsset_idRoute
 }
 export interface FileRoutesById {
@@ -360,6 +369,7 @@ export interface FileRoutesById {
   '/_authenticated/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/_authenticated/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
   '/_authenticated/place/edit/$place_id': typeof AuthenticatedPlaceEditPlace_idRoute
+  '/_authenticated/ticket/complete/$ticket_id': typeof AuthenticatedTicketCompleteTicket_idRoute
   '/_authenticated/place/asset/edit/$asset_id': typeof AuthenticatedPlaceAssetEditAsset_idRoute
 }
 export interface FileRouteTypes {
@@ -400,6 +410,7 @@ export interface FileRouteTypes {
     | '/place/asset/$asset_id'
     | '/place/asset/new'
     | '/place/edit/$place_id'
+    | '/ticket/complete/$ticket_id'
     | '/place/asset/edit/$asset_id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -438,6 +449,7 @@ export interface FileRouteTypes {
     | '/place/asset/$asset_id'
     | '/place/asset/new'
     | '/place/edit/$place_id'
+    | '/ticket/complete/$ticket_id'
     | '/place/asset/edit/$asset_id'
   id:
     | '__root__'
@@ -477,6 +489,7 @@ export interface FileRouteTypes {
     | '/_authenticated/place/asset/$asset_id'
     | '/_authenticated/place/asset/new'
     | '/_authenticated/place/edit/$place_id'
+    | '/_authenticated/ticket/complete/$ticket_id'
     | '/_authenticated/place/asset/edit/$asset_id'
   fileRoutesById: FileRoutesById
 }
@@ -745,6 +758,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlaceEditPlace_idRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/ticket/complete/$ticket_id': {
+      id: '/_authenticated/ticket/complete/$ticket_id'
+      path: '/ticket/complete/$ticket_id'
+      fullPath: '/ticket/complete/$ticket_id'
+      preLoaderRoute: typeof AuthenticatedTicketCompleteTicket_idRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/place/asset/edit/$asset_id': {
       id: '/_authenticated/place/asset/edit/$asset_id'
       path: '/place/asset/edit/$asset_id'
@@ -784,6 +804,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPlaceAssetAsset_idRoute: typeof AuthenticatedPlaceAssetAsset_idRoute
   AuthenticatedPlaceAssetNewRoute: typeof AuthenticatedPlaceAssetNewRoute
   AuthenticatedPlaceEditPlace_idRoute: typeof AuthenticatedPlaceEditPlace_idRoute
+  AuthenticatedTicketCompleteTicket_idRoute: typeof AuthenticatedTicketCompleteTicket_idRoute
   AuthenticatedPlaceAssetEditAsset_idRoute: typeof AuthenticatedPlaceAssetEditAsset_idRoute
 }
 
@@ -816,6 +837,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPlaceAssetAsset_idRoute: AuthenticatedPlaceAssetAsset_idRoute,
   AuthenticatedPlaceAssetNewRoute: AuthenticatedPlaceAssetNewRoute,
   AuthenticatedPlaceEditPlace_idRoute: AuthenticatedPlaceEditPlace_idRoute,
+  AuthenticatedTicketCompleteTicket_idRoute:
+    AuthenticatedTicketCompleteTicket_idRoute,
   AuthenticatedPlaceAssetEditAsset_idRoute:
     AuthenticatedPlaceAssetEditAsset_idRoute,
 }

@@ -285,7 +285,7 @@ export function TicketStatusChip({ status }: { status: TicketStatus }) {
     case "PENDING_REVIEW":
       return (
         <Chip bg="var(--warn-50)" border="var(--warn-200)" text="var(--warn-900)" dot="var(--warn)">
-          <Trans>Waiting for review</Trans>
+          <Trans>Pending review</Trans>
         </Chip>
       )
     case "APPROVED":
@@ -296,7 +296,7 @@ export function TicketStatusChip({ status }: { status: TicketStatus }) {
       )
     case "REJECTED":
       return (
-        <Chip bg="var(--crit-50)" border="var(--crit-200)" text="var(--crit-900)" dot="var(--crit)">
+        <Chip bg="var(--secondary)" border="var(--border)" text="var(--muted-foreground)" dot="var(--muted-foreground)">
           <Trans>Rejected</Trans>
         </Chip>
       )

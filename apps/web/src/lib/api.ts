@@ -205,6 +205,12 @@ export function ticketQuery(query: TicketListQuery): string {
   return params.toString()
 }
 
+/** Every ticket matching the query (all pages, 100 at a time). */
+export function listAllTickets(token: string, query: TicketListQuery): Promise<Ticket[]> {
+  const params = ticketQuery(query)
+  return apiAllPages<Ticket>(`/tickets${params ? `?${params}` : ""}`, token)
+}
+
 /** One page of tickets, in the order `query.sort` asks for. */
 export function listTickets(
   token: string,
@@ -497,15 +503,9 @@ export async function getAssetById(
   )
 }
 
-export async function getTicketById(
-  token: string,
-  ticketId: string,
-) {
-  const response = await authFetch(`/tickets/${ticketId}`, token).then((res) =>
-    res.json(),
-  )
-
-  return response;
+/** One ticket, with its photos (signed links that work for an hour). */
+export function getTicketById(token: string, ticketId: string): Promise<Ticket> {
+  return apiRequest<Ticket>(`/tickets/${ticketId}`, token)
 }
 
 // Finanace
