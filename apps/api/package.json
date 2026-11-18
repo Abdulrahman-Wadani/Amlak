@@ -4,7 +4,7 @@
 	"description": "",
 	"main": "index.js",
 	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
+		"test": "vitest run",
 		"check": "biome check",
 		"fix": "biome check --write",
 		"typecheck": "tsc",
@@ -40,6 +40,7 @@
 		"@types/node": "^24.19.2",
 		"@types/swagger-ui-express": "^4.1.8",
 		"prisma": "^7.10.0",
-		"typescript": "^7.0.2"
+		"typescript": "^7.0.2",
+		"vitest": "^5.1.0"
 	}
 }
