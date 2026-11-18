@@ -39,6 +39,8 @@ export interface PageProps {
   phoneEnd?: "bell" | "none" | TopBarAction
   /** Desktop: the bell in the header. */
   bell?: boolean
+  /** Desktop: the shared header. Off for a page whose own banner holds the h1 (notifications). */
+  header?: boolean
   /** Phone: the bottom tabs. Forms hide them. */
   tabs?: boolean
   children: ReactNode
@@ -61,6 +63,7 @@ export function Page({
   phoneStart,
   phoneEnd,
   bell = true,
+  header = true,
   tabs = true,
   children,
 }: PageProps) {
@@ -82,7 +85,7 @@ export function Page({
           <PhoneBar title={phoneTitle ?? title} start={start} back={back} end={end} />,
           bar,
         )}
-      <header className="hidden flex-wrap items-center justify-between gap-4 px-10 pt-8 desk:flex">
+      <header className={header ? "hidden flex-wrap items-center justify-between gap-4 px-10 pt-8 desk:flex" : "hidden"}>
         <div className="flex min-w-0 flex-col gap-1">
           <h1 className="m-0 text-[28px] leading-[1.3] font-bold">{title}</h1>
           {parent ? (

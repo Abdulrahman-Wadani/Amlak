@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import {
   Bell,
+  BellRing,
   Check,
   CheckCheck,
   ChevronLeft,
@@ -151,11 +152,77 @@ function NotificationsPage() {
   return (
     <Page
       title={<Trans>Notifications</Trans>}
-      description={<Trans>{money(unreadCount)} unread.</Trans>}
       phoneStart="back"
       phoneEnd="none"
       bell={false}
+      // The page keeps its own banner (not the design), which holds the h1.
+      header={false}
     >
+      {/* Header: on the phone the banner stacks its parts in one column. */}
+      <section
+        className="am-rise box-border flex flex-col items-stretch gap-5 bg-foreground p-6 text-white desk:flex-row desk:flex-wrap desk:items-center desk:justify-between desk:p-8"
+      >
+        <div className="flex min-w-0 flex-col gap-2.5 desk:flex-[1_1_300px]">
+          <span
+            style={S(
+              "display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--info-200)"
+            )}
+          >
+            <BellRing size={17} aria-hidden="true" />
+            <Trans>Notifications</Trans>
+          </span>
+
+          {/* On the phone the top bar holds the page's h1, so the banner's title is not a second one. */}
+          <h1
+            className="hidden desk:block"
+            style={S(
+              "margin: 0; font-size: 28px; font-weight: 700; line-height: 1.35"
+            )}
+          >
+            <Trans>Your notifications</Trans>
+          </h1>
+          <p
+            className="desk:hidden"
+            style={S(
+              "margin: 0; font-size: 28px; font-weight: 700; line-height: 1.35"
+            )}
+          >
+            <Trans>Your notifications</Trans>
+          </p>
+
+          <p
+            style={S(
+              "margin: 0; font-size: 14px; color: var(--info-200)"
+            )}
+          >
+            <Trans>
+              Stay updated with your latest activity and announcements.
+            </Trans>
+          </p>
+        </div>
+
+        <div
+          className="self-start desk:self-auto"
+          style={S(
+            "display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.10); padding: 14px 18px"
+          )}
+        >
+          <Bell size={22} aria-hidden="true" />
+
+          <div style={S("display: flex; flex-direction: column; gap: 2px")}>
+            <span
+              style={S(
+                "font-size: 24px; font-weight: 700; font-family: var(--font-mono); line-height: 1"
+              )}
+            >
+              {money(unreadCount)}
+            </span>
+            <span style={S("font-size: 12px; color: var(--info-200)")}>
+              <Trans>Unread notifications</Trans>
+            </span>
+          </div>
+        </div>
+      </section>
 
       {/* Notifications list */}
       <section>

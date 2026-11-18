@@ -46,11 +46,6 @@ msgstr "تم اختيار {0} من 5 صور"
 msgid "{0} places"
 msgstr "{0} أماكن"
 
-#. placeholder {0}: money(unreadCount)
-#: src/routes/_authenticated/notifications.tsx:154
-msgid "{0} unread."
-msgstr "{0} غير مقروءة."
-
 #: src/routes/_authenticated/home.tsx:119
 msgid "{checkIns, plural, =0 {No check-ins} one {One check-in} other {# check-ins}}"
 msgstr "{checkIns, plural, =0 {لا دخول} one {دخول واحد} two {دخولان} few {# حالات دخول} many {# حالة دخول} other {# حالة دخول}}"
@@ -278,7 +273,7 @@ msgstr "أحمد حمد"
 #: src/components/tickets-section.tsx:88
 #: src/routes/_authenticated/admin/index.tsx:33
 #: src/routes/_authenticated/content/index.tsx:216
-#: src/routes/_authenticated/notifications.tsx:206
+#: src/routes/_authenticated/notifications.tsx:273
 #: src/routes/_authenticated/places.tsx:30
 #: src/routes/_authenticated/workers.tsx:41
 msgid "All"
@@ -327,7 +322,7 @@ msgstr "أملاك"
 msgid "Amount"
 msgstr "المبلغ"
 
-#: src/routes/_authenticated/notifications.tsx:350
+#: src/routes/_authenticated/notifications.tsx:417
 msgid "Announcement"
 msgstr "إعلان"
 
@@ -469,8 +464,8 @@ msgstr "عدد المرفقات: {0}"
 
 #: src/components/asset-manage.tsx:211
 #: src/components/asset-manage.tsx:236
-#: src/components/page.tsx:149
-#: src/components/page.tsx:153
+#: src/components/page.tsx:152
+#: src/components/page.tsx:156
 #: src/components/place-bookings.tsx:637
 #: src/components/place-bookings.tsx:736
 #: src/components/place-bookings.tsx:811
@@ -1190,7 +1185,7 @@ msgstr "تعذر تحميل المصروفات. حاول مرة أخرى."
 msgid "Failed to load financial report."
 msgstr "تعذر تحميل التقرير المالي."
 
-#: src/routes/_authenticated/notifications.tsx:214
+#: src/routes/_authenticated/notifications.tsx:281
 msgid "Failed to load notifications."
 msgstr "فشل تحميل الإشعارات."
 
@@ -1206,7 +1201,7 @@ msgstr "تعذر تحميل الملف الشخصي."
 msgid "Failed to send announcement."
 msgstr "فشل إرسال الإعلان."
 
-#: src/routes/_authenticated/notifications.tsx:216
+#: src/routes/_authenticated/notifications.tsx:283
 msgid "Failed to update notification."
 msgstr "فشل تحديث الإشعار."
 
@@ -1391,7 +1386,7 @@ msgstr "قيد التنفيذ"
 msgid "Inactive"
 msgstr "غير نشط"
 
-#: src/routes/_authenticated/notifications.tsx:169
+#: src/routes/_authenticated/notifications.tsx:236
 msgid "Inbox"
 msgstr "صندوق الوارد"
 
@@ -1499,11 +1494,11 @@ msgstr "الصيانة"
 msgid "Maintenance is due today"
 msgstr "موعد الصيانة اليوم"
 
-#: src/routes/_authenticated/notifications.tsx:362
+#: src/routes/_authenticated/notifications.tsx:429
 msgid "Maintenance overdue"
 msgstr "صيانة متأخرة"
 
-#: src/routes/_authenticated/notifications.tsx:360
+#: src/routes/_authenticated/notifications.tsx:427
 msgid "Maintenance reminder"
 msgstr "تذكير بالصيانة"
 
@@ -1546,7 +1541,7 @@ msgstr "الإدارة"
 msgid "Manage the site's pages, their text and whether they are published."
 msgstr "إدارة صفحات الموقع ومحتواها وحالة نشرها."
 
-#: src/routes/_authenticated/notifications.tsx:176
+#: src/routes/_authenticated/notifications.tsx:243
 msgid "Manage your notifications and stay up to date."
 msgstr "إدارة إشعاراتك ومتابعة آخر المستجدات."
 
@@ -1560,7 +1555,7 @@ msgstr "مدير"
 msgid "Manager ID"
 msgstr "معرّف المدير"
 
-#: src/routes/_authenticated/notifications.tsx:484
+#: src/routes/_authenticated/notifications.tsx:551
 msgid "Mark as read"
 msgstr "تحديد كمقروء"
 
@@ -1650,7 +1645,7 @@ msgstr "ستظهر التذاكر الجديدة هنا."
 
 #: src/components/pager.tsx:46
 #: src/routes/_authenticated/content/index.tsx:418
-#: src/routes/_authenticated/notifications.tsx:322
+#: src/routes/_authenticated/notifications.tsx:389
 msgid "Next"
 msgstr "التالي"
 
@@ -1715,7 +1710,7 @@ msgstr "لا يغادر ضيوف اليوم."
 msgid "No monthly budget is set."
 msgstr "لم تُحدَّد ميزانية شهرية."
 
-#: src/routes/_authenticated/notifications.tsx:249
+#: src/routes/_authenticated/notifications.tsx:316
 msgid "No notifications"
 msgstr "لا توجد إشعارات"
 
@@ -1819,7 +1814,8 @@ msgstr "لا شيء للمراجعة."
 
 #: src/components/account-links.tsx:35
 #: src/components/notification-bell.tsx:16
-#: src/routes/_authenticated/notifications.tsx:153
+#: src/routes/_authenticated/notifications.tsx:154
+#: src/routes/_authenticated/notifications.tsx:172
 msgid "Notifications"
 msgstr "الإشعارات"
 
@@ -2109,7 +2105,7 @@ msgstr "صيانة وقائية"
 
 #: src/components/pager.tsx:32
 #: src/routes/_authenticated/content/index.tsx:408
-#: src/routes/_authenticated/notifications.tsx:298
+#: src/routes/_authenticated/notifications.tsx:365
 msgid "Previous"
 msgstr "السابق"
 
@@ -2154,8 +2150,8 @@ msgstr "تاريخ الشراء"
 msgid "Re-enter your password"
 msgstr "أعد إدخال كلمة المرور"
 
-#: src/routes/_authenticated/notifications.tsx:208
-#: src/routes/_authenticated/notifications.tsx:496
+#: src/routes/_authenticated/notifications.tsx:275
+#: src/routes/_authenticated/notifications.tsx:563
 msgid "Read"
 msgstr "مقروء"
 
@@ -2177,7 +2173,7 @@ msgstr "إعادة تعيين المكلف"
 msgid "Recipient role"
 msgstr "دور المستلم"
 
-#: src/routes/_authenticated/notifications.tsx:197
+#: src/routes/_authenticated/notifications.tsx:264
 msgid "Refresh"
 msgstr "تحديث"
 
@@ -2501,6 +2497,10 @@ msgstr "الحالة"
 msgid "Stay"
 msgstr "الإقامة"
 
+#: src/routes/_authenticated/notifications.tsx:198
+msgid "Stay updated with your latest activity and announcements."
+msgstr "تابع آخر نشاطاتك والإعلانات الجديدة."
+
 #: src/components/place-shared.tsx:148
 msgid "Staying"
 msgstr "مقيم الآن"
@@ -2535,7 +2535,7 @@ msgstr "طلبات الدعم"
 msgid "Support team"
 msgstr "فريق الدعم"
 
-#: src/routes/_authenticated/notifications.tsx:364
+#: src/routes/_authenticated/notifications.tsx:431
 msgid "Support ticket resolved"
 msgstr "حُلّت تذكرة الدعم"
 
@@ -2700,11 +2700,11 @@ msgstr "لا توجد أماكن مسندة لهذا العامل."
 msgid "Those dates are already booked for this property."
 msgstr "هذه التواريخ محجوزة بالفعل لهذا العقار."
 
-#: src/routes/_authenticated/notifications.tsx:354
+#: src/routes/_authenticated/notifications.tsx:421
 msgid "Ticket assigned"
 msgstr "تم إسناد تذكرة"
 
-#: src/routes/_authenticated/notifications.tsx:358
+#: src/routes/_authenticated/notifications.tsx:425
 msgid "Ticket completed"
 msgstr "اكتملت التذكرة"
 
@@ -2729,11 +2729,11 @@ msgstr "التذكرة غير موجودة"
 msgid "Ticket owner"
 msgstr "صاحب التذكرة"
 
-#: src/routes/_authenticated/notifications.tsx:356
+#: src/routes/_authenticated/notifications.tsx:423
 msgid "Ticket rejected"
 msgstr "رُفضت التذكرة"
 
-#: src/routes/_authenticated/notifications.tsx:352
+#: src/routes/_authenticated/notifications.tsx:419
 msgid "Ticket submitted"
 msgstr "تذكرة جديدة"
 
@@ -2850,10 +2850,14 @@ msgstr "تعذر الاتصال بالخادم. يرجى المحاولة مرة
 msgid "Under maintenance"
 msgstr "تحت الصيانة"
 
-#: src/routes/_authenticated/notifications.tsx:207
-#: src/routes/_authenticated/notifications.tsx:432
+#: src/routes/_authenticated/notifications.tsx:274
+#: src/routes/_authenticated/notifications.tsx:499
 msgid "Unread"
 msgstr "غير مقروء"
+
+#: src/routes/_authenticated/notifications.tsx:221
+msgid "Unread notifications"
+msgstr "الإشعارات غير المقروءة"
 
 #: src/routes/_authenticated/content/$content_id.tsx:555
 msgid "Unticking this makes the page a draft."
@@ -2875,7 +2879,7 @@ msgstr "تحديث الملف الشخصي"
 msgid "Update property"
 msgstr "تحديث العقار"
 
-#: src/routes/_authenticated/notifications.tsx:482
+#: src/routes/_authenticated/notifications.tsx:549
 msgid "Updating..."
 msgstr "جارٍ التحديث..."
 
@@ -3155,7 +3159,7 @@ msgstr "يمكنك طلب رمز جديد خلال"
 msgid "You do not have permission to do this."
 msgstr "ليست لديك صلاحية للقيام بهذا."
 
-#: src/routes/_authenticated/notifications.tsx:257
+#: src/routes/_authenticated/notifications.tsx:324
 msgid "You don't have any notifications in this category."
 msgstr "ليس لديك أي إشعارات في هذه الفئة."
 
@@ -3170,6 +3174,11 @@ msgstr "لا توجد لديك عقارات بعد."
 #: src/routes/account-setup.tsx:40
 msgid "Your account has been activated successfully!"
 msgstr "تم تفعيل حسابك بنجاح!"
+
+#: src/routes/_authenticated/notifications.tsx:182
+#: src/routes/_authenticated/notifications.tsx:190
+msgid "Your notifications"
+msgstr "إشعاراتك"
 
 #: src/routes/reset-password.tsx:167
 msgid "Your password has been changed successfully. Please log in again using your new password."
