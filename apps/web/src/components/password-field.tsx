@@ -3,14 +3,11 @@ import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { Check, Eye, EyeOff } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { useLanguage } from "@/lib/i18n"
-import { cn } from "@/lib/utils"
 
 /**
- * A password input with the show/hide button inside it, at the inline end of
- * the page (left in Arabic, right in English), centred and without a frame.
- * The text is always left to right, so the room for the button is padded on
- * the physical side the button sits on.
+ * A password input with the show/hide button inside it, centred and without
+ * a frame. The password is always typed left to right, so the button sits at
+ * its end, on the right, in both languages.
  */
 export function PasswordInput({
   id,
@@ -30,8 +27,6 @@ export function PasswordInput({
   describedBy?: string
 }) {
   const [show, setShow] = useState(false)
-  const { lang } = useLanguage()
-  const rtl = lang === "ar"
   return (
     <div className="relative">
       <Input
@@ -40,7 +35,7 @@ export function PasswordInput({
         type={show ? "text" : "password"}
         autoComplete={autoComplete}
         maxLength={128}
-        className={rtl ? "pl-12" : "pr-12"}
+        className="pr-12"
         value={value}
         aria-invalid={invalid || undefined}
         aria-describedby={describedBy}
@@ -53,10 +48,7 @@ export function PasswordInput({
         aria-pressed={show}
         disabled={disabled}
         onClick={() => setShow((s) => !s)}
-        className={cn(
-          "absolute top-1/2 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-muted-foreground shadow-none outline-none hover:text-foreground focus-visible:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50",
-          rtl ? "left-0.5" : "right-0.5"
-        )}
+        className="absolute top-1/2 right-0.5 flex size-10 -translate-y-1/2 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-muted-foreground shadow-none outline-none hover:text-foreground focus-visible:text-foreground focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50"
       >
         {show ? (
           <EyeOff aria-hidden="true" className="size-[18px]" />
