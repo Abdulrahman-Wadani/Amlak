@@ -129,7 +129,7 @@ export function TicketsSection({
                 to="/ticket/new"
                 search={{ place_id: placeId }}
                 className={cn(buttonVariants({ variant: "outline", size: "sm" }), "am-btn")}
-                style={S("height: 38px; padding: 0 12px; gap: 6px; white-space: nowrap")}
+                style={S("height: 44px; padding: 0 12px; gap: 6px; white-space: nowrap")}
               >
                 <Plus size={16} />
                 <Trans>Add ticket</Trans>

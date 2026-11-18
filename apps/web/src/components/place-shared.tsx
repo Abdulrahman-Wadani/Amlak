@@ -47,10 +47,10 @@ export function StatusBadge({ status }: { status: string }) {
   if (status === "UNDER_MAINTENANCE") {
     return (
       <Chip
-        bg="var(--warn-50)"
-        border="var(--warn-200)"
-        text="var(--warn-700)"
-        dot="var(--warn)"
+        bg="var(--info-50)"
+        border="var(--info-200)"
+        text="var(--info-900)"
+        dot="var(--info)"
       >
         <Trans>Under maintenance</Trans>
       </Chip>
@@ -61,7 +61,7 @@ export function StatusBadge({ status }: { status: string }) {
       <Chip
         bg="var(--warn-50)"
         border="var(--warn-200)"
-        text="var(--warn-700)"
+        text="var(--warn-900)"
         dot="var(--warn)"
       >
         <Trans>OPEN</Trans>
@@ -81,7 +81,7 @@ export function StatusBadge({ status }: { status: string }) {
     )
   }
   return (
-    <Chip bg="#ffffff" border="var(--border)" text="var(--ink)" dot="#5b636e">
+    <Chip bg="var(--secondary)" border="var(--border)" text="var(--muted-foreground)" dot="var(--muted-foreground)">
       <Trans>Inactive</Trans>
     </Chip>
   )
@@ -105,7 +105,7 @@ export function AssetStatusBadge({ status }: { status: string }) {
       <Chip
         bg="var(--warn-50)"
         border="var(--warn-200)"
-        text="var(--warn-700)"
+        text="var(--warn-900)"
         dot="var(--warn)"
       >
         <Trans>Needs maintenance</Trans>
@@ -117,7 +117,7 @@ export function AssetStatusBadge({ status }: { status: string }) {
       <Chip
         bg="var(--info-50)"
         border="var(--info-200)"
-        text="var(--info-700)"
+        text="var(--info-900)"
         dot="var(--info)"
       >
         <Trans>Under maintenance</Trans>
@@ -154,7 +154,7 @@ export function BookingStatusChip({ status }: { status: string }) {
       <Chip
         bg="var(--info-50)"
         border="var(--info-200)"
-        text="var(--info-700)"
+        text="var(--info-900)"
         dot="var(--info)"
       >
         <Trans>Checked out</Trans>
@@ -181,6 +181,30 @@ export function BookingStatusChip({ status }: { status: string }) {
       dot="var(--muted-foreground)"
     >
       <Trans>Confirmed</Trans>
+    </Chip>
+  )
+}
+
+/** A worker account's status, as on the workers page. */
+export function WorkerStatusChip({ status }: { status: string }) {
+  if (status === "ACTIVE") {
+    return (
+      <Chip bg="var(--good-50)" border="var(--good-200)" text="var(--good-700)" dot="var(--good)">
+        <Trans>Active</Trans>
+      </Chip>
+    )
+  }
+  if (status === "DEACTIVATED") {
+    return (
+      <Chip bg="var(--secondary)" border="var(--border)" text="var(--muted-foreground)" dot="var(--muted-foreground)">
+        <Trans>Deactivated</Trans>
+      </Chip>
+    )
+  }
+  // INVITED, and PENDING_VERIFICATION, which a worker account does not reach.
+  return (
+    <Chip bg="var(--info-50)" border="var(--info-200)" text="var(--info-900)" dot="var(--info)">
+      <Trans>Invited</Trans>
     </Chip>
   )
 }
@@ -260,13 +284,13 @@ export function TicketStatusChip({ status }: { status: TicketStatus }) {
   switch (status) {
     case "PENDING_REVIEW":
       return (
-        <Chip bg="var(--warn-50)" border="var(--warn-200)" text="var(--warn-700)" dot="var(--warn)">
+        <Chip bg="var(--warn-50)" border="var(--warn-200)" text="var(--warn-900)" dot="var(--warn)">
           <Trans>Waiting for review</Trans>
         </Chip>
       )
     case "APPROVED":
       return (
-        <Chip bg="var(--info-50)" border="var(--info-200)" text="var(--info-700)" dot="var(--info)">
+        <Chip bg="var(--info-50)" border="var(--info-200)" text="var(--info-900)" dot="var(--info)">
           <Trans>Approved</Trans>
         </Chip>
       )

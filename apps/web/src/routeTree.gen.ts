@@ -44,7 +44,8 @@ import { Route as AuthenticatedWorkerNewRouteImport } from './routes/_authentica
 import { Route as PLangSlugRouteImport } from './routes/p/$lang/$slug'
 import { Route as AuthenticatedPlaceAssetAsset_idRouteImport } from './routes/_authenticated/place/asset/$asset_id'
 import { Route as AuthenticatedPlaceAssetNewRouteImport } from './routes/_authenticated/place/asset/new'
-import { Route as AuthenticatedPlaceAssetMaintenanceNewRouteImport } from './routes/_authenticated/place/asset/maintenance/new'
+import { Route as AuthenticatedPlaceEditPlace_idRouteImport } from './routes/_authenticated/place/edit/$place_id'
+import { Route as AuthenticatedPlaceAssetEditAsset_idRouteImport } from './routes/_authenticated/place/asset/edit/$asset_id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -232,10 +233,16 @@ const AuthenticatedPlaceAssetNewRoute =
     path: '/place/asset/new',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedPlaceAssetMaintenanceNewRoute =
-  AuthenticatedPlaceAssetMaintenanceNewRouteImport.update({
-    id: '/place/asset/maintenance/new',
-    path: '/place/asset/maintenance/new',
+const AuthenticatedPlaceEditPlace_idRoute =
+  AuthenticatedPlaceEditPlace_idRouteImport.update({
+    id: '/place/edit/$place_id',
+    path: '/place/edit/$place_id',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedPlaceAssetEditAsset_idRoute =
+  AuthenticatedPlaceAssetEditAsset_idRouteImport.update({
+    id: '/place/asset/edit/$asset_id',
+    path: '/place/asset/edit/$asset_id',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 
@@ -274,7 +281,8 @@ export interface FileRoutesByFullPath {
   '/support/': typeof AuthenticatedSupportIndexRoute
   '/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
-  '/place/asset/maintenance/new': typeof AuthenticatedPlaceAssetMaintenanceNewRoute
+  '/place/edit/$place_id': typeof AuthenticatedPlaceEditPlace_idRoute
+  '/place/asset/edit/$asset_id': typeof AuthenticatedPlaceAssetEditAsset_idRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -311,7 +319,8 @@ export interface FileRoutesByTo {
   '/support': typeof AuthenticatedSupportIndexRoute
   '/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
-  '/place/asset/maintenance/new': typeof AuthenticatedPlaceAssetMaintenanceNewRoute
+  '/place/edit/$place_id': typeof AuthenticatedPlaceEditPlace_idRoute
+  '/place/asset/edit/$asset_id': typeof AuthenticatedPlaceAssetEditAsset_idRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -350,7 +359,8 @@ export interface FileRoutesById {
   '/_authenticated/support/': typeof AuthenticatedSupportIndexRoute
   '/_authenticated/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/_authenticated/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
-  '/_authenticated/place/asset/maintenance/new': typeof AuthenticatedPlaceAssetMaintenanceNewRoute
+  '/_authenticated/place/edit/$place_id': typeof AuthenticatedPlaceEditPlace_idRoute
+  '/_authenticated/place/asset/edit/$asset_id': typeof AuthenticatedPlaceAssetEditAsset_idRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -389,7 +399,8 @@ export interface FileRouteTypes {
     | '/support/'
     | '/place/asset/$asset_id'
     | '/place/asset/new'
-    | '/place/asset/maintenance/new'
+    | '/place/edit/$place_id'
+    | '/place/asset/edit/$asset_id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -426,7 +437,8 @@ export interface FileRouteTypes {
     | '/support'
     | '/place/asset/$asset_id'
     | '/place/asset/new'
-    | '/place/asset/maintenance/new'
+    | '/place/edit/$place_id'
+    | '/place/asset/edit/$asset_id'
   id:
     | '__root__'
     | '/'
@@ -464,7 +476,8 @@ export interface FileRouteTypes {
     | '/_authenticated/support/'
     | '/_authenticated/place/asset/$asset_id'
     | '/_authenticated/place/asset/new'
-    | '/_authenticated/place/asset/maintenance/new'
+    | '/_authenticated/place/edit/$place_id'
+    | '/_authenticated/place/asset/edit/$asset_id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -725,11 +738,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlaceAssetNewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/place/asset/maintenance/new': {
-      id: '/_authenticated/place/asset/maintenance/new'
-      path: '/place/asset/maintenance/new'
-      fullPath: '/place/asset/maintenance/new'
-      preLoaderRoute: typeof AuthenticatedPlaceAssetMaintenanceNewRouteImport
+    '/_authenticated/place/edit/$place_id': {
+      id: '/_authenticated/place/edit/$place_id'
+      path: '/place/edit/$place_id'
+      fullPath: '/place/edit/$place_id'
+      preLoaderRoute: typeof AuthenticatedPlaceEditPlace_idRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/place/asset/edit/$asset_id': {
+      id: '/_authenticated/place/asset/edit/$asset_id'
+      path: '/place/asset/edit/$asset_id'
+      fullPath: '/place/asset/edit/$asset_id'
+      preLoaderRoute: typeof AuthenticatedPlaceAssetEditAsset_idRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
   }
@@ -763,7 +783,8 @@ interface AuthenticatedRouteChildren {
   AuthenticatedSupportIndexRoute: typeof AuthenticatedSupportIndexRoute
   AuthenticatedPlaceAssetAsset_idRoute: typeof AuthenticatedPlaceAssetAsset_idRoute
   AuthenticatedPlaceAssetNewRoute: typeof AuthenticatedPlaceAssetNewRoute
-  AuthenticatedPlaceAssetMaintenanceNewRoute: typeof AuthenticatedPlaceAssetMaintenanceNewRoute
+  AuthenticatedPlaceEditPlace_idRoute: typeof AuthenticatedPlaceEditPlace_idRoute
+  AuthenticatedPlaceAssetEditAsset_idRoute: typeof AuthenticatedPlaceAssetEditAsset_idRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -794,8 +815,9 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedSupportIndexRoute: AuthenticatedSupportIndexRoute,
   AuthenticatedPlaceAssetAsset_idRoute: AuthenticatedPlaceAssetAsset_idRoute,
   AuthenticatedPlaceAssetNewRoute: AuthenticatedPlaceAssetNewRoute,
-  AuthenticatedPlaceAssetMaintenanceNewRoute:
-    AuthenticatedPlaceAssetMaintenanceNewRoute,
+  AuthenticatedPlaceEditPlace_idRoute: AuthenticatedPlaceEditPlace_idRoute,
+  AuthenticatedPlaceAssetEditAsset_idRoute:
+    AuthenticatedPlaceAssetEditAsset_idRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

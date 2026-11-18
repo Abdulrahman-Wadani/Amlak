@@ -1,14 +1,13 @@
-import { useState } from "react"
-import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { t } from "@lingui/core/macro"
+import { useEffect, useState } from "react"
+import { createFileRoute } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
-import { CircleAlert } from "lucide-react"
+import type { Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
-import { createAsset } from "@/lib/api"
-import { errorMessage } from "@/lib/errors"
-import { assetInput } from "@/lib/validators"
-import Form, { type FormValues } from "@/components/form"
+import { getPlace } from "@/lib/api"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Page } from "@/components/page"
+import { Panel } from "@/components/panel"
+import { AssetForm } from "@/components/asset-form"
 
 export const Route = createFileRoute("/_authenticated/place/asset/new")({
   component: AddAsset,
@@ -17,117 +16,47 @@ export const Route = createFileRoute("/_authenticated/place/asset/new")({
   }),
 })
 
-const STATUSES = [
-  "GOOD",
-  "NEEDS_MAINTENANCE",
-  "UNDER_MAINTENANCE",
-  "OUT_OF_SERVICE",
-] as const
-
-type FieldKey = "name" | "type" | "purchase_date" | "place"
-
-function validationMessage(key: FieldKey): string {
-  switch (key) {
-    case "name":
-      return t`Enter an asset name`
-    case "type":
-      return t`Enter a type`
-    case "purchase_date":
-      return t`The purchase date cannot be in the future.`
-    case "place":
-      return t`Choose a place`
-  }
-}
-
-function StatusLabel({ status }: { status: string }) {
-  switch (status) {
-    case "GOOD":
-      return <Trans>Good</Trans>
-    case "NEEDS_MAINTENANCE":
-      return <Trans>Needs maintenance</Trans>
-    case "UNDER_MAINTENANCE":
-      return <Trans>Under maintenance</Trans>
-    default:
-      return <Trans>Out of service</Trans>
-  }
-}
-
 function AddAsset() {
   const { accessToken } = useAuth()
-  const navigate = useNavigate()
   const { place_id } = Route.useSearch()
-  const [formError, setFormError] = useState("")
-  const [today] = useState(() => new Date().toISOString().slice(0, 10))
+  const [place, setPlace] = useState<Place | null>(null)
+  const [failed, setFailed] = useState(false)
 
-  async function handleCreateAsset(values: FormValues) {
+  useEffect(() => {
     if (!accessToken) return
-    const place = place_id
-    const result = assetInput.safeParse({
-      name: values.name,
-      type: values.type,
-      status: values.status ?? "GOOD",
-      purchase_date: values.purchase_date || undefined,
-    })
-    const map: Partial<Record<FieldKey, string>> = {}
-    if (!result.success) {
-      for (const issue of result.error.issues) {
-        const key = String(issue.path[0]) as FieldKey
-        if (["name", "type", "purchase_date"].includes(key) && !map[key]) {
-          map[key] = validationMessage(key)
-        }
-      }
-    }
-    if (!place) {
-      map.place = validationMessage("place")
-    }
-    // Both are YYYY-MM-DD strings, which compare correctly as text.
-    if (
-      result.success &&
-      result.data.purchase_date &&
-      result.data.purchase_date > today
-    ) {
-      map.purchase_date = validationMessage("purchase_date")
-    }
-    if (!result.success || Object.keys(map).length > 0) {
-      setFormError(
-        Object.keys(map).length > 0
-          ? Object.values(map).join(" ")
-          : t`Could not save the asset.`,
-      )
+    if (!place_id) {
+      setFailed(true)
       return
     }
-    setFormError("")
-    try {
-      await createAsset(accessToken, place, result.data)
-      void navigate({ to: "/place/$place_id", params: { place_id: place } })
-    } catch (err) {
-      setFormError(errorMessage(err))
+    let alive = true
+    getPlace(accessToken, place_id)
+      .then((p) => alive && setPlace(p))
+      .catch(() => alive && setFailed(true))
+    return () => {
+      alive = false
     }
-  }
-
-  const errorText =
-    "flex items-center gap-1.5 text-[13px] leading-5 text-crit-900"
+  }, [accessToken, place_id])
 
   return (
     <Page
       title={<Trans>Add asset</Trans>}
-      parent={{ label: <Trans>Place</Trans>, link: { to: "/place/$place_id", params: { place_id } } }}
+      parent={
+        place_id
+          ? { label: place?.place_name ?? <Trans>Place</Trans>, link: { to: "/place/$place_id", params: { place_id } } }
+          : { label: <Trans>Places</Trans>, link: { to: "/places" } }
+      }
       tabs={false}
     >
-      <Form
-        fields={[
-          { name: "name", label: t`Asset name`, type: "text" },
-          { name: "type", label: t`Type`, type: "text" },
-          { name: "status", label: t`Status`, type: "select", defaultValue: "GOOD", options: STATUSES.map((s) => ({ value: s, label: <StatusLabel status={s} /> })) },
-          { name: "purchase_date", label: t`Purchase date`, type: "date" },
-        ]}
-        onSubmit={handleCreateAsset}
-      />
-      {formError && (
-        <p role="alert" className={errorText}>
-          <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
-          {formError}
-        </p>
+      {failed ? (
+        <Panel>
+          <p className="m-0 text-sm text-muted-foreground">
+            <Trans>We could not load this property.</Trans>
+          </p>
+        </Panel>
+      ) : place && accessToken ? (
+        <AssetForm token={accessToken} place={place} />
+      ) : (
+        <Skeleton className="h-96" />
       )}
     </Page>
   )

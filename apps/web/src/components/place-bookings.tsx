@@ -323,7 +323,7 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
           <SelectTrigger
             size="sm"
             aria-label={t`Filter bookings by month`}
-            style={S("height: 40px; min-width: 190px")}
+            style={S("height: 44px; min-width: 190px")}
           >
             <SelectValue>
               {(value: string | null) =>
