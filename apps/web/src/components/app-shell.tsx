@@ -12,6 +12,7 @@ import {
   type Role,
 } from "@/lib/nav"
 import { ShellProvider, useShell } from "@/components/shell-context"
+import { Toasts } from "@/components/toast"
 
 /**
  * The signed-in layout. From 1120px: a 72px top bar with the role's links and
@@ -32,6 +33,7 @@ function Shell({ role }: { role: Role }) {
   return (
     <div className="flex min-h-screen flex-col bg-background font-sans text-[15px] leading-[1.6] text-foreground">
       <DesktopBar role={role} />
+      <Toasts />
       {/* The phone top bar: each page portals its title and buttons into it (components/page.tsx). */}
       <header
         ref={setBar}

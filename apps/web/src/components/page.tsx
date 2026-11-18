@@ -93,7 +93,7 @@ export function Page({
               <Link
                 {...parent.link}
                 activeOptions={{ exact: true }}
-                className="inline-flex items-center gap-1 text-[15px] font-medium underline underline-offset-4"
+                className="relative inline-flex items-center gap-1 text-[15px] font-medium underline underline-offset-4 before:absolute before:inset-x-0 before:-inset-y-2.5 before:content-['']"
               >
                 <NavIcon name="back" size={16} />
                 {parent.label}

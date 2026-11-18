@@ -1,95 +1,71 @@
-
-import { useEffect, useState } from "react"
+import { useEffect, useState, type FormEvent } from "react"
 import { Link, createFileRoute, useNavigate, useParams } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import { useLingui } from "@lingui/react"
+import { Camera, ChevronRight, CircleAlert, Plus } from "lucide-react"
 import type { Asset, Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { authFetch } from "@/lib/http"
 import {
+  assignPlaceWorker,
   getPlace,
   getPlaceAssets,
+  getPlaceHealth,
   getWorkers,
-  updatePlace,
+  unassignPlaceWorker,
+  type DashboardPlace,
 } from "@/lib/api"
-import { S } from "@/lib/dom-style"
 import { apiError, errorMessage } from "@/lib/errors"
-import { buttonVariants, Button } from "@/components/ui/button"
-import { cn } from "cn"
-import { Building2, CalendarDays, Coins, MapPin, Plus, Wallet, Clock3, Pencil, Save, X, Trash2, Users, Wrench } from "lucide-react"
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { useFormat } from "@/lib/format"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "cn"
 import { PlaceBookings } from "@/components/place-bookings"
 import { TicketsSection } from "@/components/tickets-section"
-import {
-  AssetStatusBadge,
-  StatusBadge,
-  TypeLabel,
-} from "@/components/place-shared"
+import { AssetStatusBadge, StatusBadge, TypeLabel } from "@/components/place-shared"
 import { Page } from "@/components/page"
-import { dateFormat, numberFormat } from "@/lib/format"
+import { ConfirmDialog, LoadError } from "@/components/states"
+import {
+  Field,
+  InfoRows,
+  Initial,
+  NativeSelect,
+  Panel,
+  PanelTitle,
+  ScrollHint,
+  ScrollList,
+  TwoColumns,
+} from "@/components/panel"
 
 export const Route = createFileRoute("/_authenticated/place/$place_id")({
   component: PlaceDetailPage,
 })
 
-type PlaceUpdateInput = Parameters<typeof updatePlace>[2]
 type Worker = Awaited<ReturnType<typeof getWorkers>>[number]
 
-function isWorkerAssignedToPlace(worker: Worker, placeId: string) {
-  const assignments = worker.assigned_places as
-    | Array<string | { place_id?: string; id?: string }>
-    | undefined
-
-  return (
-    assignments?.some((assignment) =>
-      typeof assignment === "string"
-        ? assignment === placeId
-        : assignment.place_id === placeId || assignment.id === placeId
-    ) ?? false
-  )
+function isAssigned(worker: Worker, placeId: string) {
+  return worker.assigned_places.some((assignment) => assignment.place_id === placeId)
 }
 
 function PlaceDetailPage() {
-  const { place_id } = useParams({
-    from: "/_authenticated/place/$place_id",
-  })
-
-  const { i18n } = useLingui()
+  const { place_id } = useParams({ from: "/_authenticated/place/$place_id" })
   const { accessToken, user } = useAuth()
-  // Editing, deleting and the assets and workers sections are for Managers.
+  // Editing, deleting, the budget and the workers are for Managers.
   const isManager = user?.role === "MANAGER"
   const navigate = useNavigate()
 
   const [place, setPlace] = useState<Place | null>(null)
   const [assets, setAssets] = useState<Asset[] | null>(null)
   const [workers, setWorkers] = useState<Worker[] | null>(null)
+  const [health, setHealth] = useState<DashboardPlace | null>(null)
   const [failed, setFailed] = useState(false)
-  const [activeSection, setActiveSection] = useState<"assets" | "workers" | "tickets" | "bookings" | null>(null)
 
-
+  const [confirming, setConfirming] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState("")
-  const [selectedWorkerId, setSelectedWorkerId] = useState("")
-  const [addingWorker, setAddingWorker] = useState(false)
-  const [workerError, setWorkerError] = useState("")
-  const [workerSuccess, setWorkerSuccess] = useState("")
-
-  const [editing, setEditing] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [editForm, setEditForm] = useState<PlaceUpdateInput | null>(null)
-  const [updateError, setUpdateError] = useState("")
 
   useEffect(() => {
     if (!accessToken) return
-
     let alive = true
 
     getPlace(accessToken, place_id)
@@ -100,830 +76,144 @@ function PlaceDetailPage() {
       .then((list) => alive && setAssets(list))
       .catch(() => alive && setAssets([]))
 
-    // GET /workers is Manager-only; Workers do not see the workers section.
+    // GET /workers and the dashboard's budget are Manager-only.
     if (isManager) {
       getWorkers(accessToken)
         .then((list) => alive && setWorkers(list))
-        .catch((error) => {
-          console.error("Failed to load workers:", error)
-          if (alive) setWorkers([])
-        })
+        .catch(() => alive && setWorkers([]))
+      getPlaceHealth(accessToken, place_id)
+        .then((row) => alive && setHealth(row))
+        .catch(() => {})
     }
-
 
     return () => {
       alive = false
     }
   }, [accessToken, place_id, isManager])
 
-  const money = numberFormat(
-    i18n.locale === "ar" ? "ar" : "en"
-  )
-
-  const day = dateFormat(
-    i18n.locale === "ar" ? "ar" : "en",
-    { dateStyle: "medium" }
-  )
-
-  function openEditForm() {
-    if (!place) return
-
-    setEditForm({
-      place_name: place.place_name,
-      place_type: place.place_type,
-      city: place.city,
-      address: place.address,
-      description: place.description,
-      monthly_maintenance_budget: place.monthly_maintenance_budget ?? null,
-      latitude: place.latitude,
-      longitude: place.longitude,
-      status: place.status,
-    })
-
-    setUpdateError("")
-    setEditing(true)
-  }
-
-  async function handleUpdate(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-
-    if (!accessToken || !editForm) return
-
-    try {
-      setSaving(true)
-      setUpdateError("")
-
-      const updatedPlace = await updatePlace(
-        accessToken,
-        place_id,
-        editForm
-      )
-
-      setPlace(updatedPlace)
-      setEditing(false)
-    } catch (error) {
-      setUpdateError(
-        errorMessage(error)
-      )
-    } finally {
-      setSaving(false)
-    }
-  }
-
   async function handleDelete() {
     if (!accessToken || !place || deleting) return
-
-    const confirmed = window.confirm(
-      t`Delete the place "${place.place_name}"? This cannot be undone.`,
-    )
-    if (!confirmed) return
 
     try {
       setDeleting(true)
       setDeleteError("")
-
-      const response = await authFetch(`/places/${place_id}`, accessToken, {
-        method: "DELETE",
-      })
+      const response = await authFetch(`/places/${place_id}`, accessToken, { method: "DELETE" })
       const result = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw apiError(response.status, result)
-      }
-
+      if (!response.ok) throw apiError(response.status, result)
       await navigate({ to: "/places" })
     } catch (error) {
-      console.error("Delete place error:", error)
-      setDeleteError(
-        errorMessage(error),
-      )
+      setDeleteError(errorMessage(error))
     } finally {
       setDeleting(false)
     }
   }
 
-  // Used by the add-worker form and by the header button.
-  async function handleAddWorker(e?: React.SyntheticEvent) {
-    e?.preventDefault()
-    if (!accessToken || !selectedWorkerId || addingWorker) return
+  const where = place && (
+    <>
+      <TypeLabel type={place.place_type} />, {place.city}
+    </>
+  )
 
-    try {
-      setAddingWorker(true)
-      setWorkerError("")
-      setWorkerSuccess("")
-
-      const response = await authFetch(`/places/${place_id}/workers`, accessToken, {
-        method: "POST",
-        body: JSON.stringify({ worker_id: selectedWorkerId }),
-      })
-      const result = await response.json().catch(() => null)
-
-      if (!response.ok) {
-        throw apiError(response.status, result)
-      }
-
-      const refreshedWorkers = await getWorkers(accessToken)
-      setWorkers(refreshedWorkers)
-      setSelectedWorkerId("")
-      setWorkerSuccess(t`The worker was added to the place.`)
-    } catch (error) {
-      console.error("Assign worker error:", error)
-      setWorkerError(
-        errorMessage(error),
-      )
-    } finally {
-      setAddingWorker(false)
-    }
-  }
+  const budget = isManager && health?.maintenance_budget && place && (
+    <BudgetPanel budget={health.maintenance_budget} timeZone={place.timezone} />
+  )
 
   return (
     <Page
       title={
         place?.place_name ??
-        (failed ? <Trans>Place not found</Trans> : <Skeleton style={S("width: 220px; height: 28px")} />)
+        (failed ? <Trans>Place not found</Trans> : <Skeleton className="h-7 w-56" />)
       }
       phoneTitle={<Trans>Place</Trans>}
-      parent={{ label: <Trans>Places</Trans>, link: { to: "/places" } }}
+      phoneSubtitle={where}
+      parent={{ label: isManager ? <Trans>Places</Trans> : <Trans>My places</Trans>, link: { to: "/places" } }}
       actions={
-        place && isManager && (
+        place &&
+        isManager && (
           <>
-            <Button type="button" variant="outline" id="update" onClick={openEditForm}>
-              <Pencil size={16} aria-hidden="true" />
-              <Trans>Update place</Trans>
-            </Button>
+            <Link
+              to="/place/edit/$place_id"
+              params={{ place_id }}
+              className={cn(buttonVariants({ variant: "outline" }))}
+            >
+              <Trans>Edit</Trans>
+            </Link>
             <Button
               type="button"
               variant="destructive"
-              id="remove"
-              onClick={handleDelete}
-              disabled={deleting || saving}
+              onClick={() => {
+                setDeleteError("")
+                setConfirming(true)
+              }}
             >
-              <Trash2 size={16} aria-hidden="true" />
-              {deleting ? t`Deleting…` : t`Delete place`}
+              <Trans>Delete</Trans>
             </Button>
           </>
         )
       }
     >
-      {failed && (
-        <Card style={S("padding: 18px; border: 1px solid var(--border)")}>
-          <p
-            style={S(
-              "color: var(--muted-foreground); margin: 0; font-size: 14px"
-            )}
-          >
-            <Trans>We could not load this property.</Trans>
-          </p>
-        </Card>
-      )}
+      {failed && <LoadError title={<Trans>Could not load this place</Trans>} onRetry={() => window.location.reload()} />}
 
-      {deleteError && (
-        <p style={S("color: var(--destructive); font-size: 13px; margin: 0")}>
-          {deleteError}
-        </p>
+      {place && (
+        <ConfirmDialog
+          open={confirming}
+          title={<Trans>Delete “{place.place_name}”?</Trans>}
+          text={
+            <Trans>
+              The place disappears from lists and its history stays in reports. This cannot be undone from the app.
+            </Trans>
+          }
+          confirm={deleting ? <Trans>Deleting…</Trans> : <Trans>Delete place</Trans>}
+          busy={deleting}
+          error={deleteError}
+          onConfirm={() => void handleDelete()}
+          onClose={() => setConfirming(false)}
+        />
       )}
 
       {!failed && (
         <>
-          {editing && editForm && (
-            <Card
-              style={S(
-                "padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0"
-              )}
-            >
-              <CardHeader
-                style={S(
-                  "padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: row; justify-content: space-between; align-items: center"
+          <TwoColumns
+            main={
+              <>
+                {/* On the phone the budget comes first, as designed. */}
+                {budget && <div className="flex flex-col desk:hidden">{budget}</div>}
+                <AssetsPanel placeId={place_id} assets={assets} isManager={isManager} />
+                {isManager && accessToken && (
+                  <WorkersPanel
+                    token={accessToken}
+                    placeId={place_id}
+                    workers={workers}
+                    onChanged={setWorkers}
+                  />
                 )}
-              >
-                <CardTitle
-                  style={S("font-size: 17px; font-weight: 750")}
-                >
-                  <Trans>Update property</Trans>
-                </CardTitle>
-
-                <button
-                  type="button"
-                  id="update"
-                  onClick={() => setEditing(false)}
-                  disabled={saving}
-                  style={S(
-                    "display: flex; align-items: center; justify-content: center; padding: 6px; border: 1px solid var(--border); background: var(--card)"
-                  )}
-                >
-                  <X size={18} />
-                </button>
-              </CardHeader>
-
-              <CardContent style={S("padding: 20px")}>
-                <form
-                  onSubmit={handleUpdate}
-                  style={S(
-                    "display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px"
-                  )}
-                >
-                  <EditField
-                    label={t`Place name`}
-                    value={editForm.place_name}
-                    onChange={(value) =>
-                      setEditForm({ ...editForm, place_name: value })
-                    }
-                  />
-
-                  <EditField
-                    label={t`Place type`}
-                    value={editForm.place_type}
-                    onChange={(value) =>
-                      setEditForm({ ...editForm, place_type: value })
-                    }
-                  />
-
-                  <EditField
-                    label={t`City`}
-                    value={editForm.city}
-                    onChange={(value) =>
-                      setEditForm({ ...editForm, city: value })
-                    }
-                  />
-
-                  <EditField
-                    label={t`Address`}
-                    value={editForm.address ?? ""}
-                    onChange={(value) =>
-                      setEditForm({
-                        ...editForm,
-                        address: value || null,
-                      })
-                    }
-                  />
-
-                  <EditField
-                    label={t`Description`}
-                    value={editForm.description ?? ""}
-                    onChange={(value) =>
-                      setEditForm({
-                        ...editForm,
-                        description: value || null,
-                      })
-                    }
-                  />
-
-                  <EditField
-                    label={t`Monthly budget`}
-                    type="number"
-                    value={editForm.monthly_maintenance_budget?.toString() ?? ""}
-                    onChange={(value) =>
-                      setEditForm({
-                        ...editForm,
-                        monthly_maintenance_budget: Number(value),
-                      })
-                    }
-                  />
-
-                  <EditField
-                    label={t`Latitude`}
-                    type="number"
-                    value={editForm.latitude?.toString() ?? ""}
-                    onChange={(value) =>
-                      setEditForm({
-                        ...editForm,
-                        latitude: value === "" ? null : Number(value),
-                      })
-                    }
-                  />
-
-                  <EditField
-                    label={t`Longitude`}
-                    type="number"
-                    value={editForm.longitude?.toString() ?? ""}
-                    onChange={(value) =>
-                      setEditForm({
-                        ...editForm,
-                        longitude: value === "" ? null : Number(value),
-                      })
-                    }
-                  />
-
-                  {/* The API cannot change these after creation, so they are shown, not edited. */}
-                  <p
-                    data-testid="place-fixed-settings"
-                    style={S(
-                      "grid-column: 1 / -1; margin: 0; font-size: 13px; color: var(--muted-foreground)"
-                    )}
-                  >
-                    <Trans>Currency:</Trans> <bdi dir="ltr">{place?.currency}</bdi>
-                    {" · "}
-                    <Trans>Time zone:</Trans> <bdi dir="ltr">{place?.timezone}</bdi>
-                    {" — "}
-                    <Trans>Currency and time zone are set when the place is created and cannot be changed.</Trans>
-                  </p>
-
-                  <label
-                    style={S(
-                      "display: flex; flex-direction: column; gap: 7px; font-size: 13px; font-weight: 600"
-                    )}
-                  >
-                    <Trans>Status</Trans>
-
-                    <select
-                      value={String(editForm.status)}
-                      onChange={(e) =>
-                        setEditForm({
-                          ...editForm,
-                          status: e.target.value as PlaceUpdateInput["status"],
-                        })
-                      }
-                      style={S(
-                        "height: 40px; padding: 0 10px; border: 1px solid var(--border); background: var(--card)"
-                      )}
-                    >
-                      <option value="ACTIVE">ACTIVE</option>
-                      <option value="INACTIVE">INACTIVE</option>
-                    </select>
-                  </label>
-
-                  {updateError && (
-                    <p
-                      style={S(
-                        "color: var(--destructive); font-size: 13px; grid-column: 1 / -1; margin: 0"
-                      )}
-                    >
-                      {updateError}
-                    </p>
-                  )}
-
-                  <div
-                    style={S(
-                      "display: flex; justify-content: flex-start; gap: 10px; grid-column: 1 / -1; margin-top: 8px"
-                    )}
-                  >
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className="am-btn am-solid"
-                      style={S(
-                        "height: 40px; padding: 0 18px; display: flex; align-items: center; gap: 8px"
-                      )}
-                    >
-                      <Save size={16} />
-                      {saving ? (
-                        <Trans>Saving...</Trans>
-                      ) : (
-                        <Trans>Save changes</Trans>
-                      )}
-                    </button>
-
-                    <button
-                      type="button"
-                      disabled={saving}
-                      onClick={() => setEditing(false)}
-                      className="am-btn"
-                      style={S(
-                        "height: 40px; padding: 0 18px; border: 1px solid var(--border)"
-                      )}
-                    >
-                      <Trans>Cancel</Trans>
-                    </button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card
-            className="am-lift"
-            style={S(
-              "padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0"
-            )}
-          >
-            <CardHeader
-              style={S(
-                "padding: 18px 20px; border-bottom: 1px solid var(--border); gap: 4px"
-              )}
-            >
-              <CardTitle
-                style={S("font-size: 17px; font-weight: 750")}
-              >
-                <Trans>Place information</Trans>
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent style={S("padding: 20px")}>
-              {place === null ? (
-                <div
-                  style={S(
-                    "display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px"
-                  )}
-                >
-                  {Array.from({ length: 6 }).map((_, index) => (
-                    <Skeleton
-                      key={index}
-                      style={S("height: 68px")}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <>
-                <div
-                  style={S(
-                    "display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px"
-                  )}
-                >
-                  <InfoItem
-                    label={<Trans>Property type</Trans>}
-                    icon={<Building2 size={16} />}
-                    value={<TypeLabel type={place.place_type} />}
-                  />
-
-                  <InfoItem
-                    label={<Trans>City</Trans>}
-                    icon={<MapPin size={16} />}
-                    value={place.city}
-                  />
-
-                  <InfoItem
-                    label={<Trans>Address</Trans>}
-                    icon={<MapPin size={16} />}
-                    value={place.address ?? <Trans>Not set</Trans>}
-                  />
-
-                  <InfoItem
-                    label={<Trans>Monthly budget</Trans>}
-                    icon={<Wallet size={16} />}
-                    value={
-                      place.monthly_maintenance_budget == null
-                        ? "—"
-                        : `${money.format(place.monthly_maintenance_budget)} ${place.currency}`
-                    }
-                  />
-
-                  <InfoItem
-                    label={<Trans>Currency</Trans>}
-                    icon={<Coins size={16} />}
-                    value={<bdi dir="ltr">{place.currency}</bdi>}
-                  />
-
-                  <InfoItem
-                    label={<Trans>Timezone</Trans>}
-                    icon={<Clock3 size={16} />}
-                    value={<bdi dir="ltr">{place.timezone}</bdi>}
-                  />
-
-                  <InfoItem
-                    label={<Trans>Status</Trans>}
-                    icon={<span />}
-                    value={<StatusBadge status={String(place.status)} />}
-                  />
-                </div>
-                <p
-                  style={S(
-                    "margin: 12px 0 0; font-size: 13px; color: var(--muted-foreground)"
-                  )}
-                >
-                  <Trans>Currency and time zone are set when the place is created and cannot be changed.</Trans>
-                </p>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          <div style={S("display: flex; gap: 10px; flex-wrap: wrap; align-items: center")}>
-            {isManager && (
-            <Button
-              type="button"
-              id="assets"
-              variant={activeSection === "assets" ? "default" : "outline"}
-              size="sm"
-              className="am-btn"
-              onClick={() => setActiveSection(activeSection === "assets" ? null : "assets")}
-              style={S("height: 40px; padding: 0 16px; gap: 8px")}
-            >
-              <Building2 size={16} />
-              <Trans>Assets</Trans>
-            </Button>
-            )}
-            {isManager && (
-            <Button
-              type="button"
-              variant={activeSection === "workers" ? "default" : "outline"}
-              size="sm"
-              id="worker"
-              className="am-btn"
-              onClick={() => setActiveSection(activeSection === "workers" ? null : "workers")}
-              style={S("height: 40px; padding: 0 16px; gap: 8px")}
-            >
-              <Users size={16} />
-              <Trans>Workers</Trans>
-            </Button>
-            )}
-            <Button
-              type="button"
-              variant={activeSection === "tickets" ? "default" : "outline"}
-              size="sm"
-              className="am-btn"
-              onClick={() => setActiveSection(activeSection === "tickets" ? null : "tickets")}
-              style={S("height: 40px; padding: 0 16px; gap: 8px")}
-            >
-              <Wrench size={16} />
-              <Trans>Maintenance tickets</Trans>
-            </Button>
-            <Button
-              type="button"
-              variant={activeSection === "bookings" ? "default" : "outline"}
-              size="sm"
-              className="am-btn"
-              onClick={() => setActiveSection(activeSection === "bookings" ? null : "bookings")}
-              style={S("height: 40px; padding: 0 16px; gap: 8px")}
-            >
-              <CalendarDays size={16} />
-              <Trans>Bookings</Trans>
-            </Button>
-          </div>
-
-          {activeSection === "bookings" && (
-            <PlaceBookings placeId={place_id} />
-          )}
-
-          {activeSection === "assets" && (
-          <Card
-            className="am-lift"
-            style={S(
-              "padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0"
-            )}
-          >
-            <CardHeader
-              style={S(
-                "padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px"
-              )}
-            >
-              <div
-                style={S(
-                  "display: flex; flex-direction: column; gap: 4px"
-                )}
-              >
-                <CardTitle
-                  style={S("font-size: 17px; font-weight: 750")}
-                >
-                  <Trans>Assets</Trans>
-                  {assets !== null && (
-                    <span
-                      style={S(
-                        "margin-inline-start: 8px; font-size: 12px; font-weight: 600; color: var(--muted-foreground); border: 1px solid var(--border); padding: 2px 8px"
-                      )}
-                    >
-                      {assets.length}
-                    </span>
-                  )}
-                </CardTitle>
-              </div>
-
-              <CardAction>
-                <Link
-                  to="/place/asset/new"
-                  search={{ place_id }}
-                  className={cn(
-                    buttonVariants({ variant: "outline", size: "sm" }),
-                    "am-btn"
-                  )}
-                  style={S(
-                    "height: 38px; padding: 0 12px; gap: 6px; white-space: nowrap"
-                  )}
-                >
-                  <Plus size={16} />
-                  <Trans>Add asset</Trans>
-                </Link>
-              </CardAction>
-            </CardHeader>
-
-            <CardContent style={S("padding: 20px")}>
-              {assets === null ? (
-                <div
-                  style={S(
-                    "display: flex; flex-direction: column; gap: 10px"
-                  )}
-                >
-                  <Skeleton style={S("height: 68px")} />
-                  <Skeleton style={S("height: 68px")} />
-                </div>
-              ) : assets.length === 0 ? (
-                <div
-                  style={S(
-                    "display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 32px 16px; border: 1px dashed var(--border); text-align: center"
-                  )}
-                >
-                  <Building2
-                    size={28}
-                    style={S("color: var(--muted-foreground)")}
-                  />
-                  <p
-                    style={S(
-                      "font-size: 14px; font-weight: 650; margin: 0"
-                    )}
-                  >
-                    <Trans>No assets yet.</Trans>
-                  </p>
-                  <p
-                    style={S(
-                      "font-size: 13px; color: var(--muted-foreground); margin: 0"
-                    )}
-                  >
-                    <Trans>
-                      Add an asset to start tracking this property.
-                    </Trans>
-                  </p>
-                </div>
-              ) : (
-                <div
-                  style={S(
-                    "display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px"
-                  )}
-                >
-                  {assets.map((a) => (
+              </>
+            }
+            side={
+              <>
+                {budget && <div className="hidden flex-col desk:flex">{budget}</div>}
+                <InfoPanel place={place} isManager={isManager} />
+                {!isManager && (
+                  <Panel>
                     <Link
-                      key={a.id}
-                      to="/place/asset/$asset_id"
-                      params={{ asset_id: a.id }}
-                      className="am-lift"
-                      style={S(
-                        "display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; border: 1px solid var(--border); padding: 14px; background: var(--card)"
-                      )}
+                      to="/ticket/new"
+                      search={{ place_id }}
+                      className={cn(buttonVariants(), "w-full")}
                     >
-                      <div
-                        style={S(
-                          "display: flex; flex-direction: column; gap: 5px; min-width: 0"
-                        )}
-                      >
-                        <span
-                          style={S(
-                            "font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
-                          )}
-                        >
-                          {a.name}
-                        </span>
-
-                        <span
-                          style={S(
-                            "color: var(--muted-foreground); font-size: 12px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap"
-                          )}
-                        >
-                          <span>{a.type}</span>
-
-                          {a.purchase_date && (
-                            <>
-                              <span>·</span>
-                              <CalendarDays size={13} />
-                              <span>
-                                {day.format(new Date(a.purchase_date))}
-                              </span>
-                            </>
-                          )}
-                        </span>
-                      </div>
-
-                      <div style={S("flex-shrink: 0")}>
-                        <AssetStatusBadge status={a.status} />
-                      </div>
+                      <Camera aria-hidden="true" />
+                      <Trans>Report damage in this place</Trans>
                     </Link>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    <span className="text-[13px] text-muted-foreground">
+                      <Trans>View only. Editing is for the manager.</Trans>
+                    </span>
+                  </Panel>
+                )}
+              </>
+            }
+          />
 
-          )}
-
-          {activeSection === "workers" && (
-          <Card
-            className="am-lift"
-            style={S(
-              "padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0"
-            )}
-          >
-            <CardHeader
-  style={S(
-    "padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px"
-  )}
->
-  <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-    <Users size={17} style={S("display: inline; vertical-align: middle; margin-inline-end: 7px")} />
-    <Trans>Workers</Trans>
-    {workers !== null && (
-      <span style={S("margin-inline-start: 8px; font-size: 12px; font-weight: 600; color: var(--muted-foreground); border: 1px solid var(--border); padding: 2px 8px")}>
-        {workers.filter((worker) => isWorkerAssignedToPlace(worker, place_id)).length}
-      </span>
-    )}
-  </CardTitle>
-
-  <Button
-    type="button"
-    variant="outline"
-    size="sm"
-    className={cn(buttonVariants({ variant: "outline", size: "sm" }), "am-btn")}
-    style={S("height: 38px; padding: 0 12px; gap: 6px; white-space: nowrap")}
-    onClick={handleAddWorker}
-  >
-    <Plus size={16} />
-    <Trans>Add worker</Trans>
-  </Button>
-</CardHeader>
-
-            <CardContent style={S("padding: 20px; display: flex; flex-direction: column; gap: 18px")}>
-              {workers === null ? (
-                <div style={S("display: flex; flex-direction: column; gap: 10px")}>
-                  <Skeleton style={S("height: 64px")} />
-                  <Skeleton style={S("height: 64px")} />
-                </div>
-              ) : (
-                <>
-                  {workers.filter((worker) => isWorkerAssignedToPlace(worker, place_id)).length === 0 ? (
-                    <div
-                      style={S(
-                        "display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px 16px; border: 1px dashed var(--border); text-align: center"
-                      )}
-                    >
-                      <Users size={26} style={S("color: var(--muted-foreground)")} />
-                      <p style={S("font-size: 14px; font-weight: 650; margin: 0")}><Trans>No workers are assigned to this place.</Trans></p>
-                    </div>
-                  ) : (
-                    <div
-                      style={S(
-                        "display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px"
-                      )}
-                    >
-                      {workers
-                        .filter((worker) => isWorkerAssignedToPlace(worker, place_id))
-                        .map((worker) => (
-                          <div
-                            key={worker.id}
-                            style={S(
-                              "display: flex; flex-direction: column; gap: 6px; min-width: 0; border: 1px solid var(--border); padding: 14px; background: var(--card)"
-                            )}
-                          >
-                            <span style={S("font-size: 14px; font-weight: 700")}>
-                              {worker.fullname}
-                            </span>
-                            <span style={S("font-size: 12px; color: var(--muted-foreground); overflow-wrap: anywhere")}>
-                              ID: {worker.id}
-                            </span>
-                            {worker.phone && (
-                              <span style={S("font-size: 12px; color: var(--muted-foreground)")}>
-                                {worker.phone}
-                              </span>
-                            )}
-                          </div>
-                        ))}
-                    </div>
-                  )}
-
-                  <div style={S("border-top: 1px solid var(--border); padding-top: 18px")}>
-                    <h3 style={S("font-size: 14px; font-weight: 700; margin: 0 0 12px")}><Trans>Add worker</Trans></h3>
-                    <form
-  id="add-worker-form"
-  onSubmit={handleAddWorker}
-  style={S("display: flex; align-items: end; gap: 10px; flex-wrap: wrap")}
->
-                      <label style={S("display: flex; flex-direction: column; gap: 7px; flex: 1; min-width: 220px; font-size: 13px; font-weight: 600")}>
-                        <span><Trans>Choose a worker (name and ID)</Trans></span>
-                        <select
-                          value={selectedWorkerId}
-                          onChange={(e) => {
-                            setSelectedWorkerId(e.target.value)
-                            setWorkerError("")
-                            setWorkerSuccess("")
-                          }}
-                          disabled={addingWorker}
-                          required
-                          style={S("height: 40px; padding: 0 10px; border: 1px solid var(--border); background: var(--card); min-width: 0")}
-                        >
-                          <option value=""><Trans>Choose a worker</Trans></option>
-                          {workers
-                            .filter((worker) => !isWorkerAssignedToPlace(worker, place_id))
-                            .map((worker) => (
-                              <option key={worker.id} value={worker.id}>
-                                {worker.fullname} — {worker.id}
-                              </option>
-                            ))}
-                        </select>
-                      </label>
-                    </form>
-                    {workerError && (
-                      <p style={S("color: var(--destructive); font-size: 13px; margin: 10px 0 0")}>{workerError}</p>
-                    )}
-                    {workerSuccess && (
-                      <p style={S("color: var(--primary); font-size: 13px; margin: 10px 0 0")}>{workerSuccess}</p>
-                    )}
-                    {workers.filter((worker) => !isWorkerAssignedToPlace(worker, place_id)).length === 0 && (
-                      <p style={S("color: var(--muted-foreground); font-size: 12px; margin: 10px 0 0")}><Trans>All your workers are already assigned to this place.</Trans></p>
-                    )}
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          )}
-
-          {activeSection === "tickets" && accessToken && (
+          {/* Not in the design; kept under its sections. */}
+          {accessToken && (
             <TicketsSection
               token={accessToken}
               placeId={place_id}
@@ -934,76 +224,270 @@ function PlaceDetailPage() {
               showAddTicket
             />
           )}
-
+          <PlaceBookings placeId={place_id} />
         </>
       )}
     </Page>
   )
 }
 
-function EditField({
-  label,
-  value,
-  onChange,
-  type = "text",
+/** This month's maintenance spending against the place's budget (Managers only). */
+function BudgetPanel({
+  budget,
+  timeZone,
 }: {
-  label: string
-  value: string
-  onChange: (value: string) => void
-  type?: string
+  budget: NonNullable<DashboardPlace["maintenance_budget"]>
+  timeZone: string
 }) {
+  const { money, number, date } = useFormat()
+  const month = date(new Date(), { month: "long", timeZone })
+  const share = budget.budget > 0 ? Math.min(100, (budget.spent / budget.budget) * 100) : 100
+  const over = budget.spent > budget.budget
   return (
-    <label
-      style={S(
-        "display: flex; flex-direction: column; gap: 7px; font-size: 13px; font-weight: 600"
-      )}
-    >
-      <span>{label}</span>
-
-      <input
-        type={type}
-        step={type === "number" ? "any" : undefined}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        style={S(
-          "height: 40px; padding: 0 10px; border: 1px solid var(--border); background: var(--card); min-width: 0"
-        )}
-      />
-    </label>
+    <Panel labelledBy="budget-title">
+      <PanelTitle id="budget-title">
+        <Trans>{month} maintenance budget</Trans>
+      </PanelTitle>
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <span className="text-[32px] leading-[1.2] font-bold whitespace-nowrap">
+          <span className="font-mono tabular-nums">{number(budget.spent, { maximumFractionDigits: 2 })}</span>{" "}
+          <span className="text-[0.8em]">{budget.currency}</span>
+        </span>
+        <span className="text-sm text-muted-foreground">
+          <Trans>of {money(budget.budget, budget.currency, { maximumFractionDigits: 0 })}</Trans>
+        </span>
+      </div>
+      <div aria-hidden="true" className="h-2 overflow-hidden bg-secondary">
+        <div
+          className={`am-fill h-full rounded-full ${over ? "bg-destructive" : "bg-primary"}`}
+          style={{ width: `${share}%` }}
+        />
+      </div>
+      <span className="text-[13px] text-muted-foreground">
+        <Trans>Visible to the manager only.</Trans>
+      </span>
+    </Panel>
   )
 }
 
-function InfoItem({
-  label,
-  value,
-  icon,
+/** The place's assets, scrolling inside the card when there are many. */
+function AssetsPanel({
+  placeId,
+  assets,
+  isManager,
 }: {
-  label: React.ReactNode
-  value: React.ReactNode
-  icon: React.ReactNode
+  placeId: string
+  assets: Asset[] | null
+  isManager: boolean
 }) {
+  const [scrolls, setScrolls] = useState(false)
+  const row =
+    "box-border flex min-h-[76px] flex-none snap-start items-center justify-between gap-3 border border-border bg-card p-3.5 text-foreground no-underline"
   return (
-    <div
-      style={S(
-        "display: flex; flex-direction: column; gap: 9px; min-width: 0; padding: 14px; border: 1px solid var(--border); background: var(--card)"
+    <Panel labelledBy="assets-title">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-0.5">
+          <PanelTitle id="assets-title">
+            <Trans>Assets</Trans>
+          </PanelTitle>
+          {scrolls && <ScrollHint />}
+        </div>
+        {isManager && (
+          <Link to="/place/asset/new" search={{ place_id: placeId }} className={cn(buttonVariants({ variant: "outline" }))}>
+            <Plus aria-hidden="true" />
+            <Trans>Add asset</Trans>
+          </Link>
+        )}
+      </div>
+      {assets === null ? (
+        <div className="flex flex-col gap-3">
+          <Skeleton className="h-[76px]" />
+          <Skeleton className="h-[76px]" />
+        </div>
+      ) : assets.length === 0 ? (
+        <p className="m-0 border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+          {isManager ? (
+            <Trans>No assets yet. Add an asset to start tracking this property.</Trans>
+          ) : (
+            <Trans>No assets yet.</Trans>
+          )}
+        </p>
+      ) : (
+        <ScrollList label={t`Assets`} onScrollable={setScrolls}>
+          {assets.map((asset) => {
+            const content = (
+              <>
+                <span className="flex min-w-0 flex-col leading-[1.5]">
+                  <span className="font-semibold [overflow-wrap:anywhere]">{asset.name}</span>
+                  <span className="text-[13px] text-muted-foreground">{asset.type}</span>
+                </span>
+                <span className="flex flex-none items-center gap-2">
+                  <AssetStatusBadge status={asset.status} />
+                  {isManager && (
+                    <ChevronRight aria-hidden="true" className="size-5 text-muted-foreground rtl:rotate-180" strokeWidth={1.8} />
+                  )}
+                </span>
+              </>
+            )
+            // Workers see the list only, as designed; the asset page is the Manager's.
+            return isManager ? (
+              <Link key={asset.id} to="/place/asset/$asset_id" params={{ asset_id: asset.id }} className={`am-lift ${row}`}>
+                {content}
+              </Link>
+            ) : (
+              <div key={asset.id} className={row}>
+                {content}
+              </div>
+            )
+          })}
+        </ScrollList>
       )}
-    >
-      <div
-        style={S(
-          "display: flex; align-items: center; gap: 7px; color: var(--muted-foreground); font-size: 12px; font-weight: 600"
-        )}
-      >
-        {icon}
-        <span>{label}</span>
-      </div>
+    </Panel>
+  )
+}
 
-      <div
-        style={S(
-          "font-size: 14px; font-weight: 650; min-width: 0; overflow-wrap: anywhere"
-        )}
-      >
-        {value}
-      </div>
-    </div>
+/** The workers assigned to the place, with Unassign, and the form to assign an active worker. */
+function WorkersPanel({
+  token,
+  placeId,
+  workers,
+  onChanged,
+}: {
+  token: string
+  placeId: string
+  workers: Worker[] | null
+  onChanged: (workers: Worker[]) => void
+}) {
+  const [selected, setSelected] = useState("")
+  const [busy, setBusy] = useState<string | null>(null)
+  const [error, setError] = useState("")
+
+  const assigned = workers?.filter((worker) => isAssigned(worker, placeId)) ?? []
+  const choices = workers?.filter((worker) => worker.status === "ACTIVE" && !isAssigned(worker, placeId)) ?? []
+
+  async function run(key: string, action: () => Promise<void>) {
+    setBusy(key)
+    setError("")
+    try {
+      await action()
+      onChanged(await getWorkers(token))
+    } catch (err) {
+      setError(errorMessage(err))
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  function handleAssign(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!selected) return
+    void run("assign", async () => {
+      await assignPlaceWorker(token, placeId, selected)
+      setSelected("")
+    })
+  }
+
+  return (
+    <Panel labelledBy="workers-title">
+      <PanelTitle id="workers-title">
+        <Trans>Assigned workers</Trans>
+      </PanelTitle>
+      {workers === null ? (
+        <Skeleton className="h-[72px]" />
+      ) : assigned.length === 0 ? (
+        <p className="m-0 border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+          <Trans>No workers are assigned to this place.</Trans>
+        </p>
+      ) : (
+        <div className="flex flex-col gap-3">
+          {assigned.map((worker) => (
+            <div
+              key={worker.id}
+              className="box-border flex min-w-0 flex-wrap items-center justify-between gap-3 border border-border bg-card p-3.5"
+            >
+              <div className="flex min-w-0 items-center gap-2.5">
+                <Initial name={worker.fullname} />
+                <span className="flex min-w-0 flex-col leading-[1.5]">
+                  <span className="font-semibold">{worker.fullname}</span>
+                  <span className="text-[13px] text-muted-foreground [overflow-wrap:anywhere]">{worker.email}</span>
+                </span>
+              </div>
+              <Button
+                type="button"
+                variant="destructive"
+                disabled={busy !== null}
+                aria-label={t`Unassign ${worker.fullname}`}
+                onClick={() => void run(worker.id, () => unassignPlaceWorker(token, placeId, worker.id))}
+              >
+                {busy === worker.id ? <Trans>Unassigning…</Trans> : <Trans>Unassign</Trans>}
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {workers !== null && (
+        <form
+          onSubmit={handleAssign}
+          className="flex flex-wrap items-end gap-2.5 border-t border-border pt-3.5"
+        >
+          <div className="min-w-0 flex-[1_1_180px]">
+            <Field
+              id="assign-worker"
+              label={<Trans>Assign an active worker</Trans>}
+              hint={choices.length === 0 ? <Trans>All your active workers are already assigned to this place.</Trans> : undefined}
+            >
+              <NativeSelect id="assign-worker" value={selected} onChange={setSelected} disabled={choices.length === 0}>
+                <option value="">{t`Choose a worker`}</option>
+                {choices.map((worker) => (
+                  <option key={worker.id} value={worker.id}>
+                    {worker.fullname}
+                  </option>
+                ))}
+              </NativeSelect>
+            </Field>
+          </div>
+          <Button type="submit" disabled={!selected || busy !== null}>
+            <Plus aria-hidden="true" />
+            {busy === "assign" ? <Trans>Assigning…</Trans> : <Trans>Assign</Trans>}
+          </Button>
+        </form>
+      )}
+
+      {error && (
+        <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">
+          <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+          {error}
+        </p>
+      )}
+    </Panel>
+  )
+}
+
+/** Status, type and address; Managers also see the currency and the time zone. */
+function InfoPanel({ place, isManager }: { place: Place | null; isManager: boolean }) {
+  return (
+    <Panel labelledBy="info-title" className="gap-2">
+      <PanelTitle id="info-title">
+        <Trans>Place information</Trans>
+      </PanelTitle>
+      {place === null ? (
+        <Skeleton className="h-40" />
+      ) : (
+        <InfoRows
+          rows={[
+            { label: <Trans>Status</Trans>, value: <StatusBadge status={String(place.status)} /> },
+            { label: <Trans>Type</Trans>, value: <TypeLabel type={place.place_type} /> },
+            { label: <Trans>Address</Trans>, value: place.address || place.city },
+            ...(isManager
+              ? [
+                  { label: <Trans>Currency</Trans>, value: <bdi dir="ltr">{place.currency}</bdi> },
+                  { label: <Trans>Time zone</Trans>, value: <bdi dir="ltr">{place.timezone}</bdi> },
+                ]
+              : []),
+          ]}
+        />
+      )}
+    </Panel>
   )
 }

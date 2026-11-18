@@ -1,154 +1,52 @@
-
 import { useEffect, useState } from "react"
-import {
-  Link,
-  createFileRoute,
-  useNavigate,
-  useParams,
-} from "@tanstack/react-router"
+import { Link, createFileRoute, useNavigate, useParams } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
-import { plural, t } from "@lingui/core/macro"
-import { useLingui } from "@lingui/react"
-import type { Asset, Place, Schedule } from "@amlak/shared"
+import type { Asset, Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
-import { cn } from "cn"
-import { buttonVariants,Button } from "@/components/ui/button"
-import {
-  getAssetById,
-  getPlace,
-  getScheduledMaintenancesForAsset,handleCancelSchedule
-} from "@/lib/api"
-import { S } from "@/lib/dom-style"
-import {
-  ArrowRight,
-  Building2,
-  CalendarDays,
-  MapPin,
-  Wrench,
-  Plus
-} from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { getAssetById, getPlace } from "@/lib/api"
+import { buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  AssetStatusBadge,
-} from "@/components/place-shared"
-import { AssetManage } from "@/components/asset-manage"
+import { cn } from "cn"
+import { AssetStatusBadge } from "@/components/place-shared"
+import { AssetRemove } from "@/components/asset-manage"
+import { AssetSchedules } from "@/components/asset-schedules"
 import { TicketsSection } from "@/components/tickets-section"
-import { todayIn } from "@/lib/dates"
-import { errorMessage } from "@/lib/errors"
+import { InfoRows, Panel, PanelTitle, TwoColumns } from "@/components/panel"
 import { Page } from "@/components/page"
-import { dateFormat } from "@/lib/format"
-
 
 export const Route = createFileRoute("/_authenticated/place/asset/$asset_id")({
   component: AssetDetailPage,
 })
 
 function AssetDetailPage() {
-  const { asset_id } = useParams({
-    from: "/_authenticated/place/asset/$asset_id",
-  })
-
-  const { i18n } = useLingui()
+  const { asset_id } = useParams({ from: "/_authenticated/place/asset/$asset_id" })
   const { accessToken, user } = useAuth()
+  const isManager = user?.role === "MANAGER"
   const navigate = useNavigate()
 
   const [asset, setAsset] = useState<Asset | null>(null)
   const [place, setPlace] = useState<Place | null>(null)
-  const [scheduledMaintenances, setScheduledMaintenances] = useState<Schedule[]>([])
-  const [scheduledLoading, setScheduledLoading] = useState(true)
-  // Bumped after a schedule is cancelled, to load the list again.
-  const [schedulesVersion, setSchedulesVersion] = useState(0)
-  const [cancelError, setCancelError] = useState("")
   const [failed, setFailed] = useState(false)
 
   useEffect(() => {
-  if (!accessToken || !asset_id) return
-
-  const loadScheduledMaintenances = async () => {
-    try {
-      setScheduledLoading(true)
-
-      const data = await getScheduledMaintenancesForAsset(
-        accessToken,
-        asset_id
-      )
-
-      setScheduledMaintenances(data)
-    } catch (error) {
-      console.error("Failed to load scheduled maintenances:", error)
-      setScheduledMaintenances([])
-    } finally {
-      setScheduledLoading(false)
-    }
-  }
-
-  loadScheduledMaintenances()
-}, [accessToken, asset_id, schedulesVersion])
-
-  async function cancelSchedule(scheduleId: string) {
     if (!accessToken) return
-    setCancelError("")
-    try {
-      await handleCancelSchedule(accessToken, scheduleId)
-      setSchedulesVersion((version) => version + 1)
-    } catch (error) {
-      setCancelError(
-        errorMessage(error),
-      )
-    }
-  }
-
-  useEffect(() => {
-    if (!accessToken) return
-
     let alive = true
-
-    async function loadAsset() {
-      try {
-        const assetData = await getAssetById(accessToken!, asset_id)
-
+    getAssetById(accessToken, asset_id)
+      .then(async (assetData) => {
         if (!alive) return
-
         setAsset(assetData)
-
-        // Load the place this asset belongs to.
-        const placeData = await getPlace(accessToken!, assetData.place_id)
-
-        if (!alive) return
-
-        setPlace(placeData)
-      } catch (error) {
-        console.error("Failed to load asset:", error)
-        if (alive) setFailed(true)
-      }
-    }
-
-    loadAsset()
-
+        const placeData = await getPlace(accessToken, assetData.place_id)
+        if (alive) setPlace(placeData)
+      })
+      .catch(() => alive && setFailed(true))
     return () => {
       alive = false
     }
   }, [accessToken, asset_id])
 
-  const day = dateFormat(
-    i18n.locale === "ar" ? "ar" : "en",
-    { dateStyle: "medium" }
-  )
-  function formatDate(value: string | null | undefined) {
-    if (!value) return "—"
-
-    return day.format(
-      new Date(value.length === 10 ? `${value}T00:00:00` : value)
-    )
-  }
-  
   return (
     <Page
-      title={
-        asset?.name ??
-        (failed ? <Trans>Asset not found</Trans> : <Skeleton style={S("width: 220px; height: 28px")} />)
-      }
+      title={asset?.name ?? (failed ? <Trans>Asset not found</Trans> : <Skeleton className="h-7 w-56" />)}
       phoneTitle={<Trans>Asset</Trans>}
       parent={
         asset
@@ -159,149 +57,74 @@ function AssetDetailPage() {
           : { label: <Trans>Places</Trans>, link: { to: "/places" } }
       }
     >
-      {asset && accessToken && user?.role === "MANAGER" && (
-        <AssetManage
-          key={asset.updated_at}
-          token={accessToken}
-          asset={asset}
-          today={todayIn(place?.timezone ?? "Asia/Riyadh")}
-          onUpdated={setAsset}
-          onDeleted={() =>
-            void navigate({
-              to: "/place/$place_id",
-              params: { place_id: asset.place_id },
-            })
-          }
-        />
-      )}
-
-      {failed && (
-        <Card style={S("padding: 18px; border: 1px solid var(--border)")}>
-          <p style={S("color: var(--muted-foreground); margin: 0")}>
+      {failed ? (
+        <Panel>
+          <p className="m-0 text-sm text-muted-foreground">
             <Trans>We could not load the asset.</Trans>
           </p>
-        </Card>
-      )}
-
-      {!failed && (
+        </Panel>
+      ) : (
         <>
-          {/* Asset Information */}
-          <Card
-            className="am-lift"
-            style={S(
-              "padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0"
-            )}
-          >
-            <CardHeader
-              style={S(
-                "padding: 18px 20px; border-bottom: 1px solid var(--border)"
-              )}
-            >
-              <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-                <Trans>Asset information</Trans>
-              </CardTitle>
-            </CardHeader>
+          <TwoColumns
+            main={
+              accessToken && (
+                <AssetSchedules token={accessToken} assetId={asset_id} place={place} canManage={isManager} />
+              )
+            }
+            side={
+              <Panel labelledBy="details-title" className="gap-2">
+                <PanelTitle id="details-title">
+                  <Trans>Details</Trans>
+                </PanelTitle>
+                {asset === null ? (
+                  <Skeleton className="h-40" />
+                ) : (
+                  <>
+                    <InfoRows
+                      rows={[
+                        { label: <Trans>Status</Trans>, value: <AssetStatusBadge status={asset.status} /> },
+                        { label: <Trans>Type</Trans>, value: asset.type },
+                        {
+                          label: <Trans>Place</Trans>,
+                          value: place ? (
+                            <Link to="/place/$place_id" params={{ place_id: place.id }} className="relative underline underline-offset-4 before:absolute before:inset-x-0 before:-inset-y-3.5 before:content-['']">
+                              {place.place_name}
+                            </Link>
+                          ) : (
+                            "—"
+                          ),
+                        },
+                        {
+                          label: <Trans>Purchase date</Trans>,
+                          value: asset.purchase_date ? <bdi dir="ltr">{asset.purchase_date}</bdi> : "—",
+                        },
+                      ]}
+                    />
+                    {isManager && accessToken && (
+                      <div className="flex flex-wrap gap-2.5 pt-2">
+                        <Link
+                          to="/place/asset/edit/$asset_id"
+                          params={{ asset_id: asset.id }}
+                          className={cn(buttonVariants({ variant: "outline" }))}
+                        >
+                          <Trans>Edit</Trans>
+                        </Link>
+                        <AssetRemove
+                          token={accessToken}
+                          asset={asset}
+                          onDeleted={() =>
+                            void navigate({ to: "/place/$place_id", params: { place_id: asset.place_id } })
+                          }
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+              </Panel>
+            }
+          />
 
-            <CardContent style={S("padding: 20px")}>
-              {asset === null ? (
-                <div
-                  style={S(
-                    "display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px"
-                  )}
-                >
-                  {Array.from({ length: 4 }).map((_, index) => (
-                    <Skeleton key={index} style={S("height: 68px")} />
-                  ))}
-                </div>
-              ) : (
-                <div
-                  style={S(
-                    "display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px"
-                  )}
-                >
-                  <InfoItem
-                    label={t`Asset name`}
-                    icon={<Building2 size={16} />}
-                    value={asset.name}
-                  />
-
-                  <InfoItem
-                    label={t`Asset type`}
-                    icon={<Wrench size={16} />}
-                    value={asset.type}
-                  />
-
-                  <InfoItem
-                    label={t`Status`}
-                    icon={<span />}
-                    value={<AssetStatusBadge status={asset.status} />}
-                  />
-
-                  <InfoItem
-                    label={t`Purchase date`}
-                    icon={<CalendarDays size={16} />}
-                    value={
-                      asset.purchase_date
-                        ? formatDate(String(asset.purchase_date))
-                        : "—"
-                    }
-                  />
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Related Property */}
-          <Card
-            className="am-lift"
-            style={S(
-              "padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0"
-            )}
-          >
-            <CardHeader
-              style={S(
-                "padding: 18px 20px; border-bottom: 1px solid var(--border)"
-              )}
-            >
-              <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-                <Trans>The asset's place</Trans>
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent style={S("padding: 20px")}>
-              {place === null ? (
-                <Skeleton style={S("height: 65px")} />
-              ) : (
-                <Link
-                  to="/place/$place_id"
-                  params={{ place_id: place.id }}
-                  className="am-lift"
-                  style={S(
-                    "display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; border: 1px solid var(--border); background: var(--card); text-decoration: none; color: inherit"
-                  )}
-                >
-                  <div style={S("display: flex; flex-direction: column; gap: 6px")}>
-                    <strong style={S("font-size: 14px")}>
-                      {place.place_name}
-                    </strong>
-
-                    <span
-                      style={S(
-                        "font-size: 12px; color: var(--muted-foreground); display: flex; align-items: center; gap: 5px"
-                      )}
-                    >
-                      <MapPin size={13} />
-                      {place.city}
-                    </span>
-                  </div>
-
-                  <ArrowRight size={17} className="rtl:rotate-180" />
-                </Link>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Maintenance Tickets */}
+          {/* Not in the design; kept under its sections. */}
           {asset && accessToken && (
             <TicketsSection
               token={accessToken}
@@ -312,257 +135,8 @@ function AssetDetailPage() {
               emptyAll={<Trans>This asset has no maintenance tickets.</Trans>}
             />
           )}
-
-{/* Scheduled Maintenances */}
-{/* Scheduled Maintenances */}
-<Card
-  className="am-lift"
-  style={S(
-    "padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0"
-  )}
->
-  <CardHeader
-    style={S(
-      "padding: 18px 20px; border-bottom: 1px solid var(--border)"
-    )}
-  >
-    <div
-      style={S(
-        "display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px"
-      )}
-    >
-      <div style={S("display: flex; align-items: center; gap: 10px")}>
-        <CardTitle style={S("font-size: 17px; font-weight: 750")}>
-          <Trans>Scheduled maintenance</Trans>
-        </CardTitle>
-
-        <span
-          style={S(
-            "font-size: 12px; color: var(--muted-foreground)"
-          )}
-        >
-          {scheduledMaintenances.length}
-        </span>
-      </div>
-
-      <Link
-        to="/place/asset/maintenance/new"
-        search={{
-          asset_id,
-          place_id: asset?.place_id ?? "",
-        }}
-        className={cn(
-          buttonVariants({ variant: "outline", size: "sm" }),
-          "am-btn"
-        )}
-        style={S(
-          "height: 38px; padding: 0 12px; gap: 6px; white-space: nowrap"
-        )}
-      >
-        <Plus size={16} />
-        <Trans>Schedule maintenance</Trans>
-      </Link>
-    </div>
-  </CardHeader>
-
-  <CardContent style={S("padding: 20px")}>
-  {cancelError && (
-    <p role="alert" style={S("margin: 0 0 12px; color: var(--destructive); font-size: 13px")}>
-      {cancelError}
-    </p>
-  )}
-  {scheduledLoading ? (
-    <div style={S("display: flex; flex-direction: column; gap: 12px")}>
-      <Skeleton style={S("height: 100px")} />
-      <Skeleton style={S("height: 100px")} />
-    </div>
-  ) : scheduledMaintenances.length === 0 ? (
-    <div
-      style={S(
-        "display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 32px 16px; text-align: center"
-      )}
-    >
-      <CalendarDays
-        size={30}
-        style={S("color: var(--muted-foreground); opacity: 0.6")}
-      />
-
-      <p
-        style={S(
-          "font-size: 14px; color: var(--muted-foreground); margin: 0"
-        )}
-      >
-        <Trans>This asset has no scheduled maintenance.</Trans>
-      </p>
-    </div>
-  ) : (
-    <div style={S("display: flex; flex-direction: column; gap: 12px")}>
-      {scheduledMaintenances.map((maintenance) => {
-        const dueDate = new Date(`${maintenance.next_due_date}T00:00:00`)
-
-        const today = new Date()
-        today.setHours(0, 0, 0, 0)
-
-        const daysRemaining = Math.round(
-          (dueDate.getTime() - today.getTime()) /
-            (1000 * 60 * 60 * 24)
-        )
-
-        const count = maintenance.interval_count
-        const repeats =
-          maintenance.interval_unit === "DAY"
-            ? plural(count, { one: "Every day", other: "Every # days" })
-            : maintenance.interval_unit === "WEEK"
-              ? plural(count, { one: "Every week", other: "Every # weeks" })
-              : maintenance.interval_unit === "MONTH"
-                ? plural(count, { one: "Every month", other: "Every # months" })
-                : plural(count, { one: "Every year", other: "Every # years" })
-        const leadDays = maintenance.lead_days
-        const overdueDays = Math.abs(daysRemaining)
-
-        return (
-          <div
-            key={maintenance.id}
-            style={S(
-              "padding: 16px; border: 1px solid var(--border); background: var(--card); display: flex; flex-direction: column; gap: 14px"
-            )}
-          >
-            {/* Header */}
-            <div
-              style={S(
-                "display: flex; align-items: flex-start; justify-content: space-between; gap: 12px"
-              )}
-            >
-              <div style={S("display: flex; flex-direction: column; gap: 7px")}>
-                <strong style={S("font-size: 14px; font-weight: 700")}>
-                  {maintenance.description}
-                </strong>
-
-                <span
-                  style={S(
-                    "font-size: 12px; color: var(--muted-foreground)"
-                  )}
-                >
-                  {repeats}
-                </span>
-              </div>
-
-              <CalendarDays
-                size={19}
-                style={S("color: var(--muted-foreground); flex-shrink: 0")}
-              />
-            </div>
-
-            {/* Maintenance Details */}
-            <div
-              style={S(
-                "display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; padding-top: 13px; border-top: 1px solid var(--border)"
-              )}
-            >
-              <div style={S("display: flex; flex-direction: column; gap: 5px")}>
-                <span
-                  style={S("font-size: 11px; color: var(--muted-foreground)")}
-                >
-                  <Trans>Next maintenance</Trans>
-                </span>
-
-                <strong style={S("font-size: 13px")}>
-                  {formatDate(maintenance.next_due_date)}
-                </strong>
-              </div>
-
-              <div style={S("display: flex; flex-direction: column; gap: 5px")}>
-                <span
-                  style={S("font-size: 11px; color: var(--muted-foreground)")}
-                >
-                  <Trans>Reminder before</Trans>
-                </span>
-
-                <strong style={S("font-size: 13px")}>
-                  {plural(leadDays, { one: "# day", other: "# days" })}
-                </strong>
-              </div>
-            </div>
-
-            {/* Remaining Days */}
-            <div
-              style={S(
-                `font-size: 12px; font-weight: 600; padding: 10px 12px; ${
-                  daysRemaining < 0
-                    ? "background: var(--destructive); color: white"
-                    : "background: var(--muted); color: var(--foreground)"
-                }`
-              )}
-            >
-              {daysRemaining < 0
-                ? plural(overdueDays, { one: "Overdue by # day", other: "Overdue by # days" })
-                : daysRemaining === 0
-                  ? t`Maintenance is due today`
-                  : plural(daysRemaining, { one: "# day until maintenance", other: "# days until maintenance" })}
-            </div>
-
-            {/* Cancel Schedule */}
-            <div
-              style={S(
-                "display: flex; justify-content: flex-end; padding-top: 12px; border-top: 1px solid var(--border)"
-              )}
-            >
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => void cancelSchedule(maintenance.id)}
-                style={S(
-                  "color: var(--destructive); border-color: var(--destructive)"
-                )}
-              >
-                <Trans>Cancel schedule</Trans>
-              </Button>
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )}
-</CardContent>
-</Card>
         </>
       )}
     </Page>
-  )
-}
-
-function InfoItem({
-  label,
-  value,
-  icon,
-}: {
-  label: React.ReactNode
-  value: React.ReactNode
-  icon: React.ReactNode
-}) {
-  return (
-    <div
-      style={S(
-        "display: flex; flex-direction: column; gap: 9px; min-width: 0; padding: 14px; border: 1px solid var(--border); background: var(--card)"
-      )}
-    >
-      <div
-        style={S(
-          "display: flex; align-items: center; gap: 7px; color: var(--muted-foreground); font-size: 12px; font-weight: 600"
-        )}
-      >
-        {icon}
-        <span>{label}</span>
-      </div>
-
-      <div
-        style={S(
-          "font-size: 14px; font-weight: 650; min-width: 0; overflow-wrap: anywhere"
-        )}
-      >
-        {value}
-      </div>
-    </div>
   )
 }

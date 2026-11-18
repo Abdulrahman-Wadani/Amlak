@@ -46,6 +46,33 @@ export function formatDate(value: DateInput, lang: string, options: Intl.DateTim
   return dateFormat(lang, options).format(date)
 }
 
+/**
+ * When something happened, as on the ticket cards: "5 minutes ago",
+ * "2 hours ago", "Yesterday", then the day ("18 October").
+ */
+export function formatRelative(value: DateInput, lang: string, now: Date = new Date()) {
+  const date = toDate(value)
+  if (Number.isNaN(date.getTime())) return ""
+  const minutes = Math.round((now.getTime() - date.getTime()) / 60000)
+  const words = new Intl.RelativeTimeFormat(intlLocale(lang), { numeric: "auto" })
+  const capital = (text: string) => text.charAt(0).toLocaleUpperCase(intlLocale(lang)) + text.slice(1)
+  if (minutes >= 0 && minutes < 60) return capital(words.format(-Math.max(1, minutes), "minute"))
+  const startOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+  const days = Math.round((startOf(now) - startOf(date)) / 86400000)
+  if (days === 0 && minutes >= 0) return capital(words.format(-Math.round(minutes / 60), "hour"))
+  if (days === 1) return capital(words.format(-1, "day"))
+  return formatDate(date, lang, { day: "numeric", month: "long" })
+}
+
+/** A currency's name in the interface language ("Saudi riyal" in English); the code if unknown. */
+export function currencyName(code: string, lang: string) {
+  try {
+    return new Intl.DisplayNames([intlLocale(lang)], { type: "currency" }).of(code) ?? code
+  } catch {
+    return code
+  }
+}
+
 /** The same functions, in the current interface language. */
 export function useFormat() {
   const { i18n } = useLingui()
@@ -58,6 +85,8 @@ export function useFormat() {
       money: (amount: number, currency: string, options?: Intl.NumberFormatOptions) =>
         formatMoney(amount, currency, lang, options),
       date: (value: DateInput, options?: Intl.DateTimeFormatOptions) => formatDate(value, lang, options),
+      relative: (value: DateInput) => formatRelative(value, lang),
+      currencyName: (code: string) => currencyName(code, lang),
       numberFormat: (options?: Intl.NumberFormatOptions) => numberFormat(lang, options),
       dateFormat: (options?: Intl.DateTimeFormatOptions) => dateFormat(lang, options),
     }),

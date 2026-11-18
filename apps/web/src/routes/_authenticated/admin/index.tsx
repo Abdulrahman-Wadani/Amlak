@@ -1,338 +1,198 @@
-
-import { useEffect, useMemo, useState } from "react"
-import { Link, createFileRoute } from "@tanstack/react-router"
-import { CircleAlert, Search, UserRound, Phone } from "lucide-react"
-
-import type { User } from "@amlak/shared"
-import { useAuth } from "@/lib/auth"
-import { t } from "@lingui/core/macro"
+import { useEffect, useState } from "react"
+import { Link, createFileRoute, redirect } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
-import { getUsers } from "@/lib/api"
-import { S } from "@/lib/dom-style"
-
-import { Button } from "@/components/ui/button"
+import { t } from "@lingui/core/macro"
+import { Search } from "lucide-react"
+import type { Role, User, UserStatus } from "@amlak/shared"
+import { storedUser, useAuth } from "@/lib/auth"
+import { apiPage } from "@/lib/api"
+import { roleLabel } from "@/lib/nav"
+import { useFormat } from "@/lib/format"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyTitle,
-} from "@/components/ui/empty"
-
-import { StatusBadge } from "@/components/place-shared"
 import { Page } from "@/components/page"
+import { Field, FilterTabs, Initial, ListFooter, NativeSelect } from "@/components/panel"
+import { UserStatusChip } from "@/components/place-shared"
+import { EmptyState, LoadError, LoadingList } from "@/components/states"
 
 export const Route = createFileRoute("/_authenticated/admin/")({
-  component: UsersPage,
+  beforeLoad: () => {
+    if (storedUser()?.role !== "ADMIN") throw redirect({ to: "/home" })
+  },
+  component: AdminUsers,
 })
 
-// Labels are components so they translate at render, not at import.
-const TABS = [
+const PAGE_SIZE = 12
+type Filter = "ALL" | UserStatus
+const FILTERS: { key: Filter; label: React.ReactNode }[] = [
   { key: "ALL", label: <Trans>All</Trans> },
   { key: "ACTIVE", label: <Trans>Active</Trans> },
   { key: "INVITED", label: <Trans>Invited</Trans> },
   { key: "PENDING_VERIFICATION", label: <Trans>Pending verification</Trans> },
   { key: "DEACTIVATED", label: <Trans>Deactivated</Trans> },
-] as const
+]
 
-type TabKey = (typeof TABS)[number]["key"]
+function query(params: { role?: string; status?: string; search?: string; page: number; size: number }) {
+  const q = new URLSearchParams({ page: String(params.page), page_size: String(params.size) })
+  if (params.role) q.set("role", params.role)
+  if (params.status) q.set("status", params.status)
+  if (params.search) q.set("search", params.search)
+  return `/users?${q.toString()}`
+}
 
-function UsersPage() {
-  const { accessToken } = useAuth()
-
+/** Every account: search, role and status, a page of cards at a time. */
+function AdminUsers() {
+  const { accessToken, user: me } = useAuth()
+  const { date } = useFormat()
+  const [search, setSearch] = useState("")
+  const [typed, setTyped] = useState("")
+  const [role, setRole] = useState<"" | Role>("")
+  const [filter, setFilter] = useState<Filter>("ALL")
+  const [page, setPage] = useState(1)
   const [users, setUsers] = useState<User[] | null>(null)
-  const [error, setError] = useState(false)
-  const [query, setQuery] = useState("")
-  const [tab, setTab] = useState<TabKey>("ALL")
+  const [total, setTotal] = useState(0)
+  const [counts, setCounts] = useState<Partial<Record<Filter, number>>>({})
+  const [failed, setFailed] = useState(false)
+  const [reload, setReload] = useState(0)
+
+  // Search after a short pause in typing.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(typed.trim())
+      setPage(1)
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [typed])
 
   useEffect(() => {
     if (!accessToken) return
-
     let alive = true
-
-    getUsers(accessToken)
-      .then((list) => {
-        if (alive) setUsers(list)
-      })
-      .catch(() => {
-        if (alive) setError(true)
-      })
-
+    for (const item of FILTERS) {
+      apiPage<User>(query({ role, search, status: item.key === "ALL" ? "" : item.key, page: 1, size: 1 }), accessToken)
+        .then((result) => alive && setCounts((prev) => ({ ...prev, [item.key]: result.pagination.total })))
+        .catch(() => {})
+    }
     return () => {
       alive = false
     }
-  }, [accessToken])
+  }, [accessToken, role, search, reload])
 
-  const q = query.trim().toLowerCase()
-
-  const visible = useMemo(() => {
-    if (!users) return []
-
-    return users.filter((user) => {
-      const matchesTab =
-        tab === "ALL" || user.status === tab
-
-      const matchesQuery =
-        !q ||
-        user.fullname.toLowerCase().includes(q) ||
-        user.email.toLowerCase().includes(q) ||
-        (user.phone ?? "").toLowerCase().includes(q) ||
-        user.id.includes(q) 
-
-      return matchesTab && matchesQuery
-    })
-  }, [users, tab, q])
-
-  const countFor = (key: TabKey) =>
-    users?.filter(
-      (user) => key === "ALL" || user.status === key,
-    ).length ?? 0
+  useEffect(() => {
+    if (!accessToken) return
+    let alive = true
+    setUsers(null)
+    setFailed(false)
+    apiPage<User>(query({ role, search, status: filter === "ALL" ? "" : filter, page, size: PAGE_SIZE }), accessToken)
+      .then((result) => {
+        if (!alive) return
+        setUsers(result.data)
+        setTotal(result.pagination.total)
+      })
+      .catch(() => alive && setFailed(true))
+    return () => {
+      alive = false
+    }
+  }, [accessToken, role, search, filter, page, reload])
 
   return (
-    <Page title={<Trans>Users</Trans>} phoneStart="logo" phoneEnd="none">
-
-      {/* Search and Filters */}
-      <div
-        style={S(
-          "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px",
-        )}
-      >
-        <div
-          style={S(
-            "position: relative; flex: 1 1 320px; max-width: 320px",
-          )}
-        >
-          <Label
-            htmlFor="user-search"
-            style={S(
-              "position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)",
-            )}
-          >
+    <Page
+      title={<Trans>Users</Trans>}
+      description={<Trans>All manager and worker accounts. The admin does not see places.</Trans>}
+      phoneStart="logo"
+      bell={false}
+      phoneEnd="none"
+    >
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div className="relative w-full desk:w-[320px]">
+          <label htmlFor="user-search" className="sr-only">
             <Trans>Search</Trans>
-          </Label>
-
-          <Search
-            aria-hidden="true"
-            style={S(
-              "position: absolute; top: 12px; inset-inline-start: 14px; width: 20px; height: 20px; color: var(--muted-foreground); pointer-events: none",
-            )}
-          />
-
+          </label>
+          <Search aria-hidden="true" className="pointer-events-none absolute start-3.5 top-3 size-5 text-muted-foreground" strokeWidth={1.8} />
           <Input
             id="user-search"
             type="search"
-            className="am-input"
-            style={S("padding-inline-start: 44px")}
-            placeholder={t`Search by name, email, phone or ID`}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            className="ps-11"
+            placeholder={t`Search by name or email`}
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
           />
         </div>
-
-        <div
-          role="group"
-          aria-label={t`Filter by status`}
-          style={S("display: flex; gap: 8px; flex-wrap: wrap")}
-        >
-          {TABS.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              className="am-tab"
-              aria-pressed={tab === item.key}
-              onClick={() => setTab(item.key)}
+        <div className="w-full desk:w-[200px]">
+          <Field id="user-role" label={<Trans>Role</Trans>}>
+            <NativeSelect
+              id="user-role"
+              value={role}
+              onChange={(value) => {
+                setRole(value as "" | Role)
+                setPage(1)
+              }}
             >
-              {item.label}
-              <span className="am-tab-count">
-                {countFor(item.key)}
-              </span>
-            </button>
-          ))}
+              <option value="">{t`All roles`}</option>
+              <option value="MANAGER">{roleLabel("MANAGER")}</option>
+              <option value="WORKER">{roleLabel("WORKER")}</option>
+              <option value="ADMIN">{roleLabel("ADMIN")}</option>
+            </NativeSelect>
+          </Field>
         </div>
       </div>
+      <FilterTabs
+        label={t`Filter by status`}
+        value={filter}
+        onChange={(key) => {
+          setFilter(key)
+          setPage(1)
+        }}
+        tabs={FILTERS.map((item) => ({ key: item.key, label: item.label, count: counts[item.key] ?? 0 }))}
+      />
 
-      {/* Loading */}
-      {users === null && !error && (
-        <div
-          style={S(
-            "display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px",
-          )}
-        >
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div
-              key={index}
-              style={S(
-                "display: flex; flex-direction: column; gap: 12px; padding: 14px; min-height: 150px; border: 1px solid var(--border); background: #fff",
-              )}
-            >
-              <div style={S("display: flex; align-items: center; gap: 10px")}>
-                <Skeleton
-                  style={S(
-                    "width: 36px; height: 36px; border-radius: 10px",
-                  )}
-                />
-                <div
-                  style={S(
-                    "flex: 1; display: flex; flex-direction: column; gap: 6px",
-                  )}
-                >
-                  <Skeleton style={S("height: 12px; width: 65%")} />
-                  <Skeleton style={S("height: 10px; width: 85%")} />
-                </div>
-              </div>
-
-              <Skeleton style={S("height: 20px; width: 75px")} />
-              <Skeleton style={S("height: 10px; width: 100%")} />
-              <Skeleton style={S("height: 10px; width: 45%")} />
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Error */}
-      {error && (
-        <p className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
-          <CircleAlert
-            aria-hidden="true"
-            className="size-3.5 shrink-0"
-          />
-          <Trans>We could not load the users.</Trans>
-        </p>
-      )}
-
-      {/* Empty State */}
-      {users !== null && !error && visible.length === 0 && (
-        <Empty style={S("padding: 40px")}>
-          <EmptyHeader>
-            <EmptyTitle>
-              {query || tab !== "ALL"
-                ? t`No users match`
-                : t`No users yet`}
-            </EmptyTitle>
-
-            <EmptyDescription>
-              {query || tab !== "ALL"
-                ? t`Try other search words or another filter.`
-                : t`There are no users to show.`}
-            </EmptyDescription>
-
-            {query || tab !== "ALL" ? (
-              <Button
-                size="sm"
-                className="am-btn"
-                onClick={() => {
-                  setQuery("")
-                  setTab("ALL")
-                }}
-              >
-                <Trans>Clear filters</Trans>
-              </Button>
-            ) : null}
-          </EmptyHeader>
-        </Empty>
-      )}
-
-      {/* Users Grid */}
-      {visible.length > 0 && (
-        <div
-          style={S(
-            "display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px",
-          )}
-        >
-          {visible.map((user) => (
+      {failed ? (
+        <LoadError title={<Trans>Could not load users</Trans>} onRetry={() => setReload((n) => n + 1)} />
+      ) : users === null ? (
+        <LoadingList />
+      ) : users.length === 0 ? (
+        <EmptyState title={<Trans>No users match</Trans>} text={<Trans>Change the search or the filters.</Trans>} />
+      ) : (
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] gap-4">
+          {users.map((user) => (
             <Link
               key={user.id}
               to="/admin/$admin_id"
               params={{ admin_id: user.id }}
-              className="am-lift"
-              style={S(
-                "display: flex; flex-direction: column; gap: 10px; padding: 14px; min-height: 150px; text-decoration: none; color: inherit; background: #fff; border: 1px solid var(--border); box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.08)",
-              )}
+              className="am-lift box-border flex min-w-0 flex-col gap-2.5 border border-border bg-card p-4 text-foreground no-underline shadow-sm"
             >
-              {/* User Info */}
-              <div
-                style={S(
-                  "display: flex; align-items: center; gap: 9px; min-width: 0",
-                )}
-              >
-                <div
-                  style={S(
-                    "width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--muted); flex-shrink: 0",
-                  )}
-                >
-                  <UserRound size={17} />
-                </div>
-
-                <div style={S("min-width: 0; flex: 1")}>
-                  <div
-                    style={S(
-                      "font-size: 13px; font-weight: 750; overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
-                    )}
-                  >
-                    {user.fullname}
-                  </div>
-
-                  <div
-                    style={S(
-                      "margin-top: 3px; font-size: 11px; color: var(--muted-foreground); overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
-                    )}
-                  >
-                    <bdi dir="ltr">{user.email}</bdi>
-                  </div>
-                </div>
-              </div>
-
-              {/* Role and Status */}
-              <div
-                style={S(
-                  "display: flex; align-items: center; justify-content: space-between; gap: 8px",
-                )}
-              >
-                <span
-                  style={S(
-                    "font-size: 11px; color: var(--muted-foreground)",
-                  )}
-                >
-                  {user.role}
-                </span>
-
-                <StatusBadge status={user.status} />
-              </div>
-
-              {/* Phone and Places */}
-              <div
-                style={S(
-                  "display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--muted-foreground)",
-                )}
-              >
-                <span
-                  style={S(
-                    "display: flex; align-items: center; gap: 5px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap",
-                  )}
-                >
-                  <Phone size={12} />
-                  <span dir="ltr">
-                    {user.phone || t`No phone number`}
+              <span className="flex items-start justify-between gap-3">
+                <span className="flex min-w-0 items-center gap-2.5">
+                  <Initial name={user.fullname} />
+                  <span className="flex min-w-0 flex-col leading-[1.5]">
+                    <span className="font-semibold [overflow-wrap:anywhere]">
+                      {user.id === me?.id ? t`${user.fullname} (you)` : user.fullname}
+                    </span>
+                    <span dir="ltr" className="truncate text-start text-[13px] text-muted-foreground">
+                      {user.email}
+                    </span>
                   </span>
                 </span>
-
-              </div>
-
-              {/* Footer */}
-              <div
-                style={S(
-                  "margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 650; color: var(--muted-foreground)",
-                )}
-              >
-                <Trans>View details</Trans>
-                <span aria-hidden="true" className="inline-block rtl:rotate-180">→</span>
-              </div>
+                <UserStatusChip status={user.status} />
+              </span>
+              <span className="flex flex-wrap gap-x-4 text-[13px] text-muted-foreground">
+                <span>{roleLabel(user.role)}</span>
+                <span>
+                  <Trans>Joined: {date(user.created_at, { day: "numeric", month: "long" })}</Trans>
+                </span>
+              </span>
             </Link>
           ))}
         </div>
       )}
+      <p className="m-0 text-[13px] text-muted-foreground">
+        <Trans>You cannot change the status of your own account.</Trans>
+      </p>
+      <ListFooter
+        page={page}
+        pageSize={PAGE_SIZE}
+        total={total}
+        range={(from, to, all) => t`${from} to ${to} of ${all} users`}
+        onPage={setPage}
+      />
     </Page>
   )
 }

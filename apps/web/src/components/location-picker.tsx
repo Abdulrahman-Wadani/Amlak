@@ -7,6 +7,7 @@ import { Marker } from "maplibre-gl"
 import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
 import { i18n } from "@lingui/core"
+import { MapPin } from "lucide-react"
 import "maplibre-gl/dist/maplibre-gl.css"
 
 export interface LocationData {
@@ -22,14 +23,18 @@ interface LocationPickerProps {
     latitude: number
     longitude: number
   }
+  /** Moves the pin here (e.g. the device's location); a new object moves it again. */
+  focus?: { latitude: number; longitude: number } | null
 }
 
 export default function LocationPicker({
   onLocationSelect,
   initialLocation,
+  focus,
 }: LocationPickerProps) {
   const mapContainer = useRef<HTMLDivElement>(null)
   const markerRef = useRef<Marker | null>(null)
+  const moveRef = useRef<((lng: number, lat: number) => void) | null>(null)
   const callbackRef = useRef(onLocationSelect)
 
   const [loading, setLoading] = useState(false)
@@ -113,6 +118,11 @@ export default function LocationPicker({
       }
     }
 
+    moveRef.current = (lng, lat) => {
+      map.mapLibreMap.jumpTo({ center: [lng, lat], zoom: 15 })
+      void selectLocation(lng, lat)
+    }
+
     map.mapLibreMap.on("click", (event) => {
       void selectLocation(event.lngLat.lng, event.lngLat.lat)
     })
@@ -131,36 +141,49 @@ export default function LocationPicker({
 
     return () => {
       active = false
+      moveRef.current = null
       marker.remove()
       markerRef.current = null
       map.mapLibreMap.remove()
     }
   }, [])
 
-  return (
-    <div className="flex flex-col gap-3">
-      <div
-        ref={mapContainer}
-        className="h-[400px] w-full overflow-hidden rounded-lg border"
-      />
+  useEffect(() => {
+    if (focus) moveRef.current?.(focus.longitude, focus.latitude)
+  }, [focus])
 
-      <p className="text-sm text-muted-foreground">
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="relative h-[200px] w-full overflow-hidden border border-dashed border-border bg-secondary">
+        <div ref={mapContainer} className="absolute inset-0" />
+        {/* Without a map (no key), the box says what it is for, as in the design. */}
+        {!import.meta.env.VITE_TOMTOM_API_KEY && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-[13px] text-muted-foreground">
+            <MapPin aria-hidden="true" className="size-6" strokeWidth={1.8} />
+            <span>
+              <Trans>Map to pick the location</Trans>
+            </span>
+          </div>
+        )}
+      </div>
+
+      <p className="m-0 text-[13px] text-muted-foreground">
         <Trans>Click on the map or drag the marker to choose a location.</Trans>
       </p>
 
       {loading && (
-        <p className="text-sm"><Trans>Getting the address…</Trans></p>
+        <p className="m-0 text-[13px]"><Trans>Getting the address…</Trans></p>
       )}
 
       {selectedAddress && (
-        <div className="rounded-md border p-3">
-          <p className="text-sm font-semibold"><Trans>Selected address</Trans></p>
-          <p className="text-sm">{selectedAddress}</p>
-        </div>
+        <p className="m-0 text-[13px]">
+          <span className="font-semibold"><Trans>Selected address</Trans></span>{" "}
+          {selectedAddress}
+        </p>
       )}
 
       {error && (
-        <p className="text-sm text-destructive">{error}</p>
+        <p className="m-0 text-[13px] text-destructive">{error}</p>
       )}
     </div>
   )

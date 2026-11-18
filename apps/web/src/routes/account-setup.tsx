@@ -1,219 +1,98 @@
-
 import { createFileRoute, useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
+import { useState, type FormEvent } from "react"
+import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import Form, { type FormValues } from "@/components/form"
-import { S } from "@/lib/dom-style"
-import { apiError, errorMessage } from "@/lib/errors"
+import { Mail } from "lucide-react"
+import { errorMessage, readApiError } from "@/lib/errors"
+import { AuthCard, AuthLayout } from "@/components/auth-layout"
+import { PasswordInput, PasswordRules, passwordOk } from "@/components/password-field"
+import { Field } from "@/components/panel"
+import { Notice } from "@/components/states"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 export const Route = createFileRoute("/account-setup")({
   component: AccountSetupPage,
+  validateSearch: (search: Record<string, unknown>): { email: string; token: string } => ({
+    email: typeof search.email === "string" ? search.email : "",
+    token: typeof search.token === "string" ? search.token : "",
+  }),
 })
 
-
+/** A worker's first visit from the invitation: choose a password to activate the account. */
 function AccountSetupPage() {
+  const { email, token } = Route.useSearch()
   const navigate = useNavigate()
-
-  const params = new URLSearchParams(window.location.search)
-  const email = params.get("email") ?? ""
-  const token = params.get("token") ?? ""
-
-  const [loading, setLoading] = useState(false)
+  const [password, setPassword] = useState("")
+  const [passwordError, setPasswordError] = useState("")
   const [error, setError] = useState("")
-  const [success, setSuccess] = useState(false)
+  const [expired, setExpired] = useState(!email || !token)
+  const [loading, setLoading] = useState(false)
 
-  const messages = {
-    title: t`Set Up Your Account`,
-    description: t`Welcome! Create a password to activate your account and get started.`,
-    email: t`Email Address`,
-    password: t`Password`,
-    confirmPassword: t`Confirm Password`,
-    passwordPlaceholder: t`Enter your password`,
-    confirmPlaceholder: t`Re-enter your password`,
-    submit: t`Activate Account`,
-    submitting: t`Activating Account...`,
-    invalidLink: t`The invitation link is invalid or missing required information.`,
-    passwordRequired: t`Password is required.`,
-    passwordLength: t`Password must be at least 8 characters.`,
-    passwordMismatch: t`Passwords do not match.`,
-    failed: t`Unable to activate your account. The link may be invalid, expired, or already used.`,
-    activated: t`Your account has been activated successfully!`,
-    activatedDescription: t`You can now log in using your email and password.`,
-    login: t`Go to Login`,
-    invalidResponse: t`Something went wrong. Please try again.`,
-  }
-
-  const fields = [
-    {
-      name: "password",
-      label: messages.password,
-      type: "password",
-      required: true,
-    },
-    {
-      name: "confirm_password",
-      label: messages.confirmPassword,
-      type: "password",
-      required: true,
-    },
-  ]
-
-  async function handleSubmit(submitted: FormValues) {
-    const values = {
-      password: typeof submitted.password === "string" ? submitted.password : "",
-      confirm_password:
-        typeof submitted.confirm_password === "string" ? submitted.confirm_password : "",
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    if (!passwordOk(password)) {
+      setPasswordError(t`Password does not meet the requirements`)
+      return
     }
+    setPasswordError("")
     setError("")
-
-    if (!email || !token) {
-      setError(messages.invalidLink)
-      return
-    }
-
-    if (!values.password) {
-      setError(messages.passwordRequired)
-      return
-    }
-
-    if (values.password.length < 8) {
-      setError(messages.passwordLength)
-      return
-    }
-
-    if (values.password !== values.confirm_password) {
-      setError(messages.passwordMismatch)
-      return
-    }
-
+    setLoading(true)
     try {
-      setLoading(true)
-
       const response = await fetch("/api/v1/auth/account-setup", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         credentials: "same-origin",
-        body: JSON.stringify({
-          email,
-          token,
-          password: values.password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, token, password }),
       })
-
-      if (response.status === 204) {
-        setSuccess(true)
-        return
+      if (response.ok) await navigate({ to: "/signin", search: { activated: true } })
+      else {
+        const failure = await readApiError(response)
+        if (failure.fields.includes("token") || response.status === 422) setExpired(true)
+        else setError(errorMessage(failure))
       }
-
-      const data = await response.json().catch(() => null)
-
-      if (response.status === 422) {
-        setError(messages.failed)
-        return
-      }
-
-      setError(
-        errorMessage(apiError(response.status, data)),
-      )
     } catch {
-      setError(messages.invalidResponse)
+      setError(errorMessage(null))
     } finally {
       setLoading(false)
     }
   }
 
-  if (!email || !token) {
-    return (
-      <div
-        style={S("min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--background)")}
-      >
-        <div
-          style={S("width: 100%; max-width: 440px; padding: 32px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); text-align: center")}
-        >
-          <h1 style={S("font-size: 24px; font-weight: 700; margin-bottom: 12px")}>
-            {messages.title}
-          </h1>
-
-          <p style={S("font-size: 14px; color: var(--destructive)")}>
-            {messages.invalidLink}
-          </p>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div
-      style={S("min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--background)")}
-    >
-      <div
-        style={S("width: 100%; max-width: 460px; padding: 32px; border: 1px solid var(--border); border-radius: 12px; background: var(--card); box-sizing: border-box")}
-      >
-        <div style={S("text-align: center; margin-bottom: 28px")}>
-          <h1 style={S("font-size: 26px; font-weight: 700; margin: 0 0 12px")}>
-            {success ? messages.activated : messages.title}
-          </h1>
-
-          <p style={S("font-size: 14px; color: var(--muted-foreground); margin: 0; line-height: 1.8")}>
-            {success
-              ? messages.activatedDescription
-              : messages.description}
-          </p>
-        </div>
-
-        {success ? (
-          <div style={S("display: flex; flex-direction: column; gap: 16px")}>
-            <div
-              style={S("padding: 14px; border-radius: 8px; background: var(--muted); text-align: center; font-size: 14px")}
-            >
-              {messages.email}: <strong>{email}</strong>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => navigate({ to: "/signin" })}
-              style={S("width: 100%; padding: 12px 16px; border: 0; border-radius: 7px; background: var(--primary); color: var(--primary-foreground); font-size: 14px; font-weight: 600; cursor: pointer")}
-            >
-              {messages.login}
-            </button>
-          </div>
+    <AuthLayout>
+      <AuthCard title={<Trans>Welcome to Amlak</Trans>} subtitle={<Trans>Choose a password to activate your account.</Trans>}>
+        {expired ? (
+          <Notice tone="crit" icon={<Mail />} title={<Trans>The invitation has expired.</Trans>}>
+            <Trans>Ask your manager to send a new invitation.</Trans>
+          </Notice>
         ) : (
-          <>
-            <div
-              style={S("padding: 12px 14px; margin-bottom: 20px; border-radius: 8px; background: var(--muted); font-size: 13px; overflow-wrap: anywhere")}
-            >
-              <span style={S("color: var(--muted-foreground)")}>
-                {messages.email}
-              </span>
-              <p style={S("font-weight: 600; margin: 5px 0 0")}>
-                {email}
-              </p>
+          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+            <Field id="setup-email" label={<Trans>Email</Trans>}>
+              <Input id="setup-email" dir="ltr" value={email} readOnly className="bg-secondary text-muted-foreground" />
+            </Field>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="setup-password" className="text-sm font-semibold">
+                <Trans>Choose a password</Trans>
+              </label>
+              <PasswordInput id="setup-password" value={password} onChange={setPassword} invalid={Boolean(passwordError)} describedBy="setup-rules" />
+              <PasswordRules id="setup-rules" value={password} />
+              {passwordError && (
+                <span role="alert" className="text-[13px] text-destructive">
+                  {passwordError}
+                </span>
+              )}
             </div>
-
             {error && (
-              <div
-                role="alert"
-                style={S("margin-bottom: 16px; padding: 12px; border-radius: 7px; background: var(--destructive); color: white; font-size: 13px")}
-              >
+              <p role="alert" className="m-0 text-[13px] text-destructive">
                 {error}
-              </div>
-            )}
-<center>
-            <div style={S("opacity: 1")}>
-              <Form onSubmit={handleSubmit} fields={fields} />
-            </div>
-            </center>
-
-            {loading && (
-              <p style={S("text-align: center; color: var(--muted-foreground); font-size: 13px; margin-top: 12px")}>
-                {messages.submitting}
               </p>
             )}
-          </>
+            <Button type="submit" className="h-12" disabled={loading}>
+              {loading ? <Trans>Activating…</Trans> : <Trans>Activate account</Trans>}
+            </Button>
+          </form>
         )}
-      </div>
-    </div>
+      </AuthCard>
+    </AuthLayout>
   )
 }

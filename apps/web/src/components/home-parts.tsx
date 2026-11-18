@@ -1,6 +1,6 @@
 import { useId, useState, type ReactNode } from "react"
 import { Trans } from "@lingui/react/macro"
-import { ChevronDown, TriangleAlert } from "lucide-react"
+import { ChevronDown, ChevronUp, TriangleAlert } from "lucide-react"
 
 const MONO = "font-mono tabular-nums"
 
@@ -116,7 +116,11 @@ export function PriorityText({ priority }: { priority: string }) {
     const urgent = priority === "URGENT"
     return (
       <span className={`inline-flex items-center gap-1.5 font-semibold whitespace-nowrap ${urgent ? "text-crit-900" : "text-warn-900"}`}>
-        <TriangleAlert aria-hidden="true" className="size-4" strokeWidth={1.8} />
+        {urgent ? (
+          <TriangleAlert aria-hidden="true" className="size-4" strokeWidth={1.8} />
+        ) : (
+          <ChevronUp aria-hidden="true" className="size-4" strokeWidth={1.8} />
+        )}
         {urgent ? <Trans>Urgent</Trans> : <Trans>High</Trans>}
       </span>
     )
