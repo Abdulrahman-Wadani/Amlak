@@ -71,32 +71,36 @@ const user = {
 };
 
 describe("text limits", () => {
-	test("names and titles: 100", () => {
-		assert.equal(LIMITS.name, 100);
-		checksLength(createPlaceSchema, place, "place_name", 100);
-		checksLength(updatePlaceSchema, {}, "place_name", 100);
-		checksLength(createAssetSchema, { type: "AC" }, "name", 100);
-		checksLength(updateAssetSchema, {}, "name", 100);
-		checksLength(createBookingSchema, booking, "guest_name", 100);
-		checksLength(createWorkerSchema, user, "fullname", 100);
-		checksLength(updateWorkerSchema, {}, "fullname", 100);
+	test("names of people, places and assets: 30", () => {
+		assert.equal(LIMITS.name, 30);
+		checksLength(createPlaceSchema, place, "place_name", 30);
+		checksLength(updatePlaceSchema, {}, "place_name", 30);
+		checksLength(createAssetSchema, { type: "AC" }, "name", 30);
+		checksLength(updateAssetSchema, {}, "name", 30);
+		checksLength(createWorkerSchema, user, "fullname", 30);
+		checksLength(updateWorkerSchema, {}, "fullname", 30);
 		checksLength(
 			registerSchema,
 			{ ...user, password: "Passw0rd!" },
 			"fullname",
-			100,
+			30,
 		);
-		checksLength(updateProfileSchema, {}, "fullname", 100);
-		checksLength(adminUpdateUserSchema, {}, "fullname", 100);
+		checksLength(updateProfileSchema, {}, "fullname", 30);
+		checksLength(adminUpdateUserSchema, {}, "fullname", 30);
+	});
+
+	test("limits from before this change are kept", () => {
+		// Guest names, titles and subjects: 200.
+		checksLength(createBookingSchema, booking, "guest_name", 200);
 		checksLength(
 			createSupportTicketSchema,
 			{ description: "Broken" },
 			"subject",
-			100,
+			200,
 		);
 		const content = { language: "en", slug: "about", body: "Hello" };
-		checksLength(createContentSchema, content, "title", 100);
-		checksLength(updateContentSchema, {}, "title", 100);
+		checksLength(createContentSchema, content, "title", 200);
+		checksLength(updateContentSchema, {}, "title", 200);
 		const announcement = {
 			role: "MANAGER",
 			title_en: "Hi",
@@ -104,34 +108,24 @@ describe("text limits", () => {
 			title_ar: "Hi",
 			message_ar: "Hi",
 		};
-		checksLength(announcementSchema, announcement, "title_en", 100);
-		checksLength(announcementSchema, announcement, "title_ar", 100);
-	});
+		checksLength(announcementSchema, announcement, "title_en", 200);
+		checksLength(announcementSchema, announcement, "title_ar", 200);
 
-	test("types and cities: 60", () => {
-		checksLength(createPlaceSchema, place, "place_type", 60);
-		checksLength(createPlaceSchema, place, "city", 60);
-		checksLength(createAssetSchema, { name: "AC" }, "type", 60);
-	});
-
-	test("addresses: 200", () => {
-		checksLength(createPlaceSchema, place, "address", 200);
-	});
-
-	test("descriptions, notes and reasons: 1000", () => {
-		checksLength(createPlaceSchema, place, "description", 1000);
-		checksLength(createBookingSchema, booking, "notes", 1000);
+		// Reasons: 1000.
 		checksLength(cancelBookingSchema, {}, "reason", 1000);
-		checksLength(createTicketSchema, { priority: "HIGH" }, "description", 1000);
 		checksLength(rejectTicketSchema, {}, "reason", 1000);
+
+		// Ticket descriptions and notes: 2000.
+		checksLength(createTicketSchema, { priority: "HIGH" }, "description", 2000);
 		checksLength(
 			completeTicketSchema,
 			{ actual_cost: "100" },
 			"completion_notes",
-			1000,
+			2000,
 		);
-		checksLength(createExpenseSchema, expense, "description", 1000);
-		checksLength(updateExpenseSchema, {}, "description", 1000);
+		checksLength(createBookingSchema, booking, "notes", 2000);
+		checksLength(createExpenseSchema, expense, "description", 2000);
+		checksLength(updateExpenseSchema, {}, "description", 2000);
 		checksLength(
 			createScheduleSchema,
 			{
@@ -140,29 +134,39 @@ describe("text limits", () => {
 				next_due_date: "2026-12-01",
 			},
 			"description",
-			1000,
+			2000,
 		);
+
+		// Support requests, replies and announcement text: 5000.
 		checksLength(
 			createSupportTicketSchema,
 			{ subject: "Help" },
 			"description",
-			1000,
+			5000,
 		);
-		checksLength(resolveSupportTicketSchema, {}, "admin_response", 1000);
-		const announcement = {
-			user_ids: [uuid],
-			title_en: "Hi",
-			message_en: "Hi",
-			title_ar: "Hi",
-			message_ar: "Hi",
-		};
-		checksLength(announcementSchema, announcement, "message_en", 1000);
+		checksLength(resolveSupportTicketSchema, {}, "admin_response", 5000);
+		checksLength(announcementSchema, announcement, "message_en", 5000);
+		checksLength(announcementSchema, announcement, "message_ar", 5000);
+
+		// Content body: 100000.
+		checksLength(
+			createContentSchema,
+			{ title: "About", language: "en", slug: "about" },
+			"body",
+			100_000,
+		);
+		checksLength(updateContentSchema, {}, "body", 100_000);
 	});
 
-	test("content body: 20000", () => {
-		const content = { title: "About", language: "en", slug: "about" };
-		checksLength(createContentSchema, content, "body", 20_000);
-		checksLength(updateContentSchema, {}, "body", 20_000);
+	test("types and cities: 60", () => {
+		checksLength(createPlaceSchema, place, "place_type", 60);
+		checksLength(createPlaceSchema, place, "city", 60);
+		checksLength(createAssetSchema, { name: "AC" }, "type", 60);
+	});
+
+	test("addresses: 200, place descriptions: 1000", () => {
+		checksLength(createPlaceSchema, place, "address", 200);
+		checksLength(createPlaceSchema, place, "description", 1000);
 	});
 
 	test("email: 254, login password: 128", () => {

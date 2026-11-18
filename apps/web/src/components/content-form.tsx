@@ -50,7 +50,7 @@ export function ContentForm({ token, page }: { token: string; page?: WebContent 
   async function save(publish: boolean) {
     const next: Partial<Record<FieldKey, string>> = {}
     if (!title.trim()) next.title = t`Write the title.`
-    else next.title = tooLong(title, LIMITS.name)
+    else next.title = tooLong(title, LIMITS.title)
     if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug.trim())) next.slug = t`Use lowercase English letters, digits and single dashes, like about-us.`
     if (!body.trim()) next.body = t`Write the content.`
     else next.body = tooLong(body, LIMITS.body)
@@ -128,7 +128,7 @@ export function ContentForm({ token, page }: { token: string; page?: WebContent 
               )}
             </div>
             <Field id="c-title" label={<Trans>Address</Trans>} error={errors.title}>
-              <Input id="c-title" maxLength={LIMITS.name} dir={language === "ar" ? "rtl" : "ltr"} value={title} aria-invalid={errors.title ? true : undefined} onChange={(e) => setTitle(e.target.value)} />
+              <Input id="c-title" maxLength={LIMITS.title} dir={language === "ar" ? "rtl" : "ltr"} value={title} aria-invalid={errors.title ? true : undefined} onChange={(e) => setTitle(e.target.value)} />
             </Field>
             <Field
               id="c-slug"

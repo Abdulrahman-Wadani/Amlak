@@ -74,10 +74,10 @@ export const announcementSchema = z
 			.max(1000)
 			.optional()
 			.meta({ description: "These users, if ACTIVE" }),
-		title_en: text(LIMITS.name),
-		message_en: text(LIMITS.text),
-		title_ar: text(LIMITS.name),
-		message_ar: text(LIMITS.text),
+		title_en: text(LIMITS.title),
+		message_en: text(LIMITS.message),
+		title_ar: text(LIMITS.title),
+		message_ar: text(LIMITS.message),
 	})
 	.refine(hasOneAudience, {
 		path: ["role"],

@@ -44,7 +44,7 @@ export type Booking = z.infer<typeof bookingSchema>;
 
 export const createBookingSchema = z
 	.object({
-		guest_name: z.string().trim().min(1).max(LIMITS.name),
+		guest_name: z.string().trim().min(1).max(LIMITS.guestName),
 		guest_phone: z
 			.string()
 			.trim()
@@ -63,7 +63,7 @@ export const createBookingSchema = z
 			.min(0)
 			.max(LIMITS.money)
 			.meta({ description: "For the whole stay, in the place's currency" }),
-		notes: z.string().trim().max(LIMITS.text).optional(),
+		notes: z.string().trim().max(LIMITS.longText).optional(),
 	})
 	.refine((input) => input.check_out_date > input.check_in_date, {
 		path: ["check_out_date"],

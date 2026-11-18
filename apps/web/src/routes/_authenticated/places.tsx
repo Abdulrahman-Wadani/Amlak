@@ -180,7 +180,7 @@ function PlacesPage() {
             />
             <Input
               id="q"
-              maxLength={LIMITS.name}
+              maxLength={LIMITS.short}
               type="search"
               className="am-input"
               style={S("padding-inline-start: 44px")}

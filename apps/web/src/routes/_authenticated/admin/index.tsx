@@ -112,7 +112,7 @@ function AdminUsers() {
             <Search aria-hidden="true" className="pointer-events-none absolute start-3.5 top-3 size-5 text-muted-foreground" strokeWidth={1.8} />
             <Input
               id="user-search"
-              maxLength={LIMITS.name}
+              maxLength={LIMITS.title}
               type="search"
               className="ps-11"
               placeholder={t`Search by name or email`}

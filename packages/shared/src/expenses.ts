@@ -46,7 +46,7 @@ export const createExpenseSchema = z.object({
 	category: z.enum(EXPENSE_CATEGORIES),
 	amount: amountField,
 	expense_date: z.iso.date("Use the YYYY-MM-DD format"),
-	description: z.string().trim().max(LIMITS.text).optional(),
+	description: z.string().trim().max(LIMITS.longText).optional(),
 	ticket_id: z
 		.uuid()
 		.optional()
@@ -59,7 +59,7 @@ export const updateExpenseSchema = z.object({
 	category: z.enum(EXPENSE_CATEGORIES).optional(),
 	amount: amountField.optional(),
 	expense_date: z.iso.date("Use the YYYY-MM-DD format").optional(),
-	description: z.string().trim().max(LIMITS.text).optional(),
+	description: z.string().trim().max(LIMITS.longText).optional(),
 	ticket_id: z
 		.union([z.literal(""), z.uuid()])
 		.optional()

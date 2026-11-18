@@ -87,7 +87,7 @@ export function ExpenseForm({ token, expense }: { token: string; expense?: Expen
     if (!/^\d+(\.\d{1,2})?$/.test(amount.trim()) || Number(amount) <= 0) next.amount = t`Enter the amount, like 640 or 640.50.`
     else next.amount = tooLarge(amount)
     if (!day) next.date = t`Choose the date.`
-    next.description = tooLong(description, LIMITS.text)
+    next.description = tooLong(description, LIMITS.longText)
     setErrors(next)
     if (Object.values(next).some(Boolean)) return
     setSaving(true)
@@ -174,7 +174,7 @@ export function ExpenseForm({ token, expense }: { token: string; expense?: Expen
               </Field>
             </FieldRow>
             <Field id="e-desc" label={<Trans>Description</Trans>} error={errors.description}>
-              <Input id="e-desc" dir="auto" maxLength={LIMITS.text} aria-invalid={errors.description ? true : undefined} value={description} onChange={(e) => setDescription(e.target.value)} />
+              <Input id="e-desc" dir="auto" maxLength={LIMITS.longText} aria-invalid={errors.description ? true : undefined} value={description} onChange={(e) => setDescription(e.target.value)} />
             </Field>
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold">

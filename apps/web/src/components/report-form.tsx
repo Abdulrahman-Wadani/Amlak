@@ -94,7 +94,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
     const next: Partial<Record<FieldKey, string>> = {}
     if (!placeId) next.place = t`Choose the place.`
     if (!description.trim()) next.description = t`Write what happened.`
-    else next.description = tooLong(description, LIMITS.text)
+    else next.description = tooLong(description, LIMITS.longText)
     setErrors(next)
     if (Object.values(next).some(Boolean)) return
 
@@ -196,7 +196,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
             >
               <Textarea
                 id="r-desc"
-                maxLength={LIMITS.text}
+                maxLength={LIMITS.longText}
                 rows={3}
                 dir="auto"
                 value={description}

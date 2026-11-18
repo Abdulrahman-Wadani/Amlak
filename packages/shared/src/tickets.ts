@@ -77,7 +77,7 @@ export type Ticket = z.infer<typeof ticketSchema>;
 
 /** The text fields of a damage report; the photos come as files. */
 export const createTicketSchema = z.object({
-	description: z.string().trim().min(1).max(LIMITS.text),
+	description: z.string().trim().min(1).max(LIMITS.longText),
 	priority: z.enum(TICKET_PRIORITIES),
 	asset_id: z.uuid().optional(),
 });
@@ -137,6 +137,6 @@ export const completeTicketSchema = z.object({
 		.transform(Number)
 		.refine((cost) => cost <= LIMITS.money, "Too large")
 		.meta({ description: "What the repair cost, at most 2 decimals" }),
-	completion_notes: z.string().trim().max(LIMITS.text).optional(),
+	completion_notes: z.string().trim().max(LIMITS.longText).optional(),
 });
 export type CompleteTicketInput = z.infer<typeof completeTicketSchema>;

@@ -66,7 +66,7 @@ function CompleteTask() {
     if (photos.length === 0) next.photos = t`Add at least one photo of the finished work.`
     if (!/^\d+(\.\d{1,2})?$/.test(cost.trim())) next.cost = t`Enter the cost as a number, like 320 or 320.50.`
     else next.cost = tooLarge(cost)
-    next.notes = tooLong(notes, LIMITS.text)
+    next.notes = tooLong(notes, LIMITS.longText)
     setErrors(next)
     if (Object.values(next).some(Boolean)) return
     setSaving(true)
@@ -119,7 +119,7 @@ function CompleteTask() {
                   />
                 </div>
                 <Field id="c-notes" label={<Trans>What did you fix?</Trans>} error={errors.notes}>
-                  <Textarea id="c-notes" rows={3} dir="auto" maxLength={LIMITS.text} aria-invalid={errors.notes ? true : undefined} value={notes} onChange={(e) => setNotes(e.target.value)} />
+                  <Textarea id="c-notes" rows={3} dir="auto" maxLength={LIMITS.longText} aria-invalid={errors.notes ? true : undefined} value={notes} onChange={(e) => setNotes(e.target.value)} />
                 </Field>
                 <Field
                   id="c-cost"

@@ -231,7 +231,7 @@ function ScheduleForm({
     const every = Number(count)
     const before = Number(lead)
     if (!description.trim()) next.description = t`Enter a description.`
-    else next.description = tooLong(description, LIMITS.text)
+    else next.description = tooLong(description, LIMITS.longText)
     if (!Number.isInteger(every) || every < 1 || every > 365) next.count = t`Enter a whole number from 1 to 365.`
     if (!due) next.due = t`Choose the first due date.`
     if (!Number.isInteger(before) || before < 0 || before > 60) next.lead = t`Enter a whole number from 0 to 60.`
@@ -266,7 +266,7 @@ function ScheduleForm({
         <Field id="s-description" label={<Trans>Description</Trans>} error={errors.description}>
           <Input
             id="s-description"
-            maxLength={LIMITS.text}
+            maxLength={LIMITS.longText}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             {...invalid("description")}

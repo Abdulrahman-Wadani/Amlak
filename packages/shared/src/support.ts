@@ -28,15 +28,15 @@ export type ListSupportTicketsQuery = z.infer<
 >;
 
 export const createSupportTicketSchema = z.object({
-	subject: z.string().trim().min(1).max(LIMITS.name),
-	description: z.string().trim().min(1).max(LIMITS.text),
+	subject: z.string().trim().min(1).max(LIMITS.title),
+	description: z.string().trim().min(1).max(LIMITS.message),
 });
 export type CreateSupportTicketInput = z.infer<
 	typeof createSupportTicketSchema
 >;
 
 export const resolveSupportTicketSchema = z.object({
-	admin_response: z.string().trim().min(1).max(LIMITS.text),
+	admin_response: z.string().trim().min(1).max(LIMITS.message),
 });
 export type ResolveSupportTicketInput = z.infer<
 	typeof resolveSupportTicketSchema

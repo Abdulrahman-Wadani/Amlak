@@ -120,9 +120,9 @@ function SupportRequestForm({ token }: { token: string }) {
     event.preventDefault()
     const next: typeof errors = {}
     if (!subject.trim()) next.subject = t`Write a subject.`
-    else next.subject = tooLong(subject, LIMITS.name)
+    else next.subject = tooLong(subject, LIMITS.title)
     if (!details.trim()) next.details = t`Write the details.`
-    else next.details = tooLong(details, LIMITS.text)
+    else next.details = tooLong(details, LIMITS.message)
     setErrors(next)
     if (Object.values(next).some(Boolean)) return
     setSending(true)
@@ -141,10 +141,10 @@ function SupportRequestForm({ token }: { token: string }) {
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
       <Field id="s-subject" label={<Trans>Subject</Trans>} error={errors.subject}>
-        <Input id="s-subject" dir="auto" maxLength={LIMITS.name} value={subject} aria-invalid={errors.subject ? true : undefined} onChange={(e) => setSubject(e.target.value)} />
+        <Input id="s-subject" dir="auto" maxLength={LIMITS.title} value={subject} aria-invalid={errors.subject ? true : undefined} onChange={(e) => setSubject(e.target.value)} />
       </Field>
       <Field id="s-details" label={<Trans>Details</Trans>} error={errors.details}>
-        <Textarea id="s-details" rows={4} dir="auto" maxLength={LIMITS.text} value={details} aria-invalid={errors.details ? true : undefined} onChange={(e) => setDetails(e.target.value)} />
+        <Textarea id="s-details" rows={4} dir="auto" maxLength={LIMITS.message} value={details} aria-invalid={errors.details ? true : undefined} onChange={(e) => setDetails(e.target.value)} />
       </Field>
       {formError && (
         <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">

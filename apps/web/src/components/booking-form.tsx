@@ -129,7 +129,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
     else if (checkIn && checkOut <= checkIn)
       next.out = t`The check-out date must be after the check-in date.`
     if (!name.trim()) next.name = t`Enter the guest's name.`
-    else next.name = tooLong(name, LIMITS.name)
+    else next.name = tooLong(name, LIMITS.guestName)
     if (!phone.trim()) next.phone = t`Enter the mobile number.`
     else if (!isE164(number))
       next.phone = t`Enter a valid mobile number, e.g. 501234567.`
@@ -140,7 +140,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
     if (price.trim() === "" || !(total >= 0))
       next.price = t`Enter the total price.`
     else next.price = tooLarge(total)
-    next.notes = tooLong(notes, LIMITS.text)
+    next.notes = tooLong(notes, LIMITS.longText)
     setErrors(next)
     setConflict(null)
     if (Object.values(next).some(Boolean)) return
@@ -289,7 +289,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
               <Input
                 id="b-name"
                 dir="auto"
-                maxLength={LIMITS.name}
+                maxLength={LIMITS.guestName}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 {...invalid("name", "b-name")}
@@ -374,7 +374,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
                 id="b-notes"
                 rows={3}
                 dir="auto"
-                maxLength={LIMITS.text}
+                maxLength={LIMITS.longText}
                 {...invalid("notes", "b-notes")}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}

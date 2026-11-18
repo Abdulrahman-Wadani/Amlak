@@ -37,7 +37,7 @@ export const listContentQuerySchema = z.object({
 export type ListContentQuery = z.infer<typeof listContentQuerySchema>;
 
 export const createContentSchema = z.object({
-	title: z.string().trim().min(1).max(LIMITS.name),
+	title: z.string().trim().min(1).max(LIMITS.title),
 	language: z.enum(LANGUAGES),
 	slug: slugField,
 	body: z.string().min(1).max(LIMITS.body),
@@ -47,7 +47,7 @@ export type CreateContentInput = z.infer<typeof createContentSchema>;
 
 /** Every field is optional. The language cannot change: each translation is its own page. */
 export const updateContentSchema = z.object({
-	title: z.string().trim().min(1).max(LIMITS.name).optional(),
+	title: z.string().trim().min(1).max(LIMITS.title).optional(),
 	slug: slugField.optional(),
 	body: z.string().min(1).max(LIMITS.body).optional(),
 	is_published: z.boolean().optional(),
