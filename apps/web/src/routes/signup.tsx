@@ -2,17 +2,19 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { type SubmitEvent, useEffect, useState } from "react"
 import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
-import { signUpInput } from "@/lib/validators"
+import { CircleAlert, TriangleAlert } from "lucide-react"
 import { useAuth } from "@/lib/auth"
+import type { Language } from "@amlak/shared"
 import { LANGUAGE_NAMES, useLanguage } from "@/lib/i18n"
-import { errorMessage } from "@/lib/errors"
-import { AuthBrandPanel } from "@/components/auth-brand-panel"
+import { ApiError, errorMessage } from "@/lib/errors"
+import { AuthCard, AuthLayout } from "@/components/auth-layout"
 import { EmailVerifyPanel } from "@/components/email-verify-panel"
-import { Alert, AlertTitle } from "@/components/ui/alert"
+import { PasswordInput, PasswordRules, passwordOk } from "@/components/password-field"
+import { Field, Segmented } from "@/components/panel"
+import { toE164 } from "@/components/worker-form"
 import { Button } from "@/components/ui/button"
-import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { codeError } from "@/routes/verify"
 
 export const Route = createFileRoute("/signup")({
   component: SignUp,
@@ -20,19 +22,7 @@ export const Route = createFileRoute("/signup")({
 
 type FieldKey = "fullname" | "email" | "phone" | "password"
 
-function validationMessage(key: FieldKey): string {
-  switch (key) {
-    case "fullname":
-      return t`Enter your full name`
-    case "email":
-      return t`Enter a valid email`
-    case "phone":
-      return t`Enter a valid phone number`
-    case "password":
-      return t`Password does not meet the requirements`
-  }
-}
-
+/** Create a manager account, then check the email for the code. */
 function SignUp() {
   const { lang, setLang } = useLanguage()
   const [fullname, setFullname] = useState("")
@@ -50,237 +40,152 @@ function SignUp() {
 
   useEffect(() => {
     if (step !== "verify") return
-    const timer = setInterval(() => {
-      setCooldown((s) => (s > 0 ? s - 1 : 0))
-    }, 1000)
+    const timer = setInterval(() => setCooldown((s) => (s > 0 ? s - 1 : 0)), 1000)
     return () => clearInterval(timer)
   }, [step])
 
-  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
+  function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
-    const result = signUpInput.safeParse({ fullname, email, phone, password })
-    if (!result.success) {
-      const map: Partial<Record<FieldKey, string>> = {}
-      for (const issue of result.error.issues) {
-        const key = issue.path[0] as FieldKey
-        if (!map[key]) map[key] = validationMessage(key)
-      }
-      setErrors(map)
-      return
-    }
-    setErrors({})
+    const number = toE164(phone.trim())
+    const next: Partial<Record<FieldKey, string>> = {}
+    if (!fullname.trim()) next.fullname = t`Enter your full name`
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) next.email = t`Enter a valid email`
+    if (!/^\+9665[013-9]\d{7}$/.test(number)) next.phone = t`Enter a Saudi mobile number that starts with 5.`
+    if (!passwordOk(password)) next.password = t`Password does not meet the requirements`
+    setErrors(next)
+    if (Object.keys(next).length > 0) return
     setFormError("")
     setLoading(true)
-    register(email, fullname, phone, password, lang)
+    register(email.trim(), fullname.trim(), number, password, lang)
       .then(() => {
         setStep("verify")
         setCooldown(60)
       })
       .catch((err: unknown) => {
-        setFormError(errorMessage(err))
+        // Registering can only clash on the email.
+        if (err instanceof ApiError && err.code === "CONFLICT") {
+          setErrors({ email: t`This email is already registered. Sign in or reset your password.` })
+        } else {
+          setFormError(errorMessage(err))
+        }
       })
-      .finally(() => {
-        setLoading(false)
-      })
+      .finally(() => setLoading(false))
   }
 
   function handleVerify(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     setFormError("")
     setLoading(true)
-    verifyCode(email, code)
-      .then(() => login(email, password))
+    verifyCode(email.trim(), code)
+      .then(() => login(email.trim(), password))
       .then(() => {
         void navigate({ to: "/home" })
       })
-      .catch((err: unknown) => {
-        setFormError(errorMessage(err))
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+      .catch((err: unknown) => setFormError(codeError(err)))
+      .finally(() => setLoading(false))
   }
 
-  function handleResend() {
-    setFormError("")
-    resendCode(email)
-      .then(() => setCooldown(60))
-      .catch((err: unknown) => {
-        setFormError(errorMessage(err))
-      })
+  if (step === "verify") {
+    return (
+      <AuthLayout>
+        <EmailVerifyPanel
+          email={email}
+          code={code}
+          onCodeChange={setCode}
+          cooldown={cooldown}
+          loading={loading}
+          formError={formError}
+          onSubmit={handleVerify}
+          onResend={() => {
+            setFormError("")
+            resendCode(email.trim())
+              .then(() => setCooldown(60))
+              .catch((err: unknown) => setFormError(codeError(err)))
+          }}
+          onChangeEmail={() => {
+            setFormError("")
+            setCode("")
+            setStep("register")
+          }}
+        />
+      </AuthLayout>
+    )
   }
+
+  const invalid = (key: FieldKey, id: string) =>
+    errors[key] ? { "aria-invalid": true as const, "aria-describedby": `${id}-error` } : {}
+  const errorLine = (text?: string) =>
+    text && (
+      <span className="inline-flex items-start gap-1.5">
+        <TriangleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" strokeWidth={1.8} />
+        {text}
+      </span>
+    )
 
   return (
-    <div className="grid min-h-screen bg-background lg:grid-cols-2">
-      <AuthBrandPanel />
-
-      <main className="flex items-center justify-center px-6 py-10">
-        <div className="w-full max-w-[360px]">
-          {step === "verify" ? (
-            <EmailVerifyPanel
-              email={email}
-              code={code}
-              onCodeChange={setCode}
-              cooldown={cooldown}
-              loading={loading}
-              formError={formError}
-              onSubmit={handleVerify}
-              onResend={handleResend}
-              onChangeEmail={() => setStep("register")}
+    <AuthLayout>
+      <AuthCard
+        title={<Trans>Create a manager account</Trans>}
+        subtitle={<Trans>We will send a verification code to your email after you register.</Trans>}
+      >
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+          <Field id="fullname" label={<Trans>Full name</Trans>} error={errors.fullname}>
+            <Input id="fullname" autoComplete="name" value={fullname} onChange={(e) => setFullname(e.target.value)} disabled={loading} {...invalid("fullname", "fullname")} />
+          </Field>
+          <Field id="email" label={<Trans>Email</Trans>} error={errorLine(errors.email)}>
+            <Input id="email" type="email" dir="ltr" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} {...invalid("email", "email")} />
+          </Field>
+          <Field id="phone" label={<Trans>Mobile number</Trans>} hint={<Trans>Saudi mobile starting with 5</Trans>} error={errors.phone}>
+            <div dir="ltr" className="flex gap-2">
+              <span className="box-border inline-flex h-11 flex-none items-center border border-border bg-secondary px-3 text-[15px]">+966</span>
+              <Input id="phone" type="tel" dir="ltr" autoComplete="tel-national" value={phone} onChange={(e) => setPhone(e.target.value)} disabled={loading} {...invalid("phone", "phone")} />
+            </div>
+          </Field>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="password" className="text-sm font-semibold">
+              <Trans>Password</Trans>
+            </label>
+            <PasswordInput id="password" value={password} onChange={setPassword} invalid={Boolean(errors.password)} disabled={loading} describedBy="password-rules" />
+            <PasswordRules id="password-rules" value={password} />
+            {errors.password && (
+              <span role="alert" className="text-[13px] text-destructive">
+                {errors.password}
+              </span>
+            )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-semibold">
+              <Trans>Account language</Trans>
+            </span>
+            <Segmented<Language>
+              label={t`Account language`}
+              value={lang}
+              onChange={setLang}
+              options={[
+                { key: "ar", label: <span lang="ar">{LANGUAGE_NAMES.ar}</span> },
+                { key: "en", label: <span lang="en">{LANGUAGE_NAMES.en}</span> },
+              ]}
             />
-          ) : (
-            <form onSubmit={handleSubmit} noValidate>
-              <h1 className="text-[28px] font-bold leading-9">
-                <Trans>Create manager account</Trans>
-              </h1>
-              <p className="mt-1 text-[15px] leading-6 text-muted-foreground">
-                <Trans>Enter your details to create your account.</Trans>
-              </p>
-
-              <div className="mt-8 flex flex-col gap-5">
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="fullname" className="text-sm font-semibold">
-                    <Trans>Full name</Trans>
-                  </Label>
-                  <Input
-                    id="fullname"
-                    placeholder={t`Ahmed Hamad`}
-                    className="h-11 rounded-none bg-card"
-                    value={fullname}
-                    onChange={(e) => setFullname(e.target.value)}
-                    disabled={loading}
-                  />
-                  <FieldError errors={[{ message: errors.fullname }]} />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="email" className="text-sm font-semibold">
-                    <Trans>Email</Trans>
-                  </Label>
-                  <Input
-                    id="email"
-                    dir="ltr"
-                    type="email"
-                    placeholder="name@example.com"
-                    className="h-11 rounded-none bg-card"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={loading}
-                  />
-                  <FieldError errors={[{ message: errors.email }]} />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="phone" className="text-sm font-semibold">
-                    <Trans>Phone number</Trans>
-                  </Label>
-                  <Input
-                    id="phone"
-                    dir="ltr"
-                    type="tel"
-                    placeholder="+966512345678"
-                    className="h-11 rounded-none bg-card"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    disabled={loading}
-                  />
-                  <FieldError errors={[{ message: errors.phone }]} />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="password" className="text-sm font-semibold">
-                    <Trans>Password</Trans>
-                  </Label>
-                  <Input
-                    id="password"
-                    dir="ltr"
-                    type="password"
-                    className="h-11 rounded-none bg-card"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    disabled={loading}
-                  />
-                  <ul className="flex flex-col gap-1 text-[13px] leading-5 text-muted-foreground">
-                    <li className="flex items-center gap-1.5">
-                      <span className="h-1 w-1 bg-muted-foreground" />
-                      <Trans>At least 8 characters</Trans>
-                    </li>
-                    <li className="flex items-center gap-1.5">
-                      <span className="h-1 w-1 bg-muted-foreground" />
-                      <Trans>One uppercase letter (A-Z)</Trans>
-                    </li>
-                    <li className="flex items-center gap-1.5">
-                      <span className="h-1 w-1 bg-muted-foreground" />
-                      <Trans>One lowercase letter (a-z)</Trans>
-                    </li>
-                    <li className="flex items-center gap-1.5">
-                      <span className="h-1 w-1 bg-muted-foreground" />
-                      <Trans>One symbol (like ! or @)</Trans>
-                    </li>
-                  </ul>
-                  <FieldError errors={[{ message: errors.password }]} />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <span className="text-sm font-semibold">
-                    <Trans>Account language</Trans>
-                  </span>
-                  <div className="grid grid-cols-2">
-                    <button
-                      type="button"
-                      onClick={() => setLang("ar")}
-                      aria-pressed={lang === "ar"}
-                      className={
-                        lang === "ar"
-                          ? "h-11 border border-info-700 bg-info-50 font-bold text-info-900"
-                          : "h-11 border border-input bg-card text-muted-foreground hover:bg-secondary"
-                      }
-                    >
-                      {LANGUAGE_NAMES.ar}
-                    </button>
-                    <button
-                      type="button"
-                      dir="ltr"
-                      onClick={() => setLang("en")}
-                      aria-pressed={lang === "en"}
-                      className={
-                        lang === "en"
-                          ? "-ms-px h-11 border border-info-700 bg-info-50 font-bold text-info-900"
-                          : "-ms-px h-11 border border-input bg-card text-muted-foreground hover:bg-secondary"
-                      }
-                    >
-                      {LANGUAGE_NAMES.en}
-                    </button>
-                  </div>
-                </div>
-
-                {formError && (
-                  <Alert variant="destructive" className="rounded-none">
-                    <AlertTitle className="font-bold">{formError}</AlertTitle>
-                  </Alert>
-                )}
-
-                <Button
-                  type="submit"
-                  className="h-11 rounded-none bg-info-700 font-bold text-white hover:bg-info-900"
-                  disabled={loading}
-                >
-                  {loading ? <Trans>Creating account…</Trans> : <Trans>Create account</Trans>}
-                </Button>
-              </div>
-            </form>
+          </div>
+          {formError && (
+            <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">
+              <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+              {formError}
+            </p>
           )}
-
-          <p className="mt-6 text-[13px] text-muted-foreground">
-            <Trans>
-              Already have an account?{" "}
-              <Link to="/signin" className="font-bold text-foreground underline">
-                Sign in
-              </Link>
-            </Trans>
-          </p>
-        </div>
-      </main>
-    </div>
+          <Button type="submit" className="h-12" disabled={loading}>
+            {loading ? <Trans>Creating account…</Trans> : <Trans>Create account</Trans>}
+          </Button>
+        </form>
+        <p className="m-0 text-center text-muted-foreground">
+          <Trans>
+            Already have an account?{" "}
+            <Link to="/signin" className="inline-flex min-h-11 items-center font-semibold text-foreground underline underline-offset-4">
+              Sign in
+            </Link>
+          </Trans>
+        </p>
+      </AuthCard>
+    </AuthLayout>
   )
 }

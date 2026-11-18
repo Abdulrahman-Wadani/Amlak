@@ -15,6 +15,14 @@ msgstr ""
 msgid ", "
 msgstr "، "
 
+#: src/components/password-field.tsx:73
+msgid ", done"
+msgstr "، تم"
+
+#: src/components/password-field.tsx:73
+msgid ", not yet"
+msgstr "، لم يتحقق بعد"
+
 #: src/routes/_authenticated/tickets.tsx:274
 msgid "“My reports” shows the reports you sent and their status, with photos and no costs."
 msgstr "«بلاغاتي» تعرض البلاغات التي أرسلتها وحالتها، بالصور ومن دون أي تكاليف."
@@ -175,14 +183,28 @@ msgstr "3 أشهر"
 msgid "6 months"
 msgstr "6 أشهر"
 
+#: src/components/password-field.tsx:56
+msgid "8 characters or more"
+msgstr "8 أحرف على الأقل"
+
 #. Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ
 #. Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ
 #: src/components/app-shell.tsx:60
-#: src/components/auth-brand-panel.tsx:8
+#: src/components/auth-layout.tsx:81
 msgid "A"
 msgstr "أ"
 
+#: src/routes/_authenticated/profile.tsx:161
+msgid "A square JPG or PNG photo."
+msgstr "صورة مربعة بصيغة JPG أو PNG."
+
+#: src/components/password-field.tsx:59
+msgid "A symbol such as ! or @"
+msgstr "رمز مثل ! أو @"
+
 #: src/lib/nav.tsx:179
+#: src/routes/_authenticated/profile.tsx:105
+#: src/routes/_authenticated/profile.tsx:116
 msgid "Account"
 msgstr "حسابي"
 
@@ -194,17 +216,14 @@ msgstr "تاريخ إنشاء الحساب"
 msgid "Account information"
 msgstr "معلومات الحساب"
 
-#: src/routes/signup.tsx:226
+#: src/routes/signup.tsx:158
+#: src/routes/signup.tsx:161
 msgid "Account language"
 msgstr "لغة الحساب"
 
 #: src/components/worker-form.tsx:217
 #: src/routes/_authenticated/admin/$admin_id.tsx:369
 msgid "Account status"
-msgstr "حالة الحساب"
-
-#: src/routes/_authenticated/profile.tsx:104
-msgid "Account Status"
 msgstr "حالة الحساب"
 
 #: src/components/app-shell.tsx:106
@@ -215,13 +234,13 @@ msgstr "حسابي، {name}، {roleName}"
 msgid "Accounts of the workers who work in your places."
 msgstr "حسابات العمّال الذين يعملون في عقاراتك."
 
-#: src/routes/account-setup.tsx:33
-msgid "Activate Account"
+#: src/routes/account-setup.tsx:91
+msgid "Activate account"
 msgstr "تفعيل الحساب"
 
-#: src/routes/account-setup.tsx:34
-msgid "Activating Account..."
-msgstr "جارٍ تفعيل الحساب..."
+#: src/routes/account-setup.tsx:91
+msgid "Activating…"
+msgstr "جارٍ التفعيل…"
 
 #: src/components/home-parts.tsx:139
 #: src/components/place-form.tsx:52
@@ -230,7 +249,6 @@ msgstr "جارٍ تفعيل الحساب..."
 #: src/routes/_authenticated/admin/$admin_id.tsx:382
 #: src/routes/_authenticated/admin/index.tsx:34
 #: src/routes/_authenticated/places.tsx:27
-#: src/routes/_authenticated/profile.tsx:115
 #: src/routes/_authenticated/workers.tsx:25
 msgid "Active"
 msgstr "نشط"
@@ -320,7 +338,6 @@ msgstr "العنوان"
 #: src/lib/nav.tsx:211
 #: src/routes/_authenticated/admin/$admin_id.tsx:363
 #: src/routes/_authenticated/announcements.tsx:236
-#: src/routes/_authenticated/profile.tsx:119
 msgid "Admin"
 msgstr "أدمن"
 
@@ -331,10 +348,6 @@ msgstr "بعد الحفظ"
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:261
 msgid "After the repair"
 msgstr "بعد الإصلاح"
-
-#: src/routes/signup.tsx:147
-msgid "Ahmed Hamad"
-msgstr "أحمد حمد"
 
 #: src/components/tickets-section.tsx:88
 #: src/routes/_authenticated/admin/index.tsx:33
@@ -370,13 +383,10 @@ msgstr "كل العقارات ({0})"
 msgid "All your active workers are already assigned to this place."
 msgstr "كل عمّالك النشطين معيّنون على هذا العقار."
 
-#: src/components/auth-brand-panel.tsx:18
-msgid "All your places, their\n"
-"maintenance and bookings,\n"
-"in one place."
-msgstr "كل عقاراتك وصيانتها\n"
-"وحجوزاتها في مكان\n"
-"واحد."
+#: src/components/auth-layout.tsx:31
+#: src/components/auth-layout.tsx:64
+msgid "All your places, their maintenance and bookings in one place."
+msgstr "كل عقاراتك وصيانتها وحجوزاتها في مكان واحد."
 
 #: src/components/location-permission.tsx:64
 msgid "Allow camera"
@@ -386,13 +396,13 @@ msgstr "السماح بالكاميرا"
 msgid "Allow location"
 msgstr "السماح بالموقع"
 
-#: src/routes/signup.tsx:275
+#: src/routes/signup.tsx:181
 msgid "Already have an account? <0>Sign in</0>"
 msgstr "لديك حساب بالفعل؟ <0>دخول</0>"
 
 #. Brand wordmark, Latin letters only in English
 #: src/components/app-shell.tsx:83
-#: src/components/auth-brand-panel.tsx:13
+#: src/components/auth-layout.tsx:84
 #: src/lib/i18n.tsx:40
 #: src/routes/p/$lang/$slug.tsx:51
 msgid "Amlak"
@@ -467,6 +477,10 @@ msgstr "اعتمد التذكرة."
 msgid "Arabic"
 msgstr "العربية"
 
+#: src/routes/account-setup.tsx:66
+msgid "Ask your manager to send a new invitation."
+msgstr "اطلب من مديرك إرسال دعوة جديدة."
+
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:50
 #: src/routes/_authenticated/place/asset/edit/$asset_id.tsx:43
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:203
@@ -531,14 +545,6 @@ msgstr "المكلّف"
 msgid "Assigning…"
 msgstr "جارٍ التعيين…"
 
-#: src/routes/signup.tsx:206
-msgid "At least 8 characters"
-msgstr "8 أحرف على الأقل"
-
-#: src/routes/reset-password.tsx:240
-msgid "At least 8 characters."
-msgstr "8 أحرف على الأقل."
-
 #: src/components/page.tsx:152
 #: src/components/page.tsx:156
 #: src/components/place-bookings.tsx:637
@@ -548,10 +554,9 @@ msgstr "8 أحرف على الأقل."
 msgid "Back"
 msgstr "رجوع"
 
-#: src/routes/forgot-password.tsx:189
-#: src/routes/reset-password.tsx:319
-msgid "Back to Login"
-msgstr "العودة إلى تسجيل الدخول"
+#: src/routes/forgot-password.tsx:58
+msgid "Back to sign in"
+msgstr "العودة لتسجيل الدخول"
 
 #: src/routes/_authenticated/support/$support_id.tsx:209
 #: src/routes/_authenticated/support/$support_id.tsx:484
@@ -617,7 +622,7 @@ msgstr "حسب الدور"
 #: src/components/states.tsx:183
 #: src/components/worker-form.tsx:198
 #: src/routes/_authenticated/booking/new.tsx:263
-#: src/routes/_authenticated/profile.tsx:95
+#: src/routes/_authenticated/profile.tsx:150
 #: src/routes/_authenticated/support/$support_id.tsx:370
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:544
 #: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:146
@@ -658,9 +663,13 @@ msgstr "التصنيف"
 msgid "Chalet"
 msgstr "شاليه"
 
-#: src/components/email-verify-panel.tsx:104
+#: src/components/email-verify-panel.tsx:153
 msgid "Change email"
 msgstr "تغيير البريد الإلكتروني"
+
+#: src/routes/_authenticated/profile.tsx:158
+msgid "Change photo"
+msgstr "تغيير الصورة"
 
 #: src/components/place-bookings.tsx:438
 msgid "Check in"
@@ -694,9 +703,13 @@ msgstr "تسجيل مغادرة الضيف؟"
 msgid "Check your connection, then try again."
 msgstr "تحقّق من اتصالك ثم أعد المحاولة."
 
-#: src/routes/forgot-password.tsx:99
+#: src/components/email-verify-panel.tsx:96
 msgid "Check your email"
 msgstr "تحقق من بريدك الإلكتروني"
+
+#: src/routes/signin.tsx:114
+msgid "Check your password and try again"
+msgstr "تحقق من كلمة المرور وحاول مرة أخرى"
 
 #: src/components/place-bookings.tsx:551
 #: src/lib/errors.ts:130
@@ -756,6 +769,10 @@ msgstr "تم تسجيل المغادرة"
 msgid "Checked out {0}."
 msgstr "غادر {0}."
 
+#: src/components/email-verify-panel.tsx:124
+msgid "Checking…"
+msgstr "جارٍ التحقق…"
+
 #: src/components/place-form.tsx:259
 msgid "Choose “Location”, then “Allow”."
 msgstr "اختر «الموقع» ثم «السماح»."
@@ -768,13 +785,17 @@ msgstr "اختر «بدون أصل محدد» إذا كان العطل عامً�
 msgid "Choose a check-out date after the check-in date"
 msgstr "اختر تاريخ مغادرة بعد تاريخ الوصول"
 
+#: src/routes/account-setup.tsx:75
+msgid "Choose a password"
+msgstr "اختر كلمة مرور"
+
+#: src/routes/account-setup.tsx:63
+msgid "Choose a password to activate your account."
+msgstr "اختر كلمة مرور لتفعيل حسابك."
+
 #: src/routes/_authenticated/place/$place_id.tsx:441
 msgid "Choose a worker"
 msgstr "اختر عاملًا"
-
-#: src/routes/_authenticated/profile.tsx:97
-msgid "Choose Image"
-msgstr "اختر صورة"
 
 #: src/components/place-bookings.tsx:90
 msgid "Choose the check-in date"
@@ -879,16 +900,8 @@ msgstr "تأكيد المغادرة"
 msgid "Confirm completion"
 msgstr "تأكيد الإكمال"
 
-#: src/components/email-verify-panel.tsx:77
-msgid "Confirm email"
-msgstr "تأكيد البريد"
-
-#: src/routes/reset-password.tsx:249
-msgid "Confirm New Password"
-msgstr "تأكيد كلمة المرور الجديدة"
-
-#: src/routes/account-setup.tsx:30
-msgid "Confirm Password"
+#: src/routes/reset-password.tsx:100
+msgid "Confirm password"
 msgstr "تأكيد كلمة المرور"
 
 #: src/routes/_authenticated/support/$support_id.tsx:358
@@ -899,10 +912,6 @@ msgstr "تأكيد الحل"
 msgid "Confirmed"
 msgstr "مؤكد"
 
-#: src/components/email-verify-panel.tsx:77
-msgid "Confirming…"
-msgstr "جارٍ التأكيد…"
-
 #. placeholder {0}: conflict.guest_name
 #. placeholder {1}: stay(conflict, false)
 #: src/routes/_authenticated/booking/new.tsx:169
@@ -912,6 +921,10 @@ msgstr "يتعارض مع حجز {0} ({1})."
 #: src/routes/_authenticated/booking/new.tsx:135
 msgid "Conflicts with another booking"
 msgstr "يتعارض مع حجز آخر"
+
+#: src/routes/signin.tsx:65
+msgid "Contact your manager or support to reactivate it."
+msgstr "تواصل مع مديرك أو مع الدعم لإعادة تفعيله."
 
 #: src/lib/nav.tsx:191
 #: src/routes/_authenticated/content/index.tsx:136
@@ -981,6 +994,10 @@ msgstr "تعذّر تحميل التذاكر"
 msgid "Could not load workers"
 msgstr "تعذّر تحميل العمّال"
 
+#: src/routes/_authenticated/profile.tsx:106
+msgid "Could not load your account"
+msgstr "تعذّر تحميل حسابك"
+
 #: src/components/user-support.tsx:104
 msgid "Could not load your requests"
 msgstr "تعذّر تحميل طلباتك"
@@ -989,21 +1006,17 @@ msgstr "تعذّر تحميل طلباتك"
 msgid "Could not save the booking. Please try again."
 msgstr "تعذّر حفظ الحجز. حاول مرة أخرى."
 
-#: src/routes/reset-password.tsx:149
-msgid "Create a new password for your account. Your password must be at least 8 characters long."
-msgstr "أنشئ كلمة مرور جديدة لحسابك. يجب ألا يقل طول كلمة المرور عن 8 أحرف."
+#: src/routes/signup.tsx:128
+msgid "Create a manager account"
+msgstr "أنشئ حساب مدير"
 
-#: src/routes/signup.tsx:268
+#: src/routes/signup.tsx:177
 msgid "Create account"
 msgstr "إنشاء الحساب"
 
 #: src/routes/_authenticated/announcements.tsx:162
 msgid "Create announcement"
 msgstr "إنشاء إعلان"
-
-#: src/routes/signup.tsx:134
-msgid "Create manager account"
-msgstr "إنشاء حساب مدير"
 
 #: src/components/asset-schedules.tsx:300
 msgid "Create the ticket this many days before"
@@ -1018,15 +1031,11 @@ msgstr "ابدأ بإنشاء أول صفحة محتوى."
 msgid "Created"
 msgstr "تاريخ الإنشاء"
 
-#: src/routes/_authenticated/profile.tsx:106
-msgid "Created At"
-msgstr "تاريخ الإنشاء"
-
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:158
 msgid "created the ticket."
 msgstr "أنشأ التذكرة."
 
-#: src/routes/signup.tsx:268
+#: src/routes/signup.tsx:177
 msgid "Creating account…"
 msgstr "جارٍ إنشاء الحساب…"
 
@@ -1081,7 +1090,6 @@ msgstr "إيقاف {0}"
 #: src/components/place-shared.tsx:195
 #: src/routes/_authenticated/admin/$admin_id.tsx:383
 #: src/routes/_authenticated/admin/index.tsx:37
-#: src/routes/_authenticated/profile.tsx:118
 #: src/routes/_authenticated/workers.tsx:27
 msgid "Deactivated"
 msgstr "غير نشط"
@@ -1182,13 +1190,18 @@ msgstr "الوصف"
 msgid "Details"
 msgstr "التفاصيل"
 
-#: src/components/email-verify-panel.tsx:81
-msgid "Didn't get the code?"
+#: src/components/email-verify-panel.tsx:140
+msgid "Didn’t get the code?"
 msgstr "لم يصلك الرمز؟"
 
-#: src/routes/signin.tsx:140
-msgid "Don't have an account? <0>Create manager account</0>"
-msgstr "ليس لديك حساب؟ <0>إنشاء حساب مدير</0>"
+#: src/components/email-verify-panel.tsx:130
+msgid "Didn’t get the code? You can request a new one in <0>{time}</0>"
+msgstr "لم يصلك الرمز؟ يمكنك طلب رمز جديد بعد <0>{time}</0>"
+
+#. placeholder {0}: index + 1
+#: src/components/email-verify-panel.tsx:50
+msgid "Digit {0}"
+msgstr "الرقم {0}"
 
 #: src/routes/_authenticated/content/$content_id.tsx:293
 #: src/routes/_authenticated/content/index.tsx:366
@@ -1243,10 +1256,6 @@ msgstr "تعديل الأصل"
 msgid "Edit expense"
 msgstr "تعديل المصروف"
 
-#: src/routes/_authenticated/profile.tsx:110
-msgid "Edit Personal Information"
-msgstr "تعديل المعلومات الشخصية"
-
 #: src/routes/_authenticated/place/edit/$place_id.tsx:35
 msgid "Edit place"
 msgstr "تعديل العقار"
@@ -1255,16 +1264,13 @@ msgstr "تعديل العقار"
 #: src/lib/errors.ts:68
 #: src/routes/_authenticated/admin/$admin_id.tsx:299
 #: src/routes/_authenticated/booking/$booking_id.tsx:159
+#: src/routes/_authenticated/profile.tsx:197
 #: src/routes/_authenticated/support/$support_id.tsx:418
-#: src/routes/signin.tsx:77
-#: src/routes/signup.tsx:158
+#: src/routes/account-setup.tsx:70
+#: src/routes/forgot-password.tsx:92
+#: src/routes/signin.tsx:154
+#: src/routes/signup.tsx:135
 msgid "Email"
-msgstr "البريد الإلكتروني"
-
-#: src/routes/_authenticated/profile.tsx:102
-#: src/routes/account-setup.tsx:28
-#: src/routes/forgot-password.tsx:129
-msgid "Email Address"
 msgstr "البريد الإلكتروني"
 
 #: src/routes/_authenticated/admin/$admin_id.tsx:411
@@ -1274,10 +1280,6 @@ msgstr "تأكيد البريد الإلكتروني"
 #: src/routes/_authenticated/admin/$admin_id.tsx:493
 msgid "Email verification"
 msgstr "حالة التحقق من البريد"
-
-#: src/routes/_authenticated/profile.tsx:105
-msgid "Email Verified At"
-msgstr "تاريخ تأكيد البريد الإلكتروني"
 
 #: src/routes/_authenticated/announcements.tsx:279
 #: src/routes/_authenticated/content/$content_id.tsx:369
@@ -1291,13 +1293,19 @@ msgstr "الإنجليزية"
 msgid "Enter a description."
 msgstr "اكتب الوصف."
 
+#: src/routes/_authenticated/profile.tsx:91
+#: src/routes/signup.tsx:53
+msgid "Enter a Saudi mobile number that starts with 5."
+msgstr "أدخل رقم جوال سعوديًا يبدأ بـ 5."
+
 #: src/components/asset-form.tsx:60
 #: src/components/asset-manage.tsx:30
 msgid "Enter a type"
 msgstr "أدخل النوع"
 
-#: src/routes/signin.tsx:39
-#: src/routes/signup.tsx:28
+#: src/routes/forgot-password.tsx:35
+#: src/routes/signin.tsx:97
+#: src/routes/signup.tsx:52
 msgid "Enter a valid email"
 msgstr "أدخل بريدًا إلكترونيًا صحيحًا"
 
@@ -1314,10 +1322,6 @@ msgstr "أدخل عنوان بريد إلكتروني صالحًا."
 #: src/routes/_authenticated/booking/new.tsx:108
 msgid "Enter a valid mobile number, e.g. 501234567."
 msgstr "أدخل رقم جوال صحيحًا، مثل 501234567."
-
-#: src/routes/signup.tsx:30
-msgid "Enter a valid phone number"
-msgstr "أدخل رقم جوال صحيحًا"
 
 #: src/components/asset-schedules.tsx:223
 msgid "Enter a whole number from 0 to 60."
@@ -1345,10 +1349,6 @@ msgstr "أدخل اسم الأصل"
 msgid "Enter at least one user ID."
 msgstr "أدخل معرف مستخدم واحدًا على الأقل."
 
-#: src/routes/_authenticated/profile.tsx:113
-msgid "Enter phone number"
-msgstr "أدخل رقم الهاتف"
-
 #: src/components/expense-form.tsx:85
 msgid "Enter the amount, like 640 or 640.50."
 msgstr "أدخل المبلغ، مثل 640 أو 640.50."
@@ -1356,6 +1356,10 @@ msgstr "أدخل المبلغ، مثل 640 أو 640.50."
 #: src/components/place-form.tsx:150
 msgid "Enter the city."
 msgstr "اكتب المدينة."
+
+#: src/routes/signin.tsx:149
+msgid "Enter the code"
+msgstr "إدخال الرمز"
 
 #: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:66
 msgid "Enter the cost as a number, like 320 or 320.50."
@@ -1398,24 +1402,20 @@ msgstr "أدخل السعر الإجمالي."
 msgid "Enter the worker's full name."
 msgstr "اكتب الاسم الكامل للعامل."
 
-#: src/routes/signup.tsx:137
-msgid "Enter your details to create your account."
-msgstr "أدخل بياناتك لإنشاء حسابك."
-
-#: src/routes/forgot-password.tsx:85
-msgid "Enter your email address and we will send you a link to reset your password."
-msgstr "أدخل بريدك الإلكتروني وسنرسل إليك رابطًا لإعادة تعيين كلمة المرور."
-
-#: src/routes/signin.tsx:71
+#: src/routes/signin.tsx:123
 msgid "Enter your email and password to continue."
 msgstr "أدخل بريدك وكلمة المرور للمتابعة."
 
-#: src/routes/_authenticated/profile.tsx:112
-#: src/routes/signup.tsx:26
+#: src/routes/forgot-password.tsx:88
+msgid "Enter your email and we will send you a link to set a new password."
+msgstr "اكتب بريدك وسنرسل لك رابطًا لتعيين كلمة مرور جديدة."
+
+#: src/routes/_authenticated/profile.tsx:90
+#: src/routes/signup.tsx:51
 msgid "Enter your full name"
 msgstr "أدخل اسمك الكامل"
 
-#: src/routes/account-setup.tsx:31
+#: src/routes/signin.tsx:97
 msgid "Enter your password"
 msgstr "أدخل كلمة المرور"
 
@@ -1460,10 +1460,6 @@ msgstr "تظهر هنا المصروفات التي تضيفها لهذا الش
 msgid "Failed to load notifications."
 msgstr "فشل تحميل الإشعارات."
 
-#: src/routes/_authenticated/profile.tsx:87
-msgid "Failed to load profile."
-msgstr "تعذر تحميل الملف الشخصي."
-
 #: src/routes/_authenticated/announcements.tsx:331
 msgid "Failed to send announcement."
 msgstr "فشل إرسال الإعلان."
@@ -1471,10 +1467,6 @@ msgstr "فشل إرسال الإعلان."
 #: src/routes/_authenticated/notifications.tsx:283
 msgid "Failed to update notification."
 msgstr "فشل تحديث الإشعار."
-
-#: src/routes/_authenticated/profile.tsx:88
-msgid "Failed to update profile."
-msgstr "تعذر تحديث الملف الشخصي."
 
 #: src/routes/_authenticated/content/$content_id.tsx:103
 msgid "Fill in all the required fields."
@@ -1531,17 +1523,21 @@ msgstr "أول موعد"
 msgid "For a clearer report"
 msgstr "لبلاغ أوضح"
 
-#: src/components/auth-brand-panel.tsx:21
-msgid "For managers and workers. On mobile and desktop."
-msgstr "للمدراء والعاملين، على الجوال وسطح المكتب."
+#: src/routes/reset-password.tsx:68
+msgid "For account <0>{email}</0>"
+msgstr "لحساب <0>{email}</0>"
 
-#: src/routes/signin.tsx:101
+#: src/components/auth-layout.tsx:67
+msgid "For managers and workers, on phone and desktop."
+msgstr "للمدراء والعمّال، على الجوال وسطح المكتب."
+
+#: src/routes/forgot-password.tsx:87
+msgid "Forgot password"
+msgstr "نسيت كلمة المرور"
+
+#: src/routes/signin.tsx:176
 msgid "Forgot password?"
 msgstr "نسيت كلمة المرور؟"
-
-#: src/routes/forgot-password.tsx:81
-msgid "Forgot Password?"
-msgstr "هل نسيت كلمة المرور؟"
 
 #: src/routes/_authenticated/reports.tsx:165
 msgid "From"
@@ -1550,28 +1546,16 @@ msgstr "من تاريخ"
 #: src/components/worker-form.tsx:125
 #: src/lib/errors.ts:75
 #: src/routes/_authenticated/admin/$admin_id.tsx:290
+#: src/routes/_authenticated/profile.tsx:191
 #: src/routes/_authenticated/support/$support_id.tsx:413
 #: src/routes/_authenticated/support/$support_id.tsx:431
-#: src/routes/signup.tsx:143
+#: src/routes/signup.tsx:132
 msgid "Full name"
 msgstr "الاسم الكامل"
-
-#: src/routes/_authenticated/profile.tsx:98
-msgid "Full Name"
-msgstr "الاسم الكامل"
-
-#: src/routes/_authenticated/profile.tsx:91
-msgid "Full name is required."
-msgstr "الاسم الكامل مطلوب."
 
 #: src/components/location-picker.tsx:175
 msgid "Getting the address…"
 msgstr "جارٍ جلب العنوان…"
-
-#: src/routes/account-setup.tsx:42
-#: src/routes/reset-password.tsx:178
-msgid "Go to Login"
-msgstr "الانتقال إلى تسجيل الدخول"
 
 #: src/components/asset-manage.tsx:14
 #: src/components/place-shared.tsx:99
@@ -1637,9 +1621,8 @@ msgstr "دخول الضيوف اليوم"
 msgid "Hide details"
 msgstr "إخفاء التفاصيل"
 
-#: src/routes/reset-password.tsx:228
-#: src/routes/reset-password.tsx:273
-#: src/routes/signin.tsx:118
+#: src/components/password-field.tsx:42
+#: src/routes/signin.tsx:194
 msgid "Hide password"
 msgstr "إخفاء كلمة المرور"
 
@@ -1664,9 +1647,9 @@ msgstr "الرئيسية"
 msgid "How it will look in your list"
 msgstr "هكذا سيظهر في قائمتك"
 
-#: src/routes/forgot-password.tsx:103
-msgid "If an active account exists for this email address, you will receive a password reset link shortly."
-msgstr "إذا كان هناك حساب نشط مرتبط بهذا البريد الإلكتروني، فستتلقى رابط إعادة تعيين كلمة المرور قريبًا."
+#: src/routes/forgot-password.tsx:74
+msgid "If the email is registered with us, a message will arrive within minutes."
+msgstr "إذا كان البريد مسجّلًا عندنا ستصلك رسالة خلال دقائق."
 
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:509
 msgid "If you reject, we will ask for a reason and send it to {reporter}."
@@ -1675,10 +1658,6 @@ msgstr "عند الرفض سنطلب منك سبب الرفض ونرسله لـ{
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:511
 msgid "If you reject, we will ask for a reason and send it to the reporter."
 msgstr "عند الرفض سنطلب منك سبب الرفض ونرسله لمن أبلغ."
-
-#: src/routes/_authenticated/profile.tsx:90
-msgid "Image size must not exceed 5MB."
-msgstr "يجب ألا يتجاوز حجم الصورة 5 ميجابايت."
 
 #. placeholder {0}: currencyName(place.currency)
 #: src/components/expense-form.tsx:157
@@ -1720,6 +1699,11 @@ msgstr "الإيرادات"
 msgid "Income and expenses"
 msgstr "الدخل والمصروفات"
 
+#: src/routes/_authenticated/profile.tsx:241
+#: src/routes/_authenticated/profile.tsx:244
+msgid "Interface and message language"
+msgstr "لغة الواجهة والرسائل"
+
 #: src/routes/_authenticated/worker/new.tsx:15
 #: src/routes/_authenticated/workers.tsx:85
 #: src/routes/_authenticated/workers.tsx:89
@@ -1732,7 +1716,6 @@ msgstr "ادعُ أول عامل بزر دعوة عامل."
 
 #: src/components/place-shared.tsx:202
 #: src/routes/_authenticated/admin/index.tsx:35
-#: src/routes/_authenticated/profile.tsx:116
 #: src/routes/_authenticated/workers.tsx:26
 msgid "Invited"
 msgstr "مدعو"
@@ -1751,6 +1734,7 @@ msgstr "يُحفظ في سجل الحجز."
 
 #: src/lib/errors.ts:108
 #: src/routes/_authenticated/content/new.tsx:54
+#: src/routes/_authenticated/profile.tsx:237
 msgid "Language"
 msgstr "اللغة"
 
@@ -1758,10 +1742,6 @@ msgstr "اللغة"
 #: src/routes/_authenticated/content/$content_id.tsx:408
 #: src/routes/_authenticated/support/$support_id.tsx:264
 msgid "Last updated"
-msgstr "آخر تحديث"
-
-#: src/routes/_authenticated/profile.tsx:107
-msgid "Last Updated"
 msgstr "آخر تحديث"
 
 #: src/routes/_authenticated/content/index.tsx:376
@@ -1776,10 +1756,6 @@ msgstr "آخر المصروفات"
 msgid "Latitude"
 msgstr "خط العرض"
 
-#: src/routes/_authenticated/profile.tsx:114
-msgid "Leave empty to keep the current picture."
-msgstr "اترك الحقل فارغًا للاحتفاظ بالصورة الحالية."
-
 #. placeholder {0}: day(booking.check_out_date)
 #: src/routes/_authenticated/booking/$booking_id.tsx:209
 msgid "Leaves {0}."
@@ -1793,10 +1769,6 @@ msgstr "المتبقي من ميزانية العقار لهذا الشهر: {0}
 #: src/components/place-bookings.tsx:480
 msgid "Load more"
 msgstr "تحميل المزيد"
-
-#: src/routes/_authenticated/profile.tsx:86
-msgid "Loading..."
-msgstr "جارٍ التحميل..."
 
 #: src/components/states.tsx:52
 #: src/routes/_authenticated/ticket/new.tsx:135
@@ -1816,6 +1788,10 @@ msgstr "خط الطول"
 #: src/routes/_authenticated/ticket/new.tsx:193
 msgid "Low"
 msgstr "منخفضة"
+
+#: src/components/password-field.tsx:58
+msgid "Lowercase English letter"
+msgstr "حرف إنجليزي صغير"
 
 #: src/components/app-shell.tsx:76
 #: src/components/app-shell.tsx:131
@@ -1870,7 +1846,6 @@ msgstr "إدارة إشعاراتك ومتابعة آخر المستجدات."
 
 #: src/lib/nav.tsx:215
 #: src/routes/_authenticated/announcements.tsx:239
-#: src/routes/_authenticated/profile.tsx:120
 msgid "Manager"
 msgstr "مدير"
 
@@ -1913,6 +1888,8 @@ msgid "Message"
 msgstr "الرسالة"
 
 #: src/components/worker-form.tsx:146
+#: src/routes/_authenticated/profile.tsx:211
+#: src/routes/signup.tsx:138
 msgid "Mobile number"
 msgstr "رقم الجوال"
 
@@ -1946,10 +1923,6 @@ msgstr "مهامي المفتوحة"
 msgid "My places"
 msgstr "عقاراتي"
 
-#: src/routes/_authenticated/profile.tsx:108
-msgid "My Profile"
-msgstr "الملف الشخصي"
-
 #: src/routes/_authenticated/tickets.tsx:238
 msgid "My reports"
 msgstr "بلاغاتي"
@@ -1979,8 +1952,8 @@ msgstr "صافي الربح"
 msgid "New page"
 msgstr "إنشاء صفحة"
 
-#: src/routes/reset-password.tsx:206
-msgid "New Password"
+#: src/routes/reset-password.tsx:90
+msgid "New password"
 msgstr "كلمة المرور الجديدة"
 
 #: src/components/user-support.tsx:79
@@ -2006,6 +1979,10 @@ msgstr "الشهر التالي"
 #: src/routes/_authenticated/booking/$booking_id.tsx:154
 msgid "Nights"
 msgstr "الليالي"
+
+#: src/routes/signin.tsx:215
+msgid "No account? <0>Create a manager account</0>"
+msgstr "ليس لديك حساب؟ <0>إنشاء حساب مدير</0>"
 
 #: src/components/location-picker.tsx:109
 msgid "No address was found for this location."
@@ -2223,18 +2200,6 @@ msgstr "من هذا الجهاز."
 msgid "One close photo of the damage, and one from further back that shows where it is."
 msgstr "صورة قريبة للعطل، وصورة أبعد تُظهر مكانه."
 
-#: src/routes/signup.tsx:214
-msgid "One lowercase letter (a-z)"
-msgstr "حرف إنجليزي صغير (a-z)"
-
-#: src/routes/signup.tsx:218
-msgid "One symbol (like ! or @)"
-msgstr "رمز مثل ! أو @"
-
-#: src/routes/signup.tsx:210
-msgid "One uppercase letter (A-Z)"
-msgstr "حرف إنجليزي كبير (A-Z)"
-
 #: src/components/worker-form.tsx:300
 msgid "Only the places assigned to them and their assets."
 msgstr "العقارات المسندة إليه وأصولها فقط."
@@ -2262,6 +2227,10 @@ msgstr "فتح عقاراتي"
 msgid "Open my tasks"
 msgstr "فتح مهامي"
 
+#: src/routes/signin.tsx:58
+msgid "Open the invitation email and choose a password."
+msgstr "افتح رسالة الدعوة في بريدك واختر كلمة مرور."
+
 #: src/routes/_authenticated/expenses.tsx:200
 msgid "Open the receipt"
 msgstr "فتح الإيصال"
@@ -2271,10 +2240,6 @@ msgstr "فتح الإيصال"
 #: src/routes/_authenticated/places.tsx:36
 msgid "Open tickets"
 msgstr "تذاكر مفتوحة"
-
-#: src/components/email-verify-panel.tsx:32
-msgid "Open your email"
-msgstr "افتح بريدك الإلكتروني"
 
 #: src/routes/_authenticated/booking/new.tsx:232
 msgid "Optional"
@@ -2357,34 +2322,16 @@ msgid "Pages"
 msgstr "الصفحات"
 
 #: src/lib/errors.ts:70
-#: src/routes/account-setup.tsx:29
-#: src/routes/signin.tsx:95
-#: src/routes/signup.tsx:192
+#: src/routes/signin.tsx:170
+#: src/routes/signup.tsx:146
 msgid "Password"
 msgstr "كلمة المرور"
 
-#: src/routes/signin.tsx:40
-#: src/routes/signup.tsx:32
+#: src/routes/account-setup.tsx:35
+#: src/routes/reset-password.tsx:36
+#: src/routes/signup.tsx:54
 msgid "Password does not meet the requirements"
 msgstr "كلمة المرور لا تحقق الشروط"
-
-#: src/routes/account-setup.tsx:36
-msgid "Password is required."
-msgstr "كلمة المرور مطلوبة."
-
-#: src/routes/account-setup.tsx:37
-#: src/routes/reset-password.tsx:108
-msgid "Password must be at least 8 characters."
-msgstr "يجب ألا تقل كلمة المرور عن 8 أحرف."
-
-#: src/routes/reset-password.tsx:163
-msgid "Password Reset Successful"
-msgstr "تمت إعادة تعيين كلمة المرور بنجاح"
-
-#: src/routes/account-setup.tsx:38
-#: src/routes/reset-password.tsx:111
-msgid "Passwords do not match."
-msgstr "كلمتا المرور غير متطابقتين."
 
 #: src/components/place-shared.tsx:283
 #: src/routes/_authenticated/tickets.tsx:37
@@ -2393,10 +2340,6 @@ msgstr "بانتظار المراجعة"
 
 #: src/routes/_authenticated/admin/index.tsx:36
 msgid "Pending verification"
-msgstr "بانتظار التحقق"
-
-#: src/routes/_authenticated/profile.tsx:117
-msgid "Pending Verification"
 msgstr "بانتظار التحقق"
 
 #: src/routes/_authenticated/reports.tsx:133
@@ -2408,8 +2351,8 @@ msgstr "الفترة"
 msgid "Periodic maintenance"
 msgstr "الصيانة الدورية"
 
-#: src/routes/_authenticated/profile.tsx:111
-msgid "Personal Information"
+#: src/routes/_authenticated/profile.tsx:125
+msgid "Personal information"
 msgstr "المعلومات الشخصية"
 
 #: src/routes/_authenticated/booking/$booking_id.tsx:158
@@ -2419,12 +2362,7 @@ msgstr "الجوال"
 #: src/lib/errors.ts:73
 #: src/routes/_authenticated/admin/$admin_id.tsx:325
 #: src/routes/_authenticated/support/$support_id.tsx:424
-#: src/routes/signup.tsx:175
 msgid "Phone number"
-msgstr "رقم الجوال"
-
-#: src/routes/_authenticated/profile.tsx:99
-msgid "Phone Number"
 msgstr "رقم الجوال"
 
 #. placeholder {0}: index + 1
@@ -2439,6 +2377,10 @@ msgstr "تصوير بعد الإصلاح"
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:268
 msgid "Photo after repair {n}"
 msgstr "صورة بعد الإصلاح {n}"
+
+#: src/routes/_authenticated/profile.tsx:143
+msgid "Photo saved."
+msgstr "حُفظت الصورة."
 
 #: src/components/expense-form.tsx:192
 msgid "Photograph receipt"
@@ -2523,24 +2465,12 @@ msgstr "العقارات بعملات أخرى غير مضافة إلى هذه �
 msgid "Places your manager assigns you to show here."
 msgstr "تظهر هنا العقارات التي يسندك إليها مديرك."
 
-#: src/routes/forgot-password.tsx:151
-msgid "Please enter your email address."
-msgstr "يرجى إدخال بريدك الإلكتروني."
-
 #: src/routes/_authenticated/announcements.tsx:325
 msgid "Please fill in all announcement fields."
 msgstr "يرجى تعبئة جميع حقول الإعلان."
 
-#: src/routes/_authenticated/profile.tsx:89
-msgid "Please select a valid image."
-msgstr "يرجى اختيار صورة صالحة."
-
 #: src/routes/_authenticated/admin/$admin_id.tsx:388
 msgid "Preferred language"
-msgstr "اللغة المفضلة"
-
-#: src/routes/_authenticated/profile.tsx:100
-msgid "Preferred Language"
 msgstr "اللغة المفضلة"
 
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:187
@@ -2566,14 +2496,6 @@ msgstr "الشهر السابق"
 msgid "Priority"
 msgstr "الأولوية"
 
-#: src/routes/_authenticated/profile.tsx:101
-msgid "Profile Picture"
-msgstr "الصورة الشخصية"
-
-#: src/routes/_authenticated/profile.tsx:92
-msgid "Profile updated successfully."
-msgstr "تم تحديث الملف الشخصي بنجاح."
-
 #: src/routes/_authenticated/reports.tsx:217
 msgid "Profit"
 msgstr "الربح"
@@ -2595,10 +2517,6 @@ msgstr "إعدادات النشر"
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:98
 msgid "Purchase date"
 msgstr "تاريخ الشراء"
-
-#: src/routes/account-setup.tsx:32
-msgid "Re-enter your password"
-msgstr "أعد إدخال كلمة المرور"
 
 #: src/components/worker-form.tsx:240
 #: src/routes/_authenticated/workers.tsx:244
@@ -2722,9 +2640,13 @@ msgstr "مُبلّغ التذكرة"
 msgid "Reports"
 msgstr "التقارير"
 
-#: src/routes/reset-password.tsx:196
-msgid "Request a New Link"
+#: src/routes/reset-password.tsx:83
+msgid "Request a new link"
 msgstr "طلب رابط جديد"
+
+#: src/routes/reset-password.tsx:80
+msgid "Request a new link from the forgot password page."
+msgstr "اطلب رابطًا جديدًا من صفحة نسيت كلمة المرور."
 
 #: src/components/user-support.tsx:58
 msgid "Request sent to the Amlak team."
@@ -2734,18 +2656,9 @@ msgstr "أُرسل الطلب إلى فريق أملاك."
 msgid "Requests you send appear here with the team’s reply."
 msgstr "تظهر هنا طلباتك مع رد الفريق."
 
-#: src/components/email-verify-panel.tsx:95
+#: src/components/email-verify-panel.tsx:144
 msgid "Resend code"
 msgstr "إعادة إرسال الرمز"
-
-#: src/routes/reset-password.tsx:145
-#: src/routes/reset-password.tsx:306
-msgid "Reset Password"
-msgstr "إعادة تعيين كلمة المرور"
-
-#: src/routes/reset-password.tsx:303
-msgid "Resetting Password..."
-msgstr "جارٍ إعادة تعيين كلمة المرور..."
 
 #: src/routes/_authenticated/support/$support_id.tsx:318
 #: src/routes/_authenticated/support/$support_id.tsx:394
@@ -2781,7 +2694,7 @@ msgid "Review tickets"
 msgstr "مراجعة التذاكر"
 
 #: src/routes/_authenticated/admin/$admin_id.tsx:350
-#: src/routes/_authenticated/profile.tsx:103
+#: src/routes/_authenticated/profile.tsx:179
 msgid "Role"
 msgstr "الصلاحية"
 
@@ -2789,6 +2702,10 @@ msgstr "الصلاحية"
 #: src/components/place-shared.tsx:216
 msgid "Room"
 msgstr "غرفة"
+
+#: src/routes/signup.tsx:138
+msgid "Saudi mobile starting with 5"
+msgstr "جوال سعودي يبدأ بـ 5"
 
 #: src/components/form.tsx:141
 msgid "Save"
@@ -2805,24 +2722,25 @@ msgstr "حفظ الحجز"
 #: src/components/worker-form.tsx:204
 #: src/routes/_authenticated/admin/$admin_id.tsx:578
 #: src/routes/_authenticated/content/$content_id.tsx:635
+#: src/routes/_authenticated/profile.tsx:225
 msgid "Save changes"
-msgstr "حفظ التغييرات"
-
-#: src/routes/_authenticated/profile.tsx:94
-msgid "Save Changes"
 msgstr "حفظ التغييرات"
 
 #: src/components/expense-form.tsx:111
 msgid "Save expense"
 msgstr "حفظ المصروف"
 
+#: src/routes/reset-password.tsx:109
+msgid "Save password"
+msgstr "حفظ كلمة المرور"
+
+#: src/routes/_authenticated/profile.tsx:147
+msgid "Save photo"
+msgstr "حفظ الصورة"
+
 #: src/components/place-form.tsx:347
 msgid "Save place"
 msgstr "حفظ العقار"
-
-#: src/routes/_authenticated/profile.tsx:93
-msgid "Saving..."
-msgstr "جارٍ الحفظ..."
 
 #: src/components/asset-form.tsx:165
 #: src/components/asset-schedules.tsx:331
@@ -2834,8 +2752,10 @@ msgstr "جارٍ الحفظ..."
 #: src/routes/_authenticated/admin/$admin_id.tsx:578
 #: src/routes/_authenticated/booking/new.tsx:148
 #: src/routes/_authenticated/content/$content_id.tsx:635
+#: src/routes/_authenticated/profile.tsx:225
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:624
 #: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:87
+#: src/routes/reset-password.tsx:109
 msgid "Saving…"
 msgstr "جارٍ الحفظ…"
 
@@ -2899,6 +2819,14 @@ msgstr "إرسال إعلان"
 msgid "Send invitation"
 msgstr "إرسال الدعوة"
 
+#: src/routes/forgot-password.tsx:115
+msgid "Send link"
+msgstr "إرسال الرابط"
+
+#: src/routes/forgot-password.tsx:106
+msgid "Send link in <0>{time}</0>"
+msgstr "إرسال الرابط بعد <0>{time}</0>"
+
 #: src/routes/_authenticated/ticket/new.tsx:116
 msgid "Send report"
 msgstr "إرسال البلاغ"
@@ -2907,17 +2835,13 @@ msgstr "إرسال البلاغ"
 msgid "Send request"
 msgstr "إرسال الطلب"
 
-#: src/routes/forgot-password.tsx:177
-msgid "Send Reset Link"
-msgstr "إرسال رابط إعادة التعيين"
-
 #: src/routes/_authenticated/announcements.tsx:354
-#: src/routes/forgot-password.tsx:174
 msgid "Sending..."
 msgstr "جارٍ الإرسال..."
 
 #: src/components/user-support.tsx:96
 #: src/routes/_authenticated/ticket/new.tsx:116
+#: src/routes/forgot-password.tsx:113
 msgid "Sending…"
 msgstr "جارٍ الإرسال…"
 
@@ -2925,32 +2849,35 @@ msgstr "جارٍ الإرسال…"
 msgid "Separate user IDs with commas or new lines. Maximum 1000 users."
 msgstr "افصل معرفات المستخدمين بفواصل أو أسطر جديدة. الحد الأقصى 1000 مستخدم."
 
-#: src/routes/account-setup.tsx:26
-msgid "Set Up Your Account"
-msgstr "إعداد حسابك"
+#: src/routes/reset-password.tsx:65
+msgid "Set a new password"
+msgstr "تعيين كلمة مرور جديدة"
 
 #: src/components/place-form.tsx:187
 msgid "Set when the place is created and cannot change."
 msgstr "تُحدد عند الإنشاء ولا تتغير."
 
-#: src/routes/reset-password.tsx:228
-#: src/routes/reset-password.tsx:274
-#: src/routes/signin.tsx:118
+#: src/components/password-field.tsx:42
+#: src/routes/signin.tsx:194
 msgid "Show password"
 msgstr "إظهار كلمة المرور"
 
 #. Page title
-#: src/routes/signin.tsx:68
-#: src/routes/signin.tsx:136
+#: src/routes/signin.tsx:123
+#: src/routes/signin.tsx:210
 msgid "Sign in"
 msgstr "دخول"
+
+#: src/routes/signin.tsx:139
+msgid "Sign in to continue."
+msgstr "سجّل الدخول للمتابعة."
 
 #: src/components/account-links.tsx:75
 #: src/components/account-links.tsx:78
 msgid "Sign out"
 msgstr "تسجيل الخروج"
 
-#: src/routes/signin.tsx:136
+#: src/routes/signin.tsx:210
 msgid "Signing in…"
 msgstr "جارٍ الدخول…"
 
@@ -2973,12 +2900,6 @@ msgstr "بعض الحقول غير صحيحة."
 msgid "Someone else acted on it a moment ago. We reloaded it so you see the latest status."
 msgstr "تصرّف فيها شخص آخر قبل قليل. أعدنا تحميلها لترى آخر حالة."
 
-#: src/routes/account-setup.tsx:43
-#: src/routes/forgot-password.tsx:159
-#: src/routes/reset-password.tsx:128
-msgid "Something went wrong. Please try again."
-msgstr "حدث خطأ ما. يرجى المحاولة مرة أخرى."
-
 #: src/lib/errors.ts:162
 #: src/lib/errors.ts:208
 msgid "Something went wrong. Try again."
@@ -2994,6 +2915,7 @@ msgstr "مستخدمون محددون"
 #: src/routes/_authenticated/content/new.tsx:59
 #: src/routes/_authenticated/place/$place_id.tsx:479
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:85
+#: src/routes/_authenticated/profile.tsx:185
 #: src/routes/_authenticated/support/$support_id.tsx:252
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:181
 msgid "Status"
@@ -3079,6 +3001,7 @@ msgid "The browser asks for permission after you tap the button. You can change 
 msgstr "سيطلب المتصفح الإذن بعد الضغط على الزر. يمكنك تغييره لاحقًا من إعدادات المتصفح."
 
 #: src/components/worker-form.tsx:192
+#: src/routes/_authenticated/profile.tsx:94
 msgid "The changes are saved."
 msgstr "حُفظت التغييرات."
 
@@ -3090,9 +3013,13 @@ msgstr "يظهر زر تسجيل الخروج بعد تسجيل الدخول."
 msgid "The check-out date must be after the check-in date."
 msgstr "يجب أن يكون تاريخ المغادرة بعد تاريخ الوصول."
 
-#: src/components/email-verify-panel.tsx:61
+#: src/components/email-verify-panel.tsx:119
 msgid "The code is valid for 10 minutes."
 msgstr "الرمز صالح لمدة 10 دقائق."
+
+#: src/routes/verify.tsx:19
+msgid "The code is wrong or has expired. Check it or request a new one."
+msgstr "الرمز خاطئ أو منتهي. تحقق منه أو اطلب رمزًا جديدًا."
 
 #: src/components/worker-form.tsx:132
 msgid "The email cannot be changed."
@@ -3110,13 +3037,21 @@ msgstr "لا يمكن تسجيل دخول الضيف قبل تاريخ الوص�
 msgid "The guest has checked out."
 msgstr "غادر الضيف."
 
-#: src/routes/account-setup.tsx:35
-msgid "The invitation link is invalid or missing required information."
-msgstr "رابط الدعوة غير صالح أو لا يحتوي على البيانات المطلوبة."
+#: src/routes/account-setup.tsx:65
+msgid "The invitation has expired."
+msgstr "انتهت صلاحية الدعوة."
 
 #: src/routes/_authenticated/workers.tsx:134
 msgid "The invitation link stops working. You can invite the worker again later."
 msgstr "يتوقف رابط الدعوة عن العمل. يمكنك دعوة العامل مرة أخرى لاحقًا."
+
+#: src/routes/_authenticated/profile.tsx:254
+msgid "The language and page direction change as soon as you choose."
+msgstr "تتغير اللغة واتجاه الصفحة فور الاختيار."
+
+#: src/routes/reset-password.tsx:79
+msgid "The link has expired."
+msgstr "انتهت صلاحية الرابط."
 
 #: src/components/place-form.tsx:253
 msgid "The location is blocked in the browser."
@@ -3155,14 +3090,6 @@ msgstr "تاريخ الشراء لا يمكن أن يكون في المستقب�
 msgid "The report goes to the place manager for review."
 msgstr "سيصل البلاغ إلى مدير العقار لمراجعته."
 
-#: src/routes/reset-password.tsx:105
-msgid "The reset link is invalid or incomplete."
-msgstr "رابط إعادة التعيين غير صالح أو غير مكتمل."
-
-#: src/routes/reset-password.tsx:115
-msgid "The reset link is invalid, expired, or already used."
-msgstr "رابط إعادة التعيين غير صالح أو منتهي الصلاحية أو سبق استخدامه."
-
 #: src/routes/_authenticated/content/$content_id.tsx:109
 msgid "The slug can only have lowercase English letters, numbers and hyphens (-)."
 msgstr "الرابط يجب أن يحتوي على أحرف إنجليزية صغيرة وأرقام وشرطة (-) فقط."
@@ -3174,6 +3101,10 @@ msgstr "صيغة الرابط غير صحيحة."
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:225
 msgid "The ticket status changed."
 msgstr "تغيّرت حالة التذكرة."
+
+#: src/routes/reset-password.tsx:37
+msgid "The two passwords do not match."
+msgstr "كلمتا المرور غير متطابقتين."
 
 #: src/routes/_authenticated/admin/$admin_id.tsx:553
 msgid "The user was updated."
@@ -3206,6 +3137,10 @@ msgstr "مهامه وبلاغاته وصورها."
 #: src/routes/_authenticated/admin/index.tsx:218
 msgid "There are no users to show."
 msgstr "لا يوجد مستخدمون لعرضهم حالياً."
+
+#: src/routes/signin.tsx:64
+msgid "This account is deactivated."
+msgstr "هذا الحساب موقوف."
 
 #: src/lib/errors.ts:200
 msgid "This account is not active."
@@ -3251,6 +3186,14 @@ msgstr "هذا يتعارض مع البيانات الحالية. أعد تحم�
 msgid "This email is already registered."
 msgstr "هذا البريد الإلكتروني مسجّل بالفعل."
 
+#: src/routes/signup.tsx:67
+msgid "This email is already registered. Sign in or reset your password."
+msgstr "هذا البريد مسجّل مسبقًا. سجّل الدخول أو استعد كلمة المرور."
+
+#: src/routes/_authenticated/profile.tsx:134
+msgid "This is a preview of the photo before saving."
+msgstr "هذه معاينة الصورة قبل الحفظ."
+
 #: src/routes/_authenticated/reports.tsx:141
 msgid "This month"
 msgstr "هذا الشهر"
@@ -3258,10 +3201,6 @@ msgstr "هذا الشهر"
 #: src/routes/p/$lang/$slug.tsx:71
 msgid "This page does not exist or is not published."
 msgstr "هذه الصفحة غير موجودة أو غير منشورة."
-
-#: src/routes/reset-password.tsx:185
-msgid "This password reset link is invalid or incomplete. Please request a new reset link."
-msgstr "رابط إعادة تعيين كلمة المرور غير صالح أو غير مكتمل. يرجى طلب رابط جديد."
 
 #: src/lib/errors.ts:192
 msgid "This place has current or upcoming stays."
@@ -3362,6 +3301,10 @@ msgstr "العنوان"
 msgid "To"
 msgstr "إلى تاريخ"
 
+#: src/routes/_authenticated/profile.tsx:208
+msgid "To change your email, contact support."
+msgstr "لتغيير البريد تواصل مع الدعم."
+
 #: src/routes/_authenticated/home.tsx:421
 msgid "Today"
 msgstr "اليوم"
@@ -3370,13 +3313,13 @@ msgstr "اليوم"
 msgid "Today, {date}"
 msgstr "اليوم، {date}"
 
+#: src/routes/signin.tsx:36
+msgid "Too many attempts."
+msgstr "محاولات كثيرة."
+
 #: src/lib/errors.ts:206
 msgid "Too many attempts. Wait a little and try again."
 msgstr "محاولات كثيرة. انتظر قليلًا ثم حاول مرة أخرى."
-
-#: src/routes/forgot-password.tsx:153
-msgid "Too many requests. Please try again later."
-msgstr "عدد كبير جدًا من الطلبات. يرجى المحاولة لاحقًا."
 
 #: src/components/place-bookings.tsx:594
 #: src/components/place-bookings.tsx:689
@@ -3390,10 +3333,6 @@ msgstr "السعر الإجمالي"
 #: src/components/states.tsx:97
 msgid "Try again"
 msgstr "إعادة المحاولة"
-
-#: src/routes/forgot-password.tsx:119
-msgid "Try another email"
-msgstr "جرّب بريدًا إلكترونيًا آخر"
 
 #: src/routes/_authenticated/content/index.tsx:276
 msgid "Try another search or other filters."
@@ -3415,15 +3354,6 @@ msgstr "لا يمكن أن يتداخل حجزان في العقار نفسه."
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:186
 msgid "Type"
 msgstr "النوع"
-
-#: src/routes/account-setup.tsx:39
-msgid "Unable to activate your account. The link may be invalid, expired, or already used."
-msgstr "تعذر تفعيل الحساب. قد يكون الرابط خاطئاً أو منتهياً أو مستخدماً."
-
-#: src/routes/forgot-password.tsx:155
-#: src/routes/reset-password.tsx:122
-msgid "Unable to connect to the server. Please try again."
-msgstr "تعذر الاتصال بالخادم. يرجى المحاولة مرة أخرى."
 
 #: src/routes/_authenticated/place/$place_id.tsx:422
 msgid "Unassign"
@@ -3468,13 +3398,13 @@ msgstr "إلغاء التحديد يحوّل الصفحة إلى مسودة."
 msgid "Until the worker finishes setting up the account"
 msgstr "حتى يُكمل العامل إعداد حسابه"
 
-#: src/routes/_authenticated/profile.tsx:96
-msgid "Update Profile"
-msgstr "تحديث الملف الشخصي"
-
 #: src/routes/_authenticated/notifications.tsx:549
 msgid "Updating..."
 msgstr "جارٍ التحديث..."
+
+#: src/components/password-field.tsx:57
+msgid "Uppercase English letter"
+msgstr "حرف إنجليزي كبير"
 
 #: src/components/home-parts.tsx:124
 #: src/components/place-shared.tsx:244
@@ -3525,14 +3455,19 @@ msgstr "المستخدمون"
 msgid "UUID 1, UUID 2..."
 msgstr "UUID 1، UUID 2..."
 
-#: src/components/email-verify-panel.tsx:47
+#: src/components/email-verify-panel.tsx:109
 #: src/lib/errors.ts:149
 msgid "Verification code"
 msgstr "رمز التحقق"
 
 #: src/routes/_authenticated/admin/$admin_id.tsx:496
+#: src/routes/_authenticated/profile.tsx:202
 msgid "Verified"
 msgstr "تم التحقق"
+
+#: src/components/email-verify-panel.tsx:124
+msgid "Verify email"
+msgstr "تأكيد البريد"
 
 #: src/lib/errors.ts:169
 msgid "Verify your email first — we sent a 6-digit code."
@@ -3548,10 +3483,6 @@ msgstr "عرض التفاصيل"
 msgid "View only. Editing is for the manager."
 msgstr "عرض فقط. التعديل للمدير."
 
-#: src/routes/_authenticated/profile.tsx:109
-msgid "View your account information."
-msgstr "بيانات حسابك الشخصي"
-
 #: src/components/place-form.tsx:41
 #: src/components/place-shared.tsx:212
 msgid "Villa"
@@ -3562,6 +3493,10 @@ msgstr "فيلا"
 #: src/routes/_authenticated/reports.tsx:122
 msgid "Visible to the manager only."
 msgstr "تظهر للمدير فقط."
+
+#: src/routes/signin.tsx:37
+msgid "Wait a little, then try again."
+msgstr "انتظر قليلًا ثم حاول مرة أخرى."
 
 #: src/components/ticket-parts.tsx:89
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:336
@@ -3634,9 +3569,17 @@ msgstr "نحتاج الكاميرا لتصوير العطل"
 msgid "We need your location to place the property"
 msgstr "نحتاج موقعك لتحديد مكان العقار"
 
-#: src/components/email-verify-panel.tsx:35
-msgid "We sent a 6-digit code to <0>{email}</0>."
-msgstr "أرسلنا رمزًا مكوّنًا من 6 أرقام إلى <0>{email}</0>."
+#: src/components/email-verify-panel.tsx:98
+msgid "We sent a 6-digit code to <0>{email}</0>"
+msgstr "أرسلنا رمزًا من 6 أرقام إلى <0>{email}</0>"
+
+#: src/routes/signin.tsx:47
+msgid "We sent a new code to <0>{email}</0>."
+msgstr "أرسلنا رمزًا جديدًا إلى <0>{email}</0>."
+
+#: src/routes/forgot-password.tsx:71
+msgid "We sent the link"
+msgstr "أرسلنا الرابط"
 
 #: src/components/location-permission.tsx:42
 msgid "We use it only when you tap “Take a photo” to attach damage and receipt photos. We never take photos in the background."
@@ -3645,6 +3588,10 @@ msgstr "نستخدمها فقط عند ضغطك على «التقاط صورة»
 #: src/components/location-permission.tsx:47
 msgid "We use your location once to drop the place’s pin on the map. We do not track your location or keep it afterwards."
 msgstr "نستخدم موقعك مرة واحدة لوضع دبوس العقار على الخريطة. لا نتتبع موقعك ولا نحفظه بعد ذلك."
+
+#: src/routes/signup.tsx:129
+msgid "We will send a verification code to your email after you register."
+msgstr "سنرسل رمز تحقق إلى بريدك بعد التسجيل."
 
 #: src/components/worker-form.tsx:172
 msgid "We will send an invitation to the worker's email."
@@ -3662,9 +3609,9 @@ msgstr "سنرسل السبب إلى من أبلغ مع إشعار."
 msgid "Weeks"
 msgstr "أسابيع"
 
-#: src/routes/account-setup.tsx:27
-msgid "Welcome! Create a password to activate your account and get started."
-msgstr "مرحباً بك! أنشئ كلمة مرور لتفعيل حسابك والبدء باستخدام النظام."
+#: src/routes/account-setup.tsx:63
+msgid "Welcome to Amlak"
+msgstr "أهلًا بك في أملاك"
 
 #: src/components/worker-form.tsx:296
 msgid "What a worker sees"
@@ -3689,7 +3636,6 @@ msgstr "عندما يبلّغ عامل عن عطل ستظهر التذكرة ه�
 #: src/lib/nav.tsx:213
 #: src/routes/_authenticated/admin/$admin_id.tsx:365
 #: src/routes/_authenticated/announcements.tsx:242
-#: src/routes/_authenticated/profile.tsx:121
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:603
 #: src/routes/_authenticated/worker/$worker_id.tsx:37
 msgid "Worker"
@@ -3714,8 +3660,8 @@ msgstr "العمّال"
 msgid "Workers pick it when they report damage to it."
 msgstr "يختاره العامل عند البلاغ عن عطل فيه."
 
-#: src/routes/signin.tsx:148
-msgid "Workers sign in with the invite sent by their manager."
+#: src/routes/signin.tsx:223
+msgid "Workers sign in from the invitation their manager sends."
 msgstr "العامل يدخل بالدعوة التي تصله من مديره."
 
 #: src/routes/_authenticated/support/$support_id.tsx:358
@@ -3748,6 +3694,10 @@ msgstr "اكتب ما حدث."
 msgid "Write your announcement..."
 msgstr "اكتب إعلانك هنا..."
 
+#: src/routes/signin.tsx:30
+msgid "Wrong email or password."
+msgstr "البريد أو كلمة المرور غير صحيحة."
+
 #: src/components/asset-schedules.tsx:44
 msgid "Years"
 msgstr "سنوات"
@@ -3765,17 +3715,13 @@ msgstr "تضيف الأصول وتعيّن العمّال من صفحة العق
 msgid "You are not assigned to a place yet."
 msgstr "لم تُسنَد إلى أي عقار بعد."
 
-#: src/routes/account-setup.tsx:41
-msgid "You can now log in using your email and password."
-msgstr "يمكنك الآن تسجيل الدخول باستخدام بريدك الإلكتروني وكلمة المرور."
-
-#: src/components/email-verify-panel.tsx:84
-msgid "You can request a new code in"
-msgstr "يمكنك طلب رمز جديد خلال"
-
 #: src/components/asset-form.tsx:209
 msgid "You can schedule periodic maintenance from the asset’s page."
 msgstr "يمكنك جدولة الصيانة الدورية من صفحة الأصل."
+
+#: src/routes/signin.tsx:72
+msgid "You cannot sign in until the manager’s account is reactivated."
+msgstr "لا يمكنك الدخول حتى يُعاد تفعيل حساب المدير."
 
 #: src/lib/errors.ts:202
 msgid "You do not have permission to do this."
@@ -3793,18 +3739,50 @@ msgstr "ليست لديك مهام مفتوحة"
 msgid "You have not reported anything yet"
 msgstr "لم ترسل أي بلاغ بعد"
 
-#: src/routes/account-setup.tsx:40
-msgid "Your account has been activated successfully!"
-msgstr "تم تفعيل حسابك بنجاح!"
+#: src/routes/signin.tsx:45
+msgid "You have not verified your email yet."
+msgstr "لم تؤكد بريدك بعد."
+
+#: src/routes/verify.tsx:21
+msgid "You requested too many codes. Try again later."
+msgstr "طلبت رموزًا كثيرة. حاول لاحقًا."
+
+#: src/routes/forgot-password.tsx:91
+msgid "You requested too many links."
+msgstr "طلبت روابط كثيرة."
+
+#: src/routes/signin.tsx:133
+msgid "Your account is active."
+msgstr "حسابك مفعّل."
+
+#: src/routes/signin.tsx:57
+msgid "Your account is not active yet."
+msgstr "حسابك لم يُفعّل بعد."
+
+#: src/routes/_authenticated/profile.tsx:116
+msgid "Your details, language and account security."
+msgstr "بياناتك ولغتك وأمان حسابك."
+
+#: src/routes/signin.tsx:135
+msgid "Your email is verified."
+msgstr "تم التحقق من بريدك."
+
+#: src/routes/signin.tsx:71
+msgid "Your manager’s account is deactivated."
+msgstr "حساب مديرك موقوف."
 
 #: src/routes/_authenticated/notifications.tsx:182
 #: src/routes/_authenticated/notifications.tsx:190
 msgid "Your notifications"
 msgstr "إشعاراتك"
 
-#: src/routes/reset-password.tsx:167
-msgid "Your password has been changed successfully. Please log in again using your new password."
-msgstr "تم تغيير كلمة المرور بنجاح. يرجى تسجيل الدخول مرة أخرى باستخدام كلمة المرور الجديدة."
+#: src/routes/signin.tsx:131
+msgid "Your password is changed."
+msgstr "تغيّرت كلمة المرور."
+
+#: src/routes/_authenticated/profile.tsx:129
+msgid "Your photo"
+msgstr "صورتك"
 
 #: src/routes/_authenticated/home.tsx:318
 #: src/routes/_authenticated/home.tsx:349

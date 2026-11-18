@@ -1,29 +1,90 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
-import { type SubmitEvent, useState } from "react"
-import { Eye, EyeOff } from "lucide-react"
+import { type ReactNode, type SubmitEvent, useState } from "react"
+import { Check, Eye, EyeOff, Info, Lock, Mail, TriangleAlert } from "lucide-react"
 import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
 import { signInInput } from "@/lib/validators"
 import { useAuth } from "@/lib/auth"
-import { errorMessage } from "@/lib/errors"
-import { AuthBrandPanel } from "@/components/auth-brand-panel"
+import { ApiError, errorMessage } from "@/lib/errors"
+import { AuthCard, AuthLayout } from "@/components/auth-layout"
+import { Field } from "@/components/panel"
+import { Notice } from "@/components/states"
 import { Button } from "@/components/ui/button"
-import { FieldError } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 
 export const Route = createFileRoute("/signin")({
   component: SignIn,
+  validateSearch: (search: Record<string, unknown>): { verified?: boolean; activated?: boolean; reset?: boolean } => ({
+    ...(search.verified ? { verified: true } : {}),
+    ...(search.activated ? { activated: true } : {}),
+    ...(search.reset ? { reset: true } : {}),
+  }),
 })
 
+type Problem = { tone: "crit" | "warn" | "info"; icon: ReactNode; title: ReactNode; text?: ReactNode; verify?: boolean }
+
+/** Why sign-in was refused, as the design's sign-in messages (Amlak-States). */
+function problemFor(error: unknown, email: string): Problem {
+  if (error instanceof ApiError) {
+    if (error.code === "INVALID_CREDENTIALS") {
+      return { tone: "crit", icon: <TriangleAlert />, title: <Trans>Wrong email or password.</Trans> }
+    }
+    if (error.code === "RATE_LIMITED") {
+      return {
+        tone: "warn",
+        icon: <TriangleAlert />,
+        title: <Trans>Too many attempts.</Trans>,
+        text: <Trans>Wait a little, then try again.</Trans>,
+      }
+    }
+    switch (error.details.reason) {
+      case "EMAIL_NOT_VERIFIED":
+        return {
+          tone: "warn",
+          icon: <Mail />,
+          title: <Trans>You have not verified your email yet.</Trans>,
+          text: (
+            <Trans>
+              We sent a new code to <bdi dir="ltr">{email}</bdi>.
+            </Trans>
+          ),
+          verify: true,
+        }
+      case "INVITATION_PENDING":
+        return {
+          tone: "info",
+          icon: <Info />,
+          title: <Trans>Your account is not active yet.</Trans>,
+          text: <Trans>Open the invitation email and choose a password.</Trans>,
+        }
+      case "ACCOUNT_DEACTIVATED":
+        return {
+          tone: "crit",
+          icon: <Lock />,
+          title: <Trans>This account is deactivated.</Trans>,
+          text: <Trans>Contact your manager or support to reactivate it.</Trans>,
+        }
+      case "MANAGER_DEACTIVATED":
+        return {
+          tone: "crit",
+          icon: <Lock />,
+          title: <Trans>Your manager’s account is deactivated.</Trans>,
+          text: <Trans>You cannot sign in until the manager’s account is reactivated.</Trans>,
+        }
+    }
+  }
+  return { tone: "crit", icon: <TriangleAlert />, title: errorMessage(error) }
+}
+
 function SignIn() {
+  const search = Route.useSearch()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
-  const [formError, setFormError] = useState("")
+  const [problem, setProblem] = useState<Problem | null>(null)
   const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
+  const { login, resendCode } = useAuth()
   const navigate = useNavigate()
 
   function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
@@ -33,123 +94,136 @@ function SignIn() {
       const map: { email?: string; password?: string } = {}
       for (const issue of result.error.issues) {
         const key = issue.path[0] as "email" | "password"
-        if (!map[key]) {
-          map[key] =
-            key === "email"
-              ? t`Enter a valid email`
-              : t`Password does not meet the requirements`
-        }
+        if (!map[key]) map[key] = key === "email" ? t`Enter a valid email` : t`Enter your password`
       }
       setErrors(map)
       return
     }
     setErrors({})
-    setFormError("")
+    setProblem(null)
     setLoading(true)
     login(email, password)
       .then(() => {
         void navigate({ to: "/home" })
       })
-      .catch((err: unknown) => {
-        setFormError(errorMessage(err))
+      .catch(async (err: unknown) => {
+        const found = problemFor(err, email)
+        // The notice says a new code is on its way: send it.
+        if (found.verify) await resendCode(email).catch(() => {})
+        if (err instanceof ApiError && err.code === "INVALID_CREDENTIALS") {
+          setErrors({ password: t`Check your password and try again` })
+        }
+        setProblem(found)
       })
-      .finally(() => {
-        setLoading(false)
-      })
+      .finally(() => setLoading(false))
   }
 
   return (
-    <div className="grid min-h-screen bg-background lg:grid-cols-2">
-      <AuthBrandPanel />
-
-      <main className="flex items-center justify-center px-6 py-10">
-        <form onSubmit={handleSubmit} noValidate className="w-full max-w-[340px]">
-          <h1 className="text-[28px] font-bold leading-9">
-            <Trans comment="Page title">Sign in</Trans>
-          </h1>
-          <p className="mt-1 text-[15px] leading-6 text-muted-foreground">
-            <Trans>Enter your email and password to continue.</Trans>
-          </p>
-
-          <div className="mt-8 flex flex-col gap-5">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email" className="text-sm font-semibold">
-                <Trans>Email</Trans>
-              </Label>
+    <AuthLayout>
+      <AuthCard title={<Trans comment="Page title">Sign in</Trans>} subtitle={<Trans>Enter your email and password to continue.</Trans>}>
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+          {!problem && (search.verified || search.activated || search.reset) && (
+            <Notice
+              tone="good"
+              icon={<Check />}
+              title={
+                search.reset ? (
+                  <Trans>Your password is changed.</Trans>
+                ) : search.activated ? (
+                  <Trans>Your account is active.</Trans>
+                ) : (
+                  <Trans>Your email is verified.</Trans>
+                )
+              }
+            >
+              <Trans>Sign in to continue.</Trans>
+            </Notice>
+          )}
+          {problem && (
+            <div className="flex flex-col gap-3">
+              <Notice tone={problem.tone} icon={problem.icon} title={problem.title}>
+                {problem.text}
+              </Notice>
+              {problem.verify && (
+                <Button type="button" className="h-11" onClick={() => void navigate({ to: "/verify", search: { email } })}>
+                  <Trans>Enter the code</Trans>
+                </Button>
+              )}
+            </div>
+          )}
+          <Field id="email" label={<Trans>Email</Trans>} error={errors.email}>
+            <Input
+              id="email"
+              dir="ltr"
+              type="email"
+              autoComplete="email"
+              placeholder="name@example.com"
+              value={email}
+              aria-invalid={errors.email ? true : undefined}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+            />
+          </Field>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-baseline justify-between gap-3">
+              <label htmlFor="password" className="text-sm font-semibold">
+                <Trans>Password</Trans>
+              </label>
+              <Link
+                to="/forgot-password"
+                className="relative text-sm font-medium underline underline-offset-4 before:absolute before:inset-x-0 before:-inset-y-3 before:content-['']"
+              >
+                <Trans>Forgot password?</Trans>
+              </Link>
+            </div>
+            <div className="relative">
               <Input
-                id="email"
+                id="password"
                 dir="ltr"
-                type="email"
-                placeholder="name@example.com"
-                className="h-11 rounded-none bg-card"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                className="pe-[52px]"
+                value={password}
+                aria-invalid={errors.password ? true : undefined}
+                aria-describedby={errors.password ? "password-error" : undefined}
+                onChange={(e) => setPassword(e.target.value)}
                 disabled={loading}
               />
-              <FieldError errors={[{ message: errors.email }]} />
+              <button
+                type="button"
+                aria-label={showPassword ? t`Hide password` : t`Show password`}
+                aria-pressed={showPassword}
+                onClick={() => setShowPassword((s) => !s)}
+                className="am-icon absolute end-0 top-0 flex size-11 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-muted-foreground"
+              >
+                {showPassword ? <EyeOff aria-hidden="true" className="size-[18px]" /> : <Eye aria-hidden="true" className="size-[18px]" />}
+              </button>
             </div>
-
-            <div className="flex flex-col gap-2">
-              <div className="flex items-baseline justify-between">
-                <Label htmlFor="password" className="text-sm font-semibold">
-                  <Trans>Password</Trans>
-                </Label>
-                <span className="text-[13px] text-muted-foreground underline">
-                  <Link
-                  to="/forgot-password"
-                  >
-                  <Trans>Forgot password?</Trans>
-                  </Link>
-                </span>
-              </div>
-              <div className="relative">
-                <Input
-                  id="password"
-                  dir="ltr"
-                  type={showPassword ? "text" : "password"}
-                  className="h-11 rounded-none bg-card ps-11"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
-                />
-                <button
-                  type="button"
-                  aria-label={
-                    showPassword ? t`Hide password` : t`Show password`
-                  }
-                  onClick={() => setShowPassword((s) => !s)}
-                  className="absolute top-1/2 end-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-              <FieldError errors={[{ message: errors.password }]} />
-            </div>
-
-            <FieldError errors={[{ message: formError }]} />
-
-            <Button
-              type="submit"
-              className="h-11 rounded-none bg-info-700 font-bold text-white hover:bg-info-900"
-              disabled={loading}
-            >
-              {loading ? <Trans>Signing in…</Trans> : <Trans>Sign in</Trans>}
-            </Button>
-
-            <p className="text-[13px] text-muted-foreground">
-              <Trans>
-                Don't have an account?{" "}
-                <Link to="/signup" className="font-bold text-foreground underline">
-                  Create manager account
-                </Link>
-              </Trans>
-            </p>
-            <p className="text-[13px] leading-5 text-muted-foreground">
-              <Trans>Workers sign in with the invite sent by their manager.</Trans>
-            </p>
+            {errors.password && (
+              <span id="password-error" role="alert" className="flex items-center gap-1.5 text-[13px] text-destructive">
+                <TriangleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+                {errors.password}
+              </span>
+            )}
           </div>
+          <Button type="submit" className="h-12" disabled={loading}>
+            {loading ? <Trans>Signing in…</Trans> : <Trans>Sign in</Trans>}
+          </Button>
         </form>
-      </main>
-    </div>
+        <div className="flex flex-col gap-2.5 text-center">
+          <p className="m-0 text-muted-foreground">
+            <Trans>
+              No account?{" "}
+              <Link to="/signup" className="inline-flex min-h-11 items-center font-semibold text-foreground underline underline-offset-4">
+                Create a manager account
+              </Link>
+            </Trans>
+          </p>
+          <p className="m-0 text-[13px] text-muted-foreground">
+            <Trans>Workers sign in from the invitation their manager sends.</Trans>
+          </p>
+        </div>
+      </AuthCard>
+    </AuthLayout>
   )
 }

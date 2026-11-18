@@ -1,328 +1,116 @@
-
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { useState, type FormEvent } from "react"
-import { Link, createFileRoute } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import {
-  LockKeyhole,
-  CheckCircle2,
-  Loader2,
-  Eye,
-  EyeOff,
-  ArrowLeft,
-} from "lucide-react"
-
-import { Button, buttonVariants } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { Clock3 } from "lucide-react"
 import { errorMessage, readApiError } from "@/lib/errors"
-import { Input } from "@/components/ui/input"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { AuthCard, AuthLayout } from "@/components/auth-layout"
+import { PasswordInput, PasswordRules, passwordOk } from "@/components/password-field"
+import { Field } from "@/components/panel"
+import { Notice } from "@/components/states"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn } from "cn"
 
 export const Route = createFileRoute("/reset-password")({
   component: ResetPasswordPage,
+  validateSearch: (search: Record<string, unknown>): { email: string; token: string } => ({
+    email: typeof search.email === "string" ? search.email : "",
+    token: typeof search.token === "string" ? search.token : "",
+  }),
 })
 
+/** Set a new password from the emailed link; an expired link says so and offers a new one. */
 function ResetPasswordPage() {
-  const params = new URLSearchParams(window.location.search)
-
-  const email = params.get("email") ?? ""
-  const token = params.get("token") ?? ""
-
+  const { email, token } = Route.useSearch()
+  const navigate = useNavigate()
   const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
+  const [confirm, setConfirm] = useState("")
+  const [errors, setErrors] = useState<{ password?: string; confirm?: string }>({})
   const [error, setError] = useState("")
+  const [expired, setExpired] = useState(!email || !token)
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-
+    const next: typeof errors = {}
+    if (!passwordOk(password)) next.password = t`Password does not meet the requirements`
+    if (confirm !== password) next.confirm = t`The two passwords do not match.`
+    setErrors(next)
+    if (Object.keys(next).length > 0) return
     setError("")
-
-    if (!email || !token) {
-      setError("The reset link is invalid or incomplete.")
-      return
-    }
-
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.")
-      return
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.")
-      return
-    }
-
+    setLoading(true)
     try {
-      setLoading(true)
-
       const response = await fetch("/api/v1/auth/password/reset", {
         method: "POST",
         credentials: "same-origin",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          token,
-          new_password: password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, token, new_password: password }),
       })
-
-      if (response.status === 204) {
-        setSuccess(true)
-        setPassword("")
-        setConfirmPassword("")
-        return
+      if (response.ok) await navigate({ to: "/signin", search: { reset: true } })
+      else {
+        const failure = await readApiError(response)
+        if (failure.fields.includes("token") || response.status === 422) setExpired(true)
+        else setError(errorMessage(failure))
       }
-
-      if (response.status === 422) {
-        setError("The reset link is invalid, expired, or already used.")
-        return
-      }
-
-      setError(errorMessage(await readApiError(response)))
     } catch {
-      setError("Unable to connect to the server. Please try again.")
+      setError(errorMessage(null))
     } finally {
       setLoading(false)
     }
   }
 
-  const renderError = () => {
-    switch (error) {
-      case "The reset link is invalid or incomplete.":
-        return <Trans>The reset link is invalid or incomplete.</Trans>
-
-      case "Password must be at least 8 characters.":
-        return <Trans>Password must be at least 8 characters.</Trans>
-
-      case "Passwords do not match.":
-        return <Trans>Passwords do not match.</Trans>
-
-      case "The reset link is invalid, expired, or already used.":
-        return (
-          <Trans>
-            The reset link is invalid, expired, or already used.
-          </Trans>
-        )
-
-      case "Unable to connect to the server. Please try again.":
-        return (
-          <Trans>
-            Unable to connect to the server. Please try again.
-          </Trans>
-        )
-
-      case "Something went wrong. Please try again.":
-        return <Trans>Something went wrong. Please try again.</Trans>
-
-      default:
-        return error
-    }
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/30 px-4 py-10">
-      <div className="w-full max-w-md">
-        <Card className="border-border/60 shadow-sm">
-          <CardHeader className="space-y-3 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <LockKeyhole className="h-7 w-7" />
+    <AuthLayout>
+      <AuthCard
+        title={<Trans>Set a new password</Trans>}
+        subtitle={
+          email ? (
+            <Trans>
+              For account{" "}
+              <bdi dir="ltr" className="font-semibold text-foreground">
+                {email}
+              </bdi>
+            </Trans>
+          ) : undefined
+        }
+      >
+        {expired ? (
+          <div className="flex flex-col gap-4">
+            <Notice tone="crit" icon={<Clock3 />} title={<Trans>The link has expired.</Trans>}>
+              <Trans>Request a new link from the forgot password page.</Trans>
+            </Notice>
+            <Link to="/forgot-password" className={cn(buttonVariants({ variant: "outline" }), "w-full")}>
+              <Trans>Request a new link</Trans>
+            </Link>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+            <div className="flex flex-col gap-2">
+              <label htmlFor="new-password" className="text-sm font-semibold">
+                <Trans>New password</Trans>
+              </label>
+              <PasswordInput id="new-password" value={password} onChange={setPassword} invalid={Boolean(errors.password)} describedBy="new-password-rules" />
+              <PasswordRules id="new-password-rules" value={password} />
+              {errors.password && (
+                <span role="alert" className="text-[13px] text-destructive">
+                  {errors.password}
+                </span>
+              )}
             </div>
-
-            <CardTitle className="text-2xl font-bold">
-              <Trans>Reset Password</Trans>
-            </CardTitle>
-
-            <CardDescription className="text-sm leading-6">
-              <Trans>
-                Create a new password for your account. Your password must be
-                at least 8 characters long.
-              </Trans>
-            </CardDescription>
-          </CardHeader>
-
-          <CardContent>
-            {success ? (
-              <div className="space-y-5 text-center">
-                <div className="flex flex-col items-center gap-3 rounded-xl border border-green-500/20 bg-green-500/5 p-5">
-                  <CheckCircle2 className="h-10 w-10 text-green-600" />
-
-                  <h3 className="font-semibold text-foreground">
-                    <Trans>Password Reset Successful</Trans>
-                  </h3>
-
-                  <p className="text-sm leading-6 text-muted-foreground">
-                    <Trans>
-                      Your password has been changed successfully. Please log
-                      in again using your new password.
-                    </Trans>
-                  </p>
-                </div>
-
-                <Link
-                  to="/signin"
-                  className={cn(buttonVariants(), "h-11 w-full")}
-                >
-                  <Trans>Go to Login</Trans>
-                </Link>
-              </div>
-            ) : !email || !token ? (
-              <div className="space-y-5 text-center">
-                <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-5">
-                  <p className="text-sm leading-6 text-destructive">
-                    <Trans>
-                      This password reset link is invalid or incomplete.
-                      Please request a new reset link.
-                    </Trans>
-                  </p>
-                </div>
-
-                <Link
-                  to="/forgot-password"
-                  className={cn(buttonVariants({ variant: "outline" }), "w-full")}
-                >
-                  <Trans>Request a New Link</Trans>
-                </Link>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-2">
-                  <label
-                    htmlFor="password"
-                    className="text-sm font-medium"
-                  >
-                    <Trans>New Password</Trans>
-                  </label>
-
-                  <div className="relative">
-                    <Input
-                      id="password"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      autoComplete="new-password"
-                      minLength={8}
-                      required
-                      disabled={loading}
-                      className="h-11 pr-11"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      aria-label={
-                        showPassword ? t`Hide password` : t`Show password`
-                      }
-                    >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-
-                  <p className="text-xs text-muted-foreground">
-                    <Trans>At least 8 characters.</Trans>
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <label
-                    htmlFor="confirmPassword"
-                    className="text-sm font-medium"
-                  >
-                    <Trans>Confirm New Password</Trans>
-                  </label>
-
-                  <div className="relative">
-                    <Input
-                      id="confirmPassword"
-                      type={showConfirmPassword ? "text" : "password"}
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      autoComplete="new-password"
-                      required
-                      disabled={loading}
-                      className="h-11 pr-11"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowConfirmPassword((prev) => !prev)
-                      }
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      aria-label={
-                        showConfirmPassword
-                          ? t`Hide password`
-                          : t`Show password`
-                      }
-                    >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {error && (
-                  <div
-                    role="alert"
-                    className="rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive"
-                  >
-                    {renderError()}
-                  </div>
-                )}
-
-                <Button
-                  type="submit"
-                  className="h-11 w-full"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      <Trans>Resetting Password...</Trans>
-                    </>
-                  ) : (
-                    <Trans>Reset Password</Trans>
-                  )}
-                </Button>
-              </form>
+            <Field id="confirm-password" label={<Trans>Confirm password</Trans>} error={errors.confirm}>
+              <PasswordInput id="confirm-password" value={confirm} onChange={setConfirm} invalid={Boolean(errors.confirm)} />
+            </Field>
+            {error && (
+              <p role="alert" className="m-0 text-[13px] text-destructive">
+                {error}
+              </p>
             )}
-
-            {!success && (
-              <div className="mt-6 border-t pt-5">
-                <a
-                  href="/signin"
-                  className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-                >
-                  <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
-                  <Trans>Back to Login</Trans>
-                </a>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+            <Button type="submit" className="h-12" disabled={loading}>
+              {loading ? <Trans>Saving…</Trans> : <Trans>Save password</Trans>}
+            </Button>
+          </form>
+        )}
+      </AuthCard>
+    </AuthLayout>
   )
 }
