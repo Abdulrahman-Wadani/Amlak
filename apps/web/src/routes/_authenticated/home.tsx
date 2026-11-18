@@ -29,7 +29,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { StatusBadge, TypeLabel } from "@/components/place-shared"
-import "@/styles/motion.css"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute("/_authenticated/home")({
   // Admins have no dashboard here; their start page is /admin.
@@ -41,10 +41,10 @@ export const Route = createFileRoute("/_authenticated/home")({
   component: HomePage,
 })
 
-function greeting(hour: number): ReactNode {
-  if (hour < 12) return <Trans>Good morning</Trans>
-  if (hour < 17) return <Trans>Good afternoon</Trans>
-  return <Trans>Good evening</Trans>
+function greeting(hour: number, name: string): ReactNode {
+  if (hour < 12) return <Trans>Good morning, {name}</Trans>
+  if (hour < 17) return <Trans>Good afternoon, {name}</Trans>
+  return <Trans>Good evening, {name}</Trans>
 }
 
 function HomePage() {
@@ -185,10 +185,10 @@ function HomePage() {
   )
 
   return (
-    <div
-      style={S(
-        "max-width: 1240px; margin-inline: auto; padding: 28px 40px 56px; display: flex; flex-direction: column; gap: 24px; box-sizing: border-box"
-      )}
+    <Page
+      title={greeting(now.getHours(), user?.fullname ?? "")}
+      phoneTitle={<Trans>Home</Trans>}
+      phoneStart="logo"
     >
       {/* Welcome section */}
       <section
@@ -207,17 +207,6 @@ function HomePage() {
             <Trans>Today</Trans>, {today}
           </span>
 
-          <p
-            style={S(
-              "margin: 0; font-size: 28px; font-weight: 700; line-height: 1.35"
-            )}
-          >
-            {greeting(now.getHours())}, {user?.fullname}
-          </p>
-
-          <span style={S("font-size: 14px; color: var(--info-200)")}>
-            
-          </span>
         </div>
 
         <div style={S("display: flex; flex-wrap: wrap; gap: 10px")}>
@@ -488,7 +477,7 @@ function HomePage() {
           })}
         </div>
       </section>
-    </div>
+    </Page>
   )
 }
 

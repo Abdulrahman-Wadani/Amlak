@@ -32,11 +32,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {
   AssetStatusBadge,
 } from "@/components/place-shared"
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "@/components/ui/breadcrumb"
 import { AssetManage } from "@/components/asset-manage"
 import { TicketsSection } from "@/components/tickets-section"
 import { todayIn } from "@/lib/dates"
 import { errorMessage } from "@/lib/errors"
+import { Page } from "@/components/page"
 
 
 export const Route = createFileRoute("/_authenticated/place/asset/$asset_id")({
@@ -143,67 +143,36 @@ function AssetDetailPage() {
   }
   
   return (
-    <center>
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 900px"
-      )}
+    <Page
+      title={
+        asset?.name ??
+        (failed ? <Trans>Asset not found</Trans> : <Skeleton style={S("width: 220px; height: 28px")} />)
+      }
+      phoneTitle={<Trans>Asset</Trans>}
+      parent={
+        asset
+          ? {
+              label: place?.place_name ?? <Trans>Place</Trans>,
+              link: { to: "/place/$place_id", params: { place_id: asset.place_id } },
+            }
+          : { label: <Trans>Places</Trans>, link: { to: "/places" } }
+      }
     >
-      {/* Header */}
-      <div
-        style={S(
-          "display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px"
-        )}
-      >
-        <div style={S("display: flex; flex-direction: column; gap: 8px")}>
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink render={<a href="/" />}>
-                  <Trans>Home</Trans>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-
-              <BreadcrumbSeparator />
-
-              <BreadcrumbItem>
-                <BreadcrumbLink render={<a href="/places" />}>
-                  <Trans>Places</Trans>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-
-          <h1
-            style={S(
-              "font-size: 28px; font-weight: 800; margin: 0; line-height: 1.3"
-            )}
-          >
-            {asset?.name ??
-              (failed ? (
-                <Trans>Asset not found</Trans>
-              ) : (
-                <Skeleton style={S("width: 220px; height: 28px")} />
-              ))}
-          </h1>
-
-          {asset && accessToken && user?.role === "MANAGER" && (
-            <AssetManage
-              key={asset.updated_at}
-              token={accessToken}
-              asset={asset}
-              today={todayIn(place?.timezone ?? "Asia/Riyadh")}
-              onUpdated={setAsset}
-              onDeleted={() =>
-                void navigate({
-                  to: "/place/$place_id",
-                  params: { place_id: asset.place_id },
-                })
-              }
-            />
-          )}
-        </div>
-      </div>
+      {asset && accessToken && user?.role === "MANAGER" && (
+        <AssetManage
+          key={asset.updated_at}
+          token={accessToken}
+          asset={asset}
+          today={todayIn(place?.timezone ?? "Asia/Riyadh")}
+          onUpdated={setAsset}
+          onDeleted={() =>
+            void navigate({
+              to: "/place/$place_id",
+              params: { place_id: asset.place_id },
+            })
+          }
+        />
+      )}
 
       {failed && (
         <Card style={S("padding: 18px; border: 1px solid var(--border)")}>
@@ -558,8 +527,7 @@ function AssetDetailPage() {
 </Card>
         </>
       )}
-    </div>
-    </center>
+    </Page>
   )
 }
 

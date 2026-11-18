@@ -4,12 +4,12 @@ import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { CircleAlert } from "lucide-react"
 
-import { S } from "@/lib/dom-style"
 import { useAuth } from "@/lib/auth"
 import { getPlace, getPlaceWorkers, createMaintenanceSchedule } from "@/lib/api"
 import type { IntervalUnit } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
 import Form, { type FormValues } from "@/components/form"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute(
   "/_authenticated/place/asset/maintenance/new"
@@ -121,17 +121,12 @@ function NewMaintenancePage() {
   }
 
   return (
-    <center>
-    <div style={S("padding: 40px 48px 56px; width: 100%; box-sizing: border-box")}>
-      <div style={S("margin-bottom: 28px")}>
-        <h1 style={S("font-size: 28px; font-weight: 700; margin: 0 0 8px")}>
-          <Trans>New Scheduled Maintenance</Trans>
-        </h1>
-
-        <p style={S("color: var(--muted-foreground); margin: 0")}>
-          <Trans>Create a recurring maintenance schedule for an asset.</Trans>
-        </p>
-      </div>
+    <Page
+      title={<Trans>New Scheduled Maintenance</Trans>}
+      description={<Trans>Create a recurring maintenance schedule for an asset.</Trans>}
+      parent={{ label: <Trans>Asset</Trans>, link: { to: "/place/asset/$asset_id", params: { asset_id } } }}
+      tabs={false}
+    >
 
       <Form
   fields={[
@@ -186,12 +181,11 @@ function NewMaintenancePage() {
   onSubmit={handleSubmit}
 />
       {error && (
-        <p role="alert" className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900" style={S("margin-top: 12px")}>
+        <p role="alert" className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
           <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
           {error}
         </p>
       )}
-    </div>
-    </center>
+    </Page>
   )
 }

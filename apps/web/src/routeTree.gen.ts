@@ -16,12 +16,15 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as AuthenticatedAnnouncementsRouteImport } from './routes/_authenticated/announcements'
 import { Route as AuthenticatedBookingsRouteImport } from './routes/_authenticated/bookings'
+import { Route as AuthenticatedExpensesRouteImport } from './routes/_authenticated/expenses'
 import { Route as AuthenticatedFinanceRouteImport } from './routes/_authenticated/finance'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedPlacesRouteImport } from './routes/_authenticated/places'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedTicketsRouteImport } from './routes/_authenticated/tickets'
 import { Route as AuthenticatedWorkersRouteImport } from './routes/_authenticated/workers'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
@@ -77,9 +80,20 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAnnouncementsRoute =
+  AuthenticatedAnnouncementsRouteImport.update({
+    id: '/announcements',
+    path: '/announcements',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedBookingsRoute = AuthenticatedBookingsRouteImport.update({
   id: '/bookings',
   path: '/bookings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedExpensesRoute = AuthenticatedExpensesRouteImport.update({
+  id: '/expenses',
+  path: '/expenses',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedFinanceRoute = AuthenticatedFinanceRouteImport.update({
@@ -106,6 +120,11 @@ const AuthenticatedPlacesRoute = AuthenticatedPlacesRouteImport.update({
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedReportsRoute = AuthenticatedReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedTicketsRoute = AuthenticatedTicketsRouteImport.update({
@@ -227,12 +246,15 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/announcements': typeof AuthenticatedAnnouncementsRoute
   '/bookings': typeof AuthenticatedBookingsRoute
+  '/expenses': typeof AuthenticatedExpensesRoute
   '/finance': typeof AuthenticatedFinanceRoute
   '/home': typeof AuthenticatedHomeRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/places': typeof AuthenticatedPlacesRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/tickets': typeof AuthenticatedTicketsRoute
   '/workers': typeof AuthenticatedWorkersRoute
   '/admin/$admin_id': typeof AuthenticatedAdminAdmin_idRoute
@@ -261,12 +283,15 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/announcements': typeof AuthenticatedAnnouncementsRoute
   '/bookings': typeof AuthenticatedBookingsRoute
+  '/expenses': typeof AuthenticatedExpensesRoute
   '/finance': typeof AuthenticatedFinanceRoute
   '/home': typeof AuthenticatedHomeRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/places': typeof AuthenticatedPlacesRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/reports': typeof AuthenticatedReportsRoute
   '/tickets': typeof AuthenticatedTicketsRoute
   '/workers': typeof AuthenticatedWorkersRoute
   '/admin/$admin_id': typeof AuthenticatedAdminAdmin_idRoute
@@ -297,12 +322,15 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
+  '/_authenticated/announcements': typeof AuthenticatedAnnouncementsRoute
   '/_authenticated/bookings': typeof AuthenticatedBookingsRoute
+  '/_authenticated/expenses': typeof AuthenticatedExpensesRoute
   '/_authenticated/finance': typeof AuthenticatedFinanceRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/places': typeof AuthenticatedPlacesRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/tickets': typeof AuthenticatedTicketsRoute
   '/_authenticated/workers': typeof AuthenticatedWorkersRoute
   '/_authenticated/admin/$admin_id': typeof AuthenticatedAdminAdmin_idRoute
@@ -333,12 +361,15 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signin'
     | '/signup'
+    | '/announcements'
     | '/bookings'
+    | '/expenses'
     | '/finance'
     | '/home'
     | '/notifications'
     | '/places'
     | '/profile'
+    | '/reports'
     | '/tickets'
     | '/workers'
     | '/admin/$admin_id'
@@ -367,12 +398,15 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signin'
     | '/signup'
+    | '/announcements'
     | '/bookings'
+    | '/expenses'
     | '/finance'
     | '/home'
     | '/notifications'
     | '/places'
     | '/profile'
+    | '/reports'
     | '/tickets'
     | '/workers'
     | '/admin/$admin_id'
@@ -402,12 +436,15 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signin'
     | '/signup'
+    | '/_authenticated/announcements'
     | '/_authenticated/bookings'
+    | '/_authenticated/expenses'
     | '/_authenticated/finance'
     | '/_authenticated/home'
     | '/_authenticated/notifications'
     | '/_authenticated/places'
     | '/_authenticated/profile'
+    | '/_authenticated/reports'
     | '/_authenticated/tickets'
     | '/_authenticated/workers'
     | '/_authenticated/admin/$admin_id'
@@ -492,11 +529,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/announcements': {
+      id: '/_authenticated/announcements'
+      path: '/announcements'
+      fullPath: '/announcements'
+      preLoaderRoute: typeof AuthenticatedAnnouncementsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/bookings': {
       id: '/_authenticated/bookings'
       path: '/bookings'
       fullPath: '/bookings'
       preLoaderRoute: typeof AuthenticatedBookingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/expenses': {
+      id: '/_authenticated/expenses'
+      path: '/expenses'
+      fullPath: '/expenses'
+      preLoaderRoute: typeof AuthenticatedExpensesRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/finance': {
@@ -532,6 +583,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reports': {
+      id: '/_authenticated/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthenticatedReportsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/tickets': {
@@ -678,12 +736,15 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAnnouncementsRoute: typeof AuthenticatedAnnouncementsRoute
   AuthenticatedBookingsRoute: typeof AuthenticatedBookingsRoute
+  AuthenticatedExpensesRoute: typeof AuthenticatedExpensesRoute
   AuthenticatedFinanceRoute: typeof AuthenticatedFinanceRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPlacesRoute: typeof AuthenticatedPlacesRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedTicketsRoute: typeof AuthenticatedTicketsRoute
   AuthenticatedWorkersRoute: typeof AuthenticatedWorkersRoute
   AuthenticatedAdminAdmin_idRoute: typeof AuthenticatedAdminAdmin_idRoute
@@ -706,12 +767,15 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAnnouncementsRoute: AuthenticatedAnnouncementsRoute,
   AuthenticatedBookingsRoute: AuthenticatedBookingsRoute,
+  AuthenticatedExpensesRoute: AuthenticatedExpensesRoute,
   AuthenticatedFinanceRoute: AuthenticatedFinanceRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPlacesRoute: AuthenticatedPlacesRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedTicketsRoute: AuthenticatedTicketsRoute,
   AuthenticatedWorkersRoute: AuthenticatedWorkersRoute,
   AuthenticatedAdminAdmin_idRoute: AuthenticatedAdminAdmin_idRoute,

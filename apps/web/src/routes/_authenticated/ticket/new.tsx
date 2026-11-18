@@ -1,23 +1,16 @@
 import { useEffect, useState } from "react"
-import { Link, createFileRoute, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { CircleAlert } from "lucide-react"
 import type { Asset } from "@amlak/shared"
 
-import { S } from "@/lib/dom-style"
 import { useAuth } from "@/lib/auth"
 import { createTicket, getPlaceAssets } from "@/lib/api"
 import type { TicketPriority } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
 import Form, { type FormValues } from "@/components/form"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute("/_authenticated/ticket/new")({
   component: AddTicket,
@@ -84,45 +77,12 @@ function AddTicket() {
   }
 
   return (
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 720px; width: 100%",
-      )}
+    <Page
+      title={<Trans>Report damage</Trans>}
+      description={<Trans>Report new damage for maintenance</Trans>}
+      parent={{ label: <Trans>Place</Trans>, link: { to: "/place/$place_id", params: { place_id } } }}
+      tabs={false}
     >
-<Breadcrumb>
-  <BreadcrumbList>
-  <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/" />}><Trans>Home</Trans></BreadcrumbLink>
-    </BreadcrumbItem>
-    <BreadcrumbSeparator />
-    <BreadcrumbItem>
-      <BreadcrumbLink render={<a href="/places" />}><Trans>Places</Trans></BreadcrumbLink>
-    </BreadcrumbItem>
-    <BreadcrumbSeparator />
-    <BreadcrumbItem>
-            <BreadcrumbLink
-        render={
-          <Link
-            to="/place/$place_id"
-            params={{ place_id: place_id }}
-          >
-            <Trans>Place</Trans>
-          </Link>
-        }
-      />
-    </BreadcrumbItem>
-  </BreadcrumbList>
-</Breadcrumb>
-<center>
-      <div style={S("display:flex; flex-direction:column; gap:6px")}>
-        <h1 style={S("font-size:30px; font-weight:800; margin:0")}>
-          <Trans>Report damage</Trans>
-        </h1>
-
-        <p style={S("font-size:14px; color:var(--muted-foreground); margin:0")}>
-          <Trans>Report new damage for maintenance</Trans>
-        </p>
-      </div>
         <Form
   fields={[
     {
@@ -164,14 +124,11 @@ function AddTicket() {
   onSubmit={handleSubmit}
 />
         {formError && (
-          <p role="alert" className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900" style={S("margin-top: 12px")}>
+          <p role="alert" className="flex items-center gap-1.5 text-[13px] leading-5 text-crit-900">
             <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
             {formError}
           </p>
         )}
-
-  </center>
-
-    </div>
+    </Page>
   )
 }

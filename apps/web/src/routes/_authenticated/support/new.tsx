@@ -3,11 +3,11 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router"
 import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
 import { CircleAlert } from "lucide-react"
-import { S } from "@/lib/dom-style"
 import { useAuth } from "@/lib/auth"
 import { createSupportTicket } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
 import Form, { type FormValues } from "@/components/form"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute("/_authenticated/support/new")({
   component: NewSupportTicket,
@@ -37,15 +37,11 @@ function NewSupportTicket() {
   }
 
   return (
-    <center>
-      <div
-        style={S(
-          "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px; max-width: 640px",
-        )}
-      >
-        <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-          <Trans>New support ticket</Trans>
-        </h1>
+    <Page
+      title={<Trans>New support ticket</Trans>}
+      parent={{ label: <Trans>Support tickets</Trans>, link: { to: "/support" } }}
+      tabs={false}
+    >
         <Form
           fields={[
             { name: "subject", label: t`Subject`, type: "text", required: true },
@@ -59,7 +55,6 @@ function NewSupportTicket() {
             {formError}
           </p>
         )}
-      </div>
-    </center>
+    </Page>
   )
 }

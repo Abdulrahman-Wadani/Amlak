@@ -24,6 +24,8 @@ import { errorMessage } from "@/lib/errors"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Page } from "@/components/page"
+import { ManageLinks, SecurityLinks } from "@/components/account-links"
 
 export const Route = createFileRoute("/_authenticated/profile")({
   component: ProfilePage,
@@ -327,21 +329,23 @@ function ProfilePage() {
 
   if (loading) {
     return (
-      <div style={S("padding: 40px 48px 56px")}>
-        <Skeleton style={S("height: 36px; width: 220px; margin-bottom: 24px")} />
-        <Skeleton style={S("height: 180px; margin-bottom: 20px")} />
+      <Page title={messages.myProfile} description={messages.description}>
+        <Skeleton style={S("height: 180px")} />
         <Skeleton style={S("height: 300px")} />
-      </div>
+      </Page>
     )
   }
 
   if (error && !profile) {
     return (
-      <div style={S("padding: 40px 48px 56px")}>
-        <div style={S("color: var(--destructive); font-size: 14px")}>
+      <Page title={messages.myProfile} description={messages.description}>
+        <div role="alert" style={S("color: var(--destructive); font-size: 14px")}>
           {error}
         </div>
-      </div>
+        {/* Signing out stays possible when the profile does not load. */}
+        <ManageLinks />
+        <SecurityLinks />
+      </Page>
     )
   }
 
@@ -391,18 +395,7 @@ function ProfilePage() {
   ]
 
   return (
-    <div
-      style={S("padding: 40px 48px 56px; width: 100%; box-sizing: border-box")}
-    >
-      <div style={S("margin-bottom: 28px")}>
-        <h1 style={S("font-size: 28px; font-weight: 700; margin: 0 0 8px")}>
-          {messages.myProfile}
-        </h1>
-
-        <p style={S("color: var(--muted-foreground); margin: 0")}>
-          {messages.description}
-        </p>
-      </div>
+    <Page title={messages.myProfile} description={messages.description}>
 
       {error && (
         <div style={S("color: var(--destructive); font-size: 14px; margin-bottom: 16px")}>
@@ -621,7 +614,10 @@ function ProfilePage() {
             })}
           </CardContent>
         </Card>
+
+        <ManageLinks />
+        <SecurityLinks />
       </div>
-    </div>
+    </Page>
   )
 }

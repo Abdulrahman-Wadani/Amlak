@@ -3,7 +3,6 @@ import { useEffect, useState } from "react"
 import {
   createFileRoute,
   useParams,
-  Link,
 } from "@tanstack/react-router"
 import {
   CalendarDays,
@@ -37,13 +36,6 @@ import {
 } from "@/lib/api"
 import type { Asset, Place, PlaceWorker } from "@amlak/shared"
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
 
 import {
   Card,
@@ -52,6 +44,7 @@ import {
 } from "@/components/ui/card"
 
 import { Button } from "@/components/ui/button"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute(
   "/_authenticated/ticket/$ticket_id",
@@ -535,25 +528,28 @@ function TicketDetailPage() {
 
   const today = new Date().toISOString().slice(0, 10)
 
+  const parent = {
+    label: user?.role === "WORKER" ? <Trans>My tasks</Trans> : <Trans>Maintenance tickets</Trans>,
+    link: { to: "/tickets" },
+  } as const
+
   if (loading) {
     return (
-      <div style={S("padding:32px; color:var(--muted-foreground)")}>
-        <Trans>Loading the ticket…</Trans>
-      </div>
+      <Page title={<Trans>Maintenance ticket</Trans>} parent={parent}>
+        <p style={S("margin:0; color:var(--muted-foreground)")}>
+          <Trans>Loading the ticket…</Trans>
+        </p>
+      </Page>
     )
   }
 
   if (error || !ticket) {
     return (
-      <div
-        style={S(
-          "padding:32px; display:flex; flex-direction:column; gap:16px",
-        )}
-      >
-        <p style={S("color:#dc2626")}>
+      <Page title={<Trans>Maintenance ticket</Trans>} parent={parent}>
+        <p role="alert" style={S("margin:0; color:var(--destructive)")}>
           {error || t`Ticket not found`}
         </p>
-      </div>
+      </Page>
     )
   }
 
@@ -593,67 +589,18 @@ function TicketDetailPage() {
     : []
 
   return (
-    <div
-      style={S(
-        "width:100%; max-width:1100px; margin:0 auto; padding:24px; display:flex; flex-direction:column; gap:22px",
-      )}
-    >
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink render={<a href="/" />}>
-              <Trans>Home</Trans>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-
-          <BreadcrumbSeparator />
-
-          <BreadcrumbItem>
-            <BreadcrumbLink render={<a href="/places" />}>
-              <Trans>Places</Trans>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-
-          <BreadcrumbSeparator />
-
-          <BreadcrumbItem>
-            <BreadcrumbLink
-              render={
-                <Link
-                  to="/place/$place_id"
-                  params={{ place_id: ticket.place_id }}
-                >
-                  <Trans>Place</Trans>
-                </Link>
-              }
-            />
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
-      <header
-        style={S(
-          "display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px",
-        )}
-      >
-        <div style={S("display:flex; flex-direction:column; gap:8px")}>
-          <h1 style={S("font-size:24px; font-weight:800; margin:0")}>
-            <Trans>Maintenance ticket</Trans>
-          </h1>
-
-          <p
-            style={S(
-              "font-size:13px; color:var(--muted-foreground); margin:0",
-            )}
-          >
-            {ticket.description || t`Maintenance ticket`}
-          </p>
-        </div>
-
+    <Page
+      title={<Trans>Maintenance ticket</Trans>}
+      description={ticket.description || t`Maintenance ticket`}
+      parent={parent}
+      phoneTitle={<Trans>Maintenance ticket</Trans>}
+      phoneSubtitle={ticket.description || undefined}
+      // The review screen has its own buttons at the bottom; no tabs there.
+      tabs={!canReview}
+      actions={
         <span
           style={{
             padding: "7px 14px",
-            borderRadius: 20,
             color: statusColors[ticket.status] || "var(--foreground)",
             background: `${statusColors[ticket.status] || "#6b7280"}18`,
             fontSize: 13,
@@ -662,8 +609,8 @@ function TicketDetailPage() {
         >
           {statusLabels[ticket.status] || ticket.status}
         </span>
-      </header>
-
+      }
+    >
       {/* First section: always visible */}
       <Section title={t`Ticket information`}>
         <Grid>
@@ -1309,6 +1256,6 @@ function TicketDetailPage() {
           )}
         </Section>
       </div>
-    </div>
+    </Page>
   )
 }

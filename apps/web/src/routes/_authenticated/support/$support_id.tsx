@@ -31,6 +31,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { StatusBadge } from "@/components/place-shared"
 import { Button } from "@/components/ui/button"
+import { Page } from "@/components/page"
 
 type SupportTicket = {
   id: string
@@ -144,14 +145,13 @@ const [resolveError, setResolveError] = useState<string | null>(null);
 
   if (loading) {
     return (
-      <PageContainer>
-        <div style={S(`width:100%; max-width:760px; display:flex; flex-direction:column; gap:20px;`)}>
-          <Skeleton className="h-8 w-48 mx-auto" />
+      <Page title={<Trans>Ticket details</Trans>} parent={{ label: <Trans>Support tickets</Trans>, link: { to: "/support" } }}>
+        <div style={S(`width:100%; display:flex; flex-direction:column; gap:20px;`)}>
           <Skeleton className="h-32 w-full" />
           <Skeleton className="h-64 w-full" />
           <Skeleton className="h-48 w-full" />
         </div>
-      </PageContainer>
+      </Page>
     )
   }
   const handleResolve = async () => {
@@ -187,16 +187,14 @@ const [resolveError, setResolveError] = useState<string | null>(null);
 
   if (error || !ticket) {
     return (
-      <PageContainer>
+      <Page title={<Trans>Ticket details</Trans>} parent={{ label: <Trans>Support tickets</Trans>, link: { to: "/support" } }}>
         <div
           style={S(`
             width:100%;
-            max-width:760px;
             display:flex;
             flex-direction:column;
-            align-items:center;
+            align-items:flex-start;
             gap:16px;
-            text-align:center;
           `)}
         >
           <CircleAlert size={36} color="var(--destructive)" />
@@ -210,88 +208,25 @@ const [resolveError, setResolveError] = useState<string | null>(null);
             <Trans>Back to support tickets</Trans>
           </Link>
         </div>
-      </PageContainer>
+      </Page>
     )
   }
 
   return (
-    <PageContainer>
+    <Page
+      title={ticket.subject}
+      phoneTitle={<Trans>Ticket details</Trans>}
+      parent={{ label: <Trans>Support tickets</Trans>, link: { to: "/support" } }}
+      actions={<StatusBadge status={ticket.status} />}
+    >
       <div
         style={S(`
           width:100%;
-          max-width:760px;
           display:flex;
           flex-direction:column;
-          align-items:center;
           gap:24px;
         `)}
       >
-        {/* Breadcrumb */}
-        <div
-          style={S(`
-            width:100%;
-            display:flex;
-            justify-content:flex-start;
-            align-items:center;
-            gap:8px;
-            font-size:13px;
-            color:var(--muted-foreground);
-          `)}
-        >
-          <Link to="/support" className="hover:underline">
-            <Trans>Home</Trans>
-          </Link>
-
-          <span>/</span>
-
-          <Link
-            to="/support"
-            className="hover:underline"
-          >
-            <Trans>Support tickets</Trans>
-          </Link>
-
-          <span>/</span>
-
-          <span style={S(`color:var(--foreground);`)}>
-            <Trans>Ticket details</Trans>
-          </span>
-        </div>
-        {/* Header */}
-        <div
-          style={S(`
-            width:100%;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            gap:12px;
-            text-align:center;
-          `)}
-        >
-          <div
-            style={S(`
-              width:64px;
-              height:64px;
-              border-radius:18px;
-              background:var(--muted);
-              display:flex;
-              align-items:center;
-              justify-content:center;
-            `)}
-          >
-            <TicketIcon size={30} />
-          </div>
-
-          <h1 style={S(`font-size:24px; font-weight:700;`)}>
-            {ticket.subject}
-          </h1>
-
-          <StatusBadge status={ticket.status} />
-
-          <p style={S(`font-size:13px; color:var(--muted-foreground);`)}>
-            <Trans>Support ticket</Trans>
-          </p>
-        </div>
         {/* Ticket information */}
         <Card className="w-full" >
           <CardHeader>
@@ -548,28 +483,7 @@ const [resolveError, setResolveError] = useState<string | null>(null);
           <Trans>Back to support tickets</Trans>
         </Link>
       </div>
-    </PageContainer>
-  )
-}
-
-function PageContainer({ children }: { children: React.ReactNode }) {
-  return (
-    <div
-      style={S(`
-        width:100%;
-        max-width:1000px;
-        margin:0 auto;
-        padding:40px 48px 56px;
-        display:flex;
-        flex-direction:column;
-        align-items:center;
-        gap:24px;
-      `)}
-    >
-      {children}
-
-    </div>
-    
+    </Page>
   )
 }
 

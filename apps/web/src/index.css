@@ -6,6 +6,7 @@
 @import "@fontsource/ibm-plex-mono/500.css";
 @import "@fontsource/ibm-plex-mono/600.css";
 @import "@fontsource-variable/noto-kufi-arabic";
+@import "./styles/motion.css" layer(base);
 
 @custom-variant dark (&:is(.dark *));
 
@@ -13,9 +14,11 @@
   --text-caption: 13px;
   --text-caption--line-height: 20px;
   --font-heading: var(--font-sans);
-  --font-sans: "Archivo Variable", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
-  --font-arabic: "Noto kufi Arabic Variable", sans-serif;
+  /* Arabic letters are not in Archivo, so they fall through to Noto Kufi. */
+  --font-sans: "Archivo Variable", "Noto Kufi Arabic Variable", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", "Noto Kufi Arabic Variable", ui-monospace, monospace;
+  /* Below this width the app uses the phone layout: short top bar and bottom tabs. */
+  --breakpoint-desk: 70rem;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -103,13 +106,14 @@
   --secondary: #edf1f6; /* surfaceAlt */
   --secondary-foreground: #1b2430; /* core.muted */
   --muted: #edf1f6; /* surfaceAlt */
-  --muted-foreground: rgba(27, 36, 48, 0.68); /* ink */
+  --muted-foreground: #5b636e;
   --accent: #edf1f6; /* surfaceAlt */
+  --accent-brand: #c69a35; /* supporting colour */
   --accent-foreground: #1b2430; /* ink */
-  --destructive: #e45b47; /* crit.500 */
+  --destructive: #a33a2b; /* crit.900: delete and reject */
   --destructive-foreground: #ffffff; /* surface */
-  --border: rgba(27, 36, 48, 0.16); /* core.rule */
-  --input: rgba(27, 36, 48, 0.16); /* core.rule */
+  --border: #d3d9e2;
+  --input: #d3d9e2;
   --ring: #4d7296; /* info.700 */
 
   /* Semantic families */
@@ -135,9 +139,9 @@
   --info-900: #375674;
   /* aliases */
   --good-foreground: #1a735a;
-  --warn-foreground: #9a7629;
-  --crit-foreground: #c94a38;
-  --info-foreground: #4d7296;
+  --warn-foreground: #6e541e;
+  --crit-foreground: #a33a2b;
+  --info-foreground: #375674;
   --good-hover: #115241;
   --warn-hover: #6e541e;
   --crit-hover: #a33a2b;
@@ -146,14 +150,14 @@
   /* custom non shadcn tokens */
   --faint: rgba(27, 36, 48, 0.42);
   /* charts */
-  --chart-1: #cdd2d9;
-  --chart-2: #aab1bb;
+  --chart-1: #239574; /* income */
+  --chart-2: #a87a1e; /* expenses */
   --chart-3: #5c6470;
   --chart-4: #46586e;
   --chart-5: #1b2430;
 
   /* defaults */
-  --sidebar: oklch(0.985 0 0);
+  --sidebar: #ffffff;
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);

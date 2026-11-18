@@ -36,16 +36,8 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
+import { Page } from "@/components/page"
 
-import "@/styles/motion.css"
 
 export const Route = createFileRoute(
   "/_authenticated/content/$content_id",
@@ -177,87 +169,15 @@ function ContentDetailsPage() {
     new Date(date).toLocaleDateString(i18n.locale)
 
   return (
-    <div
-      style={S(`
-        width: 100%;
-        max-width: 1000px;
-        margin: 0 auto;
-        padding: 40px 48px 56px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 24px;
-      `)}
+    <Page
+      title={
+        content?.title ??
+        (failed ? <Trans>Content not found</Trans> : <Skeleton style={S("width: 220px; height: 30px")} />)
+      }
+      phoneTitle={<Trans>Page details</Trans>}
+      parent={{ label: <Trans>Site content</Trans>, link: { to: "/content" } }}
+      tabs={false}
     >
-      {/* Header */}
-      <div
-        style={S(`
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          width: 100%;
-          gap: 20px;
-        `)}
-      >
-        <div
-          style={S(`
-            display: flex;
-            justify-content: flex-start;
-            width: 100%;
-          `)}
-        >
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink render={<a href="/" />}>
-                  <Trans>Home</Trans>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-
-              <BreadcrumbSeparator />
-
-              <BreadcrumbItem>
-                <BreadcrumbLink render={<a href="/content/" />}>
-                  <Trans>Content</Trans>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-
-              <BreadcrumbSeparator />
-
-              <BreadcrumbItem>
-                <BreadcrumbPage>
-                  <Trans>Page details</Trans>
-                </BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        </div>
-
-        <h1
-          style={S(`
-            width: 100%;
-            margin: 0;
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            text-align: center;
-          `)}
-        >
-          {content?.title ??
-            (failed ? (
-              <Trans>Content not found</Trans>
-            ) : (
-              <Skeleton
-                style={S(`
-                  width: 220px;
-                  height: 30px;
-                  margin: 0 auto;
-                `)}
-              />
-            ))}
-        </h1>
-      </div>
-
       {/* Error */}
       {failed && (
         <div
@@ -731,7 +651,7 @@ function ContentDetailsPage() {
           </div>
         </>
       )}
-    </div>
+    </Page>
   )
 }
 

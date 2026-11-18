@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { errorMessage } from "@/lib/errors"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute("/_authenticated/worker/new")({
   component: AddWorker,
@@ -97,28 +98,11 @@ function AddWorker() {
     "flex items-center gap-1.5 text-[13px] leading-5 text-crit-900"
 
   return (
-    <div
-      style={S(
-        "width: 100%; min-height: calc(100vh - 64px); display: flex; justify-content: center; align-items: center; padding: 40px 24px",
-      )}
+    <Page
+      title={<Trans>Add worker</Trans>}
+      parent={{ label: <Trans>Workers</Trans>, link: { to: "/workers" } }}
+      tabs={false}
     >
-      <div
-        style={S(
-          "width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: 24px",
-        )}
-      >
-        <div>
-          <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-            <Trans>Add worker</Trans>
-          </h1>
-
-          <p
-            style={S(
-              "color: var(--muted-foreground); font-size: 14px; margin-top: 8px",
-            )}
-          >
-          </p>
-        </div>
 
         <form
           onSubmit={handleSubmit}
@@ -248,7 +232,6 @@ function AddWorker() {
             </Button>
           </div>
         </form>
-      </div>
-    </div>
+    </Page>
   )
 }

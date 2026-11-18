@@ -24,7 +24,7 @@ import {
 
 import { StatusBadge } from "@/components/place-shared"
 import { cn } from "cn"
-import "@/styles/motion.css"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute("/_authenticated/support/")({
   component: UsersPage,
@@ -39,7 +39,8 @@ const TABS = [
 type TabKey = SupportFilter
 
 function UsersPage() {
-  const { accessToken } = useAuth()
+  const { accessToken, user } = useAuth()
+  const isAdmin = user?.role === "ADMIN"
 
   const [ticket, setTicket] = useState<SupportTicket[] | null>(null)
   const [error, setError] = useState(false)
@@ -78,44 +79,19 @@ function UsersPage() {
     ).length ?? 0
 
   return (
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px",
-      )}
+    <Page
+      title={<Trans>Support tickets</Trans>}
+      phoneStart={isAdmin ? "logo" : "none"}
+      phoneBack={isAdmin ? undefined : { to: "/profile" }}
+      phoneEnd="none"
+      bell={!isAdmin}
+      actions={
+        <Link to="/support/new" className={cn(buttonVariants(), "am-btn am-solid")}>
+          <Plus size={18} aria-hidden="true" />
+          <Trans>Add ticket</Trans>
+        </Link>
+      }
     >
-      {/* Header */}
-{/* Header */}
-<div
-  style={S(`
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 16px;
-    width: 100%;
-  `)}
->
-  <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-    <Trans>Support tickets</Trans>
-  </h1>
-
-  <Link
-    to="/support/new"
-    className={cn(buttonVariants(), "am-btn am-solid")}
-    style={S(`
-      height: 44px;
-      min-width: 44px;
-      width: fit-content;
-      padding: 0 16px;
-      margin-inline-start: auto;
-      font-size: 15px;
-      font-weight: 600;
-      box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1);
-    `)}
-  >
-    <Plus size={18} />
-    <Trans>Add ticket</Trans>
-  </Link>
-</div>
       {/* Search and Filters */}
       <div
         style={S(
@@ -341,6 +317,6 @@ function UsersPage() {
           ))}
         </div>
       )}
-    </div>
+    </Page>
   )
 }

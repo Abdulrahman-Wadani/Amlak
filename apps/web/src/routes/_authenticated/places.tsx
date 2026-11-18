@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/empty"
 import { StatusBadge, TypeLabel } from "@/components/place-shared"
 import { cn } from "cn"
-import "@/styles/motion.css"
+import { Page } from "@/components/page"
 
 export const Route = createFileRoute("/_authenticated/places")({
   component: PlacesPage,
@@ -123,36 +123,20 @@ function PlacesPage() {
     places?.filter((p) => key === "ALL" || p.status === key).length ?? 0
 
   return (
-    <div
-      style={S(
-        "padding: 40px 48px 56px; display: flex; flex-direction: column; gap: 24px"
-      )}
-    >
-      <div
-        style={S(
-          "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px"
-        )}
-      >
-        <h1 style={S("font-size: 30px; font-weight: 800; margin: 0")}>
-          <Trans>Places</Trans>
-        </h1>
-        {isManager && (
+    <Page
+      title={<Trans>Places</Trans>}
+      phoneActions={false}
+      phoneEnd={isManager ? { label: t`Add place`, icon: "plus", link: { to: "/place/new" } } : "bell"}
+      actions={isManager && (
         <Link
           to="/place/new"
           className={cn(buttonVariants(), "am-btn am-solid")}
-          style={S(
-            "height: 44px; min-width: 44px; padding: 0 16px; font-size: 15px; font-weight: 600; box-shadow: 2px 2px 0 rgba(27, 36, 48, 0.1)"
-          )}
         >
-          <Plus
-            aria-hidden="true"
-            style={S("width: 18px; height: 18px; display: block; flex: none")}
-          />
+          <Plus aria-hidden="true" />
           <Trans>Add place</Trans>
         </Link>
-        )}
-      </div>
-
+      )}
+    >
       <div
         style={S(
           "display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px"
@@ -260,7 +244,8 @@ function PlacesPage() {
         </Empty>
       )}
 
-      <div style={S("display: flex; flex-direction: row; gap: 12px")}>
+      {/* One row of cards overflowed the page; the design's grid wraps them. */}
+      <div style={S("display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 20px")}>
         {visible.map((p) => (
           <Link
             key={p.id}
@@ -324,6 +309,6 @@ function PlacesPage() {
           </Link>
         ))}
       </div>
-    </div>
+    </Page>
   )
 }
