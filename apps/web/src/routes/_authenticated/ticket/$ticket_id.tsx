@@ -50,7 +50,7 @@ function TicketPage() {
   const { ticket_id } = useParams({ from: "/_authenticated/ticket/$ticket_id" })
   const { accessToken, user } = useAuth()
   const isManager = user?.role === "MANAGER"
-  const { date, relative, dateFormat } = useFormat()
+  const { date, relative, dateFormat, number } = useFormat()
 
   const [ticket, setTicket] = useState<Ticket | null>(null)
   const [asset, setAsset] = useState<Asset | null>(null)
@@ -144,6 +144,8 @@ function TicketPage() {
   const mine = ticket?.assignee_id === user?.id
 
   // The ticket's history, newest first, from what the ticket records.
+  const damageCount = number(damage.length)
+  const afterCount = number(after.length)
   const history: { at: string; who?: string; text: React.ReactNode }[] = []
   if (ticket) {
     const photos = damage.length
@@ -285,17 +287,24 @@ function TicketPage() {
               <PanelTitle id="desc-title">
                 <Trans>Description</Trans>
               </PanelTitle>
-              <p className="m-0 text-[15px] leading-[1.8] whitespace-pre-line">
+              <p className="m-0 bg-secondary p-4 text-[15px] leading-[1.8] whitespace-pre-line">
                 <bdi>{ticket.description}</bdi>
               </p>
-              <PhotoTiles urls={damage} columns={4} label={(n) => t`Damage photo ${n}`} />
+              {damage.length > 0 && (
+                <div className="flex flex-col gap-2">
+                  <span className="text-sm font-semibold">
+                    <Trans>Damage photos ({damageCount})</Trans>
+                  </span>
+                  <PhotoTiles urls={damage} label={(n) => t`Damage photo ${n}`} />
+                </div>
+              )}
             </Panel>
             {ticket.status === "REJECTED" && ticket.rejection_reason && (
               <Panel labelledBy="reason-title">
                 <PanelTitle id="reason-title">
                   <Trans>Reason for rejection</Trans>
                 </PanelTitle>
-                <p className="m-0 text-[15px] leading-[1.8]">
+                <p className="m-0 bg-secondary p-4 text-[15px] leading-[1.8]">
                   <bdi>{ticket.rejection_reason}</bdi>
                 </p>
               </Panel>
@@ -306,17 +315,29 @@ function TicketPage() {
                   <Trans>After the repair</Trans>
                 </PanelTitle>
                 {ticket.completion_notes && (
-                  <p className="m-0 text-[15px] leading-[1.8]">
+                  <p className="m-0 bg-secondary p-4 text-[15px] leading-[1.8]">
                     <bdi>{ticket.completion_notes}</bdi>
                   </p>
                 )}
-                <PhotoTiles urls={after} columns={4} label={(n) => t`Photo after repair ${n}`} />
+                {after.length > 0 && (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-sm font-semibold">
+                      <Trans>Photos after the repair ({afterCount})</Trans>
+                    </span>
+                    <PhotoTiles urls={after} label={(n) => t`Photo after repair ${n}`} />
+                  </div>
+                )}
               </Panel>
             )}
             <Panel labelledBy="history-title">
-              <PanelTitle id="history-title">
-                <Trans>History</Trans>
-              </PanelTitle>
+              <div className="flex flex-col gap-0.5">
+                <PanelTitle id="history-title">
+                  <Trans>Ticket history</Trans>
+                </PanelTitle>
+                <span className="text-[13px] text-muted-foreground">
+                  <Trans>Who did what to this ticket and when, newest first.</Trans>
+                </span>
+              </div>
               <ul className="m-0 flex list-none flex-col gap-3.5 p-0">
                 {history.map((event) => (
                   <li key={`${event.at}-${String(event.text)}`} className="flex gap-3">

@@ -168,7 +168,7 @@ function CompleteTask() {
                 <p dir="auto" className="m-0 text-[15px] leading-[1.8]">
                   {ticket.description}
                 </p>
-                <PhotoTiles urls={damage} columns={4} label={(n) => t`Damage photo ${n}`} />
+                <PhotoTiles urls={damage} label={(n) => t`Damage photo ${n}`} />
               </Panel>
             ) : (
               <Skeleton className="h-48" />
