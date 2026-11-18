@@ -269,7 +269,7 @@ msgstr "Activate account"
 msgid "Activating…"
 msgstr "Activating…"
 
-#: src/components/home-parts.tsx:139
+#: src/components/home-parts.tsx:140
 #: src/components/place-form.tsx:52
 #: src/components/place-shared.tsx:43
 #: src/components/place-shared.tsx:188
@@ -374,7 +374,7 @@ msgstr "After the repair"
 #: src/components/tickets-section.tsx:88
 #: src/routes/_authenticated/admin/index.tsx:27
 #: src/routes/_authenticated/expenses.tsx:162
-#: src/routes/_authenticated/notifications.tsx:273
+#: src/routes/_authenticated/notifications.tsx:272
 #: src/routes/_authenticated/places.tsx:26
 #: src/routes/_authenticated/tickets.tsx:36
 #: src/routes/_authenticated/workers.tsx:24
@@ -444,7 +444,7 @@ msgstr "Amlak {0}"
 msgid "Amount"
 msgstr "Amount"
 
-#: src/routes/_authenticated/notifications.tsx:417
+#: src/routes/_authenticated/notifications.tsx:416
 msgid "Announcement"
 msgstr "Announcement"
 
@@ -562,8 +562,8 @@ msgstr "Assignee"
 msgid "Assigning…"
 msgstr "Assigning…"
 
-#: src/components/page.tsx:152
-#: src/components/page.tsx:156
+#: src/components/page.tsx:164
+#: src/components/page.tsx:168
 #: src/components/place-bookings.tsx:637
 #: src/components/place-bookings.tsx:736
 #: src/components/place-bookings.tsx:811
@@ -1200,7 +1200,7 @@ msgstr "Deleting…"
 msgid "Description"
 msgstr "Description"
 
-#: src/components/home-parts.tsx:86
+#: src/components/home-parts.tsx:87
 #: src/components/user-support.tsx:85
 #: src/routes/_authenticated/admin/$admin_id.tsx:107
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:77
@@ -1472,11 +1472,11 @@ msgstr "Expenses"
 msgid "Expenses you add for this month will appear here."
 msgstr "Expenses you add for this month will appear here."
 
-#: src/routes/_authenticated/notifications.tsx:281
+#: src/routes/_authenticated/notifications.tsx:280
 msgid "Failed to load notifications."
 msgstr "Failed to load notifications."
 
-#: src/routes/_authenticated/notifications.tsx:283
+#: src/routes/_authenticated/notifications.tsx:282
 msgid "Failed to update notification."
 msgstr "Failed to update notification."
 
@@ -1615,7 +1615,7 @@ msgstr "Guests"
 msgid "Guests arriving today"
 msgstr "Guests arriving today"
 
-#: src/components/home-parts.tsx:86
+#: src/components/home-parts.tsx:87
 msgid "Hide details"
 msgstr "Hide details"
 
@@ -1624,7 +1624,7 @@ msgstr "Hide details"
 msgid "Hide password"
 msgstr "Hide password"
 
-#: src/components/home-parts.tsx:124
+#: src/components/home-parts.tsx:125
 #: src/components/place-shared.tsx:256
 #: src/routes/_authenticated/ticket/new.tsx:195
 msgid "High"
@@ -1676,14 +1676,14 @@ msgstr "In {currencyName}. Visible to the manager only."
 msgid "In days."
 msgstr "In days."
 
-#: src/components/home-parts.tsx:142
+#: src/components/home-parts.tsx:143
 #: src/components/place-form.tsx:56
 #: src/components/place-shared.tsx:85
 #: src/routes/_authenticated/places.tsx:29
 msgid "Inactive"
 msgstr "Inactive"
 
-#: src/routes/_authenticated/notifications.tsx:236
+#: src/routes/_authenticated/notifications.tsx:235
 msgid "Inbox"
 msgstr "Inbox"
 
@@ -1773,6 +1773,10 @@ msgstr "Link"
 msgid "Load more"
 msgstr "Load more"
 
+#: src/lib/auth.tsx:241
+msgid "Loading"
+msgstr "Loading"
+
 #: src/components/states.tsx:52
 #: src/routes/_authenticated/ticket/new.tsx:135
 msgid "Loading…"
@@ -1786,7 +1790,7 @@ msgstr "Location on the map"
 msgid "Longitude"
 msgstr "Longitude"
 
-#: src/components/home-parts.tsx:130
+#: src/components/home-parts.tsx:131
 #: src/components/place-shared.tsx:267
 #: src/routes/_authenticated/ticket/new.tsx:193
 msgid "Low"
@@ -1807,11 +1811,11 @@ msgstr "Main menu"
 msgid "Maintenance"
 msgstr "Maintenance"
 
-#: src/routes/_authenticated/notifications.tsx:429
+#: src/routes/_authenticated/notifications.tsx:428
 msgid "Maintenance overdue"
 msgstr "Maintenance overdue"
 
-#: src/routes/_authenticated/notifications.tsx:427
+#: src/routes/_authenticated/notifications.tsx:426
 msgid "Maintenance reminder"
 msgstr "Maintenance reminder"
 
@@ -1839,7 +1843,7 @@ msgstr "Maintenance tickets for this asset"
 msgid "Manage"
 msgstr "Manage"
 
-#: src/routes/_authenticated/notifications.tsx:243
+#: src/routes/_authenticated/notifications.tsx:242
 msgid "Manage your notifications and stay up to date."
 msgstr "Manage your notifications and stay up to date."
 
@@ -1860,7 +1864,7 @@ msgstr "Map to pick the location"
 msgid "Margin {0}%"
 msgstr "Margin {0}%"
 
-#: src/routes/_authenticated/notifications.tsx:551
+#: src/routes/_authenticated/notifications.tsx:550
 msgid "Mark as read"
 msgstr "Mark as read"
 
@@ -1870,7 +1874,7 @@ msgstr "Mark as read"
 msgid "Me"
 msgstr "Me"
 
-#: src/components/home-parts.tsx:130
+#: src/components/home-parts.tsx:131
 #: src/components/place-shared.tsx:267
 #: src/routes/_authenticated/ticket/new.tsx:194
 msgid "Medium"
@@ -1962,7 +1966,7 @@ msgstr "New support request"
 
 #: src/components/pager.tsx:46
 #: src/components/panel.tsx:225
-#: src/routes/_authenticated/notifications.tsx:389
+#: src/routes/_authenticated/notifications.tsx:388
 msgid "Next"
 msgstr "Next"
 
@@ -2036,7 +2040,7 @@ msgstr "No guests arrive today."
 msgid "No monthly budget is set."
 msgstr "No monthly budget is set."
 
-#: src/routes/_authenticated/notifications.tsx:316
+#: src/routes/_authenticated/notifications.tsx:315
 msgid "No notifications"
 msgstr "No notifications"
 
@@ -2135,7 +2139,7 @@ msgstr "Nothing to review."
 #: src/components/account-links.tsx:35
 #: src/components/notification-bell.tsx:16
 #: src/routes/_authenticated/notifications.tsx:154
-#: src/routes/_authenticated/notifications.tsx:172
+#: src/routes/_authenticated/notifications.tsx:171
 msgid "Notifications"
 msgstr "Notifications"
 
@@ -2420,7 +2424,7 @@ msgstr "Preventive"
 
 #: src/components/pager.tsx:32
 #: src/components/panel.tsx:222
-#: src/routes/_authenticated/notifications.tsx:365
+#: src/routes/_authenticated/notifications.tsx:364
 msgid "Previous"
 msgstr "Previous"
 
@@ -2483,8 +2487,8 @@ msgstr "Reactivate account"
 msgid "Reactivating…"
 msgstr "Reactivating…"
 
-#: src/routes/_authenticated/notifications.tsx:275
-#: src/routes/_authenticated/notifications.tsx:563
+#: src/routes/_authenticated/notifications.tsx:274
+#: src/routes/_authenticated/notifications.tsx:562
 msgid "Read"
 msgstr "Read"
 
@@ -2515,7 +2519,7 @@ msgstr "Receipt"
 msgid "Receipt photo"
 msgstr "Receipt photo"
 
-#: src/routes/_authenticated/notifications.tsx:264
+#: src/routes/_authenticated/notifications.tsx:263
 msgid "Refresh"
 msgstr "Refresh"
 
@@ -2856,7 +2860,7 @@ msgstr "Status"
 msgid "Stay"
 msgstr "Stay"
 
-#: src/routes/_authenticated/notifications.tsx:198
+#: src/routes/_authenticated/notifications.tsx:197
 msgid "Stay updated with your latest activity and announcements."
 msgstr "Stay updated with your latest activity and announcements."
 
@@ -2885,7 +2889,7 @@ msgstr "Support"
 msgid "Support requests"
 msgstr "Support requests"
 
-#: src/routes/_authenticated/notifications.tsx:431
+#: src/routes/_authenticated/notifications.tsx:430
 msgid "Support ticket resolved"
 msgstr "Support ticket resolved"
 
@@ -3144,11 +3148,11 @@ msgstr "Those dates are already booked for this property."
 msgid "Ticket approved and sent to {name}."
 msgstr "Ticket approved and sent to {name}."
 
-#: src/routes/_authenticated/notifications.tsx:421
+#: src/routes/_authenticated/notifications.tsx:420
 msgid "Ticket assigned"
 msgstr "Ticket assigned"
 
-#: src/routes/_authenticated/notifications.tsx:425
+#: src/routes/_authenticated/notifications.tsx:424
 msgid "Ticket completed"
 msgstr "Ticket completed"
 
@@ -3156,7 +3160,7 @@ msgstr "Ticket completed"
 msgid "Ticket reassigned to {name}."
 msgstr "Ticket reassigned to {name}."
 
-#: src/routes/_authenticated/notifications.tsx:423
+#: src/routes/_authenticated/notifications.tsx:422
 msgid "Ticket rejected"
 msgstr "Ticket rejected"
 
@@ -3164,7 +3168,7 @@ msgstr "Ticket rejected"
 msgid "Ticket rejected."
 msgstr "Ticket rejected."
 
-#: src/routes/_authenticated/notifications.tsx:419
+#: src/routes/_authenticated/notifications.tsx:418
 msgid "Ticket submitted"
 msgstr "Ticket submitted"
 
@@ -3260,7 +3264,7 @@ msgid "Unassigning…"
 msgstr "Unassigning…"
 
 #: src/components/asset-manage.tsx:18
-#: src/components/home-parts.tsx:141
+#: src/components/home-parts.tsx:142
 #: src/components/place-form.tsx:54
 #: src/components/place-shared.tsx:55
 #: src/components/place-shared.tsx:123
@@ -3276,12 +3280,12 @@ msgstr "Unit"
 msgid "Unpublish"
 msgstr "Unpublish"
 
-#: src/routes/_authenticated/notifications.tsx:274
-#: src/routes/_authenticated/notifications.tsx:499
+#: src/routes/_authenticated/notifications.tsx:273
+#: src/routes/_authenticated/notifications.tsx:498
 msgid "Unread"
 msgstr "Unread"
 
-#: src/routes/_authenticated/notifications.tsx:221
+#: src/routes/_authenticated/notifications.tsx:220
 msgid "Unread notifications"
 msgstr "Unread notifications"
 
@@ -3289,7 +3293,7 @@ msgstr "Unread notifications"
 msgid "Until the worker finishes setting up the account"
 msgstr "Until the worker finishes setting up the account"
 
-#: src/routes/_authenticated/notifications.tsx:549
+#: src/routes/_authenticated/notifications.tsx:548
 msgid "Updating..."
 msgstr "Updating..."
 
@@ -3297,7 +3301,7 @@ msgstr "Updating..."
 msgid "Uppercase English letter"
 msgstr "Uppercase English letter"
 
-#: src/components/home-parts.tsx:124
+#: src/components/home-parts.tsx:125
 #: src/components/place-shared.tsx:256
 #: src/routes/_authenticated/ticket/new.tsx:196
 msgid "Urgent"
@@ -3600,7 +3604,7 @@ msgstr "You cannot sign in until the manager’s account is reactivated."
 msgid "You do not have permission to do this."
 msgstr "You do not have permission to do this."
 
-#: src/routes/_authenticated/notifications.tsx:324
+#: src/routes/_authenticated/notifications.tsx:323
 msgid "You don't have any notifications in this category."
 msgstr "You don't have any notifications in this category."
 
@@ -3644,8 +3648,8 @@ msgstr "Your email is verified."
 msgid "Your manager’s account is deactivated."
 msgstr "Your manager’s account is deactivated."
 
-#: src/routes/_authenticated/notifications.tsx:182
-#: src/routes/_authenticated/notifications.tsx:190
+#: src/routes/_authenticated/notifications.tsx:181
+#: src/routes/_authenticated/notifications.tsx:189
 msgid "Your notifications"
 msgstr "Your notifications"
 

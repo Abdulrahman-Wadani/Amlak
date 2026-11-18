@@ -269,7 +269,7 @@ msgstr "تفعيل الحساب"
 msgid "Activating…"
 msgstr "جارٍ التفعيل…"
 
-#: src/components/home-parts.tsx:139
+#: src/components/home-parts.tsx:140
 #: src/components/place-form.tsx:52
 #: src/components/place-shared.tsx:43
 #: src/components/place-shared.tsx:188
@@ -374,7 +374,7 @@ msgstr "بعد الإصلاح"
 #: src/components/tickets-section.tsx:88
 #: src/routes/_authenticated/admin/index.tsx:27
 #: src/routes/_authenticated/expenses.tsx:162
-#: src/routes/_authenticated/notifications.tsx:273
+#: src/routes/_authenticated/notifications.tsx:272
 #: src/routes/_authenticated/places.tsx:26
 #: src/routes/_authenticated/tickets.tsx:36
 #: src/routes/_authenticated/workers.tsx:24
@@ -444,7 +444,7 @@ msgstr "أملاك {0}"
 msgid "Amount"
 msgstr "المبلغ"
 
-#: src/routes/_authenticated/notifications.tsx:417
+#: src/routes/_authenticated/notifications.tsx:416
 msgid "Announcement"
 msgstr "إعلان"
 
@@ -562,8 +562,8 @@ msgstr "المكلّف"
 msgid "Assigning…"
 msgstr "جارٍ التعيين…"
 
-#: src/components/page.tsx:152
-#: src/components/page.tsx:156
+#: src/components/page.tsx:164
+#: src/components/page.tsx:168
 #: src/components/place-bookings.tsx:637
 #: src/components/place-bookings.tsx:736
 #: src/components/place-bookings.tsx:811
@@ -1200,7 +1200,7 @@ msgstr "جارٍ الحذف…"
 msgid "Description"
 msgstr "الوصف"
 
-#: src/components/home-parts.tsx:86
+#: src/components/home-parts.tsx:87
 #: src/components/user-support.tsx:85
 #: src/routes/_authenticated/admin/$admin_id.tsx:107
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:77
@@ -1472,11 +1472,11 @@ msgstr "المصروفات"
 msgid "Expenses you add for this month will appear here."
 msgstr "تظهر هنا المصروفات التي تضيفها لهذا الشهر."
 
-#: src/routes/_authenticated/notifications.tsx:281
+#: src/routes/_authenticated/notifications.tsx:280
 msgid "Failed to load notifications."
 msgstr "فشل تحميل الإشعارات."
 
-#: src/routes/_authenticated/notifications.tsx:283
+#: src/routes/_authenticated/notifications.tsx:282
 msgid "Failed to update notification."
 msgstr "فشل تحديث الإشعار."
 
@@ -1615,7 +1615,7 @@ msgstr "عدد الضيوف"
 msgid "Guests arriving today"
 msgstr "دخول الضيوف اليوم"
 
-#: src/components/home-parts.tsx:86
+#: src/components/home-parts.tsx:87
 msgid "Hide details"
 msgstr "إخفاء التفاصيل"
 
@@ -1624,7 +1624,7 @@ msgstr "إخفاء التفاصيل"
 msgid "Hide password"
 msgstr "إخفاء كلمة المرور"
 
-#: src/components/home-parts.tsx:124
+#: src/components/home-parts.tsx:125
 #: src/components/place-shared.tsx:256
 #: src/routes/_authenticated/ticket/new.tsx:195
 msgid "High"
@@ -1676,14 +1676,14 @@ msgstr "بـ{currencyName}. تظهر للمدير فقط."
 msgid "In days."
 msgstr "بالأيام."
 
-#: src/components/home-parts.tsx:142
+#: src/components/home-parts.tsx:143
 #: src/components/place-form.tsx:56
 #: src/components/place-shared.tsx:85
 #: src/routes/_authenticated/places.tsx:29
 msgid "Inactive"
 msgstr "غير نشط"
 
-#: src/routes/_authenticated/notifications.tsx:236
+#: src/routes/_authenticated/notifications.tsx:235
 msgid "Inbox"
 msgstr "صندوق الوارد"
 
@@ -1773,6 +1773,10 @@ msgstr "الرابط"
 msgid "Load more"
 msgstr "تحميل المزيد"
 
+#: src/lib/auth.tsx:241
+msgid "Loading"
+msgstr "جارٍ التحميل"
+
 #: src/components/states.tsx:52
 #: src/routes/_authenticated/ticket/new.tsx:135
 msgid "Loading…"
@@ -1786,7 +1790,7 @@ msgstr "الموقع على الخريطة"
 msgid "Longitude"
 msgstr "خط الطول"
 
-#: src/components/home-parts.tsx:130
+#: src/components/home-parts.tsx:131
 #: src/components/place-shared.tsx:267
 #: src/routes/_authenticated/ticket/new.tsx:193
 msgid "Low"
@@ -1807,11 +1811,11 @@ msgstr "القائمة الرئيسية"
 msgid "Maintenance"
 msgstr "الصيانة"
 
-#: src/routes/_authenticated/notifications.tsx:429
+#: src/routes/_authenticated/notifications.tsx:428
 msgid "Maintenance overdue"
 msgstr "صيانة متأخرة"
 
-#: src/routes/_authenticated/notifications.tsx:427
+#: src/routes/_authenticated/notifications.tsx:426
 msgid "Maintenance reminder"
 msgstr "تذكير بالصيانة"
 
@@ -1839,7 +1843,7 @@ msgstr "تذاكر صيانة الأصل"
 msgid "Manage"
 msgstr "الإدارة"
 
-#: src/routes/_authenticated/notifications.tsx:243
+#: src/routes/_authenticated/notifications.tsx:242
 msgid "Manage your notifications and stay up to date."
 msgstr "إدارة إشعاراتك ومتابعة آخر المستجدات."
 
@@ -1860,7 +1864,7 @@ msgstr "خريطة لاختيار الموقع"
 msgid "Margin {0}%"
 msgstr "هامش {0}%"
 
-#: src/routes/_authenticated/notifications.tsx:551
+#: src/routes/_authenticated/notifications.tsx:550
 msgid "Mark as read"
 msgstr "تحديد كمقروء"
 
@@ -1870,7 +1874,7 @@ msgstr "تحديد كمقروء"
 msgid "Me"
 msgstr "أنا"
 
-#: src/components/home-parts.tsx:130
+#: src/components/home-parts.tsx:131
 #: src/components/place-shared.tsx:267
 #: src/routes/_authenticated/ticket/new.tsx:194
 msgid "Medium"
@@ -1962,7 +1966,7 @@ msgstr "طلب دعم جديد"
 
 #: src/components/pager.tsx:46
 #: src/components/panel.tsx:225
-#: src/routes/_authenticated/notifications.tsx:389
+#: src/routes/_authenticated/notifications.tsx:388
 msgid "Next"
 msgstr "التالي"
 
@@ -2036,7 +2040,7 @@ msgstr "لا يصل ضيوف اليوم."
 msgid "No monthly budget is set."
 msgstr "لم تُحدَّد ميزانية شهرية."
 
-#: src/routes/_authenticated/notifications.tsx:316
+#: src/routes/_authenticated/notifications.tsx:315
 msgid "No notifications"
 msgstr "لا توجد إشعارات"
 
@@ -2135,7 +2139,7 @@ msgstr "لا شيء للمراجعة."
 #: src/components/account-links.tsx:35
 #: src/components/notification-bell.tsx:16
 #: src/routes/_authenticated/notifications.tsx:154
-#: src/routes/_authenticated/notifications.tsx:172
+#: src/routes/_authenticated/notifications.tsx:171
 msgid "Notifications"
 msgstr "الإشعارات"
 
@@ -2420,7 +2424,7 @@ msgstr "وقائية"
 
 #: src/components/pager.tsx:32
 #: src/components/panel.tsx:222
-#: src/routes/_authenticated/notifications.tsx:365
+#: src/routes/_authenticated/notifications.tsx:364
 msgid "Previous"
 msgstr "السابق"
 
@@ -2483,8 +2487,8 @@ msgstr "إعادة تفعيل الحساب"
 msgid "Reactivating…"
 msgstr "جارٍ إعادة التفعيل…"
 
-#: src/routes/_authenticated/notifications.tsx:275
-#: src/routes/_authenticated/notifications.tsx:563
+#: src/routes/_authenticated/notifications.tsx:274
+#: src/routes/_authenticated/notifications.tsx:562
 msgid "Read"
 msgstr "مقروء"
 
@@ -2515,7 +2519,7 @@ msgstr "الإيصال"
 msgid "Receipt photo"
 msgstr "صورة الإيصال"
 
-#: src/routes/_authenticated/notifications.tsx:264
+#: src/routes/_authenticated/notifications.tsx:263
 msgid "Refresh"
 msgstr "تحديث"
 
@@ -2856,7 +2860,7 @@ msgstr "الحالة"
 msgid "Stay"
 msgstr "الإقامة"
 
-#: src/routes/_authenticated/notifications.tsx:198
+#: src/routes/_authenticated/notifications.tsx:197
 msgid "Stay updated with your latest activity and announcements."
 msgstr "تابع آخر نشاطاتك والإعلانات الجديدة."
 
@@ -2885,7 +2889,7 @@ msgstr "الدعم"
 msgid "Support requests"
 msgstr "طلبات الدعم"
 
-#: src/routes/_authenticated/notifications.tsx:431
+#: src/routes/_authenticated/notifications.tsx:430
 msgid "Support ticket resolved"
 msgstr "حُلّت تذكرة الدعم"
 
@@ -3144,11 +3148,11 @@ msgstr "هذه التواريخ محجوزة بالفعل لهذا العقار.
 msgid "Ticket approved and sent to {name}."
 msgstr "تم اعتماد التذكرة وإرسالها لـ{name}."
 
-#: src/routes/_authenticated/notifications.tsx:421
+#: src/routes/_authenticated/notifications.tsx:420
 msgid "Ticket assigned"
 msgstr "تم إسناد تذكرة"
 
-#: src/routes/_authenticated/notifications.tsx:425
+#: src/routes/_authenticated/notifications.tsx:424
 msgid "Ticket completed"
 msgstr "اكتملت التذكرة"
 
@@ -3156,7 +3160,7 @@ msgstr "اكتملت التذكرة"
 msgid "Ticket reassigned to {name}."
 msgstr "أُعيد تكليف التذكرة إلى {name}."
 
-#: src/routes/_authenticated/notifications.tsx:423
+#: src/routes/_authenticated/notifications.tsx:422
 msgid "Ticket rejected"
 msgstr "رُفضت التذكرة"
 
@@ -3164,7 +3168,7 @@ msgstr "رُفضت التذكرة"
 msgid "Ticket rejected."
 msgstr "رُفضت التذكرة."
 
-#: src/routes/_authenticated/notifications.tsx:419
+#: src/routes/_authenticated/notifications.tsx:418
 msgid "Ticket submitted"
 msgstr "تذكرة جديدة"
 
@@ -3260,7 +3264,7 @@ msgid "Unassigning…"
 msgstr "جارٍ إلغاء التعيين…"
 
 #: src/components/asset-manage.tsx:18
-#: src/components/home-parts.tsx:141
+#: src/components/home-parts.tsx:142
 #: src/components/place-form.tsx:54
 #: src/components/place-shared.tsx:55
 #: src/components/place-shared.tsx:123
@@ -3276,12 +3280,12 @@ msgstr "الوحدة"
 msgid "Unpublish"
 msgstr "إلغاء النشر"
 
-#: src/routes/_authenticated/notifications.tsx:274
-#: src/routes/_authenticated/notifications.tsx:499
+#: src/routes/_authenticated/notifications.tsx:273
+#: src/routes/_authenticated/notifications.tsx:498
 msgid "Unread"
 msgstr "غير مقروء"
 
-#: src/routes/_authenticated/notifications.tsx:221
+#: src/routes/_authenticated/notifications.tsx:220
 msgid "Unread notifications"
 msgstr "الإشعارات غير المقروءة"
 
@@ -3289,7 +3293,7 @@ msgstr "الإشعارات غير المقروءة"
 msgid "Until the worker finishes setting up the account"
 msgstr "حتى يُكمل العامل إعداد حسابه"
 
-#: src/routes/_authenticated/notifications.tsx:549
+#: src/routes/_authenticated/notifications.tsx:548
 msgid "Updating..."
 msgstr "جارٍ التحديث..."
 
@@ -3297,7 +3301,7 @@ msgstr "جارٍ التحديث..."
 msgid "Uppercase English letter"
 msgstr "حرف إنجليزي كبير"
 
-#: src/components/home-parts.tsx:124
+#: src/components/home-parts.tsx:125
 #: src/components/place-shared.tsx:256
 #: src/routes/_authenticated/ticket/new.tsx:196
 msgid "Urgent"
@@ -3600,7 +3604,7 @@ msgstr "لا يمكنك الدخول حتى يُعاد تفعيل حساب ال�
 msgid "You do not have permission to do this."
 msgstr "ليست لديك صلاحية للقيام بهذا."
 
-#: src/routes/_authenticated/notifications.tsx:324
+#: src/routes/_authenticated/notifications.tsx:323
 msgid "You don't have any notifications in this category."
 msgstr "ليس لديك أي إشعارات في هذه الفئة."
 
@@ -3644,8 +3648,8 @@ msgstr "تم التحقق من بريدك."
 msgid "Your manager’s account is deactivated."
 msgstr "حساب مديرك موقوف."
 
-#: src/routes/_authenticated/notifications.tsx:182
-#: src/routes/_authenticated/notifications.tsx:190
+#: src/routes/_authenticated/notifications.tsx:181
+#: src/routes/_authenticated/notifications.tsx:189
 msgid "Your notifications"
 msgstr "إشعاراتك"
 

@@ -1,4 +1,3 @@
-
 import {
   createContext,
   useContext,
@@ -12,6 +11,8 @@ import { readApiError } from "@/lib/errors"
 import type { Language, User } from "@amlak/shared"
 import { rememberAccessToken, setSessionHandlers } from "@/lib/http"
 import { useLanguage } from "@/lib/i18n"
+import { t } from "@lingui/core/macro"
+import { Spinner } from "@/components/ui/spinner"
 
 type Auth = {
   user: User | null
@@ -31,16 +32,45 @@ type Auth = {
 
 const AuthContext = createContext<Auth | null>(null)
 
-const USER_KEY = "authUser"
+/*
+ * The session lives only in the refresh cookie (httpOnly, 30 days). Nothing
+ * about it is kept in localStorage or sessionStorage: on every page load the
+ * app asks /auth/refresh once, and the cookie decides. The user and the
+ * access token stay in memory.
+ */
+let currentUser: User | null = null
+let currentToken: string | null = null
+let restoring: Promise<User | null> | null = null
 
-/** The signed-in user saved for this tab, for route guards that run before render. */
+/** The signed-in user, for route guards that run before render. */
 export function storedUser(): User | null {
-  try {
-    const saved = sessionStorage.getItem(USER_KEY)
-    return saved ? (JSON.parse(saved) as User) : null
-  } catch {
-    return null
+  return currentUser
+}
+
+/**
+ * Restores the session from the refresh cookie, once per page load. Resolves
+ * with the user, or null when there is no valid session. Route guards await it.
+ */
+export function restoreSession(): Promise<User | null> {
+  if (!restoring) {
+    restoring = (async () => {
+      try {
+        const data = (await refreshOnce()) as { access_token: string }
+        const res = await fetch("/api/v1/users/me", {
+          headers: { Authorization: `Bearer ${data.access_token}` },
+          credentials: "same-origin",
+        })
+        if (!res.ok) throw await readApiError(res)
+        currentUser = (await res.json()) as User
+        currentToken = data.access_token
+      } catch {
+        currentUser = null
+        currentToken = null
+      }
+      return currentUser
+    })()
   }
+  return restoring
 }
 
 let refreshInFlight: Promise<unknown> | null = null
@@ -82,13 +112,10 @@ async function call(path: string, body?: unknown): Promise<unknown> {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { setLang } = useLanguage()
 
-  const saved = sessionStorage.getItem(USER_KEY)
-
-  const [user, setUser] = useState<User | null>(
-    saved ? (JSON.parse(saved) as User) : null
-  )
-
-  const [accessToken, setAccessToken] = useState<string | null>(null)
+  const [user, setUser] = useState<User | null>(currentUser)
+  const [accessToken, setAccessToken] = useState<string | null>(currentToken)
+  // Until the refresh cookie has answered, nothing is shown and nobody is sent to /signin.
+  const [ready, setReady] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -108,7 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }),
       expire: () => {
         // Parallel requests can all fail; end the session once.
-        if (!sessionStorage.getItem(USER_KEY)) return
+        if (!currentUser) return
         logout()
         void navigate({ to: "/signin" })
       },
@@ -118,24 +145,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigate])
 
-  // Restore the authenticated session
+  // Restore the session from the refresh cookie.
   useEffect(() => {
-    if (!saved) return
-
-    refreshOnce()
-      .then((data) => {
-        const result = data as { access_token: string }
-
-        setAccessToken(result.access_token)
-      })
-      .catch(() => {
-        sessionStorage.removeItem(USER_KEY)
-        setUser(null)
-        setAccessToken(null)
-      })
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    
+    let alive = true
+    void restoreSession().then((restored) => {
+      if (!alive) return
+      setUser(restored)
+      setAccessToken(currentToken)
+      setReady(true)
+    })
+    return () => {
+      alive = false
+    }
   }, [])
 
   async function login(email: string, password: string) {
@@ -147,10 +168,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user: User
     }
 
+    currentUser = data.user
+    currentToken = data.access_token
+    restoring = Promise.resolve(data.user)
     setAccessToken(data.access_token)
     setUser(data.user)
-
-    sessionStorage.setItem(USER_KEY, JSON.stringify(data.user))
 
     // Apply the user's preferred language globally
     if (
@@ -188,8 +210,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   function logout() {
     void api("/auth/logout")
 
-    sessionStorage.removeItem(USER_KEY)
-
+    currentUser = null
+    currentToken = null
+    restoring = Promise.resolve(null)
     setAccessToken(null)
     setUser(null)
   }
@@ -206,8 +229,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
       }}
     >
-      {children}
+      {ready ? children : <SessionLoading />}
     </AuthContext.Provider>
+  )
+}
+
+function SessionLoading() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-background text-muted-foreground">
+      <Spinner className="size-6" aria-label={t`Loading`} />
+    </div>
   )
 }
 
