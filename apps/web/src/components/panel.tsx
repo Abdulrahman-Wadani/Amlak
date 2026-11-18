@@ -400,6 +400,7 @@ export function NativeSelect({
   children,
   disabled,
   invalid,
+  describedBy,
 }: {
   id: string
   value: string
@@ -407,6 +408,7 @@ export function NativeSelect({
   children: ReactNode
   disabled?: boolean
   invalid?: boolean
+  describedBy?: string
 }) {
   return (
     <div className="relative">
@@ -415,6 +417,7 @@ export function NativeSelect({
         value={value}
         disabled={disabled}
         aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
         onChange={(e) => onChange(e.target.value)}
         className="box-border h-11 w-full appearance-none border border-input bg-card ps-3.5 pe-11 text-[15px] text-foreground outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(77,114,150,.2)] disabled:bg-secondary disabled:text-muted-foreground aria-invalid:border-destructive"
       >

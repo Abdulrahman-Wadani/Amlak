@@ -29,7 +29,6 @@ import { ReportPopup } from "@/components/report-form"
 import { AssetForm } from "@/components/asset-form"
 import { ConfirmDialog, LoadError } from "@/components/states"
 import {
-  Field,
   InfoRows,
   Initial,
   NativeSelect,
@@ -471,17 +470,20 @@ function WorkersPanel({
       )}
 
       {workers !== null && (
-        <form
-          onSubmit={handleAssign}
-          className="flex flex-wrap items-end gap-2.5 border-t border-border pt-3.5"
-        >
-          <div className="min-w-0 flex-[1_1_180px]">
-            <Field
-              id="assign-worker"
-              label={<Trans>Assign an active worker</Trans>}
-              hint={choices.length === 0 ? <Trans>All your active workers are already assigned to this place.</Trans> : undefined}
-            >
-              <NativeSelect id="assign-worker" value={selected} onChange={setSelected} disabled={choices.length === 0}>
+        // The label above, the list and the button side by side at one height, the hint under both.
+        <form onSubmit={handleAssign} className="flex flex-col gap-2 border-t border-border pt-3.5">
+          <label htmlFor="assign-worker" className="text-sm font-semibold">
+            <Trans>Assign an active worker</Trans>
+          </label>
+          <div className="flex min-w-0 items-stretch gap-2.5">
+            <div className="min-w-0 flex-1">
+              <NativeSelect
+                id="assign-worker"
+                value={selected}
+                onChange={setSelected}
+                disabled={choices.length === 0}
+                describedBy={choices.length === 0 ? "assign-worker-hint" : undefined}
+              >
                 <option value="">{t`Choose a worker`}</option>
                 {choices.map((worker) => (
                   <option key={worker.id} value={worker.id}>
@@ -489,12 +491,17 @@ function WorkersPanel({
                   </option>
                 ))}
               </NativeSelect>
-            </Field>
+            </div>
+            <Button type="submit" disabled={!selected || busy !== null}>
+              <Plus aria-hidden="true" />
+              {busy === "assign" ? <Trans>Assigning…</Trans> : <Trans>Assign</Trans>}
+            </Button>
           </div>
-          <Button type="submit" disabled={!selected || busy !== null}>
-            <Plus aria-hidden="true" />
-            {busy === "assign" ? <Trans>Assigning…</Trans> : <Trans>Assign</Trans>}
-          </Button>
+          {choices.length === 0 && (
+            <span id="assign-worker-hint" className="text-[13px] text-muted-foreground">
+              <Trans>All your active workers are already assigned to this place.</Trans>
+            </span>
+          )}
         </form>
       )}
 
