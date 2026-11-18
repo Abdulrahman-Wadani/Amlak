@@ -23,8 +23,8 @@ export const assetSchema = z
 export type Asset = z.infer<typeof assetSchema>;
 
 const assetFields = z.object({
-	name: z.string().trim().min(1),
-	type: z.string().trim().min(1),
+	name: z.string().trim().min(1).max(30),
+	type: z.string().trim().min(1).max(30),
 	purchase_date: z.iso.date("Use the YYYY-MM-DD format").nullable().optional(),
 	status: z.enum(ASSET_STATUSES).optional(),
 });

@@ -11,7 +11,7 @@ export const placeSchema = z
 	.object({
 		id: z.uuid(),
 		owner_id: z.uuid(),
-		place_name: z.string(),
+		place_name: z.string().max(10),
 		place_type: z.string(),
 		description: z.string().nullable(),
 		address: z.string().nullable(),
@@ -42,11 +42,11 @@ const isTimeZone = (name: string) => {
 };
 
 const placeFields = z.object({
-	place_name: z.string().trim().min(1),
-	place_type: z.string().trim().min(1),
-	city: z.string().trim().min(1),
-	address: z.string().trim().min(1).nullable().optional(),
-	description: z.string().trim().min(1).nullable().optional(),
+	place_name: z.string().trim().max(10),
+	place_type: z.string().trim().min(1).max(30),
+	city: z.string().trim().min(1).max(30),
+	address: z.string().trim().min(1).max(200).nullable().optional(),
+	description: z.string().trim().min(1).max(2000).nullable().optional(),
 	latitude: z.number().min(-90).max(90).nullable().optional(),
 	longitude: z.number().min(-180).max(180).nullable().optional(),
 	status: z.enum(PLACE_STATUSES).optional(),

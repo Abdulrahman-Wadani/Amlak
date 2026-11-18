@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { LANGUAGES, userSchema } from "./users.ts";
 
-export const emailSchema = z.string().trim().toLowerCase().pipe(z.email());
+export const emailSchema = z.string().trim().max(254).toLowerCase().pipe(z.email());
 
 export const passwordSchema = z
 	.string()

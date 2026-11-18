@@ -12,7 +12,7 @@ export const workerSchema = userSchema
 export type Worker = z.infer<typeof workerSchema>;
 
 export const createWorkerSchema = z.object({
-	fullname: z.string().trim().min(1),
+	fullname: z.string().trim().min(1).max(30),
 	email: emailSchema,
 	phone: phoneSchema,
 	preferred_language: z
@@ -24,7 +24,7 @@ export type CreateWorkerInput = z.infer<typeof createWorkerSchema>;
 
 /** Every field is optional. ACTIVE reactivates, DEACTIVATED deactivates. */
 export const updateWorkerSchema = z.object({
-	fullname: z.string().trim().min(1).optional(),
+	fullname: z.string().trim().min(1).max(30).optional(),
 	phone: phoneSchema.optional(),
 	status: z.enum(["ACTIVE", "DEACTIVATED"]).optional(),
 });
