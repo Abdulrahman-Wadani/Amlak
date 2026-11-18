@@ -65,7 +65,13 @@ function PlaceDetailPage() {
   // Workers are a Manager's tab; anyone else asking for it gets the assets.
   const tab: Tab = search.tab === "workers" && !isManager ? "assets" : (search.tab ?? "assets")
   const chooseTab = (next: Tab) =>
-    void navigate({ to: "/place/$place_id", params: { place_id }, search: next === "assets" ? {} : { tab: next } })
+    // Only the address changes: the page stays where it is and keeps what it loaded.
+    void navigate({
+      to: "/place/$place_id",
+      params: { place_id },
+      search: next === "assets" ? {} : { tab: next },
+      resetScroll: false,
+    })
 
   const [place, setPlace] = useState<Place | null>(null)
   const [assets, setAssets] = useState<Asset[] | null>(null)
@@ -220,37 +226,46 @@ function PlaceDetailPage() {
             value={tab}
             onChange={chooseTab}
             tabs={[
-              { key: "assets", label: <Trans>Assets</Trans> },
-              ...(isManager ? [{ key: "workers" as const, label: <Trans>Workers</Trans> }] : []),
-              { key: "tickets", label: <Trans>Tickets</Trans> },
-              { key: "bookings", label: <Trans>Bookings</Trans> },
+              {
+                key: "assets",
+                label: <Trans>Assets</Trans>,
+                content: (
+                  <AssetsPanel
+                    token={accessToken}
+                    place={place}
+                    assets={assets}
+                    isManager={isManager}
+                    onAdded={() => accessToken && void getPlaceAssets(accessToken, place_id).then(setAssets)}
+                  />
+                ),
+              },
+              ...(isManager && accessToken
+                ? [
+                    {
+                      key: "workers" as const,
+                      label: <Trans>Workers</Trans>,
+                      content: <WorkersPanel token={accessToken} placeId={place_id} workers={workers} onChanged={setWorkers} />,
+                    },
+                  ]
+                : []),
+              {
+                key: "tickets",
+                label: <Trans>Tickets</Trans>,
+                content: accessToken && (
+                  <TicketsSection
+                    token={accessToken}
+                    placeId={place_id}
+                    assets={assets}
+                    title={<Trans>Maintenance tickets</Trans>}
+                    emptyOpen={<Trans>This place has no open tickets.</Trans>}
+                    emptyAll={<Trans>This place has no maintenance tickets.</Trans>}
+                    showAddTicket
+                  />
+                ),
+              },
+              { key: "bookings", label: <Trans>Bookings</Trans>, content: <PlaceBookings placeId={place_id} /> },
             ]}
-          >
-            {tab === "assets" && (
-              <AssetsPanel
-                token={accessToken}
-                place={place}
-                assets={assets}
-                isManager={isManager}
-                onAdded={() => accessToken && void getPlaceAssets(accessToken, place_id).then(setAssets)}
-              />
-            )}
-            {tab === "workers" && isManager && accessToken && (
-              <WorkersPanel token={accessToken} placeId={place_id} workers={workers} onChanged={setWorkers} />
-            )}
-            {tab === "tickets" && accessToken && (
-              <TicketsSection
-                token={accessToken}
-                placeId={place_id}
-                assets={assets}
-                title={<Trans>Maintenance tickets</Trans>}
-                emptyOpen={<Trans>This place has no open tickets.</Trans>}
-                emptyAll={<Trans>This place has no maintenance tickets.</Trans>}
-                showAddTicket
-              />
-            )}
-            {tab === "bookings" && <PlaceBookings placeId={place_id} />}
-          </TabbedPanel>
+          />
         </>
       )}
     </Page>

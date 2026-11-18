@@ -72,17 +72,20 @@ export function TabbedPanel<K extends string>({
   tabs,
   value,
   onChange,
-  children,
 }: {
   label: string
-  tabs: { key: K; label: ReactNode; count?: number }[]
+  /** Each tab with its section; a section is drawn once its tab is first opened. */
+  tabs: { key: K; label: ReactNode; count?: number; content: ReactNode }[]
   value: K
   onChange: (key: K) => void
-  children: ReactNode
 }) {
   const id = useId()
   const { number } = useFormat()
   const refs = useRef<Record<string, HTMLButtonElement | null>>({})
+  // Sections already opened stay mounted (hidden), so going back to a tab
+  // shows it as it was, without loading it again.
+  const [opened, setOpened] = useState<K[]>([value])
+  if (!opened.includes(value)) setOpened([...opened, value])
 
   // Arrow keys move between the tabs (and choose), as in any tablist.
   function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
@@ -101,7 +104,13 @@ export function TabbedPanel<K extends string>({
 
   return (
     <section aria-label={label} className="box-border flex min-w-0 flex-col gap-5 border border-border bg-card p-5 shadow-sm desk:p-6">
-      <div role="tablist" aria-label={label} onKeyDown={onKeyDown} className="flex min-w-0 flex-wrap gap-2 border-b border-border pb-4">
+      {/* One row at every width: on the phone each tab grows from its own text width. */}
+      <div
+        role="tablist"
+        aria-label={label}
+        onKeyDown={onKeyDown}
+        className="flex min-w-0 gap-1.5 border-b border-border pb-4 desk:gap-2"
+      >
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -112,23 +121,36 @@ export function TabbedPanel<K extends string>({
             role="tab"
             id={`${id}-${tab.key}`}
             aria-selected={value === tab.key}
-            aria-controls={`${id}-panel`}
+            aria-controls={`${id}-${tab.key}-panel`}
             tabIndex={value === tab.key ? 0 : -1}
-            className="am-tab"
+            className="am-tab min-w-0 flex-auto justify-center px-2 text-[13px] desk:flex-none desk:px-3.5 desk:text-sm"
             onClick={() => onChange(tab.key)}
           >
-            {tab.label}
+            <span className="truncate">{tab.label}</span>
             {tab.count !== undefined && <span className="am-tab-count">{number(tab.count)}</span>}
           </button>
         ))}
       </div>
-      <div role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${value}`} className="flex min-w-0 flex-col">
-        <InCardContext.Provider value={true}>
-          <EmbeddedContext.Provider value={true}>
-            <InTabContext.Provider value={true}>{children}</InTabContext.Provider>
-          </EmbeddedContext.Provider>
-        </InCardContext.Provider>
-      </div>
+      <InCardContext.Provider value={true}>
+        <EmbeddedContext.Provider value={true}>
+          <InTabContext.Provider value={true}>
+            {tabs
+              .filter((tab) => opened.includes(tab.key))
+              .map((tab) => (
+                <div
+                  key={tab.key}
+                  role="tabpanel"
+                  id={`${id}-${tab.key}-panel`}
+                  aria-labelledby={`${id}-${tab.key}`}
+                  hidden={tab.key !== value}
+                  className="min-w-0 flex-col [&:not([hidden])]:flex"
+                >
+                  {tab.content}
+                </div>
+              ))}
+          </InTabContext.Provider>
+        </EmbeddedContext.Provider>
+      </InCardContext.Provider>
     </section>
   )
 }

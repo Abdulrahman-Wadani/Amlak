@@ -32,7 +32,12 @@ function AssetDetailPage() {
   const navigate = useNavigate()
   const tab: Tab = Route.useSearch().tab ?? "schedules"
   const chooseTab = (next: Tab) =>
-    void navigate({ to: "/place/asset/$asset_id", params: { asset_id }, search: next === "schedules" ? {} : { tab: next } })
+    void navigate({
+      to: "/place/asset/$asset_id",
+      params: { asset_id },
+      search: next === "schedules" ? {} : { tab: next },
+      resetScroll: false,
+    })
 
   const [asset, setAsset] = useState<Asset | null>(null)
   const [place, setPlace] = useState<Place | null>(null)
@@ -127,24 +132,29 @@ function AssetDetailPage() {
             value={tab}
             onChange={chooseTab}
             tabs={[
-              { key: "schedules", label: <Trans>Periodic maintenance</Trans> },
-              { key: "tickets", label: <Trans>Tickets</Trans> },
+              {
+                key: "schedules",
+                label: <Trans>Periodic maintenance</Trans>,
+                content: accessToken && (
+                  <AssetSchedules token={accessToken} assetId={asset_id} place={place} canManage={isManager} />
+                ),
+              },
+              {
+                key: "tickets",
+                label: <Trans>Tickets</Trans>,
+                content: asset && accessToken && (
+                  <TicketsSection
+                    token={accessToken}
+                    placeId={asset.place_id}
+                    assetId={asset.id}
+                    title={<Trans>Maintenance tickets for this asset</Trans>}
+                    emptyOpen={<Trans>This asset has no open tickets.</Trans>}
+                    emptyAll={<Trans>This asset has no maintenance tickets.</Trans>}
+                  />
+                ),
+              },
             ]}
-          >
-            {tab === "schedules" && accessToken && (
-              <AssetSchedules token={accessToken} assetId={asset_id} place={place} canManage={isManager} />
-            )}
-            {tab === "tickets" && asset && accessToken && (
-              <TicketsSection
-                token={accessToken}
-                placeId={asset.place_id}
-                assetId={asset.id}
-                title={<Trans>Maintenance tickets for this asset</Trans>}
-                emptyOpen={<Trans>This asset has no open tickets.</Trans>}
-                emptyAll={<Trans>This asset has no maintenance tickets.</Trans>}
-              />
-            )}
-          </TabbedPanel>
+          />
         </>
       )}
     </Page>
