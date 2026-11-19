@@ -851,7 +851,7 @@ msgstr "تنظيف"
 msgid "Clear filters"
 msgstr "مسح الفلاتر"
 
-#: src/components/location-picker.tsx:190
+#: src/components/location-picker.tsx:203
 msgid "Click on the map or drag the marker to choose a location."
 msgstr "اضغط على الخريطة أو اسحب العلامة لاختيار الموقع."
 
@@ -931,7 +931,7 @@ msgstr "تعذّر إلغاء الحجز. حاول مرة أخرى."
 msgid "Could not change the booking. Please try again."
 msgstr "تعذّر تغيير حالة الحجز. حاول مرة أخرى."
 
-#: src/components/location-picker.tsx:124
+#: src/components/location-picker.tsx:134
 msgid "Could not get the address."
 msgstr "تعذر الحصول على العنوان."
 
@@ -1537,7 +1537,7 @@ msgstr "من تاريخ"
 msgid "Full name"
 msgstr "الاسم الكامل"
 
-#: src/components/location-picker.tsx:194
+#: src/components/location-picker.tsx:207
 msgid "Getting the address…"
 msgstr "جارٍ جلب العنوان…"
 
@@ -1824,7 +1824,7 @@ msgstr "مدير"
 msgid "Managers"
 msgstr "المدراء"
 
-#: src/components/location-picker.tsx:175
+#: src/components/location-picker.tsx:187
 msgid "Map to pick the location"
 msgstr "خريطة لاختيار الموقع"
 
@@ -1935,7 +1935,7 @@ msgid "New support request"
 msgstr "طلب دعم جديد"
 
 #: src/components/pager.tsx:46
-#: src/components/panel.tsx:468
+#: src/components/panel.tsx:474
 #: src/routes/_authenticated/notifications.tsx:300
 msgid "Next"
 msgstr "التالي"
@@ -1957,7 +1957,7 @@ msgstr "الليالي"
 msgid "No account? <0>Create a manager account</0>"
 msgstr "ليس لديك حساب؟ <0>إنشاء حساب مدير</0>"
 
-#: src/components/location-picker.tsx:120
+#: src/components/location-picker.tsx:130
 msgid "No address was found for this location."
 msgstr "لم يُعثر على عنوان لهذا الموقع."
 
@@ -2235,7 +2235,7 @@ msgid "Page unpublished."
 msgstr "أُلغي نشر الصفحة."
 
 #: src/components/pager.tsx:20
-#: src/components/panel.tsx:459
+#: src/components/panel.tsx:465
 msgid "Pages"
 msgstr "الصفحات"
 
@@ -2393,7 +2393,7 @@ msgid "Preventive"
 msgstr "وقائية"
 
 #: src/components/pager.tsx:32
-#: src/components/panel.tsx:465
+#: src/components/panel.tsx:471
 #: src/routes/_authenticated/notifications.tsx:276
 msgid "Previous"
 msgstr "السابق"
@@ -2675,7 +2675,7 @@ msgstr "حفظ العقار"
 msgid "Saving…"
 msgstr "جارٍ الحفظ…"
 
-#: src/components/panel.tsx:278
+#: src/components/panel.tsx:284
 msgid "Scroll to see the rest"
 msgstr "مرّر لرؤية البقية"
 
@@ -2700,7 +2700,7 @@ msgstr "الأمان"
 msgid "See all"
 msgstr "عرض الكل"
 
-#: src/components/location-picker.tsx:199
+#: src/components/location-picker.tsx:212
 msgid "Selected address"
 msgstr "العنوان المختار"
 
@@ -2956,11 +2956,11 @@ msgstr "سيظهر الرابط هكذا: <0>{link}</0>"
 msgid "The location is blocked in the browser."
 msgstr "الموقع محجوب في المتصفح."
 
-#: src/components/location-picker.tsx:183
+#: src/components/location-picker.tsx:195
 msgid "The map could not load. Use your current location below, or check that the TomTom key includes the Maps service."
 msgstr "تعذّر تحميل الخريطة. استخدم موقعك الحالي بالأسفل، أو تأكد أن مفتاح TomTom يشمل خدمة الخرائط."
 
-#: src/components/location-picker.tsx:56
+#: src/components/location-picker.tsx:57
 msgid "The map is not available: the TomTom key is missing."
 msgstr "الخريطة غير متاحة: مفتاح TomTom غير موجود."
 

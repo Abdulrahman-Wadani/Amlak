@@ -458,7 +458,7 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
             noValidate
             className="flex min-h-0 flex-col"
           >
-            <div className="min-h-0 flex-1 overflow-y-auto px-1">
+            <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-1">
             {cancelling && (
               <div
                 style={S(
@@ -549,7 +549,7 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
             </DialogTitle>
           </DialogHeader>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-1">
+          <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-1">
             {confirmStay && (
               <div
                 style={S(

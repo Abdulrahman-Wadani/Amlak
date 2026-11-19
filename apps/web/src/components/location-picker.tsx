@@ -40,8 +40,9 @@ export default function LocationPicker({
   const [loading, setLoading] = useState(false)
   const [selectedAddress, setSelectedAddress] = useState("")
   const [error, setError] = useState("")
-  // The map's own style did not load (the key may not include the map service).
-  const [mapFailed, setMapFailed] = useState(false)
+  // The map did not load (its style or its tiles were refused); the HTTP
+  // status, when there is one, says why (401: wrong key, 403: no Maps service).
+  const [mapFailed, setMapFailed] = useState<{ status?: number } | null>(null)
 
   useEffect(() => {
     callbackRef.current = onLocationSelect
@@ -81,9 +82,18 @@ export default function LocationPicker({
 
     let active = true
 
-    // Without its style the map stays an empty box; say so instead.
-    map.mapLibreMap.on("error", () => {
-      if (active && !map.mapLibreMap.isStyleLoaded()) setMapFailed(true)
+    // Until the style and one tile have loaded, an error leaves an empty box;
+    // say so instead. Errors after the map has shown (one tile at the edge)
+    // are left alone.
+    let shown = false
+    map.mapLibreMap.on("data", (event) => {
+      if (event.dataType === "source" && "tile" in event && event.tile) shown = true
+    })
+    map.mapLibreMap.on("error", (event) => {
+      if (!active || shown) return
+      const status = (event.error as { status?: number } | undefined)?.status
+      console.error("The map could not load", status, event.error)
+      setMapFailed({ status })
     })
 
 
@@ -166,7 +176,9 @@ export default function LocationPicker({
   return (
     <div className="flex flex-col gap-2">
       <div className="relative h-[200px] w-full overflow-hidden border border-dashed border-border bg-secondary">
-        <div ref={mapContainer} className="absolute inset-0" />
+        {/* Sized by the box itself: maplibre's own CSS makes the map position: relative,
+            which overrides "absolute inset-0" and left it 0px high, so nothing showed. */}
+        <div ref={mapContainer} className="size-full" />
         {/* Without a map (no key), the box says what it is for, as in the design. */}
         {!import.meta.env.VITE_TOMTOM_API_KEY && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-[13px] text-muted-foreground">
@@ -182,6 +194,7 @@ export default function LocationPicker({
             <span>
               <Trans>The map could not load. Use your current location below, or check that the TomTom key includes the Maps service.</Trans>
             </span>
+            {mapFailed.status && <bdi className="font-mono text-xs">HTTP {mapFailed.status}</bdi>}
           </div>
         )}
       </div>

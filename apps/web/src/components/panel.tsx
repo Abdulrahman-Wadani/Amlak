@@ -147,7 +147,7 @@ export function TabbedPanel<K extends string>({
                   hidden={tab.key !== value}
                   // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrolling region must be reachable by keyboard
                   tabIndex={0}
-                  className="-mx-1 h-[440px] min-w-0 flex-col overflow-y-auto overscroll-contain px-1 pb-1 [scrollbar-width:thin] desk:h-[420px] [&:not([hidden])]:flex"
+                  className="-mx-1 h-[440px] min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-1 pb-1 [scrollbar-width:thin] desk:h-[420px] [&:not([hidden])]:flex"
                 >
                   {tab.content}
                 </div>
@@ -237,6 +237,8 @@ export function ScrollList({
   onScrollable: (scrolls: boolean) => void
 }) {
   const ref = useRef<HTMLDivElement>(null)
+  // Inside a tab the tab itself scrolls: no second scrolling box in it.
+  const inTab = useContext(InTabContext)
   const [scrolls, setScrolls] = useState(false)
   const report = useRef(onScrollable)
   report.current = onScrollable
@@ -263,7 +265,11 @@ export function ScrollList({
       role="region"
       aria-label={label}
       tabIndex={scrolls ? 0 : undefined}
-      className={`box-border flex max-h-[304px] flex-none snap-y snap-mandatory flex-col gap-3 overflow-y-auto overscroll-contain [scrollbar-width:thin] ${scrolls ? "pb-10 [mask-image:linear-gradient(to_bottom,#000_calc(100%-40px),transparent)]" : ""}`}
+      className={
+        inTab
+          ? "box-border flex flex-none flex-col gap-3"
+          : `box-border flex max-h-[304px] flex-none snap-y snap-mandatory flex-col gap-3 overflow-x-hidden overflow-y-auto overscroll-contain pe-1 [scrollbar-width:thin] ${scrolls ? "pb-10 [mask-image:linear-gradient(to_bottom,#000_calc(100%-40px),transparent)]" : ""}`
+      }
     >
       {children}
     </div>

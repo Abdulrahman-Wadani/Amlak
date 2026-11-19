@@ -851,7 +851,7 @@ msgstr "Cleaning"
 msgid "Clear filters"
 msgstr "Clear filters"
 
-#: src/components/location-picker.tsx:190
+#: src/components/location-picker.tsx:203
 msgid "Click on the map or drag the marker to choose a location."
 msgstr "Click on the map or drag the marker to choose a location."
 
@@ -931,7 +931,7 @@ msgstr "Could not cancel the booking. Please try again."
 msgid "Could not change the booking. Please try again."
 msgstr "Could not change the booking. Please try again."
 
-#: src/components/location-picker.tsx:124
+#: src/components/location-picker.tsx:134
 msgid "Could not get the address."
 msgstr "Could not get the address."
 
@@ -1537,7 +1537,7 @@ msgstr "From"
 msgid "Full name"
 msgstr "Full name"
 
-#: src/components/location-picker.tsx:194
+#: src/components/location-picker.tsx:207
 msgid "Getting the address…"
 msgstr "Getting the address…"
 
@@ -1824,7 +1824,7 @@ msgstr "Manager"
 msgid "Managers"
 msgstr "Managers"
 
-#: src/components/location-picker.tsx:175
+#: src/components/location-picker.tsx:187
 msgid "Map to pick the location"
 msgstr "Map to pick the location"
 
@@ -1935,7 +1935,7 @@ msgid "New support request"
 msgstr "New support request"
 
 #: src/components/pager.tsx:46
-#: src/components/panel.tsx:468
+#: src/components/panel.tsx:474
 #: src/routes/_authenticated/notifications.tsx:300
 msgid "Next"
 msgstr "Next"
@@ -1957,7 +1957,7 @@ msgstr "Nights"
 msgid "No account? <0>Create a manager account</0>"
 msgstr "No account? <0>Create a manager account</0>"
 
-#: src/components/location-picker.tsx:120
+#: src/components/location-picker.tsx:130
 msgid "No address was found for this location."
 msgstr "No address was found for this location."
 
@@ -2235,7 +2235,7 @@ msgid "Page unpublished."
 msgstr "Page unpublished."
 
 #: src/components/pager.tsx:20
-#: src/components/panel.tsx:459
+#: src/components/panel.tsx:465
 msgid "Pages"
 msgstr "Pages"
 
@@ -2393,7 +2393,7 @@ msgid "Preventive"
 msgstr "Preventive"
 
 #: src/components/pager.tsx:32
-#: src/components/panel.tsx:465
+#: src/components/panel.tsx:471
 #: src/routes/_authenticated/notifications.tsx:276
 msgid "Previous"
 msgstr "Previous"
@@ -2675,7 +2675,7 @@ msgstr "Save place"
 msgid "Saving…"
 msgstr "Saving…"
 
-#: src/components/panel.tsx:278
+#: src/components/panel.tsx:284
 msgid "Scroll to see the rest"
 msgstr "Scroll to see the rest"
 
@@ -2700,7 +2700,7 @@ msgstr "Security"
 msgid "See all"
 msgstr "See all"
 
-#: src/components/location-picker.tsx:199
+#: src/components/location-picker.tsx:212
 msgid "Selected address"
 msgstr "Selected address"
 
@@ -2956,11 +2956,11 @@ msgstr "The link will look like this: <0>{link}</0>"
 msgid "The location is blocked in the browser."
 msgstr "The location is blocked in the browser."
 
-#: src/components/location-picker.tsx:183
+#: src/components/location-picker.tsx:195
 msgid "The map could not load. Use your current location below, or check that the TomTom key includes the Maps service."
 msgstr "The map could not load. Use your current location below, or check that the TomTom key includes the Maps service."
 
-#: src/components/location-picker.tsx:56
+#: src/components/location-picker.tsx:57
 msgid "The map is not available: the TomTom key is missing."
 msgstr "The map is not available: the TomTom key is missing."
 
