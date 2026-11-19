@@ -851,7 +851,7 @@ msgstr "تنظيف"
 msgid "Clear filters"
 msgstr "مسح الفلاتر"
 
-#: src/components/location-picker.tsx:171
+#: src/components/location-picker.tsx:190
 msgid "Click on the map or drag the marker to choose a location."
 msgstr "اضغط على الخريطة أو اسحب العلامة لاختيار الموقع."
 
@@ -931,7 +931,7 @@ msgstr "تعذّر إلغاء الحجز. حاول مرة أخرى."
 msgid "Could not change the booking. Please try again."
 msgstr "تعذّر تغيير حالة الحجز. حاول مرة أخرى."
 
-#: src/components/location-picker.tsx:113
+#: src/components/location-picker.tsx:124
 msgid "Could not get the address."
 msgstr "تعذر الحصول على العنوان."
 
@@ -1537,7 +1537,7 @@ msgstr "من تاريخ"
 msgid "Full name"
 msgstr "الاسم الكامل"
 
-#: src/components/location-picker.tsx:175
+#: src/components/location-picker.tsx:194
 msgid "Getting the address…"
 msgstr "جارٍ جلب العنوان…"
 
@@ -1824,7 +1824,7 @@ msgstr "مدير"
 msgid "Managers"
 msgstr "المدراء"
 
-#: src/components/location-picker.tsx:164
+#: src/components/location-picker.tsx:175
 msgid "Map to pick the location"
 msgstr "خريطة لاختيار الموقع"
 
@@ -1957,7 +1957,7 @@ msgstr "الليالي"
 msgid "No account? <0>Create a manager account</0>"
 msgstr "ليس لديك حساب؟ <0>إنشاء حساب مدير</0>"
 
-#: src/components/location-picker.tsx:109
+#: src/components/location-picker.tsx:120
 msgid "No address was found for this location."
 msgstr "لم يُعثر على عنوان لهذا الموقع."
 
@@ -2700,7 +2700,7 @@ msgstr "الأمان"
 msgid "See all"
 msgstr "عرض الكل"
 
-#: src/components/location-picker.tsx:180
+#: src/components/location-picker.tsx:199
 msgid "Selected address"
 msgstr "العنوان المختار"
 
@@ -2956,7 +2956,11 @@ msgstr "سيظهر الرابط هكذا: <0>{link}</0>"
 msgid "The location is blocked in the browser."
 msgstr "الموقع محجوب في المتصفح."
 
-#: src/components/location-picker.tsx:54
+#: src/components/location-picker.tsx:183
+msgid "The map could not load. Use your current location below, or check that the TomTom key includes the Maps service."
+msgstr "تعذّر تحميل الخريطة. استخدم موقعك الحالي بالأسفل، أو تأكد أن مفتاح TomTom يشمل خدمة الخرائط."
+
+#: src/components/location-picker.tsx:56
 msgid "The map is not available: the TomTom key is missing."
 msgstr "الخريطة غير متاحة: مفتاح TomTom غير موجود."
 

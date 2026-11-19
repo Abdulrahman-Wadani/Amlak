@@ -40,6 +40,8 @@ export default function LocationPicker({
   const [loading, setLoading] = useState(false)
   const [selectedAddress, setSelectedAddress] = useState("")
   const [error, setError] = useState("")
+  // The map's own style did not load (the key may not include the map service).
+  const [mapFailed, setMapFailed] = useState(false)
 
   useEffect(() => {
     callbackRef.current = onLocationSelect
@@ -62,6 +64,9 @@ export default function LocationPicker({
     })
 
     const map = new TomTomMap({
+      // The plain street map: no traffic or terrain layers, which need more
+      // services on the key and add nothing to picking a location.
+      style: { type: "standard", id: "streetLight", include: [] },
       mapLibre: {
         container: mapContainer.current,
         center: initialLocation
@@ -75,6 +80,12 @@ export default function LocationPicker({
     markerRef.current = marker
 
     let active = true
+
+    // Without its style the map stays an empty box; say so instead.
+    map.mapLibreMap.on("error", () => {
+      if (active && !map.mapLibreMap.isStyleLoaded()) setMapFailed(true)
+    })
+
 
     const selectLocation = async (lng: number, lat: number) => {
       setLoading(true)
@@ -162,6 +173,14 @@ export default function LocationPicker({
             <MapPin aria-hidden="true" className="size-6" strokeWidth={1.8} />
             <span>
               <Trans>Map to pick the location</Trans>
+            </span>
+          </div>
+        )}
+        {mapFailed && (
+          <div role="alert" className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-secondary px-6 text-center text-[13px] text-muted-foreground">
+            <MapPin aria-hidden="true" className="size-6" strokeWidth={1.8} />
+            <span>
+              <Trans>The map could not load. Use your current location below, or check that the TomTom key includes the Maps service.</Trans>
             </span>
           </div>
         )}

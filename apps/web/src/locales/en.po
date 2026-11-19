@@ -851,7 +851,7 @@ msgstr "Cleaning"
 msgid "Clear filters"
 msgstr "Clear filters"
 
-#: src/components/location-picker.tsx:171
+#: src/components/location-picker.tsx:190
 msgid "Click on the map or drag the marker to choose a location."
 msgstr "Click on the map or drag the marker to choose a location."
 
@@ -931,7 +931,7 @@ msgstr "Could not cancel the booking. Please try again."
 msgid "Could not change the booking. Please try again."
 msgstr "Could not change the booking. Please try again."
 
-#: src/components/location-picker.tsx:113
+#: src/components/location-picker.tsx:124
 msgid "Could not get the address."
 msgstr "Could not get the address."
 
@@ -1537,7 +1537,7 @@ msgstr "From"
 msgid "Full name"
 msgstr "Full name"
 
-#: src/components/location-picker.tsx:175
+#: src/components/location-picker.tsx:194
 msgid "Getting the address…"
 msgstr "Getting the address…"
 
@@ -1824,7 +1824,7 @@ msgstr "Manager"
 msgid "Managers"
 msgstr "Managers"
 
-#: src/components/location-picker.tsx:164
+#: src/components/location-picker.tsx:175
 msgid "Map to pick the location"
 msgstr "Map to pick the location"
 
@@ -1957,7 +1957,7 @@ msgstr "Nights"
 msgid "No account? <0>Create a manager account</0>"
 msgstr "No account? <0>Create a manager account</0>"
 
-#: src/components/location-picker.tsx:109
+#: src/components/location-picker.tsx:120
 msgid "No address was found for this location."
 msgstr "No address was found for this location."
 
@@ -2700,7 +2700,7 @@ msgstr "Security"
 msgid "See all"
 msgstr "See all"
 
-#: src/components/location-picker.tsx:180
+#: src/components/location-picker.tsx:199
 msgid "Selected address"
 msgstr "Selected address"
 
@@ -2956,7 +2956,11 @@ msgstr "The link will look like this: <0>{link}</0>"
 msgid "The location is blocked in the browser."
 msgstr "The location is blocked in the browser."
 
-#: src/components/location-picker.tsx:54
+#: src/components/location-picker.tsx:183
+msgid "The map could not load. Use your current location below, or check that the TomTom key includes the Maps service."
+msgstr "The map could not load. Use your current location below, or check that the TomTom key includes the Maps service."
+
+#: src/components/location-picker.tsx:56
 msgid "The map is not available: the TomTom key is missing."
 msgstr "The map is not available: the TomTom key is missing."
 
