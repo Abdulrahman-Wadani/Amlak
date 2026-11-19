@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react"
-import { Link, createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { plural, t } from "@lingui/core/macro"
 import { Camera } from "lucide-react"
 import type { Place, Ticket, TicketStatus } from "@amlak/shared"
 import { storedUser, useAuth } from "@/lib/auth"
 import { getPlaces, listAllTickets, listTickets } from "@/lib/api"
-import { buttonVariants } from "@/components/ui/button"
-import { cn } from "cn"
+import { Button } from "@/components/ui/button"
 import { Page } from "@/components/page"
-import { FilterTabs, ListFooter, NativeSelect } from "@/components/panel"
+import { ReportPopup } from "@/components/report-form"
+import { FilterTabs, ListFooter, ListToolbar, Panel, ToolbarSelect } from "@/components/panel"
 import { EmptyState, LoadError, LoadingList } from "@/components/states"
 import { TaskCard, TicketCard, useTicketNames } from "@/components/ticket-parts"
 
@@ -114,22 +114,24 @@ function ManagerTickets() {
 
   return (
     <Page title={<Trans>Maintenance tickets</Trans>} phoneTitle={<Trans>Maintenance</Trans>} description={summary}>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <FilterTabs
-          label={t`Filter by status`}
-          value={filter}
-          onChange={(key) => {
-            setFilter(key)
-            setPage(1)
-          }}
-          tabs={FILTERS.map((item) => ({ key: item.key, label: item.label, count: counts[item.key] ?? 0 }))}
-        />
-        <div className="w-full desk:w-[220px]">
-          <label htmlFor="ticket-place" className="sr-only">
-            <Trans>Place</Trans>
-          </label>
-          <NativeSelect
+      {/* One card holds the page's list, its filters and its pages. */}
+      <Panel className="gap-5">
+        <ListToolbar
+          filters={
+            <FilterTabs
+              label={t`Filter by status`}
+              value={filter}
+              onChange={(key) => {
+                setFilter(key)
+                setPage(1)
+              }}
+              tabs={FILTERS.map((item) => ({ key: item.key, label: item.label, count: counts[item.key] ?? 0 }))}
+            />
+          }
+        >
+          <ToolbarSelect
             id="ticket-place"
+            label={t`Place`}
             value={placeId}
             onChange={(value) => {
               setPlaceId(value)
@@ -142,45 +144,45 @@ function ManagerTickets() {
                 {place.place_name}
               </option>
             ))}
-          </NativeSelect>
-        </div>
-      </div>
+          </ToolbarSelect>
+        </ListToolbar>
 
-      {failed ? (
-        <LoadError title={<Trans>Could not load tickets</Trans>} onRetry={() => setReload((n) => n + 1)} />
-      ) : tickets === null ? (
-        <LoadingList />
-      ) : tickets.length === 0 ? (
-        filter === "PENDING_REVIEW" ? (
-          <EmptyState
-            title={<Trans>No tickets waiting for review</Trans>}
-            text={<Trans>When a worker reports damage, the ticket will appear here.</Trans>}
-          />
-        ) : (
-          <EmptyState title={<Trans>No tickets here</Trans>} text={<Trans>Tickets with this status will appear here.</Trans>} />
-        )
-      ) : (
-        <div className={GRID}>
-          {tickets.map((ticket) => (
-            <TicketCard
-              key={ticket.id}
-              ticket={ticket}
-              place={names.places[ticket.place_id]}
-              asset={ticket.asset_id ? names.assets[ticket.asset_id] : undefined}
+        {failed ? (
+          <LoadError title={<Trans>Could not load tickets</Trans>} onRetry={() => setReload((n) => n + 1)} />
+        ) : tickets === null ? (
+          <LoadingList />
+        ) : tickets.length === 0 ? (
+          filter === "PENDING_REVIEW" ? (
+            <EmptyState
+              title={<Trans>No tickets waiting for review</Trans>}
+              text={<Trans>When a worker reports damage, the ticket will appear here.</Trans>}
             />
-          ))}
-        </div>
-      )}
+          ) : (
+            <EmptyState title={<Trans>No tickets here</Trans>} text={<Trans>Tickets with this status will appear here.</Trans>} />
+          )
+        ) : (
+          <div className={GRID}>
+            {tickets.map((ticket) => (
+              <TicketCard
+                key={ticket.id}
+                ticket={ticket}
+                place={names.places[ticket.place_id]}
+                asset={ticket.asset_id ? names.assets[ticket.asset_id] : undefined}
+              />
+            ))}
+          </div>
+        )}
 
-      {tickets && tickets.length > 0 && (
-        <ListFooter
-          page={page}
-          pageSize={PAGE_SIZE}
-          total={total}
-          range={(from, to, all) => t`${from} to ${to} of ${all} tickets`}
-          onPage={setPage}
-        />
-      )}
+        {tickets && tickets.length > 0 && (
+          <ListFooter
+            page={page}
+            pageSize={PAGE_SIZE}
+            total={total}
+            range={(from, to, all) => t`${from} to ${to} of ${all} tickets`}
+            onPage={setPage}
+          />
+        )}
+      </Panel>
     </Page>
   )
 }
@@ -194,6 +196,7 @@ function MyTasks() {
   const [tickets, setTickets] = useState<Ticket[] | null>(null)
   const [failed, setFailed] = useState(false)
   const [reload, setReload] = useState(0)
+  const [reporting, setReporting] = useState(false)
   const names = useTicketNames(accessToken, [])
 
   useEffect(() => {
@@ -223,56 +226,68 @@ function MyTasks() {
       description={<Trans>Tickets assigned to you.</Trans>}
       phoneActions={false}
       actions={
-        <Link to="/ticket/new" className={cn(buttonVariants())}>
+        <Button type="button" onClick={() => setReporting(true)}>
           <Camera aria-hidden="true" />
           <Trans>Report damage</Trans>
-        </Link>
+        </Button>
       }
     >
-      <FilterTabs
-        label={t`Filter tasks`}
-        value={tab}
-        onChange={setTab}
-        tabs={[
-          { key: "ASSIGNED", label: <Trans>Assigned to me</Trans>, count: groups.ASSIGNED.length },
-          { key: "REPORTS", label: <Trans>My reports</Trans>, count: groups.REPORTS.length },
-          { key: "COMPLETED", label: <Trans>Completed</Trans>, count: groups.COMPLETED.length },
-        ]}
-      />
-
-      {failed ? (
-        <LoadError title={<Trans>Could not load tickets</Trans>} onRetry={() => setReload((n) => n + 1)} />
-      ) : tickets === null ? (
-        <LoadingList />
-      ) : shown.length === 0 ? (
-        <EmptyState
-          title={
-            tab === "ASSIGNED" ? (
-              <Trans>You have no open tasks</Trans>
-            ) : tab === "REPORTS" ? (
-              <Trans>You have not reported anything yet</Trans>
-            ) : (
-              <Trans>No completed tasks yet</Trans>
-            )
-          }
-          text={tab === "ASSIGNED" ? <Trans>Tasks your manager approves for you will appear here.</Trans> : undefined}
+      {reporting && (
+        <ReportPopup
+          onClose={() => setReporting(false)}
+          onSaved={() => {
+            setReporting(false)
+            setReload((n) => n + 1)
+          }}
         />
-      ) : (
-        <div className={GRID}>
-          {shown.map((ticket) => (
-            <TaskCard
-              key={ticket.id}
-              ticket={ticket}
-              place={names.places[ticket.place_id]}
-              canComplete={tab === "ASSIGNED"}
-            />
-          ))}
-        </div>
       )}
+      {/* One card holds the page's list, its filters and its pages. */}
+      <Panel className="gap-5">
+        <FilterTabs
+          label={t`Filter tasks`}
+          value={tab}
+          onChange={setTab}
+          tabs={[
+            { key: "ASSIGNED", label: <Trans>Assigned to me</Trans>, count: groups.ASSIGNED.length },
+            { key: "REPORTS", label: <Trans>My reports</Trans>, count: groups.REPORTS.length },
+            { key: "COMPLETED", label: <Trans>Completed</Trans>, count: groups.COMPLETED.length },
+          ]}
+        />
 
-      <p className="m-0 text-[13px] text-muted-foreground">
-        <Trans>“My reports” shows the reports you sent and their status, with photos and no costs.</Trans>
-      </p>
+        {failed ? (
+          <LoadError title={<Trans>Could not load tickets</Trans>} onRetry={() => setReload((n) => n + 1)} />
+        ) : tickets === null ? (
+          <LoadingList />
+        ) : shown.length === 0 ? (
+          <EmptyState
+            title={
+              tab === "ASSIGNED" ? (
+                <Trans>You have no open tasks</Trans>
+              ) : tab === "REPORTS" ? (
+                <Trans>You have not reported anything yet</Trans>
+              ) : (
+                <Trans>No completed tasks yet</Trans>
+              )
+            }
+            text={tab === "ASSIGNED" ? <Trans>Tasks your manager approves for you will appear here.</Trans> : undefined}
+          />
+        ) : (
+          <div className={GRID}>
+            {shown.map((ticket) => (
+              <TaskCard
+                key={ticket.id}
+                ticket={ticket}
+                place={names.places[ticket.place_id]}
+                canComplete={tab === "ASSIGNED"}
+              />
+            ))}
+          </div>
+        )}
+
+        <p className="m-0 text-[13px] text-muted-foreground">
+          <Trans>“My reports” shows the reports you sent and their status, with photos and no costs.</Trans>
+        </p>
+      </Panel>
     </Page>
   )
 }

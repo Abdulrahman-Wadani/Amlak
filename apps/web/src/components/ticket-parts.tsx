@@ -57,7 +57,7 @@ export function TicketCard({ ticket, asset, place }: { ticket: Ticket; asset?: s
     <Link
       to="/ticket/$ticket_id"
       params={{ ticket_id: ticket.id }}
-      className="am-lift box-border flex min-w-0 flex-col gap-2.5 border border-border bg-card p-4 text-foreground no-underline shadow-sm"
+      className="am-lift box-border flex h-full min-w-0 flex-col gap-2.5 border border-border bg-card p-4 text-foreground no-underline shadow-sm"
     >
       <span className="flex items-start justify-between gap-3">
         <span className="flex min-w-0 flex-col leading-[1.5]">
@@ -68,7 +68,7 @@ export function TicketCard({ ticket, asset, place }: { ticket: Ticket; asset?: s
         </span>
         <ChevronRight aria-hidden="true" className="mt-0.5 size-5 flex-none text-muted-foreground rtl:rotate-180" strokeWidth={1.8} />
       </span>
-      <span className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[13px]">
+      <span className="mt-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-2 text-[13px]">
         <span className="flex flex-wrap items-center gap-x-3 gap-y-2">
           <TicketChip ticket={ticket} />
           <PriorityText priority={ticket.priority} />
@@ -90,7 +90,7 @@ export function TaskCard({ ticket, place, canComplete }: { ticket: Ticket; place
         : t`Due ${due}`
       : relative(ticket.created_at)
   return (
-    <div className="box-border flex min-w-0 flex-col gap-2.5 border border-border bg-card p-4 shadow-sm">
+    <div className="box-border flex h-full min-w-0 flex-col gap-2.5 border border-border bg-card p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <Link
           to="/ticket/$ticket_id"

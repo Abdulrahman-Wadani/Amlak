@@ -7,6 +7,7 @@ import type { Language, User } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { getProfile, updateProfile } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
+import { LIMITS, tooLong } from "@/lib/limits"
 import { LANGUAGE_NAMES, useLanguage } from "@/lib/i18n"
 import { roleLabel } from "@/lib/nav"
 import { Button } from "@/components/ui/button"
@@ -88,9 +89,10 @@ function ProfilePage() {
     const number = toE164(phone.trim())
     const next: typeof errors = {}
     if (!fullname.trim()) next.fullname = t`Enter your full name`
+    else next.fullname = tooLong(fullname, LIMITS.name)
     if (phone.trim() && !/^\+9665[013-9]\d{7}$/.test(number)) next.phone = t`Enter a Saudi mobile number that starts with 5.`
     setErrors(next)
-    if (Object.keys(next).length > 0) return
+    if (Object.values(next).some(Boolean)) return
     if (await save({ fullname: fullname.trim(), phone: phone.trim() ? number : undefined })) toast(t`The changes are saved.`)
   }
 
@@ -189,7 +191,7 @@ function ProfilePage() {
                 </div>
                 <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
                   <Field id="p-name" label={<Trans>Full name</Trans>} error={errors.fullname}>
-                    <Input id="p-name" autoComplete="name" value={fullname} aria-invalid={errors.fullname ? true : undefined} onChange={(e) => setFullname(e.target.value)} />
+                    <Input id="p-name" maxLength={LIMITS.name} autoComplete="name" value={fullname} aria-invalid={errors.fullname ? true : undefined} onChange={(e) => setFullname(e.target.value)} />
                   </Field>
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center justify-between gap-3">

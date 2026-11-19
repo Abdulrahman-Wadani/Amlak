@@ -31,24 +31,17 @@ import { Route as AuthenticatedWorkersRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminAdmin_idRouteImport } from './routes/_authenticated/admin/$admin_id'
 import { Route as AuthenticatedBookingBooking_idRouteImport } from './routes/_authenticated/booking/$booking_id'
-import { Route as AuthenticatedBookingNewRouteImport } from './routes/_authenticated/booking/new'
 import { Route as AuthenticatedContentIndexRouteImport } from './routes/_authenticated/content/index'
 import { Route as AuthenticatedContentContent_idRouteImport } from './routes/_authenticated/content/$content_id'
-import { Route as AuthenticatedContentNewRouteImport } from './routes/_authenticated/content/new'
-import { Route as AuthenticatedExpenseNewRouteImport } from './routes/_authenticated/expense/new'
 import { Route as AuthenticatedPlacePlace_idRouteImport } from './routes/_authenticated/place/$place_id'
 import { Route as AuthenticatedPlaceNewRouteImport } from './routes/_authenticated/place/new'
 import { Route as AuthenticatedSupportIndexRouteImport } from './routes/_authenticated/support/index'
 import { Route as AuthenticatedSupportSupport_idRouteImport } from './routes/_authenticated/support/$support_id'
-import { Route as AuthenticatedSupportNewRouteImport } from './routes/_authenticated/support/new'
 import { Route as AuthenticatedTicketTicket_idRouteImport } from './routes/_authenticated/ticket/$ticket_id'
-import { Route as AuthenticatedTicketNewRouteImport } from './routes/_authenticated/ticket/new'
 import { Route as AuthenticatedWorkerWorker_idRouteImport } from './routes/_authenticated/worker/$worker_id'
-import { Route as AuthenticatedWorkerNewRouteImport } from './routes/_authenticated/worker/new'
 import { Route as PLangSlugRouteImport } from './routes/p/$lang/$slug'
 import { Route as AuthenticatedExpenseEditExpense_idRouteImport } from './routes/_authenticated/expense/edit/$expense_id'
 import { Route as AuthenticatedPlaceAssetAsset_idRouteImport } from './routes/_authenticated/place/asset/$asset_id'
-import { Route as AuthenticatedPlaceAssetNewRouteImport } from './routes/_authenticated/place/asset/new'
 import { Route as AuthenticatedPlaceEditPlace_idRouteImport } from './routes/_authenticated/place/edit/$place_id'
 import { Route as AuthenticatedTicketCompleteTicket_idRouteImport } from './routes/_authenticated/ticket/complete/$ticket_id'
 import { Route as AuthenticatedPlaceAssetEditAsset_idRouteImport } from './routes/_authenticated/place/asset/edit/$asset_id'
@@ -166,11 +159,6 @@ const AuthenticatedBookingBooking_idRoute =
     path: '/booking/$booking_id',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedBookingNewRoute = AuthenticatedBookingNewRouteImport.update({
-  id: '/booking/new',
-  path: '/booking/new',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedContentIndexRoute =
   AuthenticatedContentIndexRouteImport.update({
     id: '/content/',
@@ -183,16 +171,6 @@ const AuthenticatedContentContent_idRoute =
     path: '/content/$content_id',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedContentNewRoute = AuthenticatedContentNewRouteImport.update({
-  id: '/content/new',
-  path: '/content/new',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
-const AuthenticatedExpenseNewRoute = AuthenticatedExpenseNewRouteImport.update({
-  id: '/expense/new',
-  path: '/expense/new',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedPlacePlace_idRoute =
   AuthenticatedPlacePlace_idRouteImport.update({
     id: '/place/$place_id',
@@ -216,33 +194,18 @@ const AuthenticatedSupportSupport_idRoute =
     path: '/support/$support_id',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedSupportNewRoute = AuthenticatedSupportNewRouteImport.update({
-  id: '/support/new',
-  path: '/support/new',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedTicketTicket_idRoute =
   AuthenticatedTicketTicket_idRouteImport.update({
     id: '/ticket/$ticket_id',
     path: '/ticket/$ticket_id',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedTicketNewRoute = AuthenticatedTicketNewRouteImport.update({
-  id: '/ticket/new',
-  path: '/ticket/new',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const AuthenticatedWorkerWorker_idRoute =
   AuthenticatedWorkerWorker_idRouteImport.update({
     id: '/worker/$worker_id',
     path: '/worker/$worker_id',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedWorkerNewRoute = AuthenticatedWorkerNewRouteImport.update({
-  id: '/worker/new',
-  path: '/worker/new',
-  getParentRoute: () => AuthenticatedRoute,
-} as any)
 const PLangSlugRoute = PLangSlugRouteImport.update({
   id: '/p/$lang/$slug',
   path: '/p/$lang/$slug',
@@ -258,12 +221,6 @@ const AuthenticatedPlaceAssetAsset_idRoute =
   AuthenticatedPlaceAssetAsset_idRouteImport.update({
     id: '/place/asset/$asset_id',
     path: '/place/asset/$asset_id',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
-const AuthenticatedPlaceAssetNewRoute =
-  AuthenticatedPlaceAssetNewRouteImport.update({
-    id: '/place/asset/new',
-    path: '/place/asset/new',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedPlaceEditPlace_idRoute =
@@ -306,25 +263,18 @@ export interface FileRoutesByFullPath {
   '/workers': typeof AuthenticatedWorkersRoute
   '/admin/$admin_id': typeof AuthenticatedAdminAdmin_idRoute
   '/booking/$booking_id': typeof AuthenticatedBookingBooking_idRoute
-  '/booking/new': typeof AuthenticatedBookingNewRoute
   '/content/$content_id': typeof AuthenticatedContentContent_idRoute
-  '/content/new': typeof AuthenticatedContentNewRoute
-  '/expense/new': typeof AuthenticatedExpenseNewRoute
   '/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
   '/place/new': typeof AuthenticatedPlaceNewRoute
   '/support/$support_id': typeof AuthenticatedSupportSupport_idRoute
-  '/support/new': typeof AuthenticatedSupportNewRoute
   '/ticket/$ticket_id': typeof AuthenticatedTicketTicket_idRoute
-  '/ticket/new': typeof AuthenticatedTicketNewRoute
   '/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
-  '/worker/new': typeof AuthenticatedWorkerNewRoute
   '/p/$lang/$slug': typeof PLangSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/content/': typeof AuthenticatedContentIndexRoute
   '/support/': typeof AuthenticatedSupportIndexRoute
   '/expense/edit/$expense_id': typeof AuthenticatedExpenseEditExpense_idRoute
   '/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
-  '/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
   '/place/edit/$place_id': typeof AuthenticatedPlaceEditPlace_idRoute
   '/ticket/complete/$ticket_id': typeof AuthenticatedTicketCompleteTicket_idRoute
   '/place/asset/edit/$asset_id': typeof AuthenticatedPlaceAssetEditAsset_idRoute
@@ -350,25 +300,18 @@ export interface FileRoutesByTo {
   '/workers': typeof AuthenticatedWorkersRoute
   '/admin/$admin_id': typeof AuthenticatedAdminAdmin_idRoute
   '/booking/$booking_id': typeof AuthenticatedBookingBooking_idRoute
-  '/booking/new': typeof AuthenticatedBookingNewRoute
   '/content/$content_id': typeof AuthenticatedContentContent_idRoute
-  '/content/new': typeof AuthenticatedContentNewRoute
-  '/expense/new': typeof AuthenticatedExpenseNewRoute
   '/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
   '/place/new': typeof AuthenticatedPlaceNewRoute
   '/support/$support_id': typeof AuthenticatedSupportSupport_idRoute
-  '/support/new': typeof AuthenticatedSupportNewRoute
   '/ticket/$ticket_id': typeof AuthenticatedTicketTicket_idRoute
-  '/ticket/new': typeof AuthenticatedTicketNewRoute
   '/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
-  '/worker/new': typeof AuthenticatedWorkerNewRoute
   '/p/$lang/$slug': typeof PLangSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/content': typeof AuthenticatedContentIndexRoute
   '/support': typeof AuthenticatedSupportIndexRoute
   '/expense/edit/$expense_id': typeof AuthenticatedExpenseEditExpense_idRoute
   '/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
-  '/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
   '/place/edit/$place_id': typeof AuthenticatedPlaceEditPlace_idRoute
   '/ticket/complete/$ticket_id': typeof AuthenticatedTicketCompleteTicket_idRoute
   '/place/asset/edit/$asset_id': typeof AuthenticatedPlaceAssetEditAsset_idRoute
@@ -396,25 +339,18 @@ export interface FileRoutesById {
   '/_authenticated/workers': typeof AuthenticatedWorkersRoute
   '/_authenticated/admin/$admin_id': typeof AuthenticatedAdminAdmin_idRoute
   '/_authenticated/booking/$booking_id': typeof AuthenticatedBookingBooking_idRoute
-  '/_authenticated/booking/new': typeof AuthenticatedBookingNewRoute
   '/_authenticated/content/$content_id': typeof AuthenticatedContentContent_idRoute
-  '/_authenticated/content/new': typeof AuthenticatedContentNewRoute
-  '/_authenticated/expense/new': typeof AuthenticatedExpenseNewRoute
   '/_authenticated/place/$place_id': typeof AuthenticatedPlacePlace_idRoute
   '/_authenticated/place/new': typeof AuthenticatedPlaceNewRoute
   '/_authenticated/support/$support_id': typeof AuthenticatedSupportSupport_idRoute
-  '/_authenticated/support/new': typeof AuthenticatedSupportNewRoute
   '/_authenticated/ticket/$ticket_id': typeof AuthenticatedTicketTicket_idRoute
-  '/_authenticated/ticket/new': typeof AuthenticatedTicketNewRoute
   '/_authenticated/worker/$worker_id': typeof AuthenticatedWorkerWorker_idRoute
-  '/_authenticated/worker/new': typeof AuthenticatedWorkerNewRoute
   '/p/$lang/$slug': typeof PLangSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/content/': typeof AuthenticatedContentIndexRoute
   '/_authenticated/support/': typeof AuthenticatedSupportIndexRoute
   '/_authenticated/expense/edit/$expense_id': typeof AuthenticatedExpenseEditExpense_idRoute
   '/_authenticated/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
-  '/_authenticated/place/asset/new': typeof AuthenticatedPlaceAssetNewRoute
   '/_authenticated/place/edit/$place_id': typeof AuthenticatedPlaceEditPlace_idRoute
   '/_authenticated/ticket/complete/$ticket_id': typeof AuthenticatedTicketCompleteTicket_idRoute
   '/_authenticated/place/asset/edit/$asset_id': typeof AuthenticatedPlaceAssetEditAsset_idRoute
@@ -442,25 +378,18 @@ export interface FileRouteTypes {
     | '/workers'
     | '/admin/$admin_id'
     | '/booking/$booking_id'
-    | '/booking/new'
     | '/content/$content_id'
-    | '/content/new'
-    | '/expense/new'
     | '/place/$place_id'
     | '/place/new'
     | '/support/$support_id'
-    | '/support/new'
     | '/ticket/$ticket_id'
-    | '/ticket/new'
     | '/worker/$worker_id'
-    | '/worker/new'
     | '/p/$lang/$slug'
     | '/admin/'
     | '/content/'
     | '/support/'
     | '/expense/edit/$expense_id'
     | '/place/asset/$asset_id'
-    | '/place/asset/new'
     | '/place/edit/$place_id'
     | '/ticket/complete/$ticket_id'
     | '/place/asset/edit/$asset_id'
@@ -486,25 +415,18 @@ export interface FileRouteTypes {
     | '/workers'
     | '/admin/$admin_id'
     | '/booking/$booking_id'
-    | '/booking/new'
     | '/content/$content_id'
-    | '/content/new'
-    | '/expense/new'
     | '/place/$place_id'
     | '/place/new'
     | '/support/$support_id'
-    | '/support/new'
     | '/ticket/$ticket_id'
-    | '/ticket/new'
     | '/worker/$worker_id'
-    | '/worker/new'
     | '/p/$lang/$slug'
     | '/admin'
     | '/content'
     | '/support'
     | '/expense/edit/$expense_id'
     | '/place/asset/$asset_id'
-    | '/place/asset/new'
     | '/place/edit/$place_id'
     | '/ticket/complete/$ticket_id'
     | '/place/asset/edit/$asset_id'
@@ -531,25 +453,18 @@ export interface FileRouteTypes {
     | '/_authenticated/workers'
     | '/_authenticated/admin/$admin_id'
     | '/_authenticated/booking/$booking_id'
-    | '/_authenticated/booking/new'
     | '/_authenticated/content/$content_id'
-    | '/_authenticated/content/new'
-    | '/_authenticated/expense/new'
     | '/_authenticated/place/$place_id'
     | '/_authenticated/place/new'
     | '/_authenticated/support/$support_id'
-    | '/_authenticated/support/new'
     | '/_authenticated/ticket/$ticket_id'
-    | '/_authenticated/ticket/new'
     | '/_authenticated/worker/$worker_id'
-    | '/_authenticated/worker/new'
     | '/p/$lang/$slug'
     | '/_authenticated/admin/'
     | '/_authenticated/content/'
     | '/_authenticated/support/'
     | '/_authenticated/expense/edit/$expense_id'
     | '/_authenticated/place/asset/$asset_id'
-    | '/_authenticated/place/asset/new'
     | '/_authenticated/place/edit/$place_id'
     | '/_authenticated/ticket/complete/$ticket_id'
     | '/_authenticated/place/asset/edit/$asset_id'
@@ -723,13 +638,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBookingBooking_idRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/booking/new': {
-      id: '/_authenticated/booking/new'
-      path: '/booking/new'
-      fullPath: '/booking/new'
-      preLoaderRoute: typeof AuthenticatedBookingNewRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/content/': {
       id: '/_authenticated/content/'
       path: '/content'
@@ -742,20 +650,6 @@ declare module '@tanstack/react-router' {
       path: '/content/$content_id'
       fullPath: '/content/$content_id'
       preLoaderRoute: typeof AuthenticatedContentContent_idRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/content/new': {
-      id: '/_authenticated/content/new'
-      path: '/content/new'
-      fullPath: '/content/new'
-      preLoaderRoute: typeof AuthenticatedContentNewRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/expense/new': {
-      id: '/_authenticated/expense/new'
-      path: '/expense/new'
-      fullPath: '/expense/new'
-      preLoaderRoute: typeof AuthenticatedExpenseNewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/place/$place_id': {
@@ -786,13 +680,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSupportSupport_idRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/support/new': {
-      id: '/_authenticated/support/new'
-      path: '/support/new'
-      fullPath: '/support/new'
-      preLoaderRoute: typeof AuthenticatedSupportNewRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/ticket/$ticket_id': {
       id: '/_authenticated/ticket/$ticket_id'
       path: '/ticket/$ticket_id'
@@ -800,25 +687,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedTicketTicket_idRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/ticket/new': {
-      id: '/_authenticated/ticket/new'
-      path: '/ticket/new'
-      fullPath: '/ticket/new'
-      preLoaderRoute: typeof AuthenticatedTicketNewRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/worker/$worker_id': {
       id: '/_authenticated/worker/$worker_id'
       path: '/worker/$worker_id'
       fullPath: '/worker/$worker_id'
       preLoaderRoute: typeof AuthenticatedWorkerWorker_idRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/worker/new': {
-      id: '/_authenticated/worker/new'
-      path: '/worker/new'
-      fullPath: '/worker/new'
-      preLoaderRoute: typeof AuthenticatedWorkerNewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/p/$lang/$slug': {
@@ -840,13 +713,6 @@ declare module '@tanstack/react-router' {
       path: '/place/asset/$asset_id'
       fullPath: '/place/asset/$asset_id'
       preLoaderRoute: typeof AuthenticatedPlaceAssetAsset_idRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
-    '/_authenticated/place/asset/new': {
-      id: '/_authenticated/place/asset/new'
-      path: '/place/asset/new'
-      fullPath: '/place/asset/new'
-      preLoaderRoute: typeof AuthenticatedPlaceAssetNewRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/place/edit/$place_id': {
@@ -887,24 +753,17 @@ interface AuthenticatedRouteChildren {
   AuthenticatedWorkersRoute: typeof AuthenticatedWorkersRoute
   AuthenticatedAdminAdmin_idRoute: typeof AuthenticatedAdminAdmin_idRoute
   AuthenticatedBookingBooking_idRoute: typeof AuthenticatedBookingBooking_idRoute
-  AuthenticatedBookingNewRoute: typeof AuthenticatedBookingNewRoute
   AuthenticatedContentContent_idRoute: typeof AuthenticatedContentContent_idRoute
-  AuthenticatedContentNewRoute: typeof AuthenticatedContentNewRoute
-  AuthenticatedExpenseNewRoute: typeof AuthenticatedExpenseNewRoute
   AuthenticatedPlacePlace_idRoute: typeof AuthenticatedPlacePlace_idRoute
   AuthenticatedPlaceNewRoute: typeof AuthenticatedPlaceNewRoute
   AuthenticatedSupportSupport_idRoute: typeof AuthenticatedSupportSupport_idRoute
-  AuthenticatedSupportNewRoute: typeof AuthenticatedSupportNewRoute
   AuthenticatedTicketTicket_idRoute: typeof AuthenticatedTicketTicket_idRoute
-  AuthenticatedTicketNewRoute: typeof AuthenticatedTicketNewRoute
   AuthenticatedWorkerWorker_idRoute: typeof AuthenticatedWorkerWorker_idRoute
-  AuthenticatedWorkerNewRoute: typeof AuthenticatedWorkerNewRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedContentIndexRoute: typeof AuthenticatedContentIndexRoute
   AuthenticatedSupportIndexRoute: typeof AuthenticatedSupportIndexRoute
   AuthenticatedExpenseEditExpense_idRoute: typeof AuthenticatedExpenseEditExpense_idRoute
   AuthenticatedPlaceAssetAsset_idRoute: typeof AuthenticatedPlaceAssetAsset_idRoute
-  AuthenticatedPlaceAssetNewRoute: typeof AuthenticatedPlaceAssetNewRoute
   AuthenticatedPlaceEditPlace_idRoute: typeof AuthenticatedPlaceEditPlace_idRoute
   AuthenticatedTicketCompleteTicket_idRoute: typeof AuthenticatedTicketCompleteTicket_idRoute
   AuthenticatedPlaceAssetEditAsset_idRoute: typeof AuthenticatedPlaceAssetEditAsset_idRoute
@@ -924,25 +783,18 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedWorkersRoute: AuthenticatedWorkersRoute,
   AuthenticatedAdminAdmin_idRoute: AuthenticatedAdminAdmin_idRoute,
   AuthenticatedBookingBooking_idRoute: AuthenticatedBookingBooking_idRoute,
-  AuthenticatedBookingNewRoute: AuthenticatedBookingNewRoute,
   AuthenticatedContentContent_idRoute: AuthenticatedContentContent_idRoute,
-  AuthenticatedContentNewRoute: AuthenticatedContentNewRoute,
-  AuthenticatedExpenseNewRoute: AuthenticatedExpenseNewRoute,
   AuthenticatedPlacePlace_idRoute: AuthenticatedPlacePlace_idRoute,
   AuthenticatedPlaceNewRoute: AuthenticatedPlaceNewRoute,
   AuthenticatedSupportSupport_idRoute: AuthenticatedSupportSupport_idRoute,
-  AuthenticatedSupportNewRoute: AuthenticatedSupportNewRoute,
   AuthenticatedTicketTicket_idRoute: AuthenticatedTicketTicket_idRoute,
-  AuthenticatedTicketNewRoute: AuthenticatedTicketNewRoute,
   AuthenticatedWorkerWorker_idRoute: AuthenticatedWorkerWorker_idRoute,
-  AuthenticatedWorkerNewRoute: AuthenticatedWorkerNewRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedContentIndexRoute: AuthenticatedContentIndexRoute,
   AuthenticatedSupportIndexRoute: AuthenticatedSupportIndexRoute,
   AuthenticatedExpenseEditExpense_idRoute:
     AuthenticatedExpenseEditExpense_idRoute,
   AuthenticatedPlaceAssetAsset_idRoute: AuthenticatedPlaceAssetAsset_idRoute,
-  AuthenticatedPlaceAssetNewRoute: AuthenticatedPlaceAssetNewRoute,
   AuthenticatedPlaceEditPlace_idRoute: AuthenticatedPlaceEditPlace_idRoute,
   AuthenticatedTicketCompleteTicket_idRoute:
     AuthenticatedTicketCompleteTicket_idRoute,

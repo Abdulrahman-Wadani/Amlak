@@ -8,10 +8,11 @@ import { storedUser, useAuth } from "@/lib/auth"
 import { apiAllPages, deleteExpense, getPlaces } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
 import { useFormat } from "@/lib/format"
-import { buttonVariants } from "@/components/ui/button"
-import { cn } from "cn"
+import { Button } from "@/components/ui/button"
+import { FormPopup } from "@/components/form-popup"
+import { ExpenseForm } from "@/components/expense-form"
 import { Page } from "@/components/page"
-import { Field, FilterTabs, NativeSelect } from "@/components/panel"
+import { FilterTabs, ListToolbar, Panel, ToolbarSelect } from "@/components/panel"
 import { ConfirmDialog, EmptyState, LoadError, LoadingList } from "@/components/states"
 import { toast } from "@/components/toast"
 import { Amount, CATEGORIES, CategoryChip, categoryLabel } from "@/components/finance-parts"
@@ -41,6 +42,7 @@ function ExpensesPage() {
   const [expenses, setExpenses] = useState<Expense[] | null>(null)
   const [failed, setFailed] = useState(false)
   const [reload, setReload] = useState(0)
+  const [adding, setAdding] = useState(false)
   const [toDelete, setToDelete] = useState<Expense | null>(null)
   const [busy, setBusy] = useState(false)
   const [deleteError, setDeleteError] = useState("")
@@ -105,14 +107,26 @@ function ExpensesPage() {
       title={<Trans>Expenses</Trans>}
       description={<Trans>Visible to the manager only.</Trans>}
       phoneActions={false}
-      phoneEnd={{ label: t`Add expense`, icon: "plus", link: { to: "/expense/new" } }}
+      phoneEnd={{ label: t`Add expense`, icon: "plus", onClick: () => setAdding(true) }}
       actions={
-        <Link to="/expense/new" className={cn(buttonVariants())}>
+        <Button type="button" onClick={() => setAdding(true)}>
           <Plus aria-hidden="true" />
           <Trans>Add expense</Trans>
-        </Link>
+        </Button>
       }
     >
+      {adding && (
+        <FormPopup
+          title=<Trans>Add expense</Trans>
+          onClose={() => setAdding(false)}
+          onSaved={() => {
+            setAdding(false)
+            setReload((n) => n + 1)
+          }}
+        >
+          {accessToken && <ExpenseForm token={accessToken} />}
+        </FormPopup>
+      )}
       <section className="box-border flex flex-wrap items-center justify-between gap-3 border border-border bg-card px-5 py-6 shadow-sm">
         <div className="flex items-center gap-1">
           <button type="button" aria-label={t`Previous month`} className={iconButton} onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}>
@@ -140,105 +154,107 @@ function ExpensesPage() {
         </span>
       </section>
 
-      <div className="flex flex-wrap items-end gap-x-6 gap-y-3">
-        <div className="w-full desk:w-[240px]">
-          <Field id="expense-place" label={<Trans>Place</Trans>}>
-            <NativeSelect id="expense-place" value={placeId} onChange={setPlaceId}>
-              <option value="">{t`All places`}</option>
-              {places?.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.place_name}
-                </option>
-              ))}
-            </NativeSelect>
-          </Field>
-        </div>
-        <div className="w-full min-w-0 desk:w-auto desk:flex-1">
-          <FilterTabs
-            label={t`Filter by category`}
-            value={filter}
-            onChange={setFilter}
-            tabs={[
-              { key: "ALL" as Filter, label: <Trans>All</Trans>, count: countFor("ALL") },
-              ...CATEGORIES.map((c) => ({ key: c as Filter, label: categoryLabel(c), count: countFor(c) })),
-            ]}
+      {/* The month total above; one card holds the filters and the list. */}
+      <Panel className="gap-5">
+        <ListToolbar
+          end={
+            <Link to="/reports" className="inline-flex min-h-11 items-center text-[15px] font-semibold text-foreground underline underline-offset-4">
+              <Trans>Financial reports</Trans>
+            </Link>
+          }
+          filters={
+            <FilterTabs
+              label={t`Filter by category`}
+              value={filter}
+              onChange={setFilter}
+              tabs={[
+                { key: "ALL" as Filter, label: <Trans>All</Trans>, count: countFor("ALL") },
+                ...CATEGORIES.map((c) => ({ key: c as Filter, label: categoryLabel(c), count: countFor(c) })),
+              ]}
+            />
+          }
+        >
+          <ToolbarSelect id="expense-place" label={t`Place`} value={placeId} onChange={setPlaceId}>
+            <option value="">{t`All places`}</option>
+            {places?.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.place_name}
+              </option>
+            ))}
+          </ToolbarSelect>
+        </ListToolbar>
+
+        {failed ? (
+          <LoadError title={<Trans>Could not load expenses</Trans>} onRetry={() => setReload((n) => n + 1)} />
+        ) : expenses === null ? (
+          <LoadingList />
+        ) : shown.length === 0 ? (
+          <EmptyState
+            title={<Trans>No expenses this month</Trans>}
+            text={<Trans>Expenses you add for this month will appear here.</Trans>}
           />
-        </div>
-        <Link to="/reports" className="inline-flex min-h-11 items-center text-[15px] font-semibold text-foreground underline underline-offset-4">
-          <Trans>Financial reports</Trans>
-        </Link>
-      </div>
-
-      {failed ? (
-        <LoadError title={<Trans>Could not load expenses</Trans>} onRetry={() => setReload((n) => n + 1)} />
-      ) : expenses === null ? (
-        <LoadingList />
-      ) : shown.length === 0 ? (
-        <EmptyState
-          title={<Trans>No expenses this month</Trans>}
-          text={<Trans>Expenses you add for this month will appear here.</Trans>}
-        />
-      ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-4">
-          {shown.map((expense) => (
-            <div key={expense.id} className="box-border flex min-w-0 flex-col gap-2.5 border border-border bg-card p-4 shadow-sm">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex min-w-0 flex-col leading-[1.5]">
-                  <span dir="auto" className="truncate font-semibold">
-                    {expense.description || categoryLabel(expense.category)}
-                  </span>
-                  <span className="text-[13px] text-muted-foreground">
-                    {t`${names[expense.place_id] ?? ""}, ${date(expense.expense_date, { day: "numeric", month: "long" })}`}
-                  </span>
+        ) : (
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] items-stretch gap-4">
+            {shown.map((expense) => (
+              <div key={expense.id} className="box-border flex h-full min-w-0 flex-col gap-2.5 border border-border bg-card p-4 shadow-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex min-w-0 flex-col leading-[1.5]">
+                    <span dir="auto" className="truncate font-semibold">
+                      {expense.description || categoryLabel(expense.category)}
+                    </span>
+                    <span className="text-[13px] text-muted-foreground">
+                      {t`${names[expense.place_id] ?? ""}, ${date(expense.expense_date, { day: "numeric", month: "long" })}`}
+                    </span>
+                  </div>
+                  <Amount value={expense.amount} currency={expense.currency} format={number} className="text-[17px]" />
                 </div>
-                <Amount value={expense.amount} currency={expense.currency} format={number} className="text-[17px]" />
-              </div>
-              <div className="flex items-center justify-between gap-2">
-                <CategoryChip category={expense.category} />
-                <div className="flex items-center">
-                  {expense.receipt_url && (
-                    <a href={expense.receipt_url} target="_blank" rel="noreferrer" aria-label={t`Open the receipt`} className={`${iconButton} text-primary`}>
-                      <ImageIcon aria-hidden="true" strokeWidth={1.8} />
-                    </a>
-                  )}
-                  <Link
-                    to="/expense/edit/$expense_id"
-                    params={{ expense_id: expense.id }}
-                    aria-label={t`Edit expense`}
-                    className={`${iconButton} text-foreground`}
-                  >
-                    <Pencil aria-hidden="true" strokeWidth={1.8} />
-                  </Link>
-                  <button
-                    type="button"
-                    aria-label={t`Delete expense`}
-                    className={`${iconButton} text-destructive`}
-                    onClick={() => {
-                      setDeleteError("")
-                      setToDelete(expense)
-                    }}
-                  >
-                    <Trash2 aria-hidden="true" strokeWidth={1.8} />
-                  </button>
+                <div className="mt-auto flex items-center justify-between gap-2">
+                  <CategoryChip category={expense.category} />
+                  <div className="flex items-center">
+                    {expense.receipt_url && (
+                      <a href={expense.receipt_url} target="_blank" rel="noreferrer" aria-label={t`Open the receipt`} className={`${iconButton} text-primary`}>
+                        <ImageIcon aria-hidden="true" strokeWidth={1.8} />
+                      </a>
+                    )}
+                    <Link
+                      to="/expense/edit/$expense_id"
+                      params={{ expense_id: expense.id }}
+                      aria-label={t`Edit expense`}
+                      className={`${iconButton} text-foreground`}
+                    >
+                      <Pencil aria-hidden="true" strokeWidth={1.8} />
+                    </Link>
+                    <button
+                      type="button"
+                      aria-label={t`Delete expense`}
+                      className={`${iconButton} text-destructive`}
+                      onClick={() => {
+                        setDeleteError("")
+                        setToDelete(expense)
+                      }}
+                    >
+                      <Trash2 aria-hidden="true" strokeWidth={1.8} />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
 
-      {toDelete && (
-        <ConfirmDialog
-          open
-          title={<Trans>Delete this expense?</Trans>}
-          text={<Trans>It disappears from the expenses and the financial reports. This cannot be undone from the app.</Trans>}
-          confirm={busy ? <Trans>Deleting…</Trans> : <Trans>Delete expense</Trans>}
-          busy={busy}
-          error={deleteError}
-          onConfirm={() => void remove()}
-          onClose={() => setToDelete(null)}
-        />
-      )}
+        {toDelete && (
+          <ConfirmDialog
+            open
+            title={<Trans>Delete this expense?</Trans>}
+            text={<Trans>It disappears from the expenses and the financial reports. This cannot be undone from the app.</Trans>}
+            confirm={busy ? <Trans>Deleting…</Trans> : <Trans>Delete expense</Trans>}
+            busy={busy}
+            error={deleteError}
+            onConfirm={() => void remove()}
+            onClose={() => setToDelete(null)}
+          />
+        )}
+      </Panel>
     </Page>
   )
 }

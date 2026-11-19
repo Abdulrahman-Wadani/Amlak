@@ -125,16 +125,19 @@ export function PhotoPicker({
 }
 
 /** Photos already on a ticket, as square tiles that open the full photo. */
-export function PhotoTiles({ urls, label, columns = 3 }: { urls: string[]; label: (n: number) => string; columns?: 3 | 4 }) {
+export function PhotoTiles({ urls, label }: { urls: string[]; label: (n: number) => string }) {
   if (urls.length === 0) return null
+  // Thumbnails of one size whatever the photo's shape; each opens the full photo.
   return (
-    <div className={`grid gap-3 ${columns === 4 ? "grid-cols-4" : "grid-cols-3"}`}>
+    <ul className="m-0 flex list-none flex-wrap gap-3 p-0">
       {urls.map((url, index) => (
-        <a key={url} href={url} target="_blank" rel="noreferrer" className="block">
-          <img src={url} alt={label(index + 1)} className="block aspect-square w-full border border-border bg-secondary object-cover" />
-        </a>
+        <li key={url}>
+          <a href={url} target="_blank" rel="noreferrer" className="am-lift block">
+            <img src={url} alt={label(index + 1)} className="block size-28 border border-border bg-secondary object-cover desk:size-36" />
+          </a>
+        </li>
       ))}
-    </div>
+    </ul>
   )
 }
 

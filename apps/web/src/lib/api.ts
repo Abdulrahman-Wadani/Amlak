@@ -1,7 +1,7 @@
 
 import { authFetch } from "./http"
 import { apiError, readApiError } from "./errors"
-import type { BookingInput } from "./validators"
+import type { CreateBookingInput } from "@amlak/shared"
 import type {
   Asset,
   CreateAssetInput,
@@ -316,7 +316,7 @@ export function listAllBookingsForPlace(
 export async function createBooking(
   token: string,
   placeId: string,
-  input: BookingInput,
+  input: CreateBookingInput,
 ): Promise<Booking> {
   return apiRequest<Booking>(`/places/${placeId}/bookings`, token, {
     method: "POST",

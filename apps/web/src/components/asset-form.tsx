@@ -7,6 +7,8 @@ import { ASSET_STATUSES, type Asset, type AssetStatus, type Place } from "@amlak
 import { createAsset, getPlaceAssets, updateAsset } from "@/lib/api"
 import { todayIn } from "@/lib/dates"
 import { errorMessage } from "@/lib/errors"
+import { FormCancel, useFormPopup } from "@/components/form-popup"
+import { LIMITS, tooLong } from "@/lib/limits"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -30,6 +32,7 @@ type FieldKey = "name" | "type" | "purchase_date"
 /** Add asset and Edit asset: the form, the place's current assets, and what comes after saving. */
 export function AssetForm({ token, place, asset }: { token: string; place: Place; asset?: Asset }) {
   const navigate = useNavigate()
+  const popup = useFormPopup()
   const [name, setName] = useState(asset?.name ?? "")
   const [type, setType] = useState(asset?.type ?? "")
   const [status, setStatus] = useState<AssetStatus>(asset?.status ?? "GOOD")
@@ -57,11 +60,13 @@ export function AssetForm({ token, place, asset }: { token: string; place: Place
     event.preventDefault()
     const next: Partial<Record<FieldKey, string>> = {}
     if (!name.trim()) next.name = t`Enter an asset name`
+    else next.name = tooLong(name, LIMITS.name)
     if (!type.trim()) next.type = t`Enter a type`
+    else next.type = tooLong(type, LIMITS.short)
     // Both are YYYY-MM-DD strings, which compare correctly as text.
     if (purchaseDate && purchaseDate > today) next.purchase_date = t`The purchase date cannot be in the future.`
     setErrors(next)
-    if (Object.keys(next).length > 0) return
+    if (Object.values(next).some(Boolean)) return
 
     setSaving(true)
     setFormError("")
@@ -82,7 +87,8 @@ export function AssetForm({ token, place, asset }: { token: string; place: Place
           status,
           purchase_date: purchaseDate || undefined,
         })
-        await navigate({ to: "/place/$place_id", params: { place_id: place.id } })
+        if (popup) popup.saved()
+        else await navigate({ to: "/place/$place_id", params: { place_id: place.id } })
       }
     } catch (err) {
       setFormError(errorMessage(err))
@@ -100,10 +106,10 @@ export function AssetForm({ token, place, asset }: { token: string; place: Place
         <Panel pad="lg">
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
             <Field id="name" label={<Trans>Asset name</Trans>} error={errors.name}>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} {...invalid("name")} />
+              <Input id="name" maxLength={LIMITS.name} value={name} onChange={(e) => setName(e.target.value)} {...invalid("name")} />
             </Field>
             <Field id="type" label={<Trans>Type</Trans>} error={errors.type}>
-              <Input id="type" value={type} onChange={(e) => setType(e.target.value)} {...invalid("type")} />
+              <Input id="type" maxLength={LIMITS.short} value={type} onChange={(e) => setType(e.target.value)} {...invalid("type")} />
             </Field>
             <Field id="status" label={<Trans>Status</Trans>}>
               <NativeSelect id="status" value={status} onChange={(value) => setStatus(value as AssetStatus)}>
@@ -157,9 +163,7 @@ export function AssetForm({ token, place, asset }: { token: string; place: Place
                   <Trans>Cancel</Trans>
                 </Link>
               ) : (
-                <Link to="/place/$place_id" params={{ place_id: place.id }} className={cn(buttonVariants({ variant: "outline" }))}>
-                  <Trans>Cancel</Trans>
-                </Link>
+                <FormCancel to={{ to: "/place/$place_id", params: { place_id: place.id } }} />
               )}
               <Button type="submit" disabled={saving}>
                 {saving ? <Trans>Saving…</Trans> : <Trans>Save asset</Trans>}

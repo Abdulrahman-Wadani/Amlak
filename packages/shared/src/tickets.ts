@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LIMITS } from "./limits.ts";
 
 export const TICKET_TYPES = ["CORRECTIVE", "PREVENTIVE"] as const;
 export type TicketType = (typeof TICKET_TYPES)[number];
@@ -76,7 +77,7 @@ export type Ticket = z.infer<typeof ticketSchema>;
 
 /** The text fields of a damage report; the photos come as files. */
 export const createTicketSchema = z.object({
-	description: z.string().trim().min(1).max(2000),
+	description: z.string().trim().min(1).max(LIMITS.longText),
 	priority: z.enum(TICKET_PRIORITIES),
 	asset_id: z.uuid().optional(),
 });
@@ -110,12 +111,12 @@ export const approveTicketSchema = z.object({
 		description: "An ACTIVE worker assigned to the place, or the place's owner",
 	}),
 	due_date: z.iso.date("Use the YYYY-MM-DD format"),
-	estimated_cost: z.number().min(0).optional(),
+	estimated_cost: z.number().min(0).max(LIMITS.money).optional(),
 });
 export type ApproveTicketInput = z.infer<typeof approveTicketSchema>;
 
 export const rejectTicketSchema = z.object({
-	reason: z.string().trim().min(1).max(1000),
+	reason: z.string().trim().min(1).max(LIMITS.text),
 });
 export type RejectTicketInput = z.infer<typeof rejectTicketSchema>;
 
@@ -134,7 +135,8 @@ export const completeTicketSchema = z.object({
 		.trim()
 		.regex(/^\d+(\.\d{1,2})?$/, "Use a number like 320 or 320.50")
 		.transform(Number)
+		.refine((cost) => cost <= LIMITS.money, "Too large")
 		.meta({ description: "What the repair cost, at most 2 decimals" }),
-	completion_notes: z.string().trim().max(2000).optional(),
+	completion_notes: z.string().trim().max(LIMITS.longText).optional(),
 });
 export type CompleteTicketInput = z.infer<typeof completeTicketSchema>;

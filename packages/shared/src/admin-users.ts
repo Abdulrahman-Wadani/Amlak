@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { phoneSchema } from "./auth.ts";
+import { LIMITS } from "./limits.ts";
 import { ROLES } from "./roles.ts";
 import { USER_STATUSES } from "./users.ts";
 
@@ -18,7 +19,7 @@ export type ListUsersQuery = z.infer<typeof listUsersQuerySchema>;
 
 /** What an Admin can change on any account. Every field is optional. */
 export const adminUpdateUserSchema = z.object({
-	fullname: z.string().trim().min(1).optional(),
+	fullname: z.string().trim().min(1).max(LIMITS.name).optional(),
 	phone: phoneSchema.optional(),
 	status: z.enum(["ACTIVE", "DEACTIVATED"]).optional().meta({
 		description:

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LIMITS } from "./limits.ts";
 import { LANGUAGES } from "./users.ts";
 
 export const webContentSchema = z
@@ -36,19 +37,19 @@ export const listContentQuerySchema = z.object({
 export type ListContentQuery = z.infer<typeof listContentQuerySchema>;
 
 export const createContentSchema = z.object({
-	title: z.string().trim().min(1).max(200),
+	title: z.string().trim().min(1).max(LIMITS.title),
 	language: z.enum(LANGUAGES),
 	slug: slugField,
-	body: z.string().min(1).max(100_000),
+	body: z.string().min(1).max(LIMITS.body),
 	is_published: z.boolean().default(false),
 });
 export type CreateContentInput = z.infer<typeof createContentSchema>;
 
 /** Every field is optional. The language cannot change: each translation is its own page. */
 export const updateContentSchema = z.object({
-	title: z.string().trim().min(1).max(200).optional(),
+	title: z.string().trim().min(1).max(LIMITS.title).optional(),
 	slug: slugField.optional(),
-	body: z.string().min(1).max(100_000).optional(),
+	body: z.string().min(1).max(LIMITS.body).optional(),
 	is_published: z.boolean().optional(),
 });
 export type UpdateContentInput = z.infer<typeof updateContentSchema>;

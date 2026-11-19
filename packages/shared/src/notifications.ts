@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LIMITS } from "./limits.ts";
 import { paginatedSchema } from "./pagination.ts";
 import { ROLES } from "./roles.ts";
 
@@ -73,10 +74,10 @@ export const announcementSchema = z
 			.max(1000)
 			.optional()
 			.meta({ description: "These users, if ACTIVE" }),
-		title_en: text(200),
-		message_en: text(5000),
-		title_ar: text(200),
-		message_ar: text(5000),
+		title_en: text(LIMITS.title),
+		message_en: text(LIMITS.message),
+		title_ar: text(LIMITS.title),
+		message_ar: text(LIMITS.message),
 	})
 	.refine(hasOneAudience, {
 		path: ["role"],

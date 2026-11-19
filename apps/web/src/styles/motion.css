@@ -160,7 +160,8 @@ textarea:focus-visible,
   font-weight: 500;
   cursor: pointer;
 }
-.am-tab[aria-pressed="true"] {
+.am-tab[aria-pressed="true"],
+.am-tab[aria-selected="true"] {
   border-color: #4d7296;
   background-color: #4d7296;
   color: #ffffff;
@@ -172,6 +173,7 @@ textarea:focus-visible,
   font-size: 13px;
   color: var(--muted-foreground);
 }
-.am-tab[aria-pressed="true"] .am-tab-count {
+.am-tab[aria-pressed="true"] .am-tab-count,
+.am-tab[aria-selected="true"] .am-tab-count {
   color: #ffffff;
 }

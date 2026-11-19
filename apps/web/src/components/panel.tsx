@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState, type ReactNode } from "react"
+import { createContext, useContext, useEffect, useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import { Check, ChevronDown } from "lucide-react"
+import { Check, ChevronDown, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useFormat } from "@/lib/format"
 
@@ -11,32 +11,174 @@ import { useFormat } from "@/lib/format"
  * inside its card, filter tabs and the list footer.
  */
 
+/**
+ * True inside a TabbedPanel: the section is one tab of a card, so it draws no
+ * card of its own and its title is left to the tab.
+ */
+const EmbeddedContext = createContext(false)
+/** True inside a TabbedPanel only: the tab names the section, so its title is hidden. */
+const InTabContext = createContext(false)
+
+/**
+ * True for anything inside a card (a Panel or a TabbedPanel): empty, loading
+ * and error states then draw no card of their own.
+ */
+export const InCardContext = createContext(false)
+
+/** Whether this section sits inside a TabbedPanel (see EmbeddedContext). */
+export function useEmbedded(): boolean {
+  return useContext(EmbeddedContext)
+}
+
 /** A white card section with the hard shadow. `pad` is 24px, or 28px for a form card. */
 export function Panel({
   children,
   className = "",
   pad = "md",
   labelledBy,
+  holdsSections = false,
 }: {
   children: ReactNode
   className?: string
   pad?: "md" | "lg"
   labelledBy?: string
+  /** The page's one card around several sections (e.g. a calendar and its list): those draw no card of their own. */
+  holdsSections?: boolean
 }) {
+  const embedded = useEmbedded()
   return (
     <section
       aria-labelledby={labelledBy}
-      className={`box-border flex min-w-0 flex-col gap-3 border border-border bg-card shadow-sm ${pad === "lg" ? "p-5 desk:p-7" : "p-5 desk:p-6"} ${className}`}
+      className={
+        embedded
+          ? `flex min-w-0 flex-col gap-3 ${className}`
+          : `box-border flex min-w-0 flex-col gap-3 border border-border bg-card shadow-sm ${pad === "lg" ? "p-5 desk:p-7" : "p-5 desk:p-6"} ${className}`
+      }
     >
-      {children}
+      <InCardContext.Provider value={true}>
+        {holdsSections ? <EmbeddedContext.Provider value={true}>{children}</EmbeddedContext.Provider> : children}
+      </InCardContext.Provider>
     </section>
+  )
+}
+
+/**
+ * One card that shows one of several lists at a time, chosen by tabs (a
+ * page shows at most one list). The sections inside draw no card of their
+ * own (see useEmbedded). The page keeps the chosen tab in the address.
+ */
+export function TabbedPanel<K extends string>({
+  label,
+  tabs,
+  value,
+  onChange,
+}: {
+  label: string
+  /** Each tab with its section; a section is drawn once its tab is first opened. */
+  tabs: { key: K; label: ReactNode; count?: number; content: ReactNode }[]
+  value: K
+  onChange: (key: K) => void
+}) {
+  const id = useId()
+  const { number } = useFormat()
+  const refs = useRef<Record<string, HTMLButtonElement | null>>({})
+  // Sections already opened stay mounted (hidden), so going back to a tab
+  // shows it as it was, without loading it again.
+  const [opened, setOpened] = useState<K[]>([value])
+  if (!opened.includes(value)) setOpened([...opened, value])
+
+  // Arrow keys move between the tabs (and choose), as in any tablist.
+  function onKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const keys = tabs.map((tab) => tab.key)
+    const at = keys.indexOf(value)
+    const rtl = getComputedStyle(event.currentTarget).direction === "rtl"
+    const step =
+      event.key === "ArrowRight" ? (rtl ? -1 : 1) : event.key === "ArrowLeft" ? (rtl ? 1 : -1) : 0
+    const next =
+      event.key === "Home" ? keys[0] : event.key === "End" ? keys[keys.length - 1] : step ? keys[(at + step + keys.length) % keys.length] : null
+    if (!next) return
+    event.preventDefault()
+    onChange(next)
+    refs.current[next]?.focus()
+  }
+
+  return (
+    <section aria-label={label} className="box-border flex min-w-0 flex-col gap-5 border border-border bg-card p-5 shadow-sm desk:p-6">
+      {/* One row at every width: on the phone each tab grows from its own text width. */}
+      <div
+        role="tablist"
+        aria-label={label}
+        onKeyDown={onKeyDown}
+        className="flex min-w-0 gap-1.5 border-b border-border pb-4 desk:gap-2"
+      >
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            ref={(el) => {
+              refs.current[tab.key] = el
+            }}
+            type="button"
+            role="tab"
+            id={`${id}-${tab.key}`}
+            aria-selected={value === tab.key}
+            aria-controls={`${id}-${tab.key}-panel`}
+            tabIndex={value === tab.key ? 0 : -1}
+            className="am-tab min-w-0 flex-auto justify-center px-2 text-[13px] desk:flex-none desk:px-3.5 desk:text-sm"
+            onClick={() => onChange(tab.key)}
+          >
+            <span className="truncate">{tab.label}</span>
+            {tab.count !== undefined && <span className="am-tab-count">{number(tab.count)}</span>}
+          </button>
+        ))}
+      </div>
+      <InCardContext.Provider value={true}>
+        <EmbeddedContext.Provider value={true}>
+          <InTabContext.Provider value={true}>
+            {tabs
+              .filter((tab) => opened.includes(tab.key))
+              .map((tab) => (
+                // One height for every tab, so the card does not jump when the tab
+                // changes; a longer list scrolls up and down inside it.
+                <div
+                  key={tab.key}
+                  role="tabpanel"
+                  id={`${id}-${tab.key}-panel`}
+                  aria-labelledby={`${id}-${tab.key}`}
+                  hidden={tab.key !== value}
+                  // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrolling region must be reachable by keyboard
+                  tabIndex={0}
+                  className="-mx-1 h-[440px] min-w-0 flex-col overflow-x-hidden overflow-y-auto overscroll-contain px-1 pb-1 [scrollbar-width:thin] desk:h-[420px] [&:not([hidden])]:flex"
+                >
+                  {tab.content}
+                </div>
+              ))}
+          </InTabContext.Provider>
+        </EmbeddedContext.Provider>
+      </InCardContext.Provider>
+    </section>
+  )
+}
+
+/** True inside a popup (components/form-popup.tsx): one column, buttons at its end. */
+const InPopupContext = createContext(false)
+
+/** What a popup's form sits in: sections without cards, one column. */
+export function PopupSections({ children }: { children: ReactNode }) {
+  return (
+    <InCardContext.Provider value={true}>
+      <EmbeddedContext.Provider value={true}>
+        <InPopupContext.Provider value={true}>{children}</InPopupContext.Provider>
+      </EmbeddedContext.Provider>
+    </InCardContext.Provider>
   )
 }
 
 /** A card's title (18px), or 16px in a side card. */
 export function PanelTitle({ children, id, small = false }: { children: ReactNode; id?: string; small?: boolean }) {
+  // Inside a tab the tab names the list; the title stays for screen readers.
+  const inTab = useContext(InTabContext)
   return (
-    <h2 id={id} className={`m-0 leading-[1.4] font-bold ${small ? "text-base" : "text-lg"}`}>
+    <h2 id={id} className={inTab ? "sr-only" : `m-0 leading-[1.4] font-bold ${small ? "text-base" : "text-lg"}`}>
       {children}
     </h2>
   )
@@ -44,6 +186,15 @@ export function PanelTitle({ children, id, small = false }: { children: ReactNod
 
 /** The main column and the side column; the side column goes under the main one when there is no room. */
 export function TwoColumns({ main, side }: { main: ReactNode; side: ReactNode }) {
+  // A popup has no room for two columns: one under the other.
+  if (useContext(InPopupContext)) {
+    return (
+      <div className="flex min-w-0 flex-col gap-5">
+        {main}
+        {side}
+      </div>
+    )
+  }
   return (
     <div className="flex flex-wrap items-start gap-6">
       <div className="flex min-w-0 flex-[999_1_520px] flex-col gap-4 desk:gap-6">{main}</div>
@@ -86,6 +237,8 @@ export function ScrollList({
   onScrollable: (scrolls: boolean) => void
 }) {
   const ref = useRef<HTMLDivElement>(null)
+  // Inside a tab the tab itself scrolls: no second scrolling box in it.
+  const inTab = useContext(InTabContext)
   const [scrolls, setScrolls] = useState(false)
   const report = useRef(onScrollable)
   report.current = onScrollable
@@ -112,7 +265,11 @@ export function ScrollList({
       role="region"
       aria-label={label}
       tabIndex={scrolls ? 0 : undefined}
-      className={`box-border flex max-h-[304px] flex-none snap-y snap-mandatory flex-col gap-3 overflow-y-auto overscroll-contain [scrollbar-width:thin] ${scrolls ? "pb-10 [mask-image:linear-gradient(to_bottom,#000_calc(100%-40px),transparent)]" : ""}`}
+      className={
+        inTab
+          ? "box-border flex flex-none flex-col gap-3"
+          : `box-border flex max-h-[304px] flex-none snap-y snap-mandatory flex-col gap-3 overflow-x-hidden overflow-y-auto overscroll-contain pe-1 [scrollbar-width:thin] ${scrolls ? "pb-10 [mask-image:linear-gradient(to_bottom,#000_calc(100%-40px),transparent)]" : ""}`
+      }
     >
       {children}
     </div>
@@ -157,7 +314,99 @@ export function Initial({ name, size = 36 }: { name: string; size?: number }) {
   )
 }
 
-/** Filter buttons with a count each (places, workers). They wrap; on the phone they scroll sideways in their row. */
+/**
+ * The bar above a list, the same on every page: the search and the pickers
+ * in the first row from the start (a page link or button at its end), then
+ * the filter buttons in their own row under them.
+ */
+export function ListToolbar({
+  children,
+  filters,
+  end,
+}: {
+  /** ToolbarSearch and ToolbarSelect, in that order. */
+  children?: ReactNode
+  /** FilterTabs (or a Segmented choice). */
+  filters?: ReactNode
+  end?: ReactNode
+}) {
+  return (
+    <div className="flex min-w-0 flex-col gap-3">
+      {(children || end) && (
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
+          {children}
+          {end && <div className="ms-auto flex items-center gap-3">{end}</div>}
+        </div>
+      )}
+      {filters}
+    </div>
+  )
+}
+
+/** The search box of a ListToolbar: 320px on the desktop, full width on the phone. */
+export function ToolbarSearch({
+  id,
+  label,
+  placeholder,
+  value,
+  onChange,
+  maxLength,
+}: {
+  id: string
+  label: string
+  placeholder: string
+  value: string
+  onChange: (value: string) => void
+  maxLength: number
+}) {
+  return (
+    <div className="relative w-full desk:w-[320px]">
+      <label htmlFor={id} className="sr-only">
+        {label}
+      </label>
+      <Search aria-hidden="true" className="pointer-events-none absolute start-3.5 top-3 size-5 text-muted-foreground" strokeWidth={1.8} />
+      <input
+        id={id}
+        type="search"
+        maxLength={maxLength}
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="box-border h-11 w-full min-w-0 border border-input bg-card ps-11 pe-3.5 text-[15px] text-foreground outline-none placeholder:text-muted-foreground focus-visible:border-primary focus-visible:shadow-[0_0_0_3px_rgba(77,114,150,0.2)]"
+      />
+    </div>
+  )
+}
+
+/** A picker of a ListToolbar (a place, a role): 240px on the desktop, full width on the phone; its first option names it. */
+export function ToolbarSelect({
+  id,
+  label,
+  value,
+  onChange,
+  disabled,
+  children,
+}: {
+  id: string
+  label: string
+  value: string
+  onChange: (value: string) => void
+  disabled?: boolean
+  children: ReactNode
+}) {
+  return (
+    <div className="w-full desk:w-[240px]">
+      <label htmlFor={id} className="sr-only">
+        {label}
+      </label>
+      <NativeSelect id={id} value={value} onChange={onChange} disabled={disabled}>
+        {children}
+      </NativeSelect>
+    </div>
+  )
+}
+
+/** Filter buttons with a count each (places, workers). They wrap onto more rows; nothing scrolls sideways. */
 export function FilterTabs<K extends string>({
   label,
   tabs,
@@ -174,7 +423,7 @@ export function FilterTabs<K extends string>({
     <div
       role="group"
       aria-label={label}
-      className="-mx-4 flex max-w-[calc(100%+2rem)] gap-2 overflow-x-auto px-4 [scrollbar-width:none] desk:mx-0 desk:max-w-full desk:flex-wrap desk:overflow-visible desk:px-0"
+      className="flex min-w-0 flex-wrap gap-2"
     >
       {tabs.map((tab) => (
         <button
@@ -275,6 +524,7 @@ export function NativeSelect({
   children,
   disabled,
   invalid,
+  describedBy,
 }: {
   id: string
   value: string
@@ -282,6 +532,7 @@ export function NativeSelect({
   children: ReactNode
   disabled?: boolean
   invalid?: boolean
+  describedBy?: string
 }) {
   return (
     <div className="relative">
@@ -290,6 +541,7 @@ export function NativeSelect({
         value={value}
         disabled={disabled}
         aria-invalid={invalid || undefined}
+        aria-describedby={describedBy}
         onChange={(e) => onChange(e.target.value)}
         className="box-border h-11 w-full appearance-none border border-input bg-card ps-3.5 pe-11 text-[15px] text-foreground outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(77,114,150,.2)] disabled:bg-secondary disabled:text-muted-foreground aria-invalid:border-destructive"
       >
@@ -314,6 +566,8 @@ export function FormButtons({ children }: { children: ReactNode }) {
  * in place of the tabs. On the desktop the buttons stay in the form.
  */
 export function PhoneActionBar({ children }: { children: ReactNode }) {
+  // In a popup the buttons stay in it, at its end.
+  if (useContext(InPopupContext)) return <div className="flex gap-2.5 desk:hidden [&>*]:flex-1">{children}</div>
   return (
     <>
       <div aria-hidden="true" className="h-[calc(76px+env(safe-area-inset-bottom))] desk:hidden" />

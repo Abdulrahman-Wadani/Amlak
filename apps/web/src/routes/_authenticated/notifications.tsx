@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState, type ReactNode } from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import {
   Bell,
-  BellRing,
   Check,
   CheckCheck,
   ChevronLeft,
@@ -28,6 +27,7 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { MessageBox } from "@/components/message-box"
+import { ListToolbar, Panel } from "@/components/panel"
 import { Page } from "@/components/page"
 import { useUnread } from "@/components/shell-context"
 import { dateFormat, numberFormat } from "@/lib/format"
@@ -153,127 +153,38 @@ function NotificationsPage() {
     <Page
       title={<Trans>Notifications</Trans>}
       phoneStart="back"
-      phoneEnd="none"
-      bell={false}
-      // The page keeps its own banner (not the design), which holds the h1.
-      header={false}
-    >
-      {/* Header: on the phone the banner stacks its parts in one column. */}
-      <section
-        className="am-rise box-border flex flex-col items-stretch gap-5 bg-foreground p-6 text-white desk:flex-row desk:flex-wrap desk:items-center desk:justify-between desk:p-8"
-      >
-        <div className="flex min-w-0 flex-col gap-2.5 desk:flex-[1_1_300px]">
-          <span
-            style={S(
-              "display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--info-200)"
-            )}
-          >
-            <BellRing size={17} aria-hidden="true" />
-            <Trans>Notifications</Trans>
-          </span>
-
-          {/* On the phone the top bar holds the page's h1, so the banner's title is not a second one. */}
-          <h1
-            className="hidden desk:block"
-            style={S(
-              "margin: 0; font-size: 28px; font-weight: 700; line-height: 1.35"
-            )}
-          >
-            <Trans>Your notifications</Trans>
-          </h1>
-          <p
-            className="desk:hidden"
-            style={S(
-              "margin: 0; font-size: 28px; font-weight: 700; line-height: 1.35"
-            )}
-          >
-            <Trans>Your notifications</Trans>
-          </p>
-
-          <p
-            style={S(
-              "margin: 0; font-size: 14px; color: var(--info-200)"
-            )}
-          >
-            <Trans>
-              Stay updated with your latest activity and announcements.
-            </Trans>
-          </p>
-        </div>
-
-        <div
-          className="self-start desk:self-auto"
-          style={S(
-            "display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.10); padding: 14px 18px"
-          )}
-        >
-          <Bell size={22} aria-hidden="true" />
-
-          <div style={S("display: flex; flex-direction: column; gap: 2px")}>
-            <span
-              style={S(
-                "font-size: 24px; font-weight: 700; font-family: var(--font-mono); line-height: 1"
-              )}
-            >
-              {money(unreadCount)}
-            </span>
-            <span style={S("font-size: 12px; color: var(--info-200)")}>
+      description={
+        <>
+          <Trans>Stay updated with your latest activity and announcements.</Trans>
+          {unreadCount > 0 && (
+            <>
+              {t` · `}
               <Trans>Unread notifications</Trans>
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* Notifications list */}
-      <section>
-        <div
-          style={S(
-            "display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 16px"
+              {t`: `}
+              <span className="font-mono">{money(unreadCount)}</span>
+            </>
           )}
-        >
-          <div>
-            <h2 style={S("font-size: 18px; font-weight: 700; margin: 0")}>
-              <Trans>Inbox</Trans>
-            </h2>
-            <p
-              style={S(
-                "font-size: 13px; color: var(--muted-foreground); margin: 5px 0 0"
-              )}
-            >
-              <Trans>
-                Manage your notifications and stay up to date.
-              </Trans>
-            </p>
-          </div>
+        </>
+      }
+    >
 
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="am-btn"
-            onClick={loadNotifications}
-            disabled={loading}
-            style={S(
-              "height: 40px; background: transparent; border: 1px solid var(--border); color: var(--foreground)"
-            )}
-          >
-            <RefreshCw
-              size={15}
-              className={loading ? "animate-spin" : ""}
-            />
-            <Trans>Refresh</Trans>
-          </Button>
-        </div>
-
-        <div
-          style={S(
-            "display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px"
-          )}
-        >
-          {filterButton("all", <Trans>All</Trans>)}
-          {filterButton("unread", <Trans>Unread</Trans>)}
-          {filterButton("read", <Trans>Read</Trans>)}
-        </div>
+      {/* One card holds the list, its filters and its pages. */}
+      <Panel className="gap-5">
+        <ListToolbar
+          end={
+            <Button type="button" variant="outline" onClick={loadNotifications} disabled={loading}>
+              <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+              <Trans>Refresh</Trans>
+            </Button>
+          }
+          filters={
+            <div role="group" aria-label={t`Filter notifications`} className="flex min-w-0 flex-wrap gap-2">
+              {filterButton("all", <Trans>All</Trans>)}
+              {filterButton("unread", <Trans>Unread</Trans>)}
+              {filterButton("read", <Trans>Read</Trans>)}
+            </div>
+          }
+        />
 
         {error && (
           <MessageBox type="error">
@@ -391,7 +302,7 @@ function NotificationsPage() {
             </Button>
           </div>
         )}
-      </section>
+      </Panel>
     </Page>
   )
 }

@@ -5,6 +5,7 @@ export * from "./bookings.ts";
 export * from "./content.ts";
 export * from "./dashboard.ts";
 export * from "./expenses.ts";
+export * from "./limits.ts";
 export * from "./notifications.ts";
 export * from "./pagination.ts";
 export * from "./place-workers.ts";

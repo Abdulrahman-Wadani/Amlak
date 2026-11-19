@@ -1,15 +1,12 @@
-import {
-  createFileRoute,
-  redirect,
-  useNavigate,
-} from "@tanstack/react-router"
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import { useEffect } from "react"
-import { useAuth } from "@/lib/auth"
+import { restoreSession, useAuth } from "@/lib/auth"
 import { AppShell } from "@/components/app-shell"
 
 export const Route = createFileRoute("/_authenticated")({
-  beforeLoad: () => {
-    if (!sessionStorage.getItem("authUser")) {
+  // The refresh cookie decides: wait for it, then let in or send to /signin.
+  beforeLoad: async () => {
+    if (!(await restoreSession())) {
       throw redirect({ to: "/signin" })
     }
   },

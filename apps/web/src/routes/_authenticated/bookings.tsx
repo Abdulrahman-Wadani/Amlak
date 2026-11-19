@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Link, createFileRoute } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { Plus } from "lucide-react"
@@ -7,12 +7,12 @@ import type { Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { getPlaces, listAllBookingsForPlace, type Booking } from "@/lib/api"
 import { todayIn } from "@/lib/dates"
-import { buttonVariants } from "@/components/ui/button"
-import { cn } from "cn"
+import { Button } from "@/components/ui/button"
 import { Page } from "@/components/page"
-import { Field, NativeSelect, TwoColumns } from "@/components/panel"
+import { AddBookingPopup } from "@/components/booking-form"
+import { ListToolbar, Panel, ToolbarSelect } from "@/components/panel"
 import { EmptyState, LoadError, LoadingList } from "@/components/states"
-import { MonthBookings, MonthCalendar, isoDay } from "@/components/booking-parts"
+import { MonthCalendar, isoDay } from "@/components/booking-parts"
 
 export const Route = createFileRoute("/_authenticated/bookings")({
   component: BookingsPage,
@@ -63,22 +63,32 @@ function BookingsPage() {
   }, [accessToken, placeId, month, reload])
 
   const place = places?.find((p) => p.id === placeId)
-  const add = placeId ? { to: "/booking/new" as const, search: { place_id: placeId } } : null
+  const [adding, setAdding] = useState(false)
 
   return (
     <Page
       title={<Trans>Bookings</Trans>}
       phoneActions={false}
-      phoneEnd={add ? { label: t`Add booking`, icon: "plus", link: add } : "bell"}
+      phoneEnd={placeId ? { label: t`Add booking`, icon: "plus", onClick: () => setAdding(true) } : "bell"}
       actions={
-        add && (
-          <Link {...add} className={cn(buttonVariants())}>
+        placeId && (
+          <Button type="button" onClick={() => setAdding(true)}>
             <Plus aria-hidden="true" />
             <Trans>Add booking</Trans>
-          </Link>
+          </Button>
         )
       }
     >
+      {adding && (
+        <AddBookingPopup
+          placeId={placeId}
+          onClose={() => setAdding(false)}
+          onSaved={() => {
+            setAdding(false)
+            setReload((n) => n + 1)
+          }}
+        />
+      )}
       {places !== null && places.length === 0 ? (
         <EmptyState
           title={<Trans>No places yet</Trans>}
@@ -91,31 +101,25 @@ function BookingsPage() {
           }
         />
       ) : (
-        <>
-          <div className="w-full desk:max-w-[320px]">
-            <Field id="booking-place" label={<Trans>Place</Trans>}>
-              <NativeSelect id="booking-place" value={placeId} onChange={setPlaceId} disabled={!places}>
-                {places?.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.place_name}
-                  </option>
-                ))}
-              </NativeSelect>
-            </Field>
-          </div>
+        // One card holds the place and its calendar.
+        <Panel className="gap-5" holdsSections>
+          <ListToolbar>
+            <ToolbarSelect id="booking-place" label={t`Place`} value={placeId} onChange={setPlaceId} disabled={!places}>
+              {places?.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.place_name}
+                </option>
+              ))}
+            </ToolbarSelect>
+          </ListToolbar>
           {failed ? (
             <LoadError title={<Trans>Could not load bookings</Trans>} onRetry={() => setReload((n) => n + 1)} />
           ) : bookings === null || !place ? (
             <LoadingList />
           ) : (
-            <TwoColumns
-              main={
-                <MonthCalendar month={month} bookings={bookings} today={todayIn(place.timezone)} onMonth={setMonth} />
-              }
-              side={<MonthBookings bookings={bookings} />}
-            />
+            <MonthCalendar month={month} bookings={bookings} today={todayIn(place.timezone)} onMonth={setMonth} />
           )}
-        </>
+        </Panel>
       )}
     </Page>
   )

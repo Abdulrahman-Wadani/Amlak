@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { emailSchema } from "./auth.ts";
+import { LIMITS } from "./limits.ts";
 
 export const BOOKING_STATUSES = [
 	"CONFIRMED",
@@ -43,7 +44,7 @@ export type Booking = z.infer<typeof bookingSchema>;
 
 export const createBookingSchema = z
 	.object({
-		guest_name: z.string().trim().min(1).max(200),
+		guest_name: z.string().trim().min(1).max(LIMITS.guestName),
 		guest_phone: z
 			.string()
 			.trim()
@@ -52,7 +53,7 @@ export const createBookingSchema = z
 				"Use the international format, e.g. +966512345678",
 			),
 		guest_email: emailSchema.optional(),
-		guest_count: z.number().int().min(1).max(100),
+		guest_count: z.number().int().min(1).max(LIMITS.guests),
 		check_in_date: z.iso.date("Use the YYYY-MM-DD format"),
 		check_out_date: z.iso.date("Use the YYYY-MM-DD format").meta({
 			description: "The day the guest leaves; the next guest can arrive on it",
@@ -60,8 +61,9 @@ export const createBookingSchema = z
 		total_price: z
 			.number()
 			.min(0)
+			.max(LIMITS.money)
 			.meta({ description: "For the whole stay, in the place's currency" }),
-		notes: z.string().trim().max(2000).optional(),
+		notes: z.string().trim().max(LIMITS.longText).optional(),
 	})
 	.refine((input) => input.check_out_date > input.check_in_date, {
 		path: ["check_out_date"],
@@ -82,6 +84,6 @@ export const listBookingsQuerySchema = z
 export type ListBookingsQuery = z.infer<typeof listBookingsQuerySchema>;
 
 export const cancelBookingSchema = z.object({
-	reason: z.string().trim().min(1).max(1000),
+	reason: z.string().trim().min(1).max(LIMITS.text),
 });
 export type CancelBookingInput = z.infer<typeof cancelBookingSchema>;

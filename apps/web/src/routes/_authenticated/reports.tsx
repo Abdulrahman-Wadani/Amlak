@@ -10,7 +10,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { cn } from "cn"
 import { Page } from "@/components/page"
-import { Field, NativeSelect, Panel, Segmented } from "@/components/panel"
+import { Field, ListToolbar, Panel, Segmented, ToolbarSelect } from "@/components/panel"
 import { LoadError, LoadingList } from "@/components/states"
 import { Amount } from "@/components/finance-parts"
 import { isoDay } from "@/components/booking-parts"
@@ -127,12 +127,9 @@ function ReportsPage() {
         </Link>
       }
     >
-      <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
-        <div className="flex min-w-0 flex-[1_1_480px] flex-col gap-2">
-          <span className="text-sm font-semibold">
-            <Trans>Period</Trans>
-          </span>
-          <div className="[&>div]:grid-cols-2 desk:[&>div]:grid-cols-4">
+      <ListToolbar
+        filters={
+          <div className="[&>div]:grid-cols-2 desk:max-w-[640px] desk:[&>div]:grid-cols-4">
             <Segmented
               label={t`Period`}
               value={period}
@@ -145,20 +142,17 @@ function ReportsPage() {
               ]}
             />
           </div>
-        </div>
-        <div className="w-full desk:w-[420px]">
-          <Field id="report-place" label={<Trans>Places</Trans>}>
-            <NativeSelect id="report-place" value={placeId} onChange={setPlaceId}>
-              <option value="">{t`All places (${number(places?.length ?? 0)})`}</option>
-              {places?.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.place_name}
-                </option>
-              ))}
-            </NativeSelect>
-          </Field>
-        </div>
-      </div>
+        }
+      >
+        <ToolbarSelect id="report-place" label={t`Places`} value={placeId} onChange={setPlaceId}>
+          <option value="">{t`All places (${number(places?.length ?? 0)})`}</option>
+          {places?.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.place_name}
+            </option>
+          ))}
+        </ToolbarSelect>
+      </ListToolbar>
 
       {period === "CUSTOM" && (
         <div className="grid grid-cols-2 gap-3 desk:max-w-[480px]">
@@ -177,7 +171,7 @@ function ReportsPage() {
         <LoadingList />
       ) : (
         <>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(260px,100%),1fr))] items-start gap-4">
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(min(260px,100%),1fr))] items-stretch gap-4">
             <Stat label={<Trans>Income</Trans>}>
               <Amount value={income} currency={currency} format={number} className="text-[32px]" />
             </Stat>
@@ -200,20 +194,21 @@ function ReportsPage() {
             </p>
           )}
           <Chart rows={rows} lang={lang} monthLabel={(d) => dateFormat({ month: "short" }).format(d)} format={number} />
-          <section className="overflow-x-auto border border-border bg-card shadow-sm">
-            <table className="w-full min-w-[480px] border-collapse text-[15px]">
+          {/* Four narrow columns that fit the card at any width: nothing scrolls sideways. */}
+          <section className="min-w-0 border border-border bg-card shadow-sm">
+            <table className="w-full table-fixed border-collapse text-sm desk:text-[15px]">
               <thead>
                 <tr className="border-b border-border text-start text-[13px] font-semibold text-muted-foreground">
-                  <th scope="col" className="px-4 py-3 text-start font-semibold">
+                  <th scope="col" className="px-2.5 py-3 text-start font-semibold [overflow-wrap:anywhere] desk:px-4">
                     <Trans>Month</Trans>
                   </th>
-                  <th scope="col" className="px-4 py-3 text-start font-semibold">
+                  <th scope="col" className="px-2.5 py-3 text-start font-semibold [overflow-wrap:anywhere] desk:px-4">
                     <Trans>Income</Trans>
                   </th>
-                  <th scope="col" className="px-4 py-3 text-start font-semibold">
+                  <th scope="col" className="px-2.5 py-3 text-start font-semibold [overflow-wrap:anywhere] desk:px-4">
                     <Trans>Expenses</Trans>
                   </th>
-                  <th scope="col" className="px-4 py-3 text-start font-semibold">
+                  <th scope="col" className="px-2.5 py-3 text-start font-semibold [overflow-wrap:anywhere] desk:px-4">
                     <Trans>Profit</Trans>
                   </th>
                 </tr>
@@ -221,12 +216,12 @@ function ReportsPage() {
               <tbody>
                 {rows.map((row) => (
                   <tr key={row.from} className="border-b border-border last:border-b-0">
-                    <th scope="row" className="px-4 py-3.5 text-start font-normal">
+                    <th scope="row" className="px-2.5 py-3.5 text-start font-normal [overflow-wrap:anywhere] desk:px-4">
                       {dateFormat({ month: "long" }).format(row.month)}
                     </th>
-                    <td className="px-4 py-3.5 font-mono tabular-nums">{number(row.income, { maximumFractionDigits: 2 })}</td>
-                    <td className="px-4 py-3.5 font-mono tabular-nums">{number(row.expenses, { maximumFractionDigits: 2 })}</td>
-                    <td className="px-4 py-3.5 font-mono font-bold tabular-nums">{number(row.profit, { maximumFractionDigits: 2 })}</td>
+                    <td className="px-2.5 py-3.5 font-mono tabular-nums [overflow-wrap:anywhere] desk:px-4">{number(row.income, { maximumFractionDigits: 2 })}</td>
+                    <td className="px-2.5 py-3.5 font-mono tabular-nums [overflow-wrap:anywhere] desk:px-4">{number(row.expenses, { maximumFractionDigits: 2 })}</td>
+                    <td className="px-2.5 py-3.5 font-mono font-bold tabular-nums [overflow-wrap:anywhere] desk:px-4">{number(row.profit, { maximumFractionDigits: 2 })}</td>
                   </tr>
                 ))}
               </tbody>
@@ -240,10 +235,10 @@ function ReportsPage() {
 
 function Stat({ label, note, children }: { label: React.ReactNode; note?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="box-border flex min-w-0 flex-col gap-1 border border-border bg-card px-5 py-6 shadow-sm">
+    <section className="box-border flex h-full min-w-0 flex-col gap-1 border border-border bg-card px-5 py-6 shadow-sm">
       <span className="text-[15px] text-muted-foreground">{label}</span>
       {children}
-      {note && <span className="text-[13px] text-muted-foreground">{note}</span>}
+      {note && <span className="mt-auto text-[13px] text-muted-foreground">{note}</span>}
     </section>
   )
 }
