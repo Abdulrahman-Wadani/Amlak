@@ -290,7 +290,7 @@ msgstr "Add a place first; its bookings show here."
 msgid "Add a schedule"
 msgstr "Add a schedule"
 
-#: src/components/place-bookings.tsx:309
+#: src/components/place-bookings.tsx:315
 msgid "Add a stay to block its dates on the calendar."
 msgstr "Add a stay to block its dates on the calendar."
 
@@ -304,7 +304,7 @@ msgid "Add at least one photo of the finished work."
 msgstr "Add at least one photo of the finished work."
 
 #: src/components/booking-form.tsx:437
-#: src/components/place-bookings.tsx:418
+#: src/components/place-bookings.tsx:284
 #: src/routes/_authenticated/bookings.tsx:72
 #: src/routes/_authenticated/bookings.tsx:77
 #: src/routes/_authenticated/home.tsx:224
@@ -633,7 +633,7 @@ msgstr "Bookings today"
 msgid "Cancel"
 msgstr "Cancel"
 
-#: src/components/place-bookings.tsx:379
+#: src/components/place-bookings.tsx:385
 #: src/routes/_authenticated/booking/$booking_id.tsx:197
 #: src/routes/_authenticated/booking/$booking_id.tsx:249
 msgid "Cancel booking"
@@ -678,7 +678,7 @@ msgstr "Change photo"
 msgid "Change the search or the filters."
 msgstr "Change the search or the filters."
 
-#: src/components/place-bookings.tsx:369
+#: src/components/place-bookings.tsx:375
 msgid "Check in"
 msgstr "Check in"
 
@@ -686,7 +686,7 @@ msgstr "Check in"
 msgid "Check in guest"
 msgstr "Check in guest"
 
-#: src/components/place-bookings.tsx:395
+#: src/components/place-bookings.tsx:401
 msgid "Check out"
 msgstr "Check out"
 
@@ -1584,7 +1584,7 @@ msgstr "Guest name"
 msgid "Guest phone"
 msgstr "Guest phone"
 
-#: src/components/place-bookings.tsx:343
+#: src/components/place-bookings.tsx:349
 msgid "guests"
 msgstr "guests"
 
@@ -1742,7 +1742,7 @@ msgstr "Left in this place’s budget this month: {0}"
 msgid "Link"
 msgstr "Link"
 
-#: src/components/place-bookings.tsx:411
+#: src/components/place-bookings.tsx:417
 msgid "Load more"
 msgstr "Load more"
 
@@ -1935,7 +1935,7 @@ msgid "New support request"
 msgstr "New support request"
 
 #: src/components/pager.tsx:46
-#: src/components/panel.tsx:464
+#: src/components/panel.tsx:468
 #: src/routes/_authenticated/notifications.tsx:300
 msgid "Next"
 msgstr "Next"
@@ -1970,11 +1970,11 @@ msgstr "No assets yet."
 msgid "No assets yet. Add an asset to start tracking this property."
 msgstr "No assets yet. Add an asset to start tracking this property."
 
-#: src/components/place-bookings.tsx:305
+#: src/components/place-bookings.tsx:311
 msgid "No bookings for this property yet."
 msgstr "No bookings for this property yet."
 
-#: src/components/place-bookings.tsx:303
+#: src/components/place-bookings.tsx:309
 msgid "No bookings in this month."
 msgstr "No bookings in this month."
 
@@ -2235,7 +2235,7 @@ msgid "Page unpublished."
 msgstr "Page unpublished."
 
 #: src/components/pager.tsx:20
-#: src/components/panel.tsx:455
+#: src/components/panel.tsx:459
 msgid "Pages"
 msgstr "Pages"
 
@@ -2393,7 +2393,7 @@ msgid "Preventive"
 msgstr "Preventive"
 
 #: src/components/pager.tsx:32
-#: src/components/panel.tsx:461
+#: src/components/panel.tsx:465
 #: src/routes/_authenticated/notifications.tsx:276
 msgid "Previous"
 msgstr "Previous"
@@ -2675,7 +2675,7 @@ msgstr "Save place"
 msgid "Saving…"
 msgstr "Saving…"
 
-#: src/components/panel.tsx:274
+#: src/components/panel.tsx:278
 msgid "Scroll to see the rest"
 msgstr "Scroll to see the rest"
 
@@ -3369,7 +3369,7 @@ msgstr "We could not get your location. Pick the place on the map."
 msgid "We could not load the asset."
 msgstr "We could not load the asset."
 
-#: src/components/place-bookings.tsx:287
+#: src/components/place-bookings.tsx:293
 msgid "We could not load the bookings for this property."
 msgstr "We could not load the bookings for this property."
 

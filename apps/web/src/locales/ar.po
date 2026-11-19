@@ -290,7 +290,7 @@ msgstr "أضف عقارًا أولًا، وتظهر حجوزاته هنا."
 msgid "Add a schedule"
 msgstr "إضافة جدول"
 
-#: src/components/place-bookings.tsx:309
+#: src/components/place-bookings.tsx:315
 msgid "Add a stay to block its dates on the calendar."
 msgstr "أضف إقامة لحجز هذه التواريخ في التقويم."
 
@@ -304,7 +304,7 @@ msgid "Add at least one photo of the finished work."
 msgstr "أضف صورة واحدة على الأقل للعمل بعد الإصلاح."
 
 #: src/components/booking-form.tsx:437
-#: src/components/place-bookings.tsx:418
+#: src/components/place-bookings.tsx:284
 #: src/routes/_authenticated/bookings.tsx:72
 #: src/routes/_authenticated/bookings.tsx:77
 #: src/routes/_authenticated/home.tsx:224
@@ -633,7 +633,7 @@ msgstr "حجوزات اليوم"
 msgid "Cancel"
 msgstr "إلغاء"
 
-#: src/components/place-bookings.tsx:379
+#: src/components/place-bookings.tsx:385
 #: src/routes/_authenticated/booking/$booking_id.tsx:197
 #: src/routes/_authenticated/booking/$booking_id.tsx:249
 msgid "Cancel booking"
@@ -678,7 +678,7 @@ msgstr "تغيير الصورة"
 msgid "Change the search or the filters."
 msgstr "غيّر البحث أو التصفية."
 
-#: src/components/place-bookings.tsx:369
+#: src/components/place-bookings.tsx:375
 msgid "Check in"
 msgstr "تسجيل الوصول"
 
@@ -686,7 +686,7 @@ msgstr "تسجيل الوصول"
 msgid "Check in guest"
 msgstr "تسجيل دخول الضيف"
 
-#: src/components/place-bookings.tsx:395
+#: src/components/place-bookings.tsx:401
 msgid "Check out"
 msgstr "تسجيل المغادرة"
 
@@ -1584,7 +1584,7 @@ msgstr "اسم الضيف"
 msgid "Guest phone"
 msgstr "هاتف الضيف"
 
-#: src/components/place-bookings.tsx:343
+#: src/components/place-bookings.tsx:349
 msgid "guests"
 msgstr "ضيوف"
 
@@ -1742,7 +1742,7 @@ msgstr "المتبقي من ميزانية العقار لهذا الشهر: {0}
 msgid "Link"
 msgstr "الرابط"
 
-#: src/components/place-bookings.tsx:411
+#: src/components/place-bookings.tsx:417
 msgid "Load more"
 msgstr "تحميل المزيد"
 
@@ -1935,7 +1935,7 @@ msgid "New support request"
 msgstr "طلب دعم جديد"
 
 #: src/components/pager.tsx:46
-#: src/components/panel.tsx:464
+#: src/components/panel.tsx:468
 #: src/routes/_authenticated/notifications.tsx:300
 msgid "Next"
 msgstr "التالي"
@@ -1970,11 +1970,11 @@ msgstr "لا أصول بعد."
 msgid "No assets yet. Add an asset to start tracking this property."
 msgstr "لا توجد أصول بعد. أضف أصلًا لتبدأ متابعة هذا العقار."
 
-#: src/components/place-bookings.tsx:305
+#: src/components/place-bookings.tsx:311
 msgid "No bookings for this property yet."
 msgstr "لا توجد حجوزات لهذا العقار بعد."
 
-#: src/components/place-bookings.tsx:303
+#: src/components/place-bookings.tsx:309
 msgid "No bookings in this month."
 msgstr "لا توجد حجوزات في هذا الشهر."
 
@@ -2235,7 +2235,7 @@ msgid "Page unpublished."
 msgstr "أُلغي نشر الصفحة."
 
 #: src/components/pager.tsx:20
-#: src/components/panel.tsx:455
+#: src/components/panel.tsx:459
 msgid "Pages"
 msgstr "الصفحات"
 
@@ -2393,7 +2393,7 @@ msgid "Preventive"
 msgstr "وقائية"
 
 #: src/components/pager.tsx:32
-#: src/components/panel.tsx:461
+#: src/components/panel.tsx:465
 #: src/routes/_authenticated/notifications.tsx:276
 msgid "Previous"
 msgstr "السابق"
@@ -2675,7 +2675,7 @@ msgstr "حفظ العقار"
 msgid "Saving…"
 msgstr "جارٍ الحفظ…"
 
-#: src/components/panel.tsx:274
+#: src/components/panel.tsx:278
 msgid "Scroll to see the rest"
 msgstr "مرّر لرؤية البقية"
 
@@ -3369,7 +3369,7 @@ msgstr "تعذّر تحديد موقعك. اختر المكان على الخر�
 msgid "We could not load the asset."
 msgstr "تعذر تحميل بيانات الأصل."
 
-#: src/components/place-bookings.tsx:287
+#: src/components/place-bookings.tsx:293
 msgid "We could not load the bookings for this property."
 msgstr "تعذّر تحميل حجوزات هذا العقار."
 

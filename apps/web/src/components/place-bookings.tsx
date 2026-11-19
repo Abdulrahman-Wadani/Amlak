@@ -277,6 +277,12 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
             ))}
           </SelectContent>
         </Select>
+
+        {/* At the end of the first row, where every tab keeps its add button. */}
+        <Button type="button" variant="outline" style={S("margin-inline-start: auto")} onClick={openAdd}>
+          <Plus size={16} />
+          <Trans>Add booking</Trans>
+        </Button>
       </CardHeader>
 
       <CardContent style={S(`padding: ${embedded ? "0" : "20px"}; display: flex; flex-direction: column; gap: 18px`)}>
@@ -412,12 +418,6 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
           </Button>
         )}
 
-        <div style={S("display: flex; gap: 10px")}>
-          <Button type="button" onClick={openAdd}>
-            <Plus size={16} />
-            <Trans>Add booking</Trans>
-          </Button>
-        </div>
       </CardContent>
 
       {adding && (

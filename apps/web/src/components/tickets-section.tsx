@@ -116,7 +116,7 @@ export function TicketsSection({
             </span>
           )}
         </CardTitle>
-        <div style={S("display: flex; align-items: center; gap: 10px; flex-wrap: wrap")}>
+        <div style={S("display: flex; flex: 1 1 auto; align-items: center; gap: 10px; flex-wrap: wrap")}>
           <div role="group" aria-label={t`Filter by status`} style={S("display: flex; gap: 8px")}>
             {tabs.map((tab) => (
               <button
@@ -131,7 +131,7 @@ export function TicketsSection({
             ))}
           </div>
           {showAddTicket && (
-            <CardAction>
+            <CardAction style={S("margin-inline-start: auto")}>
               <Button type="button" variant="outline" onClick={() => setReporting(true)}>
                 <Plus size={16} />
                 <Trans>Add ticket</Trans>

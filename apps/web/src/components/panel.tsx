@@ -137,13 +137,17 @@ export function TabbedPanel<K extends string>({
             {tabs
               .filter((tab) => opened.includes(tab.key))
               .map((tab) => (
+                // One height for every tab, so the card does not jump when the tab
+                // changes; a longer list scrolls up and down inside it.
                 <div
                   key={tab.key}
                   role="tabpanel"
                   id={`${id}-${tab.key}-panel`}
                   aria-labelledby={`${id}-${tab.key}`}
                   hidden={tab.key !== value}
-                  className="min-w-0 flex-col [&:not([hidden])]:flex"
+                  // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrolling region must be reachable by keyboard
+                  tabIndex={0}
+                  className="-mx-1 h-[440px] min-w-0 flex-col overflow-y-auto overscroll-contain px-1 pb-1 [scrollbar-width:thin] desk:h-[420px] [&:not([hidden])]:flex"
                 >
                   {tab.content}
                 </div>

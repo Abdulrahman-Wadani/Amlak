@@ -193,8 +193,8 @@ function PlaceDetailPage() {
 
       {!failed && (
         <>
-          {/* The place's information on top, then one card with one list at a time. */}
-          <div className="grid items-start gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr))] desk:gap-6">
+          {/* The place's information on top (cards of one height), then one card with one list at a time. */}
+          <div className="grid items-stretch gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr))] desk:gap-6">
             <InfoPanel place={place} isManager={isManager} />
             {budget}
             {!isManager && (
