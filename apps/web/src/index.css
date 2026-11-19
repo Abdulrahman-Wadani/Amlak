@@ -195,11 +195,6 @@
   body {
     @apply bg-background text-foreground;
   }
-  /*
-   * The scrollbar's room is kept on every page, so a long page (home,
-   * bookings) is as wide as a short one and the content does not move when
-   * going from one to the other.
-   */
   html {
     @apply font-sans;
     scrollbar-gutter: stable;
