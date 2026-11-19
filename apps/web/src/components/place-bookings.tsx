@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { useNavigate } from "@tanstack/react-router"
+import { useEmbedded } from "@/components/panel"
 import {
   keepPreviousData,
   useMutation,
@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-query"
 import { Trans, useLingui } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import { CalendarDays, CircleAlert, Plus, Save } from "lucide-react"
+import { CalendarDays, CircleAlert, Plus } from "lucide-react"
 import { BookingStatusChip, Meta } from "@/components/place-shared"
 import { Alert, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -34,7 +34,6 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -48,54 +47,20 @@ import {
   cancelBooking,
   checkInBooking,
   checkOutBooking,
-  createBooking,
   getBookingsForPlace,
   type Booking,
   type BookingWindow,
 } from "@/lib/api"
-import { bookingInput, type BookingInput } from "@/lib/validators"
+import { LIMITS, tooLong } from "@/lib/limits"
+import { AddBookingPopup } from "@/components/booking-form"
 import { useAuth } from "@/lib/auth"
 import { S } from "@/lib/dom-style"
 import { dateFormat, numberFormat } from "@/lib/format"
 
 type Issue = { path: (string | number)[]; message?: string }
 
-type FieldName = keyof BookingInput
-
 const ALL_WINDOW: BookingWindow = { from: "2000-01-01", to: "2099-12-31" }
 const PAGE_SIZE = 100
-
-const EMPTY_FORM = {
-  guest_name: "",
-  guest_phone: "",
-  guest_email: "",
-  guest_count: "1",
-  check_in_date: "",
-  check_out_date: "",
-  total_price: "",
-  notes: "",
-}
-
-function validationMessage(name: FieldName) {
-  switch (name) {
-    case "guest_name":
-      return t`Enter the guest name`
-    case "guest_phone":
-      return t`Use the international phone format`
-    case "guest_email":
-      return t`Enter a valid email address`
-    case "guest_count":
-      return t`Enter the number of guests`
-    case "check_in_date":
-      return t`Choose the check-in date`
-    case "check_out_date":
-      return t`Choose a check-out date after the check-in date`
-    case "total_price":
-      return t`Enter the total price`
-    case "notes":
-      return t`Notes are too long`
-  }
-}
 
 function isoDay(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
@@ -115,15 +80,13 @@ function isConflict(error: unknown) {
 }
 
 export function PlaceBookings({ placeId }: { placeId: string }) {
-  const navigate = useNavigate()
+  const embedded = useEmbedded()
   const { i18n } = useLingui()
   const { accessToken } = useAuth()
   const queryClient = useQueryClient()
   const [scope, setScope] = useState("all")
   const [pages, setPages] = useState(1)
-  const [formOpen, setFormOpen] = useState(false)
-  const [form, setForm] = useState({ ...EMPTY_FORM })
-  const [issues, setIssues] = useState<Issue[]>([])
+  const [adding, setAdding] = useState(false)
   const [cancelling, setCancelling] = useState<Booking | null>(null)
   const [confirmStay, setConfirmStay] = useState<
     { booking: Booking; action: "check-in" | "check-out" } | null
@@ -145,17 +108,6 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
     enabled: Boolean(accessToken),
     placeholderData: keepPreviousData,
     retry: 1,
-  })
-
-  const saveMutation = useMutation({
-    mutationFn: (input: BookingInput) =>
-      createBooking(accessToken ?? "", placeId, input),
-    onSuccess: () => {
-      setFormOpen(false)
-      setIssues([])
-      setForm({ ...EMPTY_FORM })
-      return queryClient.invalidateQueries({ queryKey: ["bookings", placeId] })
-    },
   })
 
   const cancelMutation = useMutation({
@@ -223,12 +175,12 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
     return null
   }
 
-  const busy = saveMutation.isPending || cancelMutation.isPending || stayMutation.isPending
+  const busy = cancelMutation.isPending || stayMutation.isPending
   const canLoadMore = Boolean(bookings && bookings.length >= pages * PAGE_SIZE)
 
-  // Adding a booking is its own page (the design's Add booking).
+  // Add booking opens in a popup over this list.
   function openAdd() {
-    void navigate({ to: "/booking/new", search: { place_id: placeId } })
+    setAdding(true)
   }
 
   function openCancel(booking: Booking) {
@@ -238,40 +190,15 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
     setCancelling(booking)
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const parsed = bookingInput.safeParse({
-      guest_name: form.guest_name.trim(),
-      guest_phone: form.guest_phone.trim(),
-      ...(form.guest_email.trim() ? { guest_email: form.guest_email.trim() } : {}),
-      guest_count: form.guest_count,
-      check_in_date: form.check_in_date,
-      check_out_date: form.check_out_date,
-      total_price: form.total_price,
-      ...(form.notes.trim() ? { notes: form.notes.trim() } : {}),
-    })
-    if (!parsed.success) {
-      setIssues(parsed.error.issues as Issue[])
-      return
-    }
-    setIssues([])
-    saveMutation.mutate(parsed.data)
-  }
-
   function handleCancelSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (reason.trim().length < 1) {
-      setReasonIssues([{ path: ["reason"], message: t`Enter the reason for the cancellation` }])
+    const reasonProblem = reason.trim() ? tooLong(reason, LIMITS.text) : t`Enter the reason for the cancellation`
+    if (reasonProblem) {
+      setReasonIssues([{ path: ["reason"], message: reasonProblem }])
       return
     }
     setReasonIssues([])
     cancelMutation.mutate({ bookingId: cancelling?.id ?? "", reason: reason.trim() })
-  }
-
-  function fieldIssues(name: FieldName) {
-    return issues
-      .filter((issue) => issue.path[0] === name)
-      .map(() => ({ message: validationMessage(name) }))
   }
 
   const stayLabel = (booking: Booking) => {
@@ -288,15 +215,19 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
 
   return (
     <Card
-      className="am-lift"
-      style={S("padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0")}
+      className={embedded ? undefined : "am-lift"}
+      style={S(
+        embedded
+          ? "padding: 0; border: 0; box-shadow: none; background: transparent; overflow: visible; gap: 0"
+          : "padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0",
+      )}
     >
       <CardHeader
         style={S(
-          "padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap",
+          `${embedded ? "padding: 0 0 16px" : "padding: 18px 20px; border-bottom: 1px solid var(--border)"}; display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap`,
         )}
       >
-        <CardTitle style={S("font-size: 17px; font-weight: 750")}>
+        <CardTitle className={embedded ? "sr-only" : undefined} style={S("font-size: 17px; font-weight: 750")}>
           <CalendarDays
             size={17}
             style={S("display: inline; vertical-align: middle; margin-inline-end: 7px")}
@@ -346,9 +277,15 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
             ))}
           </SelectContent>
         </Select>
+
+        {/* At the end of the first row, where every tab keeps its add button. */}
+        <Button type="button" variant="outline" style={S("margin-inline-start: auto")} onClick={openAdd}>
+          <Plus size={16} />
+          <Trans>Add booking</Trans>
+        </Button>
       </CardHeader>
 
-      <CardContent style={S("padding: 20px; display: flex; flex-direction: column; gap: 18px")}>
+      <CardContent style={S(`padding: ${embedded ? "0" : "20px"}; display: flex; flex-direction: column; gap: 18px`)}>
         {bookingsQuery.isError ? (
           <Alert variant="destructive">
             <CircleAlert />
@@ -481,173 +418,18 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
           </Button>
         )}
 
-        <div style={S("display: flex; gap: 10px")}>
-          <Button type="button" onClick={openAdd}>
-            <Plus size={16} />
-            <Trans>Add booking</Trans>
-          </Button>
-        </div>
       </CardContent>
 
-      <Dialog open={formOpen} onOpenChange={(open) => !open && setFormOpen(false)}>
-        <DialogContent showCloseButton={false} className="grid-rows-[auto_minmax(0,1fr)] max-h-[calc(100dvh-2rem)] sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>
-              <Trans>Add booking</Trans>
-            </DialogTitle>
-          </DialogHeader>
-
-          <form id="booking-form" onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-col">
-            <div className="min-h-0 flex-1 overflow-y-auto px-1">
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor="booking-guest-name">
-                  <Trans>Guest name</Trans>
-                </FieldLabel>
-                <Input
-                  id="booking-guest-name"
-                  value={form.guest_name}
-                  aria-invalid={fieldIssues("guest_name").length > 0}
-                  onChange={(e) => setForm((p) => ({ ...p, guest_name: e.target.value }))}
-                />
-                <FieldError errors={fieldIssues("guest_name")} />
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="booking-guest-phone">
-                  <Trans>Guest phone</Trans>
-                </FieldLabel>
-                <Input
-                  id="booking-guest-phone"
-                  type="tel"
-                  placeholder="+966512345678"
-                  value={form.guest_phone}
-                  aria-invalid={fieldIssues("guest_phone").length > 0}
-                  onChange={(e) => setForm((p) => ({ ...p, guest_phone: e.target.value }))}
-                />
-                <FieldDescription>
-                  <Trans>Use the international format, e.g. +966512345678</Trans>
-                </FieldDescription>
-                <FieldError errors={fieldIssues("guest_phone")} />
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="booking-guest-email">
-                  <Trans>Guest email</Trans>
-                </FieldLabel>
-                <Input
-                  id="booking-guest-email"
-                  type="email"
-                  value={form.guest_email}
-                  aria-invalid={fieldIssues("guest_email").length > 0}
-                  onChange={(e) => setForm((p) => ({ ...p, guest_email: e.target.value }))}
-                />
-                <FieldError errors={fieldIssues("guest_email")} />
-              </Field>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Field>
-                  <FieldLabel htmlFor="booking-check-in">
-                    <Trans>Check-in</Trans>
-                  </FieldLabel>
-                  <Input
-                    id="booking-check-in"
-                    type="date"
-                    value={form.check_in_date}
-                    aria-invalid={fieldIssues("check_in_date").length > 0}
-                    onChange={(e) => setForm((p) => ({ ...p, check_in_date: e.target.value }))}
-                  />
-                  <FieldError errors={fieldIssues("check_in_date")} />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="booking-check-out">
-                    <Trans>Check-out</Trans>
-                  </FieldLabel>
-                  <Input
-                    id="booking-check-out"
-                    type="date"
-                    value={form.check_out_date}
-                    aria-invalid={fieldIssues("check_out_date").length > 0}
-                    onChange={(e) => setForm((p) => ({ ...p, check_out_date: e.target.value }))}
-                  />
-                  <FieldError errors={fieldIssues("check_out_date")} />
-                </Field>
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <Field>
-                  <FieldLabel htmlFor="booking-guest-count">
-                    <Trans>Guests</Trans>
-                  </FieldLabel>
-                  <Input
-                    id="booking-guest-count"
-                    type="number"
-                    step="any"
-                    value={form.guest_count}
-                    aria-invalid={fieldIssues("guest_count").length > 0}
-                    onChange={(e) => setForm((p) => ({ ...p, guest_count: e.target.value }))}
-                  />
-                  <FieldError errors={fieldIssues("guest_count")} />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="booking-total-price">
-                    <Trans>Total price</Trans>
-                  </FieldLabel>
-                  <Input
-                    id="booking-total-price"
-                    type="number"
-                    step="any"
-                    value={form.total_price}
-                    aria-invalid={fieldIssues("total_price").length > 0}
-                    onChange={(e) => setForm((p) => ({ ...p, total_price: e.target.value }))}
-                  />
-                  <FieldError errors={fieldIssues("total_price")} />
-                </Field>
-              </div>
-
-              <Field>
-                <FieldLabel htmlFor="booking-notes">
-                  <Trans>Notes</Trans>
-                </FieldLabel>
-                <Textarea
-                  id="booking-notes"
-                  rows={3}
-                  value={form.notes}
-                  aria-invalid={fieldIssues("notes").length > 0}
-                  onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
-                />
-                <FieldError errors={fieldIssues("notes")} />
-              </Field>
-            </FieldGroup>
-
-            {saveMutation.isError && (
-              <Alert variant="destructive">
-                <CircleAlert />
-                <AlertTitle>
-                  {isConflict(saveMutation.error)
-                    ? t`Those dates are already booked for this property.`
-                    : t`Could not save the booking. Please try again.`}
-                </AlertTitle>
-              </Alert>
-            )}
-            </div>
-
-            <DialogFooter>
-              <Button type="button" variant="outline" disabled={busy} onClick={() => setFormOpen(false)}>
-                <Trans>Back</Trans>
-              </Button>
-              <Button type="submit" form="booking-form" disabled={busy}>
-                <Save size={16} />
-                {saveMutation.isPending ? (
-                  <Trans>Saving…</Trans>
-                ) : (
-                  <Trans>Add booking</Trans>
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {adding && (
+        <AddBookingPopup
+          placeId={placeId}
+          onClose={() => setAdding(false)}
+          onSaved={() => {
+            setAdding(false)
+            void queryClient.invalidateQueries({ queryKey: ["bookings", placeId] })
+          }}
+        />
+      )}
 
       <Dialog
         open={Boolean(cancelling)}
@@ -676,7 +458,7 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
             noValidate
             className="flex min-h-0 flex-col"
           >
-            <div className="min-h-0 flex-1 overflow-y-auto px-1">
+            <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-1">
             {cancelling && (
               <div
                 style={S(
@@ -699,6 +481,7 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
                 <Textarea
                   id="booking-cancel-reason"
                   rows={3}
+                  maxLength={LIMITS.text}
                   placeholder={t`Example: the guest changed their plans`}
                   value={reason}
                   aria-invalid={reasonIssues.length > 0}
@@ -766,7 +549,7 @@ export function PlaceBookings({ placeId }: { placeId: string }) {
             </DialogTitle>
           </DialogHeader>
 
-          <div className="min-h-0 flex-1 overflow-y-auto px-1">
+          <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-1">
             {confirmStay && (
               <div
                 style={S(

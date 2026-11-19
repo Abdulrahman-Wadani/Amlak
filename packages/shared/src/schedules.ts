@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LIMITS } from "./limits.ts";
 
 export const INTERVAL_UNITS = ["DAY", "WEEK", "MONTH", "YEAR"] as const;
 export type IntervalUnit = (typeof INTERVAL_UNITS)[number];
@@ -22,7 +23,7 @@ export const scheduleSchema = z
 export type Schedule = z.infer<typeof scheduleSchema>;
 
 export const createScheduleSchema = z.object({
-	description: z.string().trim().min(1).max(2000),
+	description: z.string().trim().min(1).max(LIMITS.longText),
 	interval_count: z.number().int().min(1).max(365).meta({
 		description:
 			"With interval_unit, how often it repeats: 2 + WEEK is every two weeks",

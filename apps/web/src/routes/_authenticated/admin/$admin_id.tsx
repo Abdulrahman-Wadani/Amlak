@@ -7,6 +7,7 @@ import type { User } from "@amlak/shared"
 import { storedUser, useAuth } from "@/lib/auth"
 import { apiRequest } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
+import { LIMITS, tooLong } from "@/lib/limits"
 import { LANGUAGE_NAMES } from "@/lib/i18n"
 import { roleLabel } from "@/lib/nav"
 import { useFormat } from "@/lib/format"
@@ -78,9 +79,10 @@ function AdminUser() {
     const number = toE164(phone.trim())
     const next: typeof errors = {}
     if (!fullname.trim()) next.fullname = t`Enter the full name.`
+    else next.fullname = tooLong(fullname, LIMITS.name)
     if (phone.trim() && !/^\+9665[013-9]\d{7}$/.test(number)) next.phone = t`Enter a Saudi mobile number that starts with 5.`
     setErrors(next)
-    if (Object.keys(next).length > 0) return
+    if (Object.values(next).some(Boolean)) return
     void run({ fullname: fullname.trim(), ...(phone.trim() ? { phone: number } : {}) }, t`The changes are saved.`)
   }
 
@@ -108,7 +110,7 @@ function AdminUser() {
               </PanelTitle>
               <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
                 <Field id="u-name" label={<Trans>Full name</Trans>} error={errors.fullname}>
-                  <Input id="u-name" value={fullname} aria-invalid={errors.fullname ? true : undefined} onChange={(e) => setFullname(e.target.value)} />
+                  <Input id="u-name" maxLength={LIMITS.name} value={fullname} aria-invalid={errors.fullname ? true : undefined} onChange={(e) => setFullname(e.target.value)} />
                 </Field>
                 <Field id="u-email" label={<Trans>Email</Trans>}>
                   <Input id="u-email" dir="ltr" value={user.email} readOnly className="bg-secondary text-muted-foreground" />

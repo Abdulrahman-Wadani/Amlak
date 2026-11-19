@@ -48,9 +48,11 @@ export function StatCard({
       <div className="am-fill h-full bg-good" style={{ width: `${Math.min(100, Math.max(0, bar))}%` }} />
     </div>
   )
+  // Cards in a row share one minimum height, so closed they line up; the grid
+  // aligns them to the top, so opening Details lengthens this card only.
   return (
     <section
-      className={`box-border flex h-full min-w-0 flex-col border border-border bg-card shadow-sm ${compactOnPhone ? "gap-1 p-[18px] desk:gap-2 desk:p-6" : "gap-2 p-6"}`}
+      className={`box-border flex min-h-(--stat-min-h) min-w-0 flex-col border border-border bg-card shadow-sm ${compactOnPhone ? "gap-1 p-[18px] desk:gap-2 desk:p-6" : "gap-2 p-6"}`}
     >
       {compactOnPhone && (
         <div className="flex flex-col desk:hidden">

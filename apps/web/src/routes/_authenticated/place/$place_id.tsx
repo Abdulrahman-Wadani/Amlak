@@ -24,9 +24,11 @@ import { PlaceBookings } from "@/components/place-bookings"
 import { TicketsSection } from "@/components/tickets-section"
 import { AssetStatusBadge, StatusBadge, TypeLabel } from "@/components/place-shared"
 import { Page } from "@/components/page"
+import { FormPopup } from "@/components/form-popup"
+import { ReportPopup } from "@/components/report-form"
+import { AssetForm } from "@/components/asset-form"
 import { ConfirmDialog, LoadError } from "@/components/states"
 import {
-  Field,
   InfoRows,
   Initial,
   NativeSelect,
@@ -34,10 +36,16 @@ import {
   PanelTitle,
   ScrollHint,
   ScrollList,
-  TwoColumns,
+  TabbedPanel,
 } from "@/components/panel"
 
+const TABS = ["assets", "workers", "tickets", "bookings"] as const
+type Tab = (typeof TABS)[number]
+
 export const Route = createFileRoute("/_authenticated/place/$place_id")({
+  // The open tab is in the address, so Back returns to it.
+  validateSearch: (search: Record<string, unknown>): { tab?: Tab } =>
+    TABS.includes(search.tab as Tab) ? { tab: search.tab as Tab } : {},
   component: PlaceDetailPage,
 })
 
@@ -53,6 +61,17 @@ function PlaceDetailPage() {
   // Editing, deleting, the budget and the workers are for Managers.
   const isManager = user?.role === "MANAGER"
   const navigate = useNavigate()
+  const search = Route.useSearch()
+  // Workers are a Manager's tab; anyone else asking for it gets the assets.
+  const tab: Tab = search.tab === "workers" && !isManager ? "assets" : (search.tab ?? "assets")
+  const chooseTab = (next: Tab) =>
+    // Only the address changes: the page stays where it is and keeps what it loaded.
+    void navigate({
+      to: "/place/$place_id",
+      params: { place_id },
+      search: next === "assets" ? {} : { tab: next },
+      resetScroll: false,
+    })
 
   const [place, setPlace] = useState<Place | null>(null)
   const [assets, setAssets] = useState<Asset[] | null>(null)
@@ -61,6 +80,7 @@ function PlaceDetailPage() {
   const [failed, setFailed] = useState(false)
 
   const [confirming, setConfirming] = useState(false)
+  const [reporting, setReporting] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState("")
 
@@ -173,58 +193,79 @@ function PlaceDetailPage() {
 
       {!failed && (
         <>
-          <TwoColumns
-            main={
-              <>
-                {/* On the phone the budget comes first, as designed. */}
-                {budget && <div className="flex flex-col desk:hidden">{budget}</div>}
-                <AssetsPanel placeId={place_id} assets={assets} isManager={isManager} />
-                {isManager && accessToken && (
-                  <WorkersPanel
-                    token={accessToken}
-                    placeId={place_id}
-                    workers={workers}
-                    onChanged={setWorkers}
-                  />
-                )}
-              </>
-            }
-            side={
-              <>
-                {budget && <div className="hidden flex-col desk:flex">{budget}</div>}
-                <InfoPanel place={place} isManager={isManager} />
-                {!isManager && (
-                  <Panel>
-                    <Link
-                      to="/ticket/new"
-                      search={{ place_id }}
-                      className={cn(buttonVariants(), "w-full")}
-                    >
-                      <Camera aria-hidden="true" />
-                      <Trans>Report damage in this place</Trans>
-                    </Link>
-                    <span className="text-[13px] text-muted-foreground">
-                      <Trans>View only. Editing is for the manager.</Trans>
-                    </span>
-                  </Panel>
-                )}
-              </>
-            }
-          />
+          {/* The place's information on top (cards of one height), then one card with one list at a time. */}
+          <div className="grid items-stretch gap-4 [grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr))] desk:gap-6">
+            <InfoPanel place={place} isManager={isManager} />
+            {budget}
+            {!isManager && (
+              <Panel>
+                <Button type="button" className="w-full" onClick={() => setReporting(true)}>
+                  <Camera aria-hidden="true" />
+                  <Trans>Report damage in this place</Trans>
+                </Button>
+                <span className="text-[13px] text-muted-foreground">
+                  <Trans>View only. Editing is for the manager.</Trans>
+                </span>
+              </Panel>
+            )}
+          </div>
 
-          {/* Not in the design; kept under its sections. */}
-          {accessToken && (
-            <TicketsSection
-              token={accessToken}
+          {reporting && (
+            <ReportPopup
               placeId={place_id}
-              assets={assets}
-              title={<Trans>Maintenance tickets</Trans>}
-              emptyOpen={<Trans>This place has no open tickets.</Trans>}
-              emptyAll={<Trans>This place has no maintenance tickets.</Trans>}
-              showAddTicket
+              onClose={() => setReporting(false)}
+              onSaved={() => {
+                setReporting(false)
+                chooseTab("tickets")
+              }}
             />
           )}
-          <PlaceBookings placeId={place_id} />
+
+          <TabbedPanel
+            label={t`Place sections`}
+            value={tab}
+            onChange={chooseTab}
+            tabs={[
+              {
+                key: "assets",
+                label: <Trans>Assets</Trans>,
+                content: (
+                  <AssetsPanel
+                    token={accessToken}
+                    place={place}
+                    assets={assets}
+                    isManager={isManager}
+                    onAdded={() => accessToken && void getPlaceAssets(accessToken, place_id).then(setAssets)}
+                  />
+                ),
+              },
+              ...(isManager && accessToken
+                ? [
+                    {
+                      key: "workers" as const,
+                      label: <Trans>Workers</Trans>,
+                      content: <WorkersPanel token={accessToken} placeId={place_id} workers={workers} onChanged={setWorkers} />,
+                    },
+                  ]
+                : []),
+              {
+                key: "tickets",
+                label: <Trans>Tickets</Trans>,
+                content: accessToken && (
+                  <TicketsSection
+                    token={accessToken}
+                    placeId={place_id}
+                    assets={assets}
+                    title={<Trans>Maintenance tickets</Trans>}
+                    emptyOpen={<Trans>This place has no open tickets.</Trans>}
+                    emptyAll={<Trans>This place has no maintenance tickets.</Trans>}
+                    showAddTicket
+                  />
+                ),
+              },
+              { key: "bookings", label: <Trans>Bookings</Trans>, content: <PlaceBookings placeId={place_id} /> },
+            ]}
+          />
         </>
       )}
     </Page>
@@ -272,15 +313,20 @@ function BudgetPanel({
 
 /** The place's assets, scrolling inside the card when there are many. */
 function AssetsPanel({
-  placeId,
+  token,
+  place,
   assets,
   isManager,
+  onAdded,
 }: {
-  placeId: string
+  token: string | null
+  place: Place | null
   assets: Asset[] | null
   isManager: boolean
+  onAdded: () => void
 }) {
   const [scrolls, setScrolls] = useState(false)
+  const [adding, setAdding] = useState(false)
   const row =
     "box-border flex min-h-[76px] flex-none snap-start items-center justify-between gap-3 border border-border bg-card p-3.5 text-foreground no-underline"
   return (
@@ -292,11 +338,23 @@ function AssetsPanel({
           </PanelTitle>
           {scrolls && <ScrollHint />}
         </div>
-        {isManager && (
-          <Link to="/place/asset/new" search={{ place_id: placeId }} className={cn(buttonVariants({ variant: "outline" }))}>
+        {isManager && place && (
+          <Button type="button" variant="outline" onClick={() => setAdding(true)}>
             <Plus aria-hidden="true" />
             <Trans>Add asset</Trans>
-          </Link>
+          </Button>
+        )}
+        {adding && place && token && (
+          <FormPopup
+            title={<Trans>Add asset</Trans>}
+            onClose={() => setAdding(false)}
+            onSaved={() => {
+              setAdding(false)
+              onAdded()
+            }}
+          >
+            <AssetForm token={token} place={place} />
+          </FormPopup>
         )}
       </div>
       {assets === null ? (
@@ -427,17 +485,20 @@ function WorkersPanel({
       )}
 
       {workers !== null && (
-        <form
-          onSubmit={handleAssign}
-          className="flex flex-wrap items-end gap-2.5 border-t border-border pt-3.5"
-        >
-          <div className="min-w-0 flex-[1_1_180px]">
-            <Field
-              id="assign-worker"
-              label={<Trans>Assign an active worker</Trans>}
-              hint={choices.length === 0 ? <Trans>All your active workers are already assigned to this place.</Trans> : undefined}
-            >
-              <NativeSelect id="assign-worker" value={selected} onChange={setSelected} disabled={choices.length === 0}>
+        // The label above, the list and the button side by side at one height, the hint under both.
+        <form onSubmit={handleAssign} className="flex flex-col gap-2 border-t border-border pt-3.5">
+          <label htmlFor="assign-worker" className="text-sm font-semibold">
+            <Trans>Assign an active worker</Trans>
+          </label>
+          <div className="flex min-w-0 items-stretch gap-2.5">
+            <div className="min-w-0 flex-1">
+              <NativeSelect
+                id="assign-worker"
+                value={selected}
+                onChange={setSelected}
+                disabled={choices.length === 0}
+                describedBy={choices.length === 0 ? "assign-worker-hint" : undefined}
+              >
                 <option value="">{t`Choose a worker`}</option>
                 {choices.map((worker) => (
                   <option key={worker.id} value={worker.id}>
@@ -445,12 +506,17 @@ function WorkersPanel({
                   </option>
                 ))}
               </NativeSelect>
-            </Field>
+            </div>
+            <Button type="submit" disabled={!selected || busy !== null}>
+              <Plus aria-hidden="true" />
+              {busy === "assign" ? <Trans>Assigning…</Trans> : <Trans>Assign</Trans>}
+            </Button>
           </div>
-          <Button type="submit" disabled={!selected || busy !== null}>
-            <Plus aria-hidden="true" />
-            {busy === "assign" ? <Trans>Assigning…</Trans> : <Trans>Assign</Trans>}
-          </Button>
+          {choices.length === 0 && (
+            <span id="assign-worker-hint" className="text-[13px] text-muted-foreground">
+              <Trans>All your active workers are already assigned to this place.</Trans>
+            </span>
+          )}
         </form>
       )}
 

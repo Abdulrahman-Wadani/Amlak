@@ -1,13 +1,13 @@
 import { useEffect, useState, type ReactNode } from "react"
-import { Link } from "@tanstack/react-router"
+import { useEmbedded } from "@/components/panel"
+import { ReportPopup } from "@/components/report-form"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { Plus } from "lucide-react"
 import type { Asset, Ticket } from "@amlak/shared"
 import { listTickets } from "@/lib/api"
 import { S } from "@/lib/dom-style"
-import { cn } from "@/lib/utils"
-import { buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Pager } from "@/components/pager"
 import { EmptyState, LoadError, LoadingList } from "@/components/states"
@@ -42,15 +42,18 @@ export function TicketsSection({
   title: ReactNode
   emptyOpen: ReactNode
   emptyAll: ReactNode
-  /** The Add ticket link (/ticket/new takes place_id only). */
+  /** The Add ticket button: a Report damage popup for this place. */
   showAddTicket?: boolean
 }) {
+  const embedded = useEmbedded()
   const [filter, setFilter] = useState<Filter>("OPEN")
   const [page, setPage] = useState(1)
   const [tickets, setTickets] = useState<Ticket[] | null>(null)
   const [total, setTotal] = useState<number | null>(null)
   const [totalPages, setTotalPages] = useState(1)
   const [failed, setFailed] = useState(false)
+  const [reporting, setReporting] = useState(false)
+  const [version, setVersion] = useState(0)
 
   useEffect(() => {
     let alive = true
@@ -76,7 +79,7 @@ export function TicketsSection({
     return () => {
       alive = false
     }
-  }, [token, placeId, assetId, filter, page])
+  }, [token, placeId, assetId, filter, page, version])
 
   function choose(next: Filter) {
     setFilter(next)
@@ -90,15 +93,19 @@ export function TicketsSection({
 
   return (
     <Card
-      className="am-lift"
-      style={S("padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0")}
+      className={embedded ? undefined : "am-lift"}
+      style={S(
+        embedded
+          ? "padding: 0; border: 0; box-shadow: none; background: transparent; overflow: visible; gap: 0"
+          : "padding: 0; border: 1px solid var(--border); overflow: hidden; gap: 0",
+      )}
     >
       <CardHeader
         style={S(
-          "padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap",
+          `${embedded ? "padding: 0 0 16px" : "padding: 18px 20px; border-bottom: 1px solid var(--border)"}; display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap`,
         )}
       >
-        <CardTitle style={S("font-size: 17px; font-weight: 750")}>
+        <CardTitle className={embedded ? "sr-only" : undefined} style={S("font-size: 17px; font-weight: 750")}>
           {title}
           {total !== null && (
             <span
@@ -109,7 +116,7 @@ export function TicketsSection({
             </span>
           )}
         </CardTitle>
-        <div style={S("display: flex; align-items: center; gap: 10px; flex-wrap: wrap")}>
+        <div style={S("display: flex; flex: 1 1 auto; align-items: center; gap: 10px; flex-wrap: wrap")}>
           <div role="group" aria-label={t`Filter by status`} style={S("display: flex; gap: 8px")}>
             {tabs.map((tab) => (
               <button
@@ -124,22 +131,27 @@ export function TicketsSection({
             ))}
           </div>
           {showAddTicket && (
-            <CardAction>
-              <Link
-                to="/ticket/new"
-                search={{ place_id: placeId }}
-                className={cn(buttonVariants({ variant: "outline", size: "sm" }), "am-btn")}
-                style={S("height: 44px; padding: 0 12px; gap: 6px; white-space: nowrap")}
-              >
+            <CardAction style={S("margin-inline-start: auto")}>
+              <Button type="button" variant="outline" onClick={() => setReporting(true)}>
                 <Plus size={16} />
                 <Trans>Add ticket</Trans>
-              </Link>
+              </Button>
             </CardAction>
           )}
         </div>
       </CardHeader>
 
-      <CardContent style={S("padding: 20px; display: flex; flex-direction: column; gap: 14px")}>
+      {reporting && (
+        <ReportPopup
+          placeId={placeId}
+          onClose={() => setReporting(false)}
+          onSaved={() => {
+            setReporting(false)
+            setVersion((n) => n + 1)
+          }}
+        />
+      )}
+      <CardContent style={S(`padding: ${embedded ? "0" : "20px"}; display: flex; flex-direction: column; gap: 14px`)}>
         {failed ? (
           <LoadError card={false} title={<Trans>Could not load tickets</Trans>} />
         ) : tickets === null ? (

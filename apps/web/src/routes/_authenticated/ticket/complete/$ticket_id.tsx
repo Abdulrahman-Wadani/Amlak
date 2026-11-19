@@ -7,6 +7,7 @@ import type { Place, Ticket } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import { completeTicket, getPlace, getTicketById } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
+import { LIMITS, tooLarge, tooLong } from "@/lib/limits"
 import { useFormat } from "@/lib/format"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/ticket/complete/$ticket_id
   component: CompleteTask,
 })
 
-type FieldKey = "photos" | "cost"
+type FieldKey = "photos" | "cost" | "notes"
 
 /** Complete task: photos after the repair, what was fixed and what it cost. */
 function CompleteTask() {
@@ -64,8 +65,10 @@ function CompleteTask() {
     const next: Partial<Record<FieldKey, string>> = {}
     if (photos.length === 0) next.photos = t`Add at least one photo of the finished work.`
     if (!/^\d+(\.\d{1,2})?$/.test(cost.trim())) next.cost = t`Enter the cost as a number, like 320 or 320.50.`
+    else next.cost = tooLarge(cost)
+    next.notes = tooLong(notes, LIMITS.longText)
     setErrors(next)
-    if (Object.keys(next).length > 0) return
+    if (Object.values(next).some(Boolean)) return
     setSaving(true)
     setFormError("")
     try {
@@ -115,8 +118,8 @@ function CompleteTask() {
                     error={errors.photos}
                   />
                 </div>
-                <Field id="c-notes" label={<Trans>What did you fix?</Trans>}>
-                  <Textarea id="c-notes" rows={3} dir="auto" value={notes} onChange={(e) => setNotes(e.target.value)} />
+                <Field id="c-notes" label={<Trans>What did you fix?</Trans>} error={errors.notes}>
+                  <Textarea id="c-notes" rows={3} dir="auto" maxLength={LIMITS.longText} aria-invalid={errors.notes ? true : undefined} value={notes} onChange={(e) => setNotes(e.target.value)} />
                 </Field>
                 <Field
                   id="c-cost"
@@ -165,7 +168,7 @@ function CompleteTask() {
                 <p dir="auto" className="m-0 text-[15px] leading-[1.8]">
                   {ticket.description}
                 </p>
-                <PhotoTiles urls={damage} columns={4} label={(n) => t`Damage photo ${n}`} />
+                <PhotoTiles urls={damage} label={(n) => t`Damage photo ${n}`} />
               </Panel>
             ) : (
               <Skeleton className="h-48" />

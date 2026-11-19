@@ -5,6 +5,8 @@ import { t } from "@lingui/core/macro"
 import { CircleAlert } from "lucide-react"
 import { createContent, updateContent, type ContentLanguage, type WebContent } from "@/lib/api"
 import { ApiError, errorMessage } from "@/lib/errors"
+import { FormCancel, useFormPopup } from "@/components/form-popup"
+import { LIMITS, tooLong } from "@/lib/limits"
 import { LANGUAGE_NAMES } from "@/lib/i18n"
 import { useFormat } from "@/lib/format"
 import { Button, buttonVariants } from "@/components/ui/button"
@@ -34,6 +36,7 @@ type FieldKey = "title" | "slug" | "body"
 /** New page and Edit page: language, title, link and content; saved as a draft or published. */
 export function ContentForm({ token, page }: { token: string; page?: WebContent }) {
   const navigate = useNavigate()
+  const popup = useFormPopup()
   const { date } = useFormat()
   const [current, setCurrent] = useState(page)
   const [language, setLanguage] = useState<ContentLanguage>(page?.language ?? "ar")
@@ -47,10 +50,12 @@ export function ContentForm({ token, page }: { token: string; page?: WebContent 
   async function save(publish: boolean) {
     const next: Partial<Record<FieldKey, string>> = {}
     if (!title.trim()) next.title = t`Write the title.`
+    else next.title = tooLong(title, LIMITS.title)
     if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug.trim())) next.slug = t`Use lowercase English letters, digits and single dashes, like about-us.`
     if (!body.trim()) next.body = t`Write the content.`
+    else next.body = tooLong(body, LIMITS.body)
     setErrors(next)
-    if (Object.keys(next).length > 0) return
+    if (Object.values(next).some(Boolean)) return
     setBusy(true)
     setError("")
     try {
@@ -61,7 +66,8 @@ export function ContentForm({ token, page }: { token: string; page?: WebContent 
       } else {
         await createContent(token, { ...fields, language })
         toast(publish ? t`Page published.` : t`Draft saved.`)
-        await navigate({ to: "/content" })
+        if (popup) popup.saved()
+        else await navigate({ to: "/content" })
       }
     } catch (err) {
       setError(
@@ -122,7 +128,7 @@ export function ContentForm({ token, page }: { token: string; page?: WebContent 
               )}
             </div>
             <Field id="c-title" label={<Trans>Address</Trans>} error={errors.title}>
-              <Input id="c-title" dir={language === "ar" ? "rtl" : "ltr"} value={title} aria-invalid={errors.title ? true : undefined} onChange={(e) => setTitle(e.target.value)} />
+              <Input id="c-title" maxLength={LIMITS.title} dir={language === "ar" ? "rtl" : "ltr"} value={title} aria-invalid={errors.title ? true : undefined} onChange={(e) => setTitle(e.target.value)} />
             </Field>
             <Field
               id="c-slug"
@@ -134,10 +140,10 @@ export function ContentForm({ token, page }: { token: string; page?: WebContent 
                 </Trans>
               }
             >
-              <Input id="c-slug" dir="ltr" value={slug} aria-invalid={errors.slug ? true : undefined} aria-describedby={errors.slug ? "c-slug-error" : "c-slug-hint"} onChange={(e) => setSlug(e.target.value)} />
+              <Input id="c-slug" maxLength={100} dir="ltr" value={slug} aria-invalid={errors.slug ? true : undefined} aria-describedby={errors.slug ? "c-slug-error" : "c-slug-hint"} onChange={(e) => setSlug(e.target.value)} />
             </Field>
             <Field id="c-body" label={<Trans>Content</Trans>} error={errors.body}>
-              <Textarea id="c-body" rows={8} dir={language === "ar" ? "rtl" : "ltr"} value={body} aria-invalid={errors.body ? true : undefined} onChange={(e) => setBody(e.target.value)} />
+              <Textarea id="c-body" rows={8} maxLength={LIMITS.body} dir={language === "ar" ? "rtl" : "ltr"} value={body} aria-invalid={errors.body ? true : undefined} onChange={(e) => setBody(e.target.value)} />
             </Field>
             {error && (
               <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">
@@ -146,6 +152,7 @@ export function ContentForm({ token, page }: { token: string; page?: WebContent 
               </p>
             )}
             <FormButtons>
+              {popup && <FormCancel to={{ to: "/content" }} />}
               <Button type="button" variant="outline" disabled={busy} onClick={() => void save(false)}>
                 <Trans>Save draft</Trans>
               </Button>

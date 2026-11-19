@@ -1,33 +1,47 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import { type ReactNode, type SubmitEvent, useState } from "react"
-import { Check, Eye, EyeOff, Info, Lock, Mail, TriangleAlert } from "lucide-react"
+import { Check, Info, Lock, Mail, TriangleAlert } from "lucide-react"
 import { t } from "@lingui/core/macro"
 import { Trans } from "@lingui/react/macro"
 import { signInInput } from "@/lib/validators"
 import { useAuth } from "@/lib/auth"
 import { ApiError, errorMessage } from "@/lib/errors"
+import { LIMITS } from "@/lib/limits"
 import { AuthCard, AuthLayout } from "@/components/auth-layout"
 import { Field } from "@/components/panel"
 import { Notice } from "@/components/states"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { PasswordInput } from "@/components/password-field"
 
 export const Route = createFileRoute("/signin")({
   component: SignIn,
-  validateSearch: (search: Record<string, unknown>): { verified?: boolean; activated?: boolean; reset?: boolean } => ({
+  validateSearch: (
+    search: Record<string, unknown>
+  ): { verified?: boolean; activated?: boolean; reset?: boolean } => ({
     ...(search.verified ? { verified: true } : {}),
     ...(search.activated ? { activated: true } : {}),
     ...(search.reset ? { reset: true } : {}),
   }),
 })
 
-type Problem = { tone: "crit" | "warn" | "info"; icon: ReactNode; title: ReactNode; text?: ReactNode; verify?: boolean }
+type Problem = {
+  tone: "crit" | "warn" | "info"
+  icon: ReactNode
+  title: ReactNode
+  text?: ReactNode
+  verify?: boolean
+}
 
 /** Why sign-in was refused, as the design's sign-in messages (Amlak-States). */
 function problemFor(error: unknown, email: string): Problem {
   if (error instanceof ApiError) {
     if (error.code === "INVALID_CREDENTIALS") {
-      return { tone: "crit", icon: <TriangleAlert />, title: <Trans>Wrong email or password.</Trans> }
+      return {
+        tone: "crit",
+        icon: <TriangleAlert />,
+        title: <Trans>Wrong email or password.</Trans>,
+      }
     }
     if (error.code === "RATE_LIMITED") {
       return {
@@ -62,14 +76,20 @@ function problemFor(error: unknown, email: string): Problem {
           tone: "crit",
           icon: <Lock />,
           title: <Trans>This account is deactivated.</Trans>,
-          text: <Trans>Contact your manager or support to reactivate it.</Trans>,
+          text: (
+            <Trans>Contact your manager or support to reactivate it.</Trans>
+          ),
         }
       case "MANAGER_DEACTIVATED":
         return {
           tone: "crit",
           icon: <Lock />,
           title: <Trans>Your manager’s account is deactivated.</Trans>,
-          text: <Trans>You cannot sign in until the manager’s account is reactivated.</Trans>,
+          text: (
+            <Trans>
+              You cannot sign in until the manager’s account is reactivated.
+            </Trans>
+          ),
         }
     }
   }
@@ -80,8 +100,9 @@ function SignIn() {
   const search = Route.useSearch()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  )
   const [problem, setProblem] = useState<Problem | null>(null)
   const [loading, setLoading] = useState(false)
   const { login, resendCode } = useAuth()
@@ -94,7 +115,9 @@ function SignIn() {
       const map: { email?: string; password?: string } = {}
       for (const issue of result.error.issues) {
         const key = issue.path[0] as "email" | "password"
-        if (!map[key]) map[key] = key === "email" ? t`Enter a valid email` : t`Enter your password`
+        if (!map[key])
+          map[key] =
+            key === "email" ? t`Enter a valid email` : t`Enter your password`
       }
       setErrors(map)
       return
@@ -120,32 +143,50 @@ function SignIn() {
 
   return (
     <AuthLayout>
-      <AuthCard title={<Trans comment="Page title">Sign in</Trans>} subtitle={<Trans>Enter your email and password to continue.</Trans>}>
-        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-          {!problem && (search.verified || search.activated || search.reset) && (
-            <Notice
-              tone="good"
-              icon={<Check />}
-              title={
-                search.reset ? (
-                  <Trans>Your password is changed.</Trans>
-                ) : search.activated ? (
-                  <Trans>Your account is active.</Trans>
-                ) : (
-                  <Trans>Your email is verified.</Trans>
-                )
-              }
-            >
-              <Trans>Sign in to continue.</Trans>
-            </Notice>
-          )}
+      <AuthCard
+        title={<Trans comment="Page title">Sign in</Trans>}
+        subtitle={<Trans>Enter your email and password to continue.</Trans>}
+      >
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className="flex flex-col gap-5"
+        >
+          {!problem &&
+            (search.verified || search.activated || search.reset) && (
+              <Notice
+                tone="good"
+                icon={<Check />}
+                title={
+                  search.reset ? (
+                    <Trans>Your password is changed.</Trans>
+                  ) : search.activated ? (
+                    <Trans>Your account is active.</Trans>
+                  ) : (
+                    <Trans>Your email is verified.</Trans>
+                  )
+                }
+              >
+                <Trans>Sign in to continue.</Trans>
+              </Notice>
+            )}
           {problem && (
             <div className="flex flex-col gap-3">
-              <Notice tone={problem.tone} icon={problem.icon} title={problem.title}>
+              <Notice
+                tone={problem.tone}
+                icon={problem.icon}
+                title={problem.title}
+              >
                 {problem.text}
               </Notice>
               {problem.verify && (
-                <Button type="button" className="h-11" onClick={() => void navigate({ to: "/verify", search: { email } })}>
+                <Button
+                  type="button"
+                  className="h-11"
+                  onClick={() =>
+                    void navigate({ to: "/verify", search: { email } })
+                  }
+                >
                   <Trans>Enter the code</Trans>
                 </Button>
               )}
@@ -154,6 +195,7 @@ function SignIn() {
           <Field id="email" label={<Trans>Email</Trans>} error={errors.email}>
             <Input
               id="email"
+              maxLength={LIMITS.email}
               dir="ltr"
               type="email"
               autoComplete="email"
@@ -176,32 +218,25 @@ function SignIn() {
                 <Trans>Forgot password?</Trans>
               </Link>
             </div>
-            <div className="relative">
-              <Input
-                id="password"
-                dir="ltr"
-                type={showPassword ? "text" : "password"}
-                autoComplete="current-password"
-                className="pe-[52px]"
-                value={password}
-                aria-invalid={errors.password ? true : undefined}
-                aria-describedby={errors.password ? "password-error" : undefined}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-              />
-              <button
-                type="button"
-                aria-label={showPassword ? t`Hide password` : t`Show password`}
-                aria-pressed={showPassword}
-                onClick={() => setShowPassword((s) => !s)}
-                className="am-icon absolute end-0 top-0 flex size-11 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-muted-foreground"
-              >
-                {showPassword ? <EyeOff aria-hidden="true" className="size-[18px]" /> : <Eye aria-hidden="true" className="size-[18px]" />}
-              </button>
-            </div>
+            <PasswordInput
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={setPassword}
+              invalid={Boolean(errors.password)}
+              describedBy={errors.password ? "password-error" : undefined}
+              disabled={loading}
+            />
             {errors.password && (
-              <span id="password-error" role="alert" className="flex items-center gap-1.5 text-[13px] text-destructive">
-                <TriangleAlert aria-hidden="true" className="size-3.5 shrink-0" />
+              <span
+                id="password-error"
+                role="alert"
+                className="flex items-center gap-1.5 text-[13px] text-destructive"
+              >
+                <TriangleAlert
+                  aria-hidden="true"
+                  className="size-3.5 shrink-0"
+                />
                 {errors.password}
               </span>
             )}
@@ -214,13 +249,18 @@ function SignIn() {
           <p className="m-0 text-muted-foreground">
             <Trans>
               No account?{" "}
-              <Link to="/signup" className="inline-flex min-h-11 items-center font-semibold text-foreground underline underline-offset-4">
+              <Link
+                to="/signup"
+                className="inline-flex min-h-11 items-center font-semibold text-foreground underline underline-offset-4"
+              >
                 Create a manager account
               </Link>
             </Trans>
           </p>
           <p className="m-0 text-[13px] text-muted-foreground">
-            <Trans>Workers sign in from the invitation their manager sends.</Trans>
+            <Trans>
+              Workers sign in from the invitation their manager sends.
+            </Trans>
           </p>
         </div>
       </AuthCard>

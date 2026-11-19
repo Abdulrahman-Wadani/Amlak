@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react"
 import { Link, createFileRoute, redirect } from "@tanstack/react-router"
-import { Building2, CalendarDays, Camera, ChevronDown, ChevronLeft, Plus, Wallet, Wrench } from "lucide-react"
+import { Building2, CalendarDays, Camera, ChevronLeft, Plus, Wallet, Wrench } from "lucide-react"
 import { Trans } from "@lingui/react/macro"
 import { plural, t } from "@lingui/core/macro"
 import type { Place, Ticket } from "@amlak/shared"
@@ -18,12 +18,18 @@ import { groupBookings } from "@/lib/bookings"
 import { addDays, todayIn } from "@/lib/dates"
 import { useFormat } from "@/lib/format"
 import { placeCounts } from "@/lib/places"
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BookingStatusChip, OverdueChip, StatusBadge, TicketStatusChip, TypeLabel } from "@/components/place-shared"
 import { DetailRow, DetailsLink, PlaceStatusText, PriorityText, StatCard } from "@/components/home-parts"
 import { Page } from "@/components/page"
+import { AddBookingPopup } from "@/components/booking-form"
+import { ReportPopup } from "@/components/report-form"
+import { Panel, PanelTitle } from "@/components/panel"
 import { cn } from "cn"
+
+/** How many places the home card shows: the newest active ones; See all opens the rest. */
+const HOME_PLACES = 3
 
 export const Route = createFileRoute("/_authenticated/home")({
   // Admins have no dashboard here; their start page is /admin.
@@ -94,6 +100,8 @@ function useHomeData() {
   const [dashboard, setDashboard] = useState<DashboardPlace[] | null>(null)
   const [placesError, setPlacesError] = useState(false)
   const [dashboardError, setDashboardError] = useState(false)
+  // Bumped after a popup saves, so the figures load again.
+  const [version, setVersion] = useState(0)
   useEffect(() => {
     if (!accessToken) return
     let alive = true
@@ -106,8 +114,8 @@ function useHomeData() {
     return () => {
       alive = false
     }
-  }, [accessToken])
-  return { places, dashboard, placesError, dashboardError }
+  }, [accessToken, version])
+  return { places, dashboard, placesError, dashboardError, refresh: () => setVersion((n) => n + 1) }
 }
 
 function sum(rows: DashboardPlace[], pick: (row: DashboardPlace) => number | undefined) {
@@ -127,7 +135,8 @@ function ManagerHome() {
   const { user, accessToken } = useAuth()
   const f = useFormat()
   const [now] = useState(() => new Date())
-  const { places, dashboard, placesError, dashboardError } = useHomeData()
+  const { places, dashboard, placesError, dashboardError, refresh } = useHomeData()
+  const [adding, setAdding] = useState(false)
   const today = useTodayBookings(places, dashboard)
 
   // Tickets waiting for review: the first three, the total and the oldest.
@@ -195,29 +204,41 @@ function ManagerHome() {
     return t`${guests}, and ${tickets}.`
   })()
 
+  const todayDate = f.date(now, { weekday: "long", day: "numeric", month: "long" })
+
   return (
     <Page
       title={greeting(now.getHours(), user?.fullname ?? "")}
+      description={
+        <>
+          <Trans>Today, {todayDate}</Trans>
+          {!loading && <>{t` · `}{headline}</>}
+        </>
+      }
       phoneTitle={<Trans>Home</Trans>}
       phoneStart="logo"
       phoneActions={false}
       actions={
-        <Link to="/booking/new" className={cn(buttonVariants())}>
+        <Button type="button" onClick={() => setAdding(true)}>
           <Plus aria-hidden="true" />
           <Trans>Add booking</Trans>
-        </Link>
+        </Button>
       }
     >
-      <TodayBand
-        date={f.date(now, { weekday: "long", day: "numeric", month: "long" })}
-        headline={loading ? null : headline}
-        rows={today}
-        primary={{ to: "/tickets", label: <Trans>Review tickets</Trans> }}
-      />
 
-      <div className="flex flex-wrap items-start gap-6">
-        <div className="min-w-0 flex-[999_1_560px]">
-          <div className="grid items-stretch gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))]">
+      {adding && (
+        <AddBookingPopup
+          onClose={() => setAdding(false)}
+          onSaved={() => {
+            setAdding(false)
+            refresh()
+          }}
+        />
+      )}
+      {/* The figures, then the places in one card. */}
+      <div className="flex min-w-0 flex-col gap-4 desk:gap-6">
+        <div className="min-w-0">
+          <div className="grid items-start gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr))]">
             <StatCard
               compactOnPhone
               icon={<Wrench strokeWidth={1.8} />}
@@ -311,19 +332,11 @@ function ManagerHome() {
           </div>
         </div>
 
-        <section aria-labelledby="your-places" className="am-rise flex min-w-0 flex-[1_1_320px] flex-col gap-3 desk:max-w-[360px]">
-          <div className="flex items-start justify-between gap-3">
-            <div className="flex flex-col gap-0.5">
-              <h2 id="your-places" className="m-0 text-lg leading-[1.4] font-bold">
-                <Trans>Your places</Trans>
-              </h2>
-              {(places?.length ?? 0) > 2 && (
-                <span className="inline-flex items-center gap-1 text-[13px] text-muted-foreground">
-                  <ChevronDown aria-hidden="true" className="size-4" strokeWidth={1.8} />
-                  <Trans>Scroll to see the rest</Trans>
-                </span>
-              )}
-            </div>
+        <Panel labelledBy="your-places">
+          <div className="flex items-center justify-between gap-3">
+            <PanelTitle id="your-places">
+              <Trans>Your places</Trans>
+            </PanelTitle>
             <Link to="/places" className="inline-flex min-h-11 items-center text-sm font-semibold">
               <Trans>See all</Trans>
             </Link>
@@ -335,7 +348,7 @@ function ManagerHome() {
           ) : places === null ? (
             <Skeleton className="h-[168px]" />
           ) : places.length === 0 ? (
-            <div className="flex flex-col items-start gap-3 border border-border bg-card p-[18px]">
+            <div className="flex flex-col items-start gap-3 border border-dashed border-border p-[18px]">
               <span className="text-muted-foreground">
                 <Trans>Add your first property to see it here.</Trans>
               </span>
@@ -344,23 +357,18 @@ function ManagerHome() {
               </Link>
             </div>
           ) : (
-            <div
-              role="region"
-              aria-label={t`Your places`}
-              // biome-ignore lint/a11y/noNoninteractiveTabindex: a scrolling region must be reachable by keyboard
-              tabIndex={0}
-              className={cn(
-                "flex flex-none flex-col gap-3 overflow-y-auto overscroll-contain [scroll-snap-type:y_mandatory] [scrollbar-width:thin]",
-                places.length > 2 &&
-                  "h-[400px] pb-10 [mask-image:linear-gradient(to_bottom,#000_calc(100%-40px),transparent)]",
-              )}
-            >
-              {places.map((place) => (
+            // The newest active places only, so nothing scrolls inside the card; See all opens the rest.
+            <div className="grid min-w-0 gap-3 [grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr))]">
+              {places
+                .filter((place) => place.status === "ACTIVE")
+                .sort((a, b) => b.created_at.localeCompare(a.created_at))
+                .slice(0, HOME_PLACES)
+                .map((place) => (
                 <Link
                   key={place.id}
                   to="/place/$place_id"
                   params={{ place_id: place.id }}
-                  className="am-lift box-border flex h-[168px] flex-none snap-start flex-col gap-3.5 border border-border bg-card p-[18px] text-foreground no-underline"
+                  className="am-lift box-border flex min-w-0 flex-col gap-3.5 border border-border bg-card p-[18px] text-foreground no-underline"
                 >
                   <span className="flex items-start gap-3">
                     <span aria-hidden="true" className="inline-flex size-11 flex-none items-center justify-center bg-secondary">
@@ -388,7 +396,7 @@ function ManagerHome() {
               ))}
             </div>
           )}
-        </section>
+        </Panel>
       </div>
     </Page>
   )
@@ -400,63 +408,6 @@ function PlaceStat({ label, value }: { label: ReactNode; value: ReactNode }) {
       <span className="text-[13px] text-muted-foreground">{label}</span>
       <span className="font-mono text-lg font-semibold tabular-nums">{value}</span>
     </span>
-  )
-}
-
-/** The dark band: today's date, one sentence, who arrives and leaves, and two buttons. */
-function TodayBand({
-  date,
-  headline,
-  rows,
-  primary,
-}: {
-  date: string
-  headline: ReactNode
-  rows: { checkIns: TodayRow[]; checkOuts: TodayRow[] } | null
-  primary: { to: "/tickets"; label: ReactNode }
-}) {
-  const people = rows ? [...rows.checkIns.map((r) => ({ ...r, in: true })), ...rows.checkOuts.map((r) => ({ ...r, in: false }))] : []
-  return (
-    <section
-      aria-label={t`Today`}
-      className="am-rise box-border flex min-h-(--band-min-h) flex-wrap content-center items-center justify-between gap-x-12 gap-y-6 bg-foreground p-6 text-white shadow-[4px_4px_0_var(--accent-brand)] desk:p-8"
-    >
-      <div className="flex min-w-0 flex-[1_1_360px] flex-col gap-3.5">
-        <span className="text-sm text-info-200">
-          <Trans>Today, {date}</Trans>
-        </span>
-        {headline && <p className="m-0 text-[22px] leading-[1.35] font-bold desk:text-[28px]">{headline}</p>}
-        {people.length > 0 && (
-          <ul className="m-0 flex list-none flex-col gap-1.5 p-0 text-[15px]">
-            {people.slice(0, 4).map(({ booking, place, in: arriving }) => (
-              <li key={`${booking.id}-${arriving}`}>
-                <strong className="font-semibold">
-                  {arriving ? <Trans>{booking.guest_name} arrives</Trans> : <Trans>{booking.guest_name} leaves</Trans>}
-                </strong>
-                <span className="text-info-200">
-                  {t`, `}
-                  {place.place_name}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-      <div className="flex flex-wrap gap-2.5">
-        <Link
-          to={primary.to}
-          className="inline-flex h-11 items-center justify-center gap-2 border border-white bg-white px-4 text-[15px] font-semibold whitespace-nowrap text-foreground no-underline"
-        >
-          {primary.label}
-        </Link>
-        <Link
-          to="/bookings"
-          className="inline-flex h-11 items-center justify-center gap-2 border border-white/45 bg-transparent px-4 text-[15px] font-semibold whitespace-nowrap text-white no-underline hover:text-white"
-        >
-          <Trans>Bookings</Trans>
-        </Link>
-      </div>
-    </section>
   )
 }
 
@@ -490,7 +441,8 @@ function WorkerHome() {
   const { user, accessToken } = useAuth()
   const f = useFormat()
   const [now] = useState(() => new Date())
-  const { places, dashboard, placesError, dashboardError } = useHomeData()
+  const { places, dashboard, placesError, dashboardError, refresh } = useHomeData()
+  const [reporting, setReporting] = useState(false)
   const today = useTodayBookings(places, dashboard)
 
   // My open tasks: approved tickets assigned to me, soonest due first.
@@ -517,11 +469,6 @@ function WorkerHome() {
   const checkIns = sum(dashboard ?? [], (r) => r.today?.check_ins)
   const loading = (value: unknown, failed: boolean) => value === null && !failed
 
-  // Report damage needs a place; with one place it opens straight away.
-  const reportLink =
-    places?.length === 1
-      ? { to: "/ticket/new" as const, search: { place_id: places[0].id } }
-      : { to: "/places" as const }
 
   return (
     <Page
@@ -531,13 +478,24 @@ function WorkerHome() {
       phoneSubtitle={f.date(now, { weekday: "long", day: "numeric", month: "long" })}
       phoneStart="logo"
       actions={
-        <Link {...reportLink} className={cn(buttonVariants(), "w-full no-underline desk:w-auto")}>
+        <Button type="button" className="w-full desk:w-auto" onClick={() => setReporting(true)}>
           <Camera aria-hidden="true" strokeWidth={1.8} />
           <Trans>Report damage</Trans>
-        </Link>
+        </Button>
       }
     >
-      <div className="grid items-stretch gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr))]">
+      {/* With one place the report starts on it; otherwise the worker picks the place. */}
+      {reporting && (
+        <ReportPopup
+          placeId={places?.length === 1 ? places[0].id : undefined}
+          onClose={() => setReporting(false)}
+          onSaved={() => {
+            setReporting(false)
+            refresh()
+          }}
+        />
+      )}
+      <div className="grid items-start gap-5 [grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr))]">
         <StatCard
           title={<Trans>My open tasks</Trans>}
           value={loading(tasks, tasksError) ? <Skeleton className="h-10 w-16" /> : tasksError ? "—" : f.number(tasks?.total ?? 0)}

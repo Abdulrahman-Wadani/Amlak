@@ -6,9 +6,10 @@ import { CircleAlert, Info, MapPin } from "lucide-react"
 import type { Worker } from "@amlak/shared"
 import { createWorker, deleteWorker, updateWorker } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { FormCancel, useFormPopup } from "@/components/form-popup"
+import { LIMITS, tooLong } from "@/lib/limits"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { cn } from "cn"
 import { WorkerStatusChip } from "@/components/place-shared"
 import { ConfirmDialog } from "@/components/states"
 import { Bullets, Field, FormButtons, Panel, PanelTitle, TwoColumns } from "@/components/panel"
@@ -45,6 +46,7 @@ export function WorkerForm({
   onSaved?: (worker: Worker) => void
 }) {
   const navigate = useNavigate()
+  const popup = useFormPopup()
   const editing = worker !== undefined
   const [name, setName] = useState(worker?.fullname ?? "")
   const [email, setEmail] = useState(worker?.email ?? "")
@@ -62,12 +64,13 @@ export function WorkerForm({
     event.preventDefault()
     const next: Partial<Record<FieldKey, string>> = {}
     if (!name.trim()) next.name = t`Enter the worker's full name.`
+    else next.name = tooLong(name, LIMITS.name)
     if (!editing && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) next.email = t`Enter a valid email address.`
     if (!phone.trim()) next.phone = t`Enter the mobile number.`
     else if (!isE164(number)) next.phone = t`Enter a valid mobile number, e.g. 501234567.`
     setErrors(next)
     setSaved(false)
-    if (Object.keys(next).length > 0) return
+    if (Object.values(next).some(Boolean)) return
 
     setBusy("save")
     setFormError("")
@@ -78,7 +81,8 @@ export function WorkerForm({
         setSaved(true)
       } else {
         await createWorker(token, { fullname: name.trim(), email: email.trim(), phone: number })
-        await navigate({ to: "/workers" })
+        if (popup) popup.saved()
+        else await navigate({ to: "/workers" })
       }
     } catch (err) {
       setFormError(errorMessage(err))
@@ -123,7 +127,7 @@ export function WorkerForm({
         <Panel pad="lg">
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
             <Field id="wn" label={<Trans>Full name</Trans>} error={errors.name}>
-              <Input id="wn" autoComplete="off" value={name} onChange={(e) => setName(e.target.value)} {...invalid("name", "wn")} />
+              <Input id="wn" autoComplete="off" maxLength={LIMITS.name} value={name} onChange={(e) => setName(e.target.value)} {...invalid("name", "wn")} />
             </Field>
             <Field
               id="we"
@@ -134,6 +138,7 @@ export function WorkerForm({
               <Input
                 id="we"
                 type="email"
+                maxLength={LIMITS.email}
                 dir="ltr"
                 autoComplete="off"
                 readOnly={editing}
@@ -194,9 +199,7 @@ export function WorkerForm({
             )}
 
             <FormButtons>
-              <Link to="/workers" className={cn(buttonVariants({ variant: "outline" }))}>
-                <Trans>Cancel</Trans>
-              </Link>
+              <FormCancel to={{ to: "/workers" }} />
               <Button type="submit" disabled={busy !== null}>
                 {busy === "save" ? (
                   <Trans>Saving…</Trans>

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react"
-import { Link, useNavigate } from "@tanstack/react-router"
+import { useNavigate } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { Camera, Check, CircleAlert, Image as ImageIcon } from "lucide-react"
@@ -7,21 +7,23 @@ import type { Expense, ExpenseCategory, Place } from "@amlak/shared"
 import { apiAllPages, createExpense, getPlaceHealth, getPlaces, updateExpense, type DashboardPlace } from "@/lib/api"
 import { todayIn } from "@/lib/dates"
 import { errorMessage } from "@/lib/errors"
+import { FormCancel, useFormPopup } from "@/components/form-popup"
+import { LIMITS, tooLarge, tooLong } from "@/lib/limits"
 import { useFormat } from "@/lib/format"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { cn } from "cn"
 import { Field, FieldRow, FormButtons, NativeSelect, Panel, PanelTitle, PhoneActionBar, TwoColumns } from "@/components/panel"
 import { LocationPermission } from "@/components/location-permission"
 import { askedBefore, rememberAsked } from "@/components/photo-picker"
 import { Amount, CATEGORIES, categoryLabel } from "@/components/finance-parts"
 import { isoDay } from "@/components/booking-parts"
 
-type FieldKey = "place" | "amount" | "date"
+type FieldKey = "place" | "amount" | "date" | "description"
 
 /** Add expense and Edit expense, with the place's month at the side. */
 export function ExpenseForm({ token, expense }: { token: string; expense?: Expense }) {
   const navigate = useNavigate()
+  const popup = useFormPopup()
   const { number, dateFormat, date, currencyName } = useFormat()
   const [places, setPlaces] = useState<Place[] | null>(null)
   const [placeId, setPlaceId] = useState(expense?.place_id ?? "")
@@ -83,9 +85,11 @@ export function ExpenseForm({ token, expense }: { token: string; expense?: Expen
     const next: Partial<Record<FieldKey, string>> = {}
     if (!placeId) next.place = t`Choose the place.`
     if (!/^\d+(\.\d{1,2})?$/.test(amount.trim()) || Number(amount) <= 0) next.amount = t`Enter the amount, like 640 or 640.50.`
+    else next.amount = tooLarge(amount)
     if (!day) next.date = t`Choose the date.`
+    next.description = tooLong(description, LIMITS.longText)
     setErrors(next)
-    if (Object.keys(next).length > 0) return
+    if (Object.values(next).some(Boolean)) return
     setSaving(true)
     setFormError("")
     try {
@@ -98,7 +102,8 @@ export function ExpenseForm({ token, expense }: { token: string; expense?: Expen
       }
       if (expense) await updateExpense(token, expense.id, { ...fields, description: description.trim() })
       else await createExpense(token, placeId, fields)
-      await navigate({ to: "/expenses" })
+      if (popup) popup.saved()
+      else await navigate({ to: "/expenses" })
     } catch (err) {
       setFormError(errorMessage(err))
     } finally {
@@ -168,8 +173,8 @@ export function ExpenseForm({ token, expense }: { token: string; expense?: Expen
                 <Input id="e-date" type="date" dir="ltr" value={day} onChange={(e) => setDay(e.target.value)} />
               </Field>
             </FieldRow>
-            <Field id="e-desc" label={<Trans>Description</Trans>}>
-              <Input id="e-desc" dir="auto" value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Field id="e-desc" label={<Trans>Description</Trans>} error={errors.description}>
+              <Input id="e-desc" dir="auto" maxLength={LIMITS.longText} aria-invalid={errors.description ? true : undefined} value={description} onChange={(e) => setDescription(e.target.value)} />
             </Field>
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold">
@@ -226,9 +231,7 @@ export function ExpenseForm({ token, expense }: { token: string; expense?: Expen
             )}
             <div className="hidden desk:block">
               <FormButtons>
-                <Link to="/expenses" className={cn(buttonVariants({ variant: "outline" }))}>
-                  <Trans>Cancel</Trans>
-                </Link>
+                <FormCancel to={{ to: "/expenses" }} />
                 {save}
               </FormButtons>
             </div>

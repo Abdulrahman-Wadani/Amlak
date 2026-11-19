@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { LIMITS } from "./limits.ts";
 
 export const EXPENSE_CATEGORIES = [
 	"MAINTENANCE",
@@ -37,6 +38,7 @@ const amountField = z
 	.regex(/^\d+(\.\d{1,2})?$/, "Use a number like 320 or 320.50")
 	.transform(Number)
 	.refine((amount) => amount > 0, "Must be more than 0")
+	.refine((amount) => amount <= LIMITS.money, "Too large")
 	.meta({ description: "In the place's currency, at most 2 decimals" });
 
 /** The text fields of a new expense; the receipt photo comes as a file. */
@@ -44,7 +46,7 @@ export const createExpenseSchema = z.object({
 	category: z.enum(EXPENSE_CATEGORIES),
 	amount: amountField,
 	expense_date: z.iso.date("Use the YYYY-MM-DD format"),
-	description: z.string().trim().max(2000).optional(),
+	description: z.string().trim().max(LIMITS.longText).optional(),
 	ticket_id: z
 		.uuid()
 		.optional()
@@ -57,7 +59,7 @@ export const updateExpenseSchema = z.object({
 	category: z.enum(EXPENSE_CATEGORIES).optional(),
 	amount: amountField.optional(),
 	expense_date: z.iso.date("Use the YYYY-MM-DD format").optional(),
-	description: z.string().trim().max(2000).optional(),
+	description: z.string().trim().max(LIMITS.longText).optional(),
 	ticket_id: z
 		.union([z.literal(""), z.uuid()])
 		.optional()

@@ -6,6 +6,7 @@ import { CircleAlert, MapPin } from "lucide-react"
 import type { CreatePlaceInput, Place, PlaceStatus } from "@amlak/shared"
 import { createPlace, updatePlace } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
+import { LIMITS, tooLarge, tooLong } from "@/lib/limits"
 import { useFormat } from "@/lib/format"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -68,7 +69,7 @@ function timeZones(): string[] {
   }
 }
 
-type Errors = Partial<Record<"name" | "type" | "city" | "budget", string>>
+type Errors = Partial<Record<"name" | "type" | "city" | "address" | "description" | "budget", string>>
 
 /**
  * Add place and Edit place. Currency and time zone are chosen when the place
@@ -146,14 +147,18 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
     event.preventDefault()
     const next: Errors = {}
     if (!name.trim()) next.name = t`Enter the place name.`
+    else next.name = tooLong(name, LIMITS.name)
     if (!type) next.type = t`Choose the place type.`
     if (!city.trim()) next.city = t`Enter the city.`
+    else next.city = tooLong(city, LIMITS.short)
+    next.address = tooLong(address, LIMITS.address)
+    next.description = tooLong(description, LIMITS.text)
     const amount = budget.trim() === "" ? null : Number(budget.trim())
     if (amount !== null && (!Number.isFinite(amount) || amount < 0)) {
       next.budget = t`Enter an amount of 0 or more, or leave it empty.`
-    }
+    } else next.budget = tooLarge(amount)
     setErrors(next)
-    if (Object.keys(next).length > 0) return
+    if (Object.values(next).some(Boolean)) return
 
     const fields = {
       place_name: name.trim(),
@@ -194,6 +199,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
             <Field id="pname" label={<Trans>Place name</Trans>} error={errors.name}>
               <Input
                 id="pname"
+                maxLength={LIMITS.name}
                 value={name}
                 aria-invalid={errors.name ? true : undefined}
                 aria-describedby={errors.name ? "pname-error" : undefined}
@@ -214,22 +220,38 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
               </NativeSelect>
             </Field>
 
-            <Field id="pdesc" label={<Trans>Description</Trans>}>
-              <Textarea id="pdesc" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Field id="pdesc" label={<Trans>Description</Trans>} error={errors.description}>
+              <Textarea
+                id="pdesc"
+                rows={3}
+                maxLength={LIMITS.text}
+                value={description}
+                aria-invalid={errors.description ? true : undefined}
+                aria-describedby={errors.description ? "pdesc-error" : undefined}
+                onChange={(e) => setDescription(e.target.value)}
+              />
             </Field>
 
             <FieldRow>
               <Field id="pcity" label={<Trans>City</Trans>} error={errors.city}>
                 <Input
                   id="pcity"
+                  maxLength={LIMITS.short}
                   value={city}
                   aria-invalid={errors.city ? true : undefined}
                   aria-describedby={errors.city ? "pcity-error" : undefined}
                   onChange={(e) => setCity(e.target.value)}
                 />
               </Field>
-              <Field id="paddr" label={<Trans>Address</Trans>}>
-                <Input id="paddr" value={address} onChange={(e) => setAddress(e.target.value)} />
+              <Field id="paddr" label={<Trans>Address</Trans>} error={errors.address}>
+                <Input
+                  id="paddr"
+                  maxLength={LIMITS.address}
+                  value={address}
+                  aria-invalid={errors.address ? true : undefined}
+                  aria-describedby={errors.address ? "paddr-error" : undefined}
+                  onChange={(e) => setAddress(e.target.value)}
+                />
               </Field>
             </FieldRow>
 
