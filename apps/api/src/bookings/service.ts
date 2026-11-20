@@ -20,6 +20,7 @@ import {
 	stayingBookingId,
 } from "./access.ts";
 import { toBooking } from "./present.ts";
+import { assertNoRepairDuring } from "./repairs.ts";
 
 /**
  * The booking calendar: a place's bookings whose stay touches the days
@@ -69,6 +70,8 @@ export async function getBooking(
  * a booking whose guest is coming or staying. The check-out day is free, so
  * the next guest can arrive on it.
  *
+ * Nor may it have a repair on one of its nights (see repairs.ts).
+ *
  * A stay that is already over can be recorded too (to keep past bookings and
  * their income): it is saved as checked out, and it must not overlap a past
  * stay either, so the same stay is not counted twice.
@@ -89,6 +92,12 @@ export async function createBooking(
 		const over = input.check_out_date < todayIn(place.timezone);
 
 		await lockPlace(tx, place.id);
+		await assertNoRepairDuring(
+			tx,
+			place.id,
+			input.check_in_date,
+			input.check_out_date,
+		);
 		const conflicting = await tx.booking.findFirst({
 			where: {
 				place_id: place.id,

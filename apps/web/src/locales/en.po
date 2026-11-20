@@ -78,9 +78,10 @@ msgstr "{0} of {1}"
 #. placeholder {1}: relative(ticket.created_at)
 #. placeholder {1}: roleLabel(person.role)
 #: src/components/admin-support.tsx:57
-#: src/components/booking-parts.tsx:128
+#: src/components/booking-parts.tsx:158
+#: src/components/repair-day.tsx:58
 #: src/routes/_authenticated/expenses.tsx:206
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:218
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:219
 msgid "{0}, {1}"
 msgstr "{0}, {1}"
 
@@ -158,7 +159,7 @@ msgstr "{month} maintenance budget"
 msgid "{monthName} total"
 msgstr "{monthName} total"
 
-#: src/components/booking-parts.tsx:29
+#: src/components/booking-parts.tsx:30
 msgid "{nights, plural, one {one night} other {# nights}}"
 msgstr "{nights, plural, one {one night} other {# nights}}"
 
@@ -182,7 +183,7 @@ msgstr "{pending, plural, =0 {No tickets wait for your review.} one {One ticket 
 msgid "{pendingCount, plural, =0 {no tickets wait for your decision} one {one ticket waits for your decision} other {# tickets wait for your decision}}"
 msgstr "{pendingCount, plural, =0 {no tickets wait for your decision} one {one ticket waits for your decision} other {# tickets wait for your decision}}"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:157
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:158
 msgid "{photos, plural, one {created the ticket and attached one photo.} other {created the ticket and attached # photos.}}"
 msgstr "{photos, plural, one {created the ticket and attached one photo.} other {created the ticket and attached # photos.}}"
 
@@ -198,9 +199,14 @@ msgstr "{place}, due {due}"
 msgid "{place}, was due {due}"
 msgstr "{place}, was due {due}"
 
-#: src/components/booking-parts.tsx:30
+#: src/components/booking-parts.tsx:31
 msgid "{range}, {count}"
 msgstr "{range}, {count}"
+
+#. placeholder {0}: staying.guest_name
+#: src/components/repair-day.tsx:47
+msgid "<0>{0}</0> stays until {leaves}. Choose a day from {leaves} on."
+msgstr "<0>{0}</0> stays until {leaves}. Choose a day from {leaves} on."
 
 #: src/routes/_authenticated/reports.tsx:132
 msgid "3 months"
@@ -226,6 +232,14 @@ msgstr "A"
 #: src/components/expense-form.tsx:176
 msgid "A clear photo of the amount and date."
 msgstr "A clear photo of the amount and date."
+
+#: src/components/repair-day.tsx:46
+msgid "A guest is staying on this day"
+msgstr "A guest is staying on this day"
+
+#: src/components/booking-form.tsx:141
+msgid "A repair is due at this place on {day}. Choose other dates."
+msgstr "A repair is due at this place on {day}. Choose other dates."
 
 #: src/routes/_authenticated/profile.tsx:163
 msgid "A square JPG or PNG photo."
@@ -286,11 +300,11 @@ msgid "Active"
 msgstr "Active"
 
 #: src/lib/errors.ts:126
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:202
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:203
 msgid "Actual cost"
 msgstr "Actual cost"
 
-#: src/routes/_authenticated/bookings.tsx:97
+#: src/routes/_authenticated/bookings.tsx:111
 msgid "Add a place first; its bookings show here."
 msgstr "Add a place first; its bookings show here."
 
@@ -311,10 +325,10 @@ msgstr "Add asset"
 msgid "Add at least one photo of the finished work."
 msgstr "Add at least one photo of the finished work."
 
-#: src/components/booking-form.tsx:397
+#: src/components/booking-form.tsx:403
 #: src/components/place-bookings.tsx:284
-#: src/routes/_authenticated/bookings.tsx:72
-#: src/routes/_authenticated/bookings.tsx:77
+#: src/routes/_authenticated/bookings.tsx:86
+#: src/routes/_authenticated/bookings.tsx:91
 #: src/routes/_authenticated/home.tsx:224
 msgid "Add booking"
 msgstr "Add booking"
@@ -368,7 +382,7 @@ msgstr "Address"
 msgid "Admin"
 msgstr "Admin"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:315
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:316
 msgid "After the repair"
 msgstr "After the repair"
 
@@ -474,7 +488,7 @@ msgstr "Another guest is staying at the place. Check them out first."
 msgid "Apartment"
 msgstr "Apartment"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:464
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:466
 msgid "Approve ticket"
 msgstr "Approve ticket"
 
@@ -483,11 +497,11 @@ msgstr "Approve ticket"
 msgid "Approved"
 msgstr "Approved"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:172
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:173
 msgid "approved the ticket and assigned {assignee}."
 msgstr "approved the ticket and assigned {assignee}."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:173
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:174
 msgid "approved the ticket."
 msgstr "approved the ticket."
 
@@ -502,7 +516,7 @@ msgstr "Ask your manager to send a new invitation."
 #: src/components/report-form.tsx:151
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:65
 #: src/routes/_authenticated/place/asset/edit/$asset_id.tsx:43
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:206
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:207
 msgid "Asset"
 msgstr "Asset"
 
@@ -535,7 +549,7 @@ msgstr "Assign"
 msgid "Assign an active worker"
 msgstr "Assign an active worker"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:494
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:496
 msgid "Assign to"
 msgstr "Assign to"
 
@@ -547,7 +561,7 @@ msgstr "Assigned places"
 msgid "Assigned places: {places}"
 msgstr "Assigned places: {places}"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:195
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:196
 msgid "Assigned to"
 msgstr "Assigned to"
 
@@ -562,6 +576,10 @@ msgstr "Assigned workers"
 #: src/lib/errors.ts:122
 msgid "Assignee"
 msgstr "Assignee"
+
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:620
+msgid "Assignee and due date"
+msgstr "Assignee and due date"
 
 #: src/routes/_authenticated/place/$place_id.tsx:512
 msgid "Assigning…"
@@ -592,6 +610,10 @@ msgstr "Body"
 msgid "Booking"
 msgstr "Booking"
 
+#: src/routes/_authenticated/notifications.tsx:344
+msgid "Booking cancelled"
+msgstr "Booking cancelled"
+
 #: src/routes/_authenticated/booking/$booking_id.tsx:88
 msgid "Booking cancelled."
 msgstr "Booking cancelled."
@@ -601,7 +623,7 @@ msgstr "Booking cancelled."
 #: src/lib/nav.tsx:169
 #: src/routes/_authenticated/booking/$booking_id.tsx:98
 #: src/routes/_authenticated/booking/$booking_id.tsx:131
-#: src/routes/_authenticated/bookings.tsx:70
+#: src/routes/_authenticated/bookings.tsx:84
 #: src/routes/_authenticated/place/$place_id.tsx:266
 msgid "Bookings"
 msgstr "Bookings"
@@ -617,7 +639,7 @@ msgstr "Bookings today"
 #: src/components/place-form.tsx:323
 #: src/components/states.tsx:187
 #: src/routes/_authenticated/profile.tsx:152
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:562
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:565
 #: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:150
 msgid "Cancel"
 msgstr "Cancel"
@@ -712,7 +734,7 @@ msgstr "Check your password and try again"
 msgid "Check-in"
 msgstr "Check-in"
 
-#: src/components/booking-form.tsx:219
+#: src/components/booking-form.tsx:225
 msgid "Check-in date"
 msgstr "Check-in date"
 
@@ -739,7 +761,7 @@ msgstr "Check-in: {0}"
 msgid "Check-out"
 msgstr "Check-out"
 
-#: src/components/booking-form.tsx:244
+#: src/components/booking-form.tsx:250
 msgid "Check-out date"
 msgstr "Check-out date"
 
@@ -754,7 +776,7 @@ msgstr "Check-out: {0}"
 msgid "Checked in {0}, leaves {1}."
 msgstr "Checked in {0}, leaves {1}."
 
-#: src/components/booking-parts.tsx:146
+#: src/components/booking-parts.tsx:176
 #: src/components/place-shared.tsx:160
 msgid "Checked out"
 msgstr "Checked out"
@@ -800,7 +822,7 @@ msgstr "Choose the check-out date."
 msgid "Choose the date."
 msgstr "Choose the date."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:419
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:421
 msgid "Choose the due date."
 msgstr "Choose the due date."
 
@@ -808,7 +830,7 @@ msgstr "Choose the due date."
 msgid "Choose the first due date."
 msgstr "Choose the first due date."
 
-#: src/components/booking-form.tsx:206
+#: src/components/booking-form.tsx:212
 #: src/components/expense-form.tsx:106
 #: src/components/report-form.tsx:138
 msgid "Choose the place"
@@ -851,7 +873,7 @@ msgid "Close"
 msgstr "Close"
 
 #: src/components/ticket-parts.tsx:112
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:272
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:273
 #: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:98
 msgid "Complete task"
 msgstr "Complete task"
@@ -862,7 +884,7 @@ msgstr "Complete task"
 msgid "Completed"
 msgstr "Completed"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:177
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:178
 msgid "completed the ticket."
 msgstr "completed the ticket."
 
@@ -886,18 +908,18 @@ msgstr "Confirm completion"
 msgid "Confirm password"
 msgstr "Confirm password"
 
-#: src/components/booking-parts.tsx:144
+#: src/components/booking-parts.tsx:174
 #: src/components/place-shared.tsx:178
 msgid "Confirmed"
 msgstr "Confirmed"
 
 #. placeholder {0}: conflict.guest_name
 #. placeholder {1}: stay(conflict, false)
-#: src/components/booking-form.tsx:177
+#: src/components/booking-form.tsx:183
 msgid "Conflicts with {0}’s booking ({1})."
 msgstr "Conflicts with {0}’s booking ({1})."
 
-#: src/components/booking-form.tsx:141
+#: src/components/booking-form.tsx:147
 msgid "Conflicts with another booking"
 msgstr "Conflicts with another booking"
 
@@ -910,7 +932,7 @@ msgstr "Contact your manager or support to reactivate it."
 msgid "Content"
 msgstr "Content"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:190
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:191
 msgid "Corrective"
 msgstr "Corrective"
 
@@ -926,7 +948,7 @@ msgstr "Could not change the booking. Please try again."
 msgid "Could not get the address."
 msgstr "Could not get the address."
 
-#: src/routes/_authenticated/bookings.tsx:116
+#: src/routes/_authenticated/bookings.tsx:130
 msgid "Could not load bookings"
 msgstr "Could not load bookings"
 
@@ -966,7 +988,7 @@ msgstr "Could not load this page"
 msgid "Could not load this place"
 msgstr "Could not load this place"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:137
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:138
 #: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:104
 msgid "Could not load this ticket"
 msgstr "Could not load this ticket"
@@ -1005,7 +1027,7 @@ msgstr "Create a manager account"
 msgid "Create account"
 msgstr "Create account"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:161
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:162
 msgid "created the ticket."
 msgstr "created the ticket."
 
@@ -1021,12 +1043,12 @@ msgstr "Currency"
 msgid "Custom"
 msgstr "Custom"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:298
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:299
 #: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:172
 msgid "Damage photo {n}"
 msgstr "Damage photo {n}"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:296
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:297
 msgid "Damage photos ({damageCount})"
 msgstr "Damage photos ({damageCount})"
 
@@ -1156,7 +1178,7 @@ msgstr "Deleting…"
 #: src/components/expense-form.tsx:152
 #: src/components/place-form.tsx:201
 #: src/lib/errors.ts:112
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:288
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:289
 msgid "Description"
 msgstr "Description"
 
@@ -1164,7 +1186,7 @@ msgstr "Description"
 #: src/components/user-support.tsx:146
 #: src/routes/_authenticated/admin/$admin_id.tsx:109
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:102
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:372
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:373
 msgid "Details"
 msgstr "Details"
 
@@ -1198,7 +1220,7 @@ msgstr "Draft"
 msgid "Draft saved."
 msgstr "Draft saved."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:197
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:198
 msgid "Due"
 msgstr "Due"
 
@@ -1207,13 +1229,13 @@ msgid "due {due}"
 msgstr "due {due}"
 
 #: src/components/ticket-parts.tsx:90
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:276
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:277
 msgid "Due {due}"
 msgstr "Due {due}"
 
 #: src/lib/errors.ts:119
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:503
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:633
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:505
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:636
 msgid "Due date"
 msgstr "Due date"
 
@@ -1312,7 +1334,7 @@ msgid "Enter a whole number from 1 to 365."
 msgstr "Enter a whole number from 1 to 365."
 
 #: src/components/place-form.tsx:137
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:417
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:419
 msgid "Enter an amount of 0 or more, or leave it empty."
 msgstr "Enter an amount of 0 or more, or leave it empty."
 
@@ -1384,8 +1406,8 @@ msgid "Enter your password"
 msgstr "Enter your password"
 
 #: src/lib/errors.ts:124
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:199
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:482
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:200
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:484
 msgid "Estimated cost"
 msgstr "Estimated cost"
 
@@ -1532,16 +1554,16 @@ msgstr "Guest checked in."
 msgid "Guest checked out."
 msgstr "Guest checked out."
 
-#: src/components/booking-form.tsx:297
+#: src/components/booking-form.tsx:303
 msgid "Guest email"
 msgstr "Guest email"
 
-#: src/components/booking-form.tsx:262
+#: src/components/booking-form.tsx:268
 #: src/lib/errors.ts:77
 msgid "Guest name"
 msgstr "Guest name"
 
-#: src/components/booking-form.tsx:277
+#: src/components/booking-form.tsx:283
 msgid "Guest phone"
 msgstr "Guest phone"
 
@@ -1583,18 +1605,18 @@ msgstr "Home"
 msgid "If the email is registered with us, a message will arrive within minutes."
 msgstr "If the email is registered with us, a message will arrive within minutes."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:526
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:529
 msgid "If you reject, we will ask for a reason and send it to {reporter}."
 msgstr "If you reject, we will ask for a reason and send it to {reporter}."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:528
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:531
 msgid "If you reject, we will ask for a reason and send it to the reporter."
 msgstr "If you reject, we will ask for a reason and send it to the reporter."
 
-#: src/components/booking-form.tsx:332
+#: src/components/booking-form.tsx:338
 #: src/components/expense-form.tsx:138
 #: src/components/place-form.tsx:282
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:488
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:490
 #: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:128
 msgid "In Saudi riyals."
 msgstr "In Saudi riyals."
@@ -1680,7 +1702,7 @@ msgid "Leaves {0}."
 msgstr "Leaves {0}."
 
 #. placeholder {0}: money(remaining, place.currency, { maximumFractionDigits: 0 })
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:486
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:488
 msgid "Left in this place’s budget this month: {0}"
 msgstr "Left in this place’s budget this month: {0}"
 
@@ -1742,14 +1764,14 @@ msgstr "Maintenance reminder"
 msgid "Maintenance spending in {month}"
 msgstr "Maintenance spending in {month}"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:134
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:217
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:135
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:218
 msgid "Maintenance ticket"
 msgstr "Maintenance ticket"
 
 #: src/routes/_authenticated/place/$place_id.tsx:259
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:135
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:221
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:136
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:222
 #: src/routes/_authenticated/tickets.tsx:116
 msgid "Maintenance tickets"
 msgstr "Maintenance tickets"
@@ -1779,13 +1801,13 @@ msgstr "Map to pick the location"
 msgid "Margin {0}%"
 msgstr "Margin {0}%"
 
-#: src/routes/_authenticated/notifications.tsx:462
+#: src/routes/_authenticated/notifications.tsx:464
 msgid "Mark as read"
 msgstr "Mark as read"
 
 #: src/components/asset-schedules.tsx:96
 #: src/components/asset-schedules.tsx:99
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:95
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:96
 msgid "Me"
 msgstr "Me"
 
@@ -1841,8 +1863,8 @@ msgid "My requests"
 msgstr "My requests"
 
 #: src/lib/nav.tsx:161
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:135
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:222
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:136
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:223
 #: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:99
 #: src/routes/_authenticated/tickets.tsx:225
 msgid "My tasks"
@@ -1890,7 +1912,7 @@ msgstr "Next"
 msgid "Next due: <0>{due}</0>"
 msgstr "Next due: <0>{due}</0>"
 
-#: src/components/booking-parts.tsx:87
+#: src/components/booking-parts.tsx:99
 #: src/routes/_authenticated/expenses.tsx:140
 msgid "Next month"
 msgstr "Next month"
@@ -1947,10 +1969,6 @@ msgstr "No monthly budget is set."
 msgid "No notifications"
 msgstr "No notifications"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:623
-msgid "No one else can take this ticket at this place."
-msgstr "No one else can take this ticket at this place."
-
 #: src/components/admin-support.tsx:113
 msgid "No open requests"
 msgstr "No open requests"
@@ -1963,7 +1981,7 @@ msgstr "No pages yet"
 msgid "No places match"
 msgstr "No places match"
 
-#: src/routes/_authenticated/bookings.tsx:94
+#: src/routes/_authenticated/bookings.tsx:108
 #: src/routes/_authenticated/places.tsx:200
 msgid "No places yet"
 msgstr "No places yet"
@@ -1977,7 +1995,7 @@ msgid "No resolved requests yet"
 msgstr "No resolved requests yet"
 
 #: src/components/report-form.tsx:164
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:206
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:207
 msgid "No specific asset"
 msgstr "No specific asset"
 
@@ -2021,7 +2039,7 @@ msgstr "Not now"
 msgid "Not ready for check-in yet."
 msgstr "Not ready for check-in yet."
 
-#: src/components/booking-form.tsx:350
+#: src/components/booking-form.tsx:356
 #: src/routes/_authenticated/booking/$booking_id.tsx:170
 msgid "Notes"
 msgstr "Notes"
@@ -2044,7 +2062,7 @@ msgstr "Notifications"
 msgid "Notifications, {count} unread"
 msgstr "Notifications, {count} unread"
 
-#: src/components/booking-form.tsx:314
+#: src/components/booking-form.tsx:320
 msgid "Number of guests"
 msgstr "Number of guests"
 
@@ -2168,10 +2186,20 @@ msgstr "Pending verification"
 msgid "Period"
 msgstr "Period"
 
+#: src/components/booking-parts.tsx:150
+msgid "Periodic"
+msgstr "Periodic"
+
 #: src/components/asset-schedules.tsx:125
+#: src/components/booking-parts.tsx:178
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:137
 msgid "Periodic maintenance"
 msgstr "Periodic maintenance"
+
+#. placeholder {0}: ticket.description
+#: src/components/booking-parts.tsx:144
+msgid "Periodic maintenance: {0}"
+msgstr "Periodic maintenance: {0}"
 
 #: src/routes/_authenticated/profile.tsx:127
 msgid "Personal information"
@@ -2194,7 +2222,7 @@ msgstr "Photo {0}"
 msgid "Photo after repair"
 msgstr "Photo after repair"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:327
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:328
 msgid "Photo after repair {n}"
 msgstr "Photo after repair {n}"
 
@@ -2215,26 +2243,26 @@ msgstr "Photos"
 msgid "Photos after repair"
 msgstr "Photos after repair"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:325
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:326
 msgid "Photos after the repair ({afterCount})"
 msgstr "Photos after the repair ({afterCount})"
 
 #. placeholder {0}: date(conflict.check_out_date, { day: "numeric", month: "long", })
-#: src/components/booking-form.tsx:183
+#: src/components/booking-form.tsx:189
 msgid "Pick an arrival date on or after {0}. The next stay can start on the same day as a check-out."
 msgstr "Pick an arrival date on or after {0}. The next stay can start on the same day as a check-out."
 
 #: src/components/asset-form.tsx:122
-#: src/components/booking-form.tsx:196
+#: src/components/booking-form.tsx:202
 #: src/components/expense-form.tsx:103
 #: src/components/report-form.tsx:128
-#: src/routes/_authenticated/bookings.tsx:107
+#: src/routes/_authenticated/bookings.tsx:121
 #: src/routes/_authenticated/expenses.tsx:177
 #: src/routes/_authenticated/place/$place_id.tsx:147
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:69
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:112
 #: src/routes/_authenticated/place/edit/$place_id.tsx:37
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:204
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:205
 #: src/routes/_authenticated/tickets.tsx:134
 msgid "Place"
 msgstr "Place"
@@ -2280,12 +2308,12 @@ msgstr "Places assigned to you."
 msgid "Places in other currencies are not added to these totals: {0} profit."
 msgstr "Places in other currencies are not added to these totals: {0} profit."
 
-#: src/routes/_authenticated/bookings.tsx:99
+#: src/routes/_authenticated/bookings.tsx:113
 #: src/routes/_authenticated/places.tsx:205
 msgid "Places your manager assigns you to show here."
 msgstr "Places your manager assigns you to show here."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:190
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:191
 msgid "Preventive"
 msgstr "Preventive"
 
@@ -2295,7 +2323,7 @@ msgstr "Preventive"
 msgid "Previous"
 msgstr "Previous"
 
-#: src/components/booking-parts.tsx:76
+#: src/components/booking-parts.tsx:88
 #: src/routes/_authenticated/expenses.tsx:132
 msgid "Previous month"
 msgstr "Previous month"
@@ -2303,7 +2331,7 @@ msgstr "Previous month"
 #: src/components/report-form.tsx:207
 #: src/components/report-form.tsx:210
 #: src/lib/errors.ts:114
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:185
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:186
 msgid "Priority"
 msgstr "Priority"
 
@@ -2355,7 +2383,7 @@ msgid "Reactivating…"
 msgstr "Reactivating…"
 
 #: src/routes/_authenticated/notifications.tsx:184
-#: src/routes/_authenticated/notifications.tsx:474
+#: src/routes/_authenticated/notifications.tsx:476
 msgid "Read"
 msgstr "Read"
 
@@ -2367,15 +2395,10 @@ msgstr "Reason"
 msgid "Reason for cancelling"
 msgstr "Reason for cancelling"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:305
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:548
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:306
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:551
 msgid "Reason for rejection"
 msgstr "Reason for rejection"
-
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:616
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:643
-msgid "Reassign"
-msgstr "Reassign"
 
 #: src/components/expense-form.tsx:157
 msgid "Receipt"
@@ -2390,13 +2413,13 @@ msgstr "Receipt photo"
 msgid "Refresh"
 msgstr "Refresh"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:469
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:471
 msgid "Reject"
 msgstr "Reject"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:469
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:543
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:565
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:471
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:546
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:568
 msgid "Reject ticket"
 msgstr "Reject ticket"
 
@@ -2405,7 +2428,7 @@ msgstr "Reject ticket"
 msgid "Rejected"
 msgstr "Rejected"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:170
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:171
 msgid "rejected the ticket."
 msgstr "rejected the ticket."
 
@@ -2426,6 +2449,19 @@ msgstr "Remove “{0}”?"
 #: src/components/asset-manage.tsx:95
 msgid "Remove asset"
 msgstr "Remove asset"
+
+#: src/components/booking-parts.tsx:150
+msgid "Repair"
+msgstr "Repair"
+
+#: src/components/booking-parts.tsx:177
+msgid "Repair (no bookings that day)"
+msgstr "Repair (no bookings that day)"
+
+#. placeholder {0}: ticket.description
+#: src/components/booking-parts.tsx:144
+msgid "Repair: {0}"
+msgstr "Repair: {0}"
 
 #: src/lib/errors.ts:145
 msgid "Repeat every"
@@ -2454,7 +2490,7 @@ msgstr "Report damage"
 msgid "Report damage in this place"
 msgstr "Report damage in this place"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:209
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:210
 msgid "Reported by"
 msgstr "Reported by"
 
@@ -2500,7 +2536,7 @@ msgstr "Resolved"
 msgid "Rest house"
 msgstr "Rest house"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:476
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:478
 msgid "Review"
 msgstr "Review"
 
@@ -2524,6 +2560,7 @@ msgid "Saudi mobile starting with 5"
 msgstr "Saudi mobile starting with 5"
 
 #: src/components/form.tsx:141
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:647
 msgid "Save"
 msgstr "Save"
 
@@ -2531,7 +2568,7 @@ msgstr "Save"
 msgid "Save asset"
 msgstr "Save asset"
 
-#: src/components/booking-form.tsx:154
+#: src/components/booking-form.tsx:160
 msgid "Save booking"
 msgstr "Save booking"
 
@@ -2563,14 +2600,14 @@ msgstr "Save place"
 
 #: src/components/asset-form.tsx:146
 #: src/components/asset-schedules.tsx:347
-#: src/components/booking-form.tsx:154
+#: src/components/booking-form.tsx:160
 #: src/components/expense-form.tsx:94
 #: src/components/place-bookings.tsx:608
 #: src/components/place-form.tsx:327
 #: src/components/worker-form.tsx:230
 #: src/routes/_authenticated/admin/$admin_id.tsx:132
 #: src/routes/_authenticated/profile.tsx:227
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:643
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:647
 #: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:90
 #: src/routes/reset-password.tsx:109
 msgid "Saving…"
@@ -2696,7 +2733,7 @@ msgstr "Slug"
 msgid "Some fields are not valid."
 msgstr "Some fields are not valid."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:229
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:230
 msgid "Someone else acted on it a moment ago. We reloaded it so you see the latest status."
 msgstr "Someone else acted on it a moment ago. We reloaded it so you see the latest status."
 
@@ -2713,7 +2750,7 @@ msgstr "Something went wrong. Try again."
 #: src/routes/_authenticated/place/$place_id.tsx:545
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:109
 #: src/routes/_authenticated/profile.tsx:187
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:184
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:185
 msgid "Status"
 msgstr "Status"
 
@@ -2726,7 +2763,7 @@ msgstr "Stay"
 msgid "Stay updated with your latest activity and announcements."
 msgstr "Stay updated with your latest activity and announcements."
 
-#: src/components/booking-parts.tsx:145
+#: src/components/booking-parts.tsx:175
 #: src/components/place-shared.tsx:148
 msgid "Staying"
 msgstr "Staying"
@@ -2783,6 +2820,14 @@ msgstr "Text in English"
 #: src/lib/errors.ts:185
 msgid "That place name is already taken."
 msgstr "That place name is already taken."
+
+#: src/components/repair-day.tsx:62
+msgid "The assignee gets a notice with the guest’s phone number to contact them."
+msgstr "The assignee gets a notice with the guest’s phone number to contact them."
+
+#: src/components/repair-day.tsx:55
+msgid "The booking on this day will be cancelled"
+msgstr "The booking on this day will be cancelled"
 
 #: src/components/location-permission.tsx:54
 msgid "The browser asks for permission after you tap the button. You can change it later in the browser settings."
@@ -2883,7 +2928,7 @@ msgstr "The place is ready for arrival."
 msgid "The purchase date cannot be in the future."
 msgstr "The purchase date cannot be in the future."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:228
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:229
 msgid "The ticket status changed."
 msgstr "The ticket status changed."
 
@@ -2999,11 +3044,11 @@ msgstr "This place has no open tickets."
 msgid "This slug is already used in this language."
 msgstr "This slug is already used in this language."
 
-#: src/components/booking-form.tsx:245
+#: src/components/booking-form.tsx:251
 msgid "This stay is over, so it is saved as checked out."
 msgstr "This stay is over, so it is saved as checked out."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:431
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:433
 msgid "Ticket approved and sent to {name}."
 msgstr "Ticket approved and sent to {name}."
 
@@ -3015,11 +3060,11 @@ msgstr "Ticket assigned"
 msgid "Ticket completed"
 msgstr "Ticket completed"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:335
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:336
 msgid "Ticket history"
 msgstr "Ticket history"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:604
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:608
 msgid "Ticket reassigned to {name}."
 msgstr "Ticket reassigned to {name}."
 
@@ -3027,7 +3072,7 @@ msgstr "Ticket reassigned to {name}."
 msgid "Ticket rejected"
 msgstr "Ticket rejected"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:452
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:454
 msgid "Ticket rejected."
 msgstr "Ticket rejected."
 
@@ -3088,7 +3133,7 @@ msgstr "Too many attempts."
 msgid "Too many attempts. Wait a little and try again."
 msgstr "Too many attempts. Wait a little and try again."
 
-#: src/components/booking-form.tsx:329
+#: src/components/booking-form.tsx:335
 #: src/components/place-bookings.tsx:471
 #: src/components/place-bookings.tsx:562
 #: src/lib/errors.ts:136
@@ -3104,7 +3149,7 @@ msgstr "Try again"
 #: src/lib/errors.ts:95
 #: src/routes/_authenticated/place/$place_id.tsx:546
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:110
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:189
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:190
 msgid "Type"
 msgstr "Type"
 
@@ -3139,7 +3184,7 @@ msgid "Unpublish"
 msgstr "Unpublish"
 
 #: src/routes/_authenticated/notifications.tsx:183
-#: src/routes/_authenticated/notifications.tsx:410
+#: src/routes/_authenticated/notifications.tsx:412
 msgid "Unread"
 msgstr "Unread"
 
@@ -3151,7 +3196,7 @@ msgstr "Unread notifications"
 msgid "Until the worker finishes setting up the account"
 msgstr "Until the worker finishes setting up the account"
 
-#: src/routes/_authenticated/notifications.tsx:460
+#: src/routes/_authenticated/notifications.tsx:462
 msgid "Updating..."
 msgstr "Updating..."
 
@@ -3236,7 +3281,7 @@ msgid "Wait a little, then try again."
 msgstr "Wait a little, then try again."
 
 #: src/components/ticket-parts.tsx:89
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:276
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:277
 msgid "Was due {due}"
 msgstr "Was due {due}"
 
@@ -3313,11 +3358,11 @@ msgstr "We will send a verification code to your email after you register."
 msgid "We will send an invitation to the worker's email."
 msgstr "We will send an invitation to the worker's email."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:552
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:555
 msgid "We will send the reason to {reporter} with a notification."
 msgstr "We will send the reason to {reporter} with a notification."
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:554
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:557
 msgid "We will send the reason to the reporter with a notification."
 msgstr "We will send the reason to the reporter with a notification."
 
@@ -3349,12 +3394,12 @@ msgstr "When a worker reports damage, the ticket will appear here."
 msgid "When to create the ticket"
 msgstr "When to create the ticket"
 
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:338
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:339
 msgid "Who did what to this ticket and when, newest first."
 msgstr "Who did what to this ticket and when, newest first."
 
 #: src/lib/nav.tsx:213
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:622
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:626
 #: src/routes/_authenticated/worker/$worker_id.tsx:37
 msgid "Worker"
 msgstr "Worker"
@@ -3396,7 +3441,7 @@ msgid "Write the details."
 msgstr "Write the details."
 
 #: src/routes/_authenticated/booking/$booking_id.tsx:82
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:442
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:444
 msgid "Write the reason."
 msgstr "Write the reason."
 

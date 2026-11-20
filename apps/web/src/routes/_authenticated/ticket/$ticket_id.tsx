@@ -33,6 +33,7 @@ import { PhotoTiles } from "@/components/photo-picker"
 import { PriorityText } from "@/components/home-parts"
 import { LoadError, Notice } from "@/components/states"
 import { TicketChip } from "@/components/ticket-parts"
+import { RepairDayNotice, useRepairDay } from "@/components/repair-day"
 import { toast } from "@/components/toast"
 
 export const Route = createFileRoute("/_authenticated/ticket/$ticket_id")({
@@ -409,6 +410,7 @@ function ReviewPanel({
   const [reasonError, setReasonError] = useState("")
   const chosen = assignee || people[0]?.id || ""
   const prefix = phone ? "m-" : ""
+  const repair = useRepairDay(accessToken, ticket, place.id, due)
 
   async function approve(event?: FormEvent) {
     event?.preventDefault()
@@ -460,7 +462,7 @@ function ReviewPanel({
   }
 
   const approveButton = (
-    <Button type="submit" form={`${prefix}review-form`} disabled={busy} className={phone ? undefined : "w-full"}>
+    <Button type="submit" form={`${prefix}review-form`} disabled={busy || Boolean(repair.staying)} className={phone ? undefined : "w-full"}>
       <Trans>Approve ticket</Trans>
     </Button>
   )
@@ -511,6 +513,7 @@ function ReviewPanel({
             onChange={(e) => setDue(e.target.value)}
           />
         </Field>
+        <RepairDayNotice {...repair} />
         {error && (
           <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">
             <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
@@ -586,12 +589,13 @@ function ReassignPanel({
   onConflict: (err: unknown) => Promise<boolean>
 }) {
   const { accessToken } = useAuth()
-  const others = people.filter((person) => person.id !== ticket.assignee_id)
+  // The current assignee stays on the list, so the date can move alone.
   const [assignee, setAssignee] = useState("")
   const [due, setDue] = useState(ticket.due_date ?? "")
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
-  const chosen = assignee || others[0]?.id || ""
+  const chosen = assignee || ticket.assignee_id || people[0]?.id || ""
+  const repair = useRepairDay(accessToken, ticket, place.id, due)
 
   async function submit(event: FormEvent) {
     event.preventDefault()
@@ -613,17 +617,16 @@ function ReassignPanel({
   return (
     <Panel labelledBy="reassign-title" className="gap-4">
       <PanelTitle id="reassign-title">
-        <Trans>Reassign</Trans>
+        <Trans>Assignee and due date</Trans>
       </PanelTitle>
       <form onSubmit={submit} noValidate className="flex flex-col gap-4">
         <Field
           id="reassign-worker"
           required
           label={<Trans>Worker</Trans>}
-          hint={others.length === 0 ? <Trans>No one else can take this ticket at this place.</Trans> : undefined}
         >
-          <NativeSelect id="reassign-worker" value={chosen} onChange={setAssignee} disabled={others.length === 0}>
-            {others.map((person) => (
+          <NativeSelect id="reassign-worker" value={chosen} onChange={setAssignee}>
+            {people.map((person) => (
               <option key={person.id} value={person.id}>
                 {person.name}
               </option>
@@ -633,14 +636,15 @@ function ReassignPanel({
         <Field id="reassign-due" required label={<Trans>Due date</Trans>}>
           <Input id="reassign-due" type="date" dir="ltr" min={todayIn(place.timezone)} value={due} onChange={(e) => setDue(e.target.value)} />
         </Field>
+        <RepairDayNotice {...repair} />
         {error && (
           <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">
             <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />
             {error}
           </p>
         )}
-        <Button type="submit" variant="outline" className="w-full" disabled={busy || !chosen || !due}>
-          {busy ? <Trans>Saving…</Trans> : <Trans>Reassign</Trans>}
+        <Button type="submit" variant="outline" className="w-full" disabled={busy || !chosen || !due || Boolean(repair.staying)}>
+          {busy ? <Trans>Saving…</Trans> : <Trans>Save</Trans>}
         </Button>
       </form>
     </Panel>

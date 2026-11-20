@@ -6,6 +6,7 @@ import type {
 } from "@amlak/shared";
 import { auditLog } from "../audit.ts";
 import type { AuthUser } from "../auth/tokens.ts";
+import { clearPlaceForRepair } from "../bookings/repairs.ts";
 import { fromDbDate, toDbDate, todayIn } from "../dates.ts";
 import { prisma } from "../db.ts";
 import { AppError } from "../errors.ts";
@@ -27,7 +28,8 @@ import { toTicketWithPhotos } from "./present.ts";
 
 /**
  * The Manager approves a ticket that waits for review: they choose who does
- * the work and by when. The ticket's asset now needs maintenance.
+ * the work and by when. The ticket's asset now needs maintenance. A repair
+ * day clears the place: see clearPlaceForRepair.
  */
 export async function approveTicket(
 	manager: AuthUser,
@@ -42,6 +44,15 @@ export async function approveTicket(
 		});
 		await assertCanBeAssignee(tx, input.assignee_id, place, "assignee_id");
 		assertNotPast(input.due_date, place.timezone);
+		await clearPlaceForRepair(
+			tx,
+			manager,
+			ticket,
+			place,
+			input.due_date,
+			input.assignee_id,
+			ipAddress,
+		);
 
 		const approved = await moveTicket(tx, ticket, "PENDING_REVIEW", {
 			status: "APPROVED",
@@ -127,7 +138,8 @@ export async function rejectTicket(
 
 /**
  * The Manager gives an approved ticket a new assignee and due date. The
- * reminders start over for the new date.
+ * reminders start over for the new date, and the new repair day clears the
+ * place as on approval.
  */
 export async function reassignTicket(
 	manager: AuthUser,
@@ -142,6 +154,15 @@ export async function reassignTicket(
 		});
 		await assertCanBeAssignee(tx, input.assignee_id, place, "assignee_id");
 		assertNotPast(input.due_date, place.timezone);
+		await clearPlaceForRepair(
+			tx,
+			manager,
+			ticket,
+			place,
+			input.due_date,
+			input.assignee_id,
+			ipAddress,
+		);
 
 		const changed = await moveTicket(tx, ticket, "APPROVED", {
 			assignee_id: input.assignee_id,

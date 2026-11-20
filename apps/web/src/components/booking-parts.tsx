@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { plural, t } from "@lingui/core/macro"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Wrench } from "lucide-react"
+import type { Ticket } from "@amlak/shared"
 import type { Booking } from "@/lib/api"
 import { useFormat } from "@/lib/format"
 import { Panel } from "@/components/panel"
@@ -38,20 +39,31 @@ const STAY_TONE: Record<string, string> = {
   CHECKED_OUT: "bg-muted-foreground/50 desk:border-border desk:bg-secondary desk:text-muted-foreground",
 }
 
+/** The colours of a repair in the calendar. */
+const REPAIR_TONE: Record<string, string> = {
+  CORRECTIVE: "border-warn bg-warn text-white",
+  PREVENTIVE: "border-warn bg-warn-50 text-warn-900",
+}
+
 /**
  * A month of a place's bookings. Each night of a stay has a bar in the
  * booking's status colour, with the guest's name where the stay starts and at
  * the start of each week (names on the desktop; a thin bar on the phone). A
- * day of a stay opens its booking. The key under the month names the colours.
+ * day of a stay opens its booking. Repairs show on their day, corrective and
+ * preventive in two colours, and open their ticket. The key under the month
+ * names the colours.
  */
 export function MonthCalendar({
   month,
   bookings,
+  repairs = [],
   today,
   onMonth,
 }: {
   month: Date
   bookings: Booking[]
+  /** Tickets with a due date this month. */
+  repairs?: Ticket[]
   today: string
   onMonth: (month: Date) => void
 }) {
@@ -121,6 +133,24 @@ export function MonthCalendar({
               >
                 {i + 1}
               </span>
+              {repairs
+                .filter((ticket) => ticket.due_date === day)
+                .map((ticket) => (
+                  <Link
+                    key={ticket.id}
+                    to="/ticket/$ticket_id"
+                    params={{ ticket_id: ticket.id }}
+                    title={ticket.description}
+                    aria-label={ticket.ticket_type === "PREVENTIVE" ? t`Periodic maintenance: ${ticket.description}` : t`Repair: ${ticket.description}`}
+                    // Above the stay's link, which covers the whole day.
+                    className={`relative z-10 box-border inline-flex min-w-0 items-center gap-1 rounded-[3px] border p-0.5 text-xs font-semibold no-underline desk:h-6 desk:px-1.5 ${REPAIR_TONE[ticket.ticket_type] ?? REPAIR_TONE.CORRECTIVE} ${ticket.status === "COMPLETED" ? "opacity-55" : ""}`}
+                  >
+                    <Wrench aria-hidden="true" className="size-3.5 flex-none" strokeWidth={2} />
+                    <span aria-hidden="true" className="hidden truncate desk:inline">
+                      {ticket.ticket_type === "PREVENTIVE" ? t`Periodic` : t`Repair`}
+                    </span>
+                  </Link>
+                ))}
               {booking && (
                 <Link
                   to="/booking/$booking_id"
@@ -144,6 +174,8 @@ export function MonthCalendar({
             ["CONFIRMED", "bg-info", <Trans key="c">Confirmed</Trans>],
             ["CHECKED_IN", "bg-good", <Trans key="s">Staying</Trans>],
             ["CHECKED_OUT", "bg-muted-foreground/50", <Trans key="o">Checked out</Trans>],
+            ["CORRECTIVE", "bg-warn", <Trans key="r">Repair (no bookings that day)</Trans>],
+            ["PREVENTIVE", "border border-warn bg-warn-50", <Trans key="p">Periodic maintenance</Trans>],
           ] as const
         ).map(([key, swatch, label]) => (
           <li key={key} className="inline-flex items-center gap-2">

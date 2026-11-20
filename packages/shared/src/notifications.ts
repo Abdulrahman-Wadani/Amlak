@@ -12,6 +12,7 @@ export const NOTIFICATION_TYPES = [
 	"MAINTENANCE_OVERDUE",
 	"SUPPORT_RESOLVED",
 	"ANNOUNCEMENT",
+	"BOOKING_CANCELLED",
 ] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 

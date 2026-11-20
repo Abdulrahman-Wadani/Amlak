@@ -133,7 +133,13 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
     } catch (err) {
       const other =
         err instanceof ApiError ? err.details.conflicting_booking_id : undefined
-      if (
+      const repairDay =
+        err instanceof ApiError ? err.details.due_date : undefined
+      if (err instanceof ApiError && err.code === "CONFLICT" && typeof repairDay === "string") {
+        // A repair is due on one of the nights.
+        const day = date(repairDay, { day: "numeric", month: "long" })
+        setErrors({ in: t`A repair is due at this place on ${day}. Choose other dates.` })
+      } else if (
         err instanceof ApiError &&
         err.code === "CONFLICT" &&
         typeof other === "string"

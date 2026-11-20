@@ -340,6 +340,8 @@ function NotificationCard({
         return <Trans>Maintenance overdue</Trans>
       case "SUPPORT_RESOLVED":
         return <Trans>Support ticket resolved</Trans>
+      case "BOOKING_CANCELLED":
+        return <Trans>Booking cancelled</Trans>
       default:
         return type.replaceAll("_", " ")
     }
