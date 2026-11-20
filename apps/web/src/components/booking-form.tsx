@@ -8,10 +8,8 @@ import {
   createBooking,
   getBooking,
   getPlaces,
-  listAllBookingsForPlace,
   type Booking,
 } from "@/lib/api"
-import { todayIn } from "@/lib/dates"
 import { ApiError, errorMessage } from "@/lib/errors"
 import { LIMITS, tooLarge, tooLong } from "@/lib/limits"
 import { useFormat } from "@/lib/format"
@@ -20,18 +18,16 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { FormCancel, FormPopup, useFormPopup } from "@/components/form-popup"
 import {
-  Bullets,
   Field,
   FieldRow,
   FormButtons,
   NativeSelect,
   Panel,
-  PanelTitle,
   PhoneActionBar,
   TwoColumns,
 } from "@/components/panel"
 import { Notice } from "@/components/states"
-import { MonthBookings, isoDay, useStayText } from "@/components/booking-parts"
+import { useStayText } from "@/components/booking-parts"
 import { isE164, toE164 } from "@/components/worker-form"
 
 type FieldKey =
@@ -71,7 +67,6 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
   const [formError, setFormError] = useState("")
   const [conflict, setConflict] = useState<Booking | null>(null)
   const [saving, setSaving] = useState(false)
-  const [month, setMonth] = useState<Booking[] | null>(null)
 
   useEffect(() => {
     if (!accessToken) return
@@ -90,31 +85,6 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
   }, [accessToken, search.place_id])
 
   const place = places?.find((p) => p.id === placeId)
-  // The month of the chosen arrival, or this month.
-  const monthKey = (
-    checkIn || (place ? todayIn(place.timezone) : isoDay(new Date()))
-  ).slice(0, 7)
-
-  useEffect(() => {
-    if (!accessToken || !placeId) return
-    let alive = true
-    const [y, m] = monthKey.split("-").map(Number)
-    listAllBookingsForPlace(accessToken, placeId, {
-      from: `${monthKey}-01`,
-      to: isoDay(new Date(y, m, 0)),
-    })
-      .then(
-        (list) =>
-          alive &&
-          setMonth(
-            list.sort((a, b) => a.check_in_date.localeCompare(b.check_in_date))
-          )
-      )
-      .catch(() => alive && setMonth([]))
-    return () => {
-      alive = false
-    }
-  }, [accessToken, placeId, monthKey])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -221,6 +191,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
             )}
             <Field
               id="b-place"
+              required
               label={<Trans>Place</Trans>}
               error={errors.place}
             >
@@ -243,6 +214,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
             <div className="grid grid-cols-2 gap-3 desk:gap-4">
               <Field
                 id="b-in"
+                required
                 label={<Trans>Check-in date</Trans>}
                 error={
                   errors.in && (
@@ -267,6 +239,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
               </Field>
               <Field
                 id="b-out"
+                required
                 label={<Trans>Check-out date</Trans>}
                 error={errors.out}
               >
@@ -283,6 +256,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
             </div>
             <Field
               id="b-name"
+              required
               label={<Trans>Guest name</Trans>}
               error={errors.name}
             >
@@ -297,6 +271,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
             </Field>
             <Field
               id="b-phone"
+              required
               label={<Trans>Guest phone</Trans>}
               error={errors.phone}
             >
@@ -316,6 +291,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
             </Field>
             <Field
               id="b-email"
+              optional
               label={<Trans>Guest email</Trans>}
               error={errors.email}
             >
@@ -324,7 +300,6 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
                 type="email"
                 maxLength={LIMITS.email}
                 dir="ltr"
-                placeholder={t`Optional`}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 {...invalid("email", "b-email")}
@@ -333,6 +308,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
             <FieldRow>
               <Field
                 id="b-count"
+                required
                 label={<Trans>Number of guests</Trans>}
                 error={errors.count}
               >
@@ -347,6 +323,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
               </Field>
               <Field
                 id="b-price"
+                required
                 label={<Trans>Total price</Trans>}
                 hint={
                   place ? (
@@ -367,6 +344,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
             </FieldRow>
             <Field
               id="b-notes"
+              optional
               label={<Trans>Notes</Trans>}
               error={errors.notes}
             >
@@ -399,26 +377,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
           <PhoneActionBar>{save}</PhoneActionBar>
         </Panel>
       }
-      side={
-        <>
-          {placeId && month && month.length > 0 && <MonthBookings bookings={month} />}
-          <Panel>
-            <PanelTitle small>
-              <Trans>Before saving</Trans>
-            </PanelTitle>
-            <Bullets
-              items={[
-                <Trans key="1">
-                  Two bookings at the same place cannot overlap.
-                </Trans>,
-                <Trans key="2">
-                  The worker checks the guest in and out from the booking page.
-                </Trans>,
-              ]}
-            />
-          </Panel>
-        </>
-      }
+      side={null}
     />
   )
 }

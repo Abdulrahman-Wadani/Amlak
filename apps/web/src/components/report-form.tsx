@@ -1,35 +1,31 @@
 import { useEffect, useState, type FormEvent } from "react"
-import { Link } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import { Camera, CircleAlert, TriangleAlert, Wrench } from "lucide-react"
-import type { Asset, Place, Ticket } from "@amlak/shared"
+import { CircleAlert } from "lucide-react"
+import type { Asset, Place } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
 import {
   createTicket,
   getPlaceAssets,
   getPlaces,
-  listTickets,
   type TicketPriority,
 } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
 import { LIMITS, tooLong } from "@/lib/limits"
-import { useFormat } from "@/lib/format"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { FormCancel, FormPopup, useFormPopup } from "@/components/form-popup"
 import {
   Field,
+  FieldNeed,
   FormButtons,
   NativeSelect,
   Panel,
-  PanelTitle,
   PhoneActionBar,
   Segmented,
   TwoColumns,
 } from "@/components/panel"
 import { PhotoPicker } from "@/components/photo-picker"
-import { TicketChip } from "@/components/ticket-parts"
 
 type FieldKey = "place" | "description"
 
@@ -53,7 +49,6 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [formError, setFormError] = useState("")
   const [sending, setSending] = useState(false)
-  const [earlier, setEarlier] = useState<Ticket[] | null>(null)
 
   useEffect(() => {
     if (!accessToken) return
@@ -74,15 +69,11 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
   useEffect(() => {
     setAssetId("")
     setAssets([])
-    setEarlier(null)
     if (!accessToken || !placeId) return
     let alive = true
     getPlaceAssets(accessToken, placeId)
       .then((list) => alive && setAssets(list))
       .catch(() => {})
-    listTickets(accessToken, { place_id: placeId }, 1, 3)
-      .then((result) => alive && setEarlier(result.data))
-      .catch(() => alive && setEarlier([]))
     return () => {
       alive = false
     }
@@ -133,6 +124,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
           >
             <Field
               id="r-place"
+              required
               label={<Trans>Place</Trans>}
               error={errors.place}
             >
@@ -155,6 +147,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
 
             <Field
               id="r-asset"
+              optional
               label={<Trans>Asset</Trans>}
               hint={
                 <Trans>
@@ -179,7 +172,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
 
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold">
-                <Trans>Photos</Trans>
+                <Trans>Photos</Trans><FieldNeed optional />
               </span>
               <PhotoPicker
                 photos={photos}
@@ -191,6 +184,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
 
             <Field
               id="r-desc"
+              required
               label={<Trans>What happened?</Trans>}
               error={errors.description}
             >
@@ -210,7 +204,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
 
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold">
-                <Trans>Priority</Trans>
+                <Trans>Priority</Trans><FieldNeed required />
               </span>
               <Segmented
                 label={t`Priority`}
@@ -245,86 +239,8 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
           <PhoneActionBar>{send}</PhoneActionBar>
         </Panel>
       }
-      side={
-        <>
-          <Panel>
-            <PanelTitle small>
-              <Trans>For a clearer report</Trans>
-            </PanelTitle>
-            <Tip icon={<Camera />} tone="info">
-              <Trans>
-                One close photo of the damage, and one from further back that
-                shows where it is.
-              </Trans>
-            </Tip>
-            <Tip icon={<Wrench />} tone="info">
-              <Trans>
-                Pick the asset if you know it, so the report is linked to it.
-              </Trans>
-            </Tip>
-            <Tip icon={<TriangleAlert />} tone="warn">
-              <Trans>
-                “Urgent” only when a guest or the place is affected right now.
-              </Trans>
-            </Tip>
-          </Panel>
-          {placeId && earlier && earlier.length > 0 && (
-            <EarlierReports tickets={earlier} />
-          )}
-        </>
-      }
+      side={null}
     />
-  )
-}
-
-function Tip({
-  icon,
-  tone,
-  children,
-}: {
-  icon: React.ReactNode
-  tone: "info" | "warn"
-  children: React.ReactNode
-}) {
-  return (
-    <div className="flex items-start gap-2.5 text-sm leading-[1.6]">
-      <span
-        aria-hidden="true"
-        className={`inline-flex size-8 flex-none items-center justify-center [&_svg]:size-4 [&_svg]:stroke-[1.8] ${tone === "warn" ? "bg-warn-50 text-warn" : "bg-info-50 text-info"}`}
-      >
-        {icon}
-      </span>
-      <span>{children}</span>
-    </div>
-  )
-}
-
-function EarlierReports({ tickets }: { tickets: Ticket[] }) {
-  const { relative } = useFormat()
-  return (
-    <Panel>
-      <PanelTitle small>
-        <Trans>Earlier reports at this place</Trans>
-      </PanelTitle>
-      <div className="flex flex-col gap-3">
-        {tickets.map((ticket) => (
-          <Link
-            key={ticket.id}
-            to="/ticket/$ticket_id"
-            params={{ ticket_id: ticket.id }}
-            className="am-lift box-border flex flex-col gap-2 border border-border bg-card p-3.5 text-foreground no-underline"
-          >
-            <span dir="auto" className="truncate font-semibold">
-              {ticket.description}
-            </span>
-            <span className="flex flex-wrap items-center justify-between gap-2 text-[13px] text-muted-foreground">
-              {relative(ticket.created_at)}
-              <TicketChip ticket={ticket} />
-            </span>
-          </Link>
-        ))}
-      </div>
-    </Panel>
   )
 }
 

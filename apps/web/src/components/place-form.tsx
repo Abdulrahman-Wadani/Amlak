@@ -15,15 +15,13 @@ import { cn } from "cn"
 import LocationPicker, { type LocationData } from "@/components/location-picker"
 import { LocationPermission } from "@/components/location-permission"
 import { Notice } from "@/components/states"
-import { StatusBadge, TypeLabel } from "@/components/place-shared"
 import {
-  Bullets,
   Field,
+  FieldNeed,
   FieldRow,
   FormButtons,
   NativeSelect,
   Panel,
-  PanelTitle,
   TwoColumns,
 } from "@/components/panel"
 
@@ -175,7 +173,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
       main={
         <Panel pad="lg">
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-            <Field id="pname" label={<Trans>Place name</Trans>} error={errors.name}>
+            <Field id="pname" required label={<Trans>Place name</Trans>} error={errors.name}>
               <Input
                 id="pname"
                 maxLength={LIMITS.name}
@@ -186,7 +184,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
               />
             </Field>
 
-            <Field id="ptype" label={<Trans>Place type</Trans>} error={errors.type}>
+            <Field id="ptype" required label={<Trans>Place type</Trans>} error={errors.type}>
               <NativeSelect id="ptype" value={type} onChange={setType} invalid={Boolean(errors.type)}>
                 <option value="" disabled>
                   {t`Choose the place type`}
@@ -199,7 +197,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
               </NativeSelect>
             </Field>
 
-            <Field id="pdesc" label={<Trans>Description</Trans>} error={errors.description}>
+            <Field id="pdesc" optional label={<Trans>Description</Trans>} error={errors.description}>
               <Textarea
                 id="pdesc"
                 rows={3}
@@ -212,7 +210,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
             </Field>
 
             <FieldRow>
-              <Field id="pcity" label={<Trans>City</Trans>} error={errors.city}>
+              <Field id="pcity" required label={<Trans>City</Trans>} error={errors.city}>
                 <Input
                   id="pcity"
                   maxLength={LIMITS.short}
@@ -222,7 +220,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
                   onChange={(e) => setCity(e.target.value)}
                 />
               </Field>
-              <Field id="paddr" label={<Trans>Address</Trans>} error={errors.address}>
+              <Field id="paddr" optional label={<Trans>Address</Trans>} error={errors.address}>
                 <Input
                   id="paddr"
                   maxLength={LIMITS.address}
@@ -236,7 +234,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
 
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold">
-                <Trans>Location on the map</Trans>
+                <Trans>Location on the map</Trans><FieldNeed optional />
               </span>
               <LocationPicker
                 onLocationSelect={handleLocation}
@@ -278,8 +276,9 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
 
             <Field
               id="pbudget"
+              optional
               label={<Trans>Monthly maintenance budget</Trans>}
-              hint={<Trans>Optional. In {currencyName("SAR")}.</Trans>}
+              hint={<Trans>In {currencyName("SAR")}.</Trans>}
               error={errors.budget}
             >
               <Input
@@ -295,7 +294,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
             </Field>
 
             {editing && (
-              <Field id="pstatus" label={<Trans>Status</Trans>}>
+              <Field id="pstatus" required label={<Trans>Status</Trans>}>
                 <NativeSelect id="pstatus" value={status} onChange={(value) => setStatus(value as PlaceStatus)}>
                   {(["ACTIVE", "UNDER_MAINTENANCE", "INACTIVE"] as const).map((value) => (
                     <option key={value} value={value}>
@@ -332,60 +331,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
           <LocationPermission open={asking} onAllow={locate} onClose={() => setAsking(false)} />
         </Panel>
       }
-      side={
-        <>
-          <Panel>
-            <PanelTitle small>
-              <Trans>How it will look in your list</Trans>
-            </PanelTitle>
-            <div className="box-border flex min-w-0 flex-col gap-4 border border-border bg-card p-5 shadow-sm">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex min-w-0 flex-col gap-1">
-                  <span className="text-lg leading-[1.4] font-bold [overflow-wrap:anywhere]">
-                    {name.trim() || <Trans>Place name</Trans>}
-                  </span>
-                  <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <MapPin aria-hidden="true" className="size-4 flex-none" strokeWidth={1.8} />
-                    <span>
-                      {type ? <TypeLabel type={type} /> : <Trans>Place type</Trans>}
-                      {city.trim() && <>, {city.trim()}</>}
-                    </span>
-                  </span>
-                </div>
-                <StatusBadge status={status} />
-              </div>
-              {!editing && (
-                <div className="grid grid-cols-3 gap-3 border-t border-border pt-3.5">
-                  {(
-                    [
-                      ["assets", <Trans key="assets">Assets</Trans>],
-                      ["tickets", <Trans key="tickets">Open tickets</Trans>],
-                      ["workers", <Trans key="workers">Workers</Trans>],
-                    ] as const
-                  ).map(([key, label]) => (
-                      <div key={key} className="flex flex-col leading-[1.4]">
-                        <span className="text-[13px] text-muted-foreground">{label}</span>
-                        <span className="font-mono font-semibold tabular-nums">0</span>
-                      </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </Panel>
-          <Panel>
-            <PanelTitle small>
-              <Trans>Before saving</Trans>
-            </PanelTitle>
-            <Bullets
-              items={[
-                <Trans key="1">Amounts are in Saudi riyals.</Trans>,
-                <Trans key="2">You add assets and assign workers from the place page once it is saved.</Trans>,
-                <Trans key="3">The monthly budget is visible to you only; workers never see it.</Trans>,
-              ]}
-            />
-          </Panel>
-        </>
-      }
+      side={null}
     />
   )
 }

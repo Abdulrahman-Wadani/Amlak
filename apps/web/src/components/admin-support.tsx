@@ -140,7 +140,7 @@ export function AdminSupport() {
                   </p>
                 ) : (
                   <form onSubmit={resolve} noValidate className="flex flex-col gap-3">
-                    <Field id="reply" label={<Trans>Reply</Trans>} error={replyError}>
+                    <Field id="reply" required label={<Trans>Reply</Trans>} error={replyError}>
                       <Textarea id="reply" rows={4} dir="auto" maxLength={LIMITS.message} value={reply} aria-invalid={replyError ? true : undefined} onChange={(e) => setReply(e.target.value)} />
                     </Field>
                     {error && (

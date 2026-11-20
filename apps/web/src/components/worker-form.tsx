@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { WorkerStatusChip } from "@/components/place-shared"
 import { ConfirmDialog } from "@/components/states"
-import { Bullets, Field, FormButtons, Panel, PanelTitle, TwoColumns } from "@/components/panel"
+import { Field, FormButtons, Panel, PanelTitle, TwoColumns } from "@/components/panel"
 
 const PREFIX = "+966"
 
@@ -126,11 +126,12 @@ export function WorkerForm({
       main={
         <Panel pad="lg">
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-            <Field id="wn" label={<Trans>Full name</Trans>} error={errors.name}>
+            <Field id="wn" required label={<Trans>Full name</Trans>} error={errors.name}>
               <Input id="wn" autoComplete="off" maxLength={LIMITS.name} value={name} onChange={(e) => setName(e.target.value)} {...invalid("name", "wn")} />
             </Field>
             <Field
               id="we"
+              required={!editing}
               label={<Trans>Email</Trans>}
               error={errors.email}
               hint={editing ? <Trans>The email cannot be changed.</Trans> : undefined}
@@ -148,7 +149,7 @@ export function WorkerForm({
                 {...invalid("email", "we")}
               />
             </Field>
-            <Field id="wp" label={<Trans>Mobile number</Trans>} error={errors.phone}>
+            <Field id="wp" required label={<Trans>Mobile number</Trans>} error={errors.phone}>
               {editing ? (
                 <Input id="wp" type="tel" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} {...invalid("phone", "wp")} />
               ) : (
@@ -214,6 +215,7 @@ export function WorkerForm({
         </Panel>
       }
       side={
+        worker ? (
         <>
           <Panel>
             <PanelTitle small>
@@ -293,22 +295,9 @@ export function WorkerForm({
                 </ul>
               )}
             </Panel>
-          ) : (
-            <Panel>
-              <PanelTitle small>
-                <Trans>What a worker sees</Trans>
-              </PanelTitle>
-              <Bullets
-                items={[
-                  <Trans key="1">Only the places assigned to them and their assets.</Trans>,
-                  <Trans key="2">Bookings at those places, where they check guests in and out.</Trans>,
-                  <Trans key="3">Their tasks, their reports and the photos.</Trans>,
-                  <Trans key="4">No expenses and no financial reports.</Trans>,
-                ]}
-              />
-            </Panel>
-          )}
+          ) : null}
         </>
+        ) : null
       }
     />
   )

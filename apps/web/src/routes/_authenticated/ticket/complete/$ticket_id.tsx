@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "cn"
 import { Page } from "@/components/page"
-import { Field, FormButtons, Panel, PhoneActionBar, TwoColumns } from "@/components/panel"
+import { Field, FieldNeed, FormButtons, Panel, PhoneActionBar, TwoColumns } from "@/components/panel"
 import { PhotoPicker, PhotoTiles } from "@/components/photo-picker"
 import { LoadError } from "@/components/states"
 import { TicketChip } from "@/components/ticket-parts"
@@ -109,7 +109,7 @@ function CompleteTask() {
               <form id="complete-form" onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
                 <div className="flex flex-col gap-2">
                   <span className="text-sm font-semibold">
-                    <Trans>Photos after repair</Trans>
+                    <Trans>Photos after repair</Trans><FieldNeed required />
                   </span>
                   <PhotoPicker
                     photos={photos}
@@ -118,11 +118,12 @@ function CompleteTask() {
                     error={errors.photos}
                   />
                 </div>
-                <Field id="c-notes" label={<Trans>What did you fix?</Trans>} error={errors.notes}>
+                <Field id="c-notes" optional label={<Trans>What did you fix?</Trans>} error={errors.notes}>
                   <Textarea id="c-notes" rows={3} dir="auto" maxLength={LIMITS.longText} aria-invalid={errors.notes ? true : undefined} value={notes} onChange={(e) => setNotes(e.target.value)} />
                 </Field>
                 <Field
                   id="c-cost"
+                  required
                   label={<Trans>What the repair cost</Trans>}
                   hint={place ? <Trans>In {currencyName(place.currency)}.</Trans> : undefined}
                   error={errors.cost}

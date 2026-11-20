@@ -1,35 +1,23 @@
-import { useEffect, useState, type FormEvent } from "react"
+import { useState, type FormEvent } from "react"
 import { Link, useNavigate } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { CircleAlert } from "lucide-react"
 import { ASSET_STATUSES, type Asset, type AssetStatus, type Place } from "@amlak/shared"
-import { createAsset, getPlaceAssets, updateAsset } from "@/lib/api"
+import { createAsset, updateAsset } from "@/lib/api"
 import { todayIn } from "@/lib/dates"
 import { errorMessage } from "@/lib/errors"
 import { FormCancel, useFormPopup } from "@/components/form-popup"
 import { LIMITS, tooLong } from "@/lib/limits"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "cn"
 import { assetStatusLabel } from "@/components/asset-manage"
-import { AssetStatusBadge } from "@/components/place-shared"
-import {
-  Bullets,
-  Field,
-  FormButtons,
-  NativeSelect,
-  Panel,
-  PanelTitle,
-  ScrollHint,
-  ScrollList,
-  TwoColumns,
-} from "@/components/panel"
+import { Field, FormButtons, NativeSelect, Panel, TwoColumns } from "@/components/panel"
 
 type FieldKey = "name" | "type" | "purchase_date"
 
-/** Add asset and Edit asset: the form, the place's current assets, and what comes after saving. */
+/** Add asset and Edit asset. */
 export function AssetForm({ token, place, asset }: { token: string; place: Place; asset?: Asset }) {
   const navigate = useNavigate()
   const popup = useFormPopup()
@@ -40,21 +28,9 @@ export function AssetForm({ token, place, asset }: { token: string; place: Place
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [formError, setFormError] = useState("")
   const [saving, setSaving] = useState(false)
-  const [others, setOthers] = useState<Asset[] | null>(null)
-  const [scrolls, setScrolls] = useState(false)
 
   // The place's own day decides what "in the future" means.
   const today = todayIn(place.timezone)
-
-  useEffect(() => {
-    let alive = true
-    getPlaceAssets(token, place.id)
-      .then((list) => alive && setOthers(list))
-      .catch(() => alive && setOthers([]))
-    return () => {
-      alive = false
-    }
-  }, [token, place.id])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -105,13 +81,13 @@ export function AssetForm({ token, place, asset }: { token: string; place: Place
       main={
         <Panel pad="lg">
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-            <Field id="name" label={<Trans>Asset name</Trans>} error={errors.name}>
+            <Field id="name" required label={<Trans>Asset name</Trans>} error={errors.name}>
               <Input id="name" maxLength={LIMITS.name} value={name} onChange={(e) => setName(e.target.value)} {...invalid("name")} />
             </Field>
-            <Field id="type" label={<Trans>Type</Trans>} error={errors.type}>
+            <Field id="type" required label={<Trans>Type</Trans>} error={errors.type}>
               <Input id="type" maxLength={LIMITS.short} value={type} onChange={(e) => setType(e.target.value)} {...invalid("type")} />
             </Field>
-            <Field id="status" label={<Trans>Status</Trans>}>
+            <Field id="status" required label={<Trans>Status</Trans>}>
               <NativeSelect id="status" value={status} onChange={(value) => setStatus(value as AssetStatus)}>
                 {ASSET_STATUSES.map((value) => (
                   <option key={value} value={value}>
@@ -122,6 +98,7 @@ export function AssetForm({ token, place, asset }: { token: string; place: Place
             </Field>
             <Field
               id="purchase_date"
+              optional
               label={<Trans>Purchase date</Trans>}
               error={
                 errors.purchase_date && (
@@ -172,51 +149,7 @@ export function AssetForm({ token, place, asset }: { token: string; place: Place
           </form>
         </Panel>
       }
-      side={
-        <>
-          <Panel labelledBy="current-assets">
-            <div className="flex flex-col gap-0.5">
-              <PanelTitle small id="current-assets">
-                <Trans>Current assets at {place.place_name}</Trans>
-              </PanelTitle>
-              {scrolls && <ScrollHint />}
-            </div>
-            {others === null ? (
-              <Skeleton className="h-[76px]" />
-            ) : others.length === 0 ? (
-              <p className="m-0 text-sm text-muted-foreground">
-                <Trans>No assets yet.</Trans>
-              </p>
-            ) : (
-              <ScrollList label={t`Current assets`} onScrollable={setScrolls}>
-                {others.map((item) => (
-                  <div
-                    key={item.id}
-                    className="box-border flex min-h-[76px] flex-none snap-start items-center justify-between gap-3 border border-border bg-card p-3.5"
-                  >
-                    <span className="flex min-w-0 flex-col leading-[1.5]">
-                      <span className="font-semibold [overflow-wrap:anywhere]">{item.name}</span>
-                      <span className="text-[13px] text-muted-foreground">{item.type}</span>
-                    </span>
-                    <AssetStatusBadge status={item.status} />
-                  </div>
-                ))}
-              </ScrollList>
-            )}
-          </Panel>
-          <Panel>
-            <PanelTitle small>
-              <Trans>After saving</Trans>
-            </PanelTitle>
-            <Bullets
-              items={[
-                <Trans key="1">You can schedule periodic maintenance from the asset’s page.</Trans>,
-                <Trans key="2">Workers pick it when they report damage to it.</Trans>,
-              ]}
-            />
-          </Panel>
-        </>
-      }
+      side={null}
     />
   )
 }

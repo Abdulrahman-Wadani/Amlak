@@ -263,7 +263,7 @@ function ScheduleForm({
   return (
     <Panel className="gap-4">
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-        <Field id="s-description" label={<Trans>Description</Trans>} error={errors.description}>
+        <Field id="s-description" required label={<Trans>Description</Trans>} error={errors.description}>
           <Input
             id="s-description"
             maxLength={LIMITS.longText}
@@ -273,7 +273,7 @@ function ScheduleForm({
           />
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field id="s-count" label={<Trans>Every</Trans>} error={errors.count}>
+          <Field id="s-count" required label={<Trans>Every</Trans>} error={errors.count}>
             <Input
               id="s-count"
               inputMode="numeric"
@@ -283,7 +283,7 @@ function ScheduleForm({
               {...invalid("count")}
             />
           </Field>
-          <Field id="s-unit" label={<Trans>Unit</Trans>}>
+          <Field id="s-unit" required label={<Trans>Unit</Trans>}>
             <NativeSelect id="s-unit" value={unit} onChange={(value) => setUnit(value as IntervalUnit)}>
               {(["DAY", "WEEK", "MONTH", "YEAR"] as const).map((value) => (
                 <option key={value} value={value}>
@@ -294,7 +294,7 @@ function ScheduleForm({
           </Field>
         </div>
         <FieldRow>
-          <Field id="s-due" label={<Trans>First due date</Trans>} error={errors.due}>
+          <Field id="s-due" required label={<Trans>First due date</Trans>} error={errors.due}>
             <Input
               id="s-due"
               type="date"
@@ -307,6 +307,7 @@ function ScheduleForm({
           </Field>
           <Field
             id="s-lead"
+            required
             label={<Trans>Create the ticket this many days before</Trans>}
             hint={<Trans>In days.</Trans>}
             error={errors.lead}
@@ -321,7 +322,7 @@ function ScheduleForm({
             />
           </Field>
         </FieldRow>
-        <Field id="s-worker" label={<Trans>Default worker</Trans>}>
+        <Field id="s-worker" required label={<Trans>Default worker</Trans>}>
           <NativeSelect id="s-worker" value={chosen} onChange={setAssignee}>
             {people.map((person) => (
               <option key={person.id} value={person.id}>

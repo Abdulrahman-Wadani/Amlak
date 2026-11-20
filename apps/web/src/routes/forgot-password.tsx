@@ -90,7 +90,7 @@ function ForgotPasswordPage() {
       >
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
           {wait > 0 && <Notice tone="warn" icon={<Clock3 />} title={<Trans>You requested too many links.</Trans>} />}
-          <Field id="email" label={<Trans>Email</Trans>} error={error}>
+          <Field id="email" required label={<Trans>Email</Trans>} error={error}>
             <Input
               id="email"
               type="email"

@@ -286,21 +286,6 @@ export function ScrollHint() {
   )
 }
 
-/** Square bullets, as in the side cards ("Before saving", "What a worker sees"). */
-export function Bullets({ items }: { items: ReactNode[] }) {
-  return (
-    <ul className="m-0 flex list-none flex-col gap-2 p-0 text-sm leading-[1.6]">
-      {items.map((item, index) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: a fixed list
-        <li key={index} className="flex items-start gap-2.5">
-          <span aria-hidden="true" className="mt-[9px] size-1.5 flex-none bg-muted-foreground" />
-          <span>{item}</span>
-        </li>
-      ))}
-    </ul>
-  )
-}
-
 /** A round initial (36px), for workers. */
 export function Initial({ name, size = 36 }: { name: string; size?: number }) {
   return (
@@ -479,23 +464,59 @@ export function ListFooter({
 }
 
 /** A form field: the label above, a grey hint or a red error under it. */
+/**
+ * After a field's label: a red star for a field that must be filled, or
+ * "(Optional)" for one that may stay empty. Every form marks each field it
+ * asks for one way or the other; read-only fields get neither.
+ */
+export function FieldNeed({ required, optional }: { required?: boolean; optional?: boolean }) {
+  if (required) {
+    return (
+      <>
+        <span aria-hidden="true" className="ms-1 text-destructive">
+          *
+        </span>
+        <span className="sr-only">
+          {" "}
+          <Trans>(required)</Trans>
+        </span>
+      </>
+    )
+  }
+  if (optional) {
+    return (
+      <span className="ms-1.5 text-[13px] font-normal text-muted-foreground">
+        <Trans>(optional)</Trans>
+      </span>
+    )
+  }
+  return null
+}
+
 export function Field({
   id,
   label,
   hint,
   error,
+  required,
+  optional,
   children,
 }: {
   id: string
   label: ReactNode
   hint?: ReactNode
   error?: ReactNode
+  /** The field must be filled: a red star after the label. */
+  required?: boolean
+  /** The field may stay empty: "(optional)" after the label. */
+  optional?: boolean
   children: ReactNode
 }) {
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <label htmlFor={id} className="text-sm font-semibold">
         {label}
+        <FieldNeed required={required} optional={optional} />
       </label>
       {children}
       {error ? (

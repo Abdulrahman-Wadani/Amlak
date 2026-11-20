@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Page } from "@/components/page"
-import { Field, FormButtons, Panel, PanelTitle, Segmented, TwoColumns } from "@/components/panel"
+import { Field, FieldNeed, FormButtons, Panel, PanelTitle, Segmented, TwoColumns } from "@/components/panel"
 import { toast } from "@/components/toast"
 
 export const Route = createFileRoute("/_authenticated/announcements")({
@@ -94,7 +94,7 @@ function Announcements() {
             <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
                 <span className="text-sm font-semibold">
-                  <Trans>Send to</Trans>
+                  <Trans>Send to</Trans><FieldNeed required />
                 </span>
                 <div className="[&>div]:grid-cols-3">
                   <Segmented
@@ -109,16 +109,16 @@ function Announcements() {
                   />
                 </div>
               </div>
-              <Field id="a-title-en" label={<Trans>Title in English</Trans>} error={errors.titleEn}>
+              <Field id="a-title-en" required label={<Trans>Title in English</Trans>} error={errors.titleEn}>
                 <Input id="a-title-en" maxLength={LIMITS.title} lang="en" dir="ltr" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} {...invalid("titleEn", "a-title-en")} />
               </Field>
-              <Field id="a-text-en" label={<Trans>Text in English</Trans>} error={errors.messageEn}>
+              <Field id="a-text-en" required label={<Trans>Text in English</Trans>} error={errors.messageEn}>
                 <Textarea id="a-text-en" maxLength={LIMITS.message} lang="en" dir="ltr" rows={3} value={messageEn} onChange={(e) => setMessageEn(e.target.value)} {...invalid("messageEn", "a-text-en")} />
               </Field>
-              <Field id="a-title-ar" label={<Trans>Title in Arabic</Trans>} error={errors.titleAr}>
+              <Field id="a-title-ar" required label={<Trans>Title in Arabic</Trans>} error={errors.titleAr}>
                 <Input id="a-title-ar" maxLength={LIMITS.title} lang="ar" dir="rtl" value={titleAr} onChange={(e) => setTitleAr(e.target.value)} {...invalid("titleAr", "a-title-ar")} />
               </Field>
-              <Field id="a-text-ar" label={<Trans>Text in Arabic</Trans>} error={errors.messageAr}>
+              <Field id="a-text-ar" required label={<Trans>Text in Arabic</Trans>} error={errors.messageAr}>
                 <Textarea id="a-text-ar" maxLength={LIMITS.message} lang="ar" dir="rtl" rows={3} value={messageAr} onChange={(e) => setMessageAr(e.target.value)} {...invalid("messageAr", "a-text-ar")} />
               </Field>
               {error && (

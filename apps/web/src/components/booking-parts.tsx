@@ -1,12 +1,8 @@
-import { useState } from "react"
-import { Link } from "@tanstack/react-router"
-import { Trans } from "@lingui/react/macro"
 import { plural, t } from "@lingui/core/macro"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import type { Booking } from "@/lib/api"
 import { useFormat } from "@/lib/format"
-import { BookingStatusChip } from "@/components/place-shared"
-import { Panel, PanelTitle, ScrollHint, ScrollList } from "@/components/panel"
+import { Panel } from "@/components/panel"
 
 export function isoDay(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
@@ -119,44 +115,3 @@ export function MonthCalendar({
   )
 }
 
-/** The month's bookings as a list that scrolls inside its card. */
-export function MonthBookings({ bookings }: { bookings: Booking[] }) {
-  const [scrolls, setScrolls] = useState(false)
-  const stay = useStayText()
-  return (
-    <Panel labelledBy="month-bookings">
-      <div className="flex flex-col gap-0.5">
-        <PanelTitle id="month-bookings">
-          <Trans>Bookings this month</Trans>
-        </PanelTitle>
-        {scrolls && <ScrollHint />}
-      </div>
-      {bookings.length === 0 ? (
-        <p className="m-0 text-sm text-muted-foreground">
-          <Trans>No bookings this month.</Trans>
-        </p>
-      ) : (
-        <ScrollList label={t`Bookings this month`} onScrollable={setScrolls}>
-          {bookings.map((booking) => (
-            <Link
-              key={booking.id}
-              to="/booking/$booking_id"
-              params={{ booking_id: booking.id }}
-              className="am-lift box-border flex min-h-[76px] flex-none snap-start items-center justify-between gap-3 border border-border bg-card p-3.5 text-foreground no-underline"
-            >
-              <span className="flex min-w-0 flex-col leading-[1.5]">
-                <span dir="auto" className="truncate font-semibold">
-                  {booking.guest_name}
-                </span>
-                <span className="text-[13px] text-muted-foreground">
-                  {stay(booking, booking.status === "CONFIRMED" || booking.status === "CHECKED_IN")}
-                </span>
-              </span>
-              <BookingStatusChip status={booking.status} />
-            </Link>
-          ))}
-        </ScrollList>
-      )}
-    </Panel>
-  )
-}

@@ -109,13 +109,13 @@ function AdminUser() {
                 <Trans>Details</Trans>
               </PanelTitle>
               <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-                <Field id="u-name" label={<Trans>Full name</Trans>} error={errors.fullname}>
+                <Field id="u-name" required label={<Trans>Full name</Trans>} error={errors.fullname}>
                   <Input id="u-name" maxLength={LIMITS.name} value={fullname} aria-invalid={errors.fullname ? true : undefined} onChange={(e) => setFullname(e.target.value)} />
                 </Field>
                 <Field id="u-email" label={<Trans>Email</Trans>}>
                   <Input id="u-email" dir="ltr" value={user.email} readOnly className="bg-secondary text-muted-foreground" />
                 </Field>
-                <Field id="u-phone" label={<Trans>Mobile number</Trans>} error={errors.phone}>
+                <Field id="u-phone" optional label={<Trans>Mobile number</Trans>} error={errors.phone}>
                   <div dir="ltr" className="flex gap-2">
                     <span className="box-border inline-flex h-11 flex-none items-center border border-border bg-secondary px-3 text-[15px]">+966</span>
                     <Input id="u-phone" type="tel" dir="ltr" value={phone} aria-invalid={errors.phone ? true : undefined} onChange={(e) => setPhone(e.target.value)} />

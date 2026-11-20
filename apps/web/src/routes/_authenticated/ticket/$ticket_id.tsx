@@ -478,19 +478,20 @@ function ReviewPanel({
       <form id={`${prefix}review-form`} onSubmit={approve} noValidate className="flex flex-col gap-4">
         <Field
           id={`${prefix}cost`}
+          optional
           label={<Trans>Estimated cost</Trans>}
           error={errors.cost}
           hint={
             remaining != null ? (
               <Trans>Left in this place’s budget this month: {money(remaining, place.currency, { maximumFractionDigits: 0 })}</Trans>
             ) : (
-              <Trans>Optional. In {currencyName(place.currency)}.</Trans>
+              <Trans>In {currencyName(place.currency)}.</Trans>
             )
           }
         >
           <Input id={`${prefix}cost`} inputMode="decimal" dir="ltr" value={cost} onChange={(e) => setCost(e.target.value)} />
         </Field>
-        <Field id={`${prefix}assignee`} label={<Trans>Assign to</Trans>}>
+        <Field id={`${prefix}assignee`} required label={<Trans>Assign to</Trans>}>
           <NativeSelect id={`${prefix}assignee`} value={chosen} onChange={setAssignee}>
             {people.map((person) => (
               <option key={person.id} value={person.id}>
@@ -499,7 +500,7 @@ function ReviewPanel({
             ))}
           </NativeSelect>
         </Field>
-        <Field id={`${prefix}due`} label={<Trans>Due date</Trans>} error={errors.due}>
+        <Field id={`${prefix}due`} required label={<Trans>Due date</Trans>} error={errors.due}>
           <Input
             id={`${prefix}due`}
             type="date"
@@ -543,6 +544,7 @@ function ReviewPanel({
           </DialogTitle>
           <Field
             id={`${prefix}reason`}
+            required
             label={<Trans>Reason for rejection</Trans>}
             error={reasonError}
             hint={
@@ -616,6 +618,7 @@ function ReassignPanel({
       <form onSubmit={submit} noValidate className="flex flex-col gap-4">
         <Field
           id="reassign-worker"
+          required
           label={<Trans>Worker</Trans>}
           hint={others.length === 0 ? <Trans>No one else can take this ticket at this place.</Trans> : undefined}
         >
@@ -627,7 +630,7 @@ function ReassignPanel({
             ))}
           </NativeSelect>
         </Field>
-        <Field id="reassign-due" label={<Trans>Due date</Trans>}>
+        <Field id="reassign-due" required label={<Trans>Due date</Trans>}>
           <Input id="reassign-due" type="date" dir="ltr" min={todayIn(place.timezone)} value={due} onChange={(e) => setDue(e.target.value)} />
         </Field>
         {error && (
