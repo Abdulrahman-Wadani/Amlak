@@ -184,10 +184,16 @@ export function PanelTitle({ children, id, small = false }: { children: ReactNod
   )
 }
 
-/** The main column and the side column; the side column goes under the main one when there is no room. */
-export function TwoColumns({ main, side }: { main: ReactNode; side: ReactNode }) {
+/**
+ * The main column and the side column; the side column goes under the main one
+ * when there is no room. Without a side column the main one takes the whole
+ * width, under the band, like the card of any other page.
+ */
+export function TwoColumns({ main, side }: { main: ReactNode; side?: ReactNode }) {
+  const inPopup = useContext(InPopupContext)
+  if (!side) return <div className="flex min-w-0 flex-col gap-4 desk:gap-6">{main}</div>
   // A popup has no room for two columns: one under the other.
-  if (useContext(InPopupContext)) {
+  if (inPopup) {
     return (
       <div className="flex min-w-0 flex-col gap-5">
         {main}

@@ -135,7 +135,6 @@ function Announcements() {
             </form>
           </Panel>
         }
-        side={null}
       />
     </Page>
   )

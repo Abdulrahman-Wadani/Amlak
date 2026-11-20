@@ -377,7 +377,6 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
           <PhoneActionBar>{save}</PhoneActionBar>
         </Panel>
       }
-      side={null}
     />
   )
 }

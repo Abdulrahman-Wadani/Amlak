@@ -149,7 +149,6 @@ export function AssetForm({ token, place, asset }: { token: string; place: Place
           </form>
         </Panel>
       }
-      side={null}
     />
   )
 }

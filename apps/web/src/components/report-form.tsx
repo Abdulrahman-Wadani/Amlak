@@ -239,7 +239,6 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
           <PhoneActionBar>{send}</PhoneActionBar>
         </Panel>
       }
-      side={null}
     />
   )
 }

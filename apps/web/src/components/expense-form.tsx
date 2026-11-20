@@ -215,7 +215,6 @@ export function ExpenseForm({ token, expense }: { token: string; expense?: Expen
           <PhoneActionBar>{save}</PhoneActionBar>
         </Panel>
       }
-      side={null}
     />
   )
 }

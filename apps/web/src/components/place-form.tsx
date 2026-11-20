@@ -173,29 +173,30 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
       main={
         <Panel pad="lg">
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-            <Field id="pname" required label={<Trans>Place name</Trans>} error={errors.name}>
-              <Input
-                id="pname"
-                maxLength={LIMITS.name}
-                value={name}
-                aria-invalid={errors.name ? true : undefined}
-                aria-describedby={errors.name ? "pname-error" : undefined}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </Field>
-
-            <Field id="ptype" required label={<Trans>Place type</Trans>} error={errors.type}>
-              <NativeSelect id="ptype" value={type} onChange={setType} invalid={Boolean(errors.type)}>
-                <option value="" disabled>
-                  {t`Choose the place type`}
-                </option>
-                {types.map((value) => (
-                  <option key={value} value={value}>
-                    {typeLabel(value)}
+            <FieldRow>
+              <Field id="pname" required label={<Trans>Place name</Trans>} error={errors.name}>
+                <Input
+                  id="pname"
+                  maxLength={LIMITS.name}
+                  value={name}
+                  aria-invalid={errors.name ? true : undefined}
+                  aria-describedby={errors.name ? "pname-error" : undefined}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </Field>
+              <Field id="ptype" required label={<Trans>Place type</Trans>} error={errors.type}>
+                <NativeSelect id="ptype" value={type} onChange={setType} invalid={Boolean(errors.type)}>
+                  <option value="" disabled>
+                    {t`Choose the place type`}
                   </option>
-                ))}
-              </NativeSelect>
-            </Field>
+                  {types.map((value) => (
+                    <option key={value} value={value}>
+                      {typeLabel(value)}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </Field>
+            </FieldRow>
 
             <Field id="pdesc" optional label={<Trans>Description</Trans>} error={errors.description}>
               <Textarea
@@ -331,7 +332,6 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
           <LocationPermission open={asking} onAllow={locate} onClose={() => setAsking(false)} />
         </Panel>
       }
-      side={null}
     />
   )
 }
