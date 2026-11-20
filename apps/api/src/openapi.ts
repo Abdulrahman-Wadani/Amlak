@@ -17,7 +17,7 @@ import {
 	createPlaceSchema,
 	createScheduleSchema,
 	createSupportTicketSchema,
-	createTicketSchema,
+	createTicketFieldsSchema,
 	createWorkerSchema,
 	dashboardQuerySchema,
 	expenseSchema,
@@ -364,7 +364,7 @@ export const openApiDocument = createDocument({
 				requestBody: {
 					content: {
 						"multipart/form-data": {
-							schema: createTicketSchema.extend({
+							schema: createTicketFieldsSchema.extend({
 								photos: z
 									.array(z.file())
 									.min(1)
@@ -375,7 +375,10 @@ export const openApiDocument = createDocument({
 					},
 				},
 				responses: {
-					"201": ok("The new ticket, waiting for review", ticketSchema),
+					"201": ok(
+						"The new ticket, waiting for review, or APPROVED when the Manager sent assignee_id and due_date (same rules as approval: confirmed bookings on the repair day are cancelled, a staying guest makes it a 422)",
+						ticketSchema,
+					),
 					"404": fail("Place not found"),
 					"422": fail(
 						"Some fields are invalid, a photo is missing, or the asset is not in this place",

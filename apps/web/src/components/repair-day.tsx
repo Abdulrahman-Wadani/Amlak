@@ -2,7 +2,6 @@ import { useEffect, useState } from "react"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { CalendarX } from "lucide-react"
-import type { Ticket } from "@amlak/shared"
 import { listAllBookingsForPlace, type Booking } from "@/lib/api"
 import { useFormat } from "@/lib/format"
 import { Notice } from "@/components/states"
@@ -14,12 +13,11 @@ import { useStayText } from "@/components/booking-parts"
  * staying that day blocks the day, and confirmed bookings covering it will be
  * cancelled. Preventive tickets leave bookings alone.
  */
-export function useRepairDay(token: string | null, ticket: Ticket, placeId: string, day: string) {
+export function useRepairDay(token: string | null, corrective: boolean, placeId: string, day: string) {
   const [found, setFound] = useState<{ day: string; bookings: Booking[] } | null>(null)
-  const corrective = ticket.ticket_type === "CORRECTIVE"
 
   useEffect(() => {
-    if (!token || !corrective || !day) return
+    if (!token || !corrective || !placeId || !day) return
     let alive = true
     listAllBookingsForPlace(token, placeId, { from: day, to: day })
       .then((list) => alive && setFound({ day, bookings: list }))

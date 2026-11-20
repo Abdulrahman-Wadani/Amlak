@@ -3,21 +3,26 @@ import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { CircleAlert } from "lucide-react"
 import type { Asset, Place } from "@amlak/shared"
+import { todayIn } from "@/lib/dates"
 import { useAuth } from "@/lib/auth"
 import {
   createTicket,
   getPlaceAssets,
   getPlaces,
+  getPlaceWorkers,
   type TicketPriority,
 } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
-import { LIMITS, tooLong } from "@/lib/limits"
+import { LIMITS, tooLarge, tooLong } from "@/lib/limits"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { RepairDayNotice, useRepairDay } from "@/components/repair-day"
 import { FormCancel, FormPopup, useFormPopup } from "@/components/form-popup"
 import {
   Field,
   FieldNeed,
+  FieldRow,
   FormButtons,
   NativeSelect,
   Panel,
@@ -27,15 +32,17 @@ import {
 } from "@/components/panel"
 import { PhotoPicker } from "@/components/photo-picker"
 
-type FieldKey = "place" | "description"
+type FieldKey = "place" | "description" | "photos" | "cost" | "due"
 
 /**
  * Report damage, shown in a popup: the place (chosen here, or given by the
  * place page), the asset, photos, what happened and how urgent. The report
- * goes to the place manager for review.
+ * goes to the place manager for review. The place's manager also chooses
+ * who does it and by when (the review's fields), and the ticket is approved
+ * as it is added.
  */
 export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
-  const { accessToken } = useAuth()
+  const { accessToken, user } = useAuth()
   const popup = useFormPopup()
   const search = { place_id: startPlace }
 
@@ -49,6 +56,11 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [formError, setFormError] = useState("")
   const [sending, setSending] = useState(false)
+  // The review's fields, for the place's manager.
+  const [people, setPeople] = useState<{ id: string; name: string }[]>([])
+  const [assignee, setAssignee] = useState("")
+  const [due, setDue] = useState("")
+  const [cost, setCost] = useState("")
 
   useEffect(() => {
     if (!accessToken) return
@@ -66,9 +78,16 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
     }
   }, [accessToken, search.place_id])
 
+  const place = places?.find((p) => p.id === placeId)
+  const approves = Boolean(place && user && place.owner_id === user.id)
+  const chosen = assignee || people[0]?.id || ""
+  const repair = useRepairDay(accessToken, approves, placeId, due)
+
   useEffect(() => {
     setAssetId("")
     setAssets([])
+    setAssignee("")
+    setPeople([])
     if (!accessToken || !placeId) return
     let alive = true
     getPlaceAssets(accessToken, placeId)
@@ -79,15 +98,39 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
     }
   }, [accessToken, placeId])
 
+  // Who can take the ticket: the place's active workers, then the manager.
+  useEffect(() => {
+    if (!accessToken || !approves || !place) return
+    let alive = true
+    getPlaceWorkers(accessToken, place.id)
+      .catch(() => [])
+      .then((list) => {
+        if (!alive) return
+        setPeople([
+          ...list.filter((item) => item.worker.status === "ACTIVE").map((item) => ({ id: item.worker.id, name: item.worker.fullname })),
+          { id: place.owner_id, name: t`Me` },
+        ])
+      })
+    return () => {
+      alive = false
+    }
+  }, [accessToken, approves, place])
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!accessToken) return
     const next: Partial<Record<FieldKey, string>> = {}
     if (!placeId) next.place = t`Choose the place.`
+    if (photos.length === 0) next.photos = t`Add at least one photo of the damage.`
     if (!description.trim()) next.description = t`Write what happened.`
     else next.description = tooLong(description, LIMITS.longText)
+    if (approves) {
+      if (!due) next.due = t`Choose the due date.`
+      if (cost.trim() && !/^\d+(\.\d{1,2})?$/.test(cost.trim())) next.cost = t`Enter an amount of 0 or more, or leave it empty.`
+      else next.cost = tooLarge(cost)
+    }
     setErrors(next)
-    if (Object.values(next).some(Boolean)) return
+    if (Object.values(next).some(Boolean) || (approves && (!chosen || repair.staying))) return
 
     setSending(true)
     setFormError("")
@@ -97,6 +140,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
         priority,
         description: description.trim(),
         photos,
+        ...(approves ? { assignee_id: chosen, due_date: due, estimated_cost: cost.trim() || undefined } : {}),
       })
       popup?.saved()
     } catch (err) {
@@ -108,7 +152,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
 
   const send = (
     <Button type="submit" form="report-form" disabled={sending}>
-      {sending ? <Trans>Sending…</Trans> : <Trans>Send report</Trans>}
+      {sending ? <Trans>Sending…</Trans> : approves ? <Trans>Add and approve ticket</Trans> : <Trans>Send report</Trans>}
     </Button>
   )
 
@@ -172,11 +216,12 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
 
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold">
-                <Trans>Photos</Trans><FieldNeed optional />
+                <Trans>Photos</Trans><FieldNeed required />
               </span>
               <PhotoPicker
                 photos={photos}
                 onChange={setPhotos}
+                error={errors.photos}
                 label={<Trans>Take a photo</Trans>}
                 hint={<Trans>Add photos that show the damage.</Trans>}
               />
@@ -219,6 +264,46 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
               />
             </div>
 
+            {approves && (
+              <>
+                <FieldRow>
+                  <Field id="r-assignee" required label={<Trans>Assign to</Trans>}>
+                    <NativeSelect id="r-assignee" value={chosen} onChange={setAssignee}>
+                      {people.map((person) => (
+                        <option key={person.id} value={person.id}>
+                          {person.name}
+                        </option>
+                      ))}
+                    </NativeSelect>
+                  </Field>
+                  <Field id="r-due" required label={<Trans>Due date</Trans>} error={errors.due}>
+                    <Input
+                      id="r-due"
+                      type="date"
+                      dir="ltr"
+                      min={place ? todayIn(place.timezone) : undefined}
+                      value={due}
+                      aria-invalid={errors.due ? true : undefined}
+                      aria-describedby={errors.due ? "r-due-error" : undefined}
+                      onChange={(e) => setDue(e.target.value)}
+                    />
+                  </Field>
+                </FieldRow>
+                <RepairDayNotice {...repair} />
+                <Field id="r-cost" optional label={<Trans>Estimated cost</Trans>} hint={<Trans>In Saudi riyals.</Trans>} error={errors.cost}>
+                  <Input
+                    id="r-cost"
+                    inputMode="decimal"
+                    dir="ltr"
+                    value={cost}
+                    aria-invalid={errors.cost ? true : undefined}
+                    aria-describedby={errors.cost ? "r-cost-error" : "r-cost-hint"}
+                    onChange={(e) => setCost(e.target.value)}
+                  />
+                </Field>
+              </>
+            )}
+
             {formError && (
               <p
                 role="alert"
@@ -253,8 +338,10 @@ export function ReportPopup({
   onClose: () => void
   onSaved: () => void
 }) {
+  // A manager's ticket is approved as it is added.
+  const manager = useAuth().user?.role === "MANAGER"
   return (
-    <FormPopup title={<Trans>Report damage</Trans>} onClose={onClose} onSaved={onSaved}>
+    <FormPopup title={manager ? <Trans>Add maintenance ticket</Trans> : <Trans>Report damage</Trans>} onClose={onClose} onSaved={onSaved}>
       <ReportForm placeId={placeId} />
     </FormPopup>
   )

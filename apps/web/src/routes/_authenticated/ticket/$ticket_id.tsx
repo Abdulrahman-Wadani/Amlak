@@ -410,7 +410,7 @@ function ReviewPanel({
   const [reasonError, setReasonError] = useState("")
   const chosen = assignee || people[0]?.id || ""
   const prefix = phone ? "m-" : ""
-  const repair = useRepairDay(accessToken, ticket, place.id, due)
+  const repair = useRepairDay(accessToken, ticket.ticket_type === "CORRECTIVE", place.id, due)
 
   async function approve(event?: FormEvent) {
     event?.preventDefault()
@@ -595,7 +595,7 @@ function ReassignPanel({
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
   const chosen = assignee || ticket.assignee_id || people[0]?.id || ""
-  const repair = useRepairDay(accessToken, ticket, place.id, due)
+  const repair = useRepairDay(accessToken, ticket.ticket_type === "CORRECTIVE", place.id, due)
 
   async function submit(event: FormEvent) {
     event.preventDefault()

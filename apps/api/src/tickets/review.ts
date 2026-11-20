@@ -217,7 +217,7 @@ export async function moveTicket(
 	});
 }
 
-function assertNotPast(date: string, timeZone: string) {
+export function assertNotPast(date: string, timeZone: string) {
 	if (date < todayIn(timeZone)) {
 		throw new AppError("VALIDATION_ERROR", "Some fields are invalid", {
 			fields: { due_date: "The due date cannot be in the past" },
@@ -226,7 +226,7 @@ function assertNotPast(date: string, timeZone: string) {
 }
 
 // A Manager who assigns the ticket to themselves needs no notification.
-async function notifyAssignee(
+export async function notifyAssignee(
 	tx: Prisma.TransactionClient,
 	manager: AuthUser,
 	ticket: TicketRow,
