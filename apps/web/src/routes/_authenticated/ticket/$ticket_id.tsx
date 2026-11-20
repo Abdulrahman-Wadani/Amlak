@@ -18,6 +18,7 @@ import {
   type DashboardPlace,
 } from "@/lib/api"
 import { todayIn } from "@/lib/dates"
+import { canCompleteTicket } from "@/lib/tickets"
 import { ApiError, errorMessage } from "@/lib/errors"
 import { LIMITS, tooLarge, tooLong } from "@/lib/limits"
 import { useFormat } from "@/lib/format"
@@ -142,7 +143,6 @@ function TicketPage() {
 
   const pending = ticket?.status === "PENDING_REVIEW"
   const approved = ticket?.status === "APPROVED"
-  const mine = ticket?.assignee_id === user?.id
 
   // The ticket's history, newest first, from what the ticket records.
   const damageCount = number(damage.length)
@@ -266,7 +266,7 @@ function TicketPage() {
             {isManager && approved && place && (
               <ReassignPanel ticket={ticket} place={place} people={assignable} onDone={load} onConflict={onConflict} />
             )}
-            {!isManager && approved && mine && (
+            {canCompleteTicket(ticket, user?.id) && (
               <Panel>
                 <Link to="/ticket/complete/$ticket_id" params={{ ticket_id: ticket.id }} className={cn(buttonVariants(), "w-full")}>
                   <Check aria-hidden="true" />
