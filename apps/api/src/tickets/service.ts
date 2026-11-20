@@ -8,6 +8,7 @@ import {
 } from "@amlak/shared";
 import { auditLog } from "../audit.ts";
 import type { AuthUser } from "../auth/tokens.ts";
+import { clearPlaceForRepair } from "../bookings/repairs.ts";
 import { toDbDate, todayIn } from "../dates.ts";
 import { prisma } from "../db.ts";
 import { AppError } from "../errors.ts";
@@ -17,13 +18,16 @@ import { type Page, paginated } from "../pagination.ts";
 import { findPlaceFor, visiblePlaces } from "../places/access.ts";
 import { type ImageFile, storeImage } from "../uploads/storage.ts";
 import {
+	assertCanBeAssignee,
 	findTicketFor,
 	ticketInclude,
 	ticketListInclude,
 	visibleTickets,
 } from "./access.ts";
+import { emailAssignee, reminderSentAtOnAssign } from "./emails.ts";
 import { submittedNotice } from "./messages.ts";
 import { toTicket, toTicketWithPhotos } from "./present.ts";
+import { assertNotPast, notifyAssignee } from "./review.ts";
 
 export async function listTickets(
 	user: AuthUser,
@@ -88,6 +92,10 @@ export async function getTicket(
  * A Worker assigned to the place, or its Manager, reports damage with
  * photos. The ticket waits for the Manager's review, and the Manager is
  * notified unless they reported it themselves.
+ *
+ * The place's Manager can approve it as they add it, with the approval's
+ * fields (assignee, due date, estimated cost): it is saved APPROVED and
+ * follows the same rules as an approval, repair day included.
  */
 export async function createTicket(
 	user: AuthUser,
@@ -102,6 +110,17 @@ export async function createTicket(
 		});
 	}
 	const place = await findPlaceFor(user, placeId);
+	const approval =
+		input.assignee_id && input.due_date
+			? { assigneeId: input.assignee_id, dueDate: input.due_date }
+			: null;
+	if (approval && place.owner_id !== user.user_id) {
+		throw new AppError(
+			"FORBIDDEN",
+			"Only the place's Manager can approve a ticket",
+		);
+	}
+	if (approval) assertNotPast(approval.dueDate, place.timezone);
 	if (input.asset_id) {
 		await assertAssetInPlace(input.asset_id, place.id);
 	}
@@ -115,6 +134,23 @@ export async function createTicket(
 	}
 
 	const row = await prisma.$transaction(async (tx) => {
+		if (approval) {
+			await assertCanBeAssignee(tx, approval.assigneeId, place, "assignee_id");
+			await clearPlaceForRepair(
+				tx,
+				user,
+				{
+					id: ticketId,
+					ticket_type: "CORRECTIVE",
+					description: input.description,
+					assignee_id: approval.assigneeId,
+				},
+				place,
+				approval.dueDate,
+				approval.assigneeId,
+				ipAddress,
+			);
+		}
 		const ticket = await tx.maintenanceTicket.create({
 			data: {
 				id: ticketId,
@@ -124,6 +160,18 @@ export async function createTicket(
 				ticket_type: "CORRECTIVE",
 				priority: input.priority,
 				description: input.description,
+				...(approval && {
+					status: "APPROVED" as const,
+					assignee_id: approval.assigneeId,
+					due_date: toDbDate(approval.dueDate),
+					estimated_cost: input.estimated_cost,
+					reminder_sent_at: reminderSentAtOnAssign(
+						approval.dueDate,
+						place.timezone,
+					),
+					reviewed_by: user.user_id,
+					reviewed_at: new Date(),
+				}),
 				attachments: {
 					create: photoKeys.map((key) => ({
 						uploaded_by: user.user_id,
@@ -147,6 +195,28 @@ export async function createTicket(
 			},
 			ipAddress,
 		});
+		if (approval) {
+			if (ticket.asset_id) {
+				await tx.asset.update({
+					where: { id: ticket.asset_id },
+					data: { status: "NEEDS_MAINTENANCE" },
+				});
+			}
+			await auditLog(tx, user.user_id, {
+				action: "TICKET_APPROVE",
+				entityType: "MaintenanceTicket",
+				entityId: ticket.id,
+				oldValues: { status: "PENDING_REVIEW" },
+				newValues: {
+					status: ticket.status,
+					assignee_id: approval.assigneeId,
+					due_date: approval.dueDate,
+					estimated_cost: input.estimated_cost ?? null,
+				},
+				ipAddress,
+			});
+			await notifyAssignee(tx, user, ticket, place);
+		}
 		if (place.owner_id !== user.user_id) {
 			await notify(tx, place.owner_id, {
 				type: "TICKET_SUBMITTED",
@@ -160,6 +230,9 @@ export async function createTicket(
 		}
 		return ticket;
 	});
+	if (row.assignee_id && row.assignee_id !== user.user_id) {
+		void emailAssignee(row.id);
+	}
 	return toTicketWithPhotos(row, user.role);
 }
 

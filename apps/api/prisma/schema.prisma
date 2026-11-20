@@ -94,6 +94,7 @@ enum NotificationType {
     MAINTENANCE_OVERDUE
     SUPPORT_RESOLVED
     ANNOUNCEMENT
+    BOOKING_CANCELLED
 }
 
 enum SupportTicketStatus {

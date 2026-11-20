@@ -3,9 +3,9 @@ import { createFileRoute } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { Plus } from "lucide-react"
-import type { Place } from "@amlak/shared"
+import type { Place, Ticket } from "@amlak/shared"
 import { useAuth } from "@/lib/auth"
-import { getPlaces, listAllBookingsForPlace, type Booking } from "@/lib/api"
+import { getPlaces, listAllBookingsForPlace, listAllTickets, type Booking } from "@/lib/api"
 import { todayIn } from "@/lib/dates"
 import { Button } from "@/components/ui/button"
 import { Page } from "@/components/page"
@@ -29,6 +29,8 @@ function BookingsPage() {
     return new Date(now.getFullYear(), now.getMonth(), 1)
   })
   const [bookings, setBookings] = useState<Booking[] | null>(null)
+  // Every repair with a day this month, corrective or preventive, open or done.
+  const [repairs, setRepairs] = useState<Ticket[]>([])
   const [failed, setFailed] = useState(false)
   const [reload, setReload] = useState(0)
 
@@ -57,6 +59,18 @@ function BookingsPage() {
     listAllBookingsForPlace(accessToken, placeId, { from, to })
       .then((list) => alive && setBookings(list.sort((a, b) => a.check_in_date.localeCompare(b.check_in_date))))
       .catch(() => alive && setFailed(true))
+    listAllTickets(accessToken, { place_id: placeId })
+      .then(
+        (list) =>
+          alive &&
+          setRepairs(
+            list.filter(
+              (ticket) =>
+                ticket.due_date && ticket.due_date >= from && ticket.due_date <= to && (ticket.status === "APPROVED" || ticket.status === "COMPLETED"),
+            ),
+          ),
+      )
+      .catch(() => alive && setRepairs([]))
     return () => {
       alive = false
     }
@@ -117,7 +131,7 @@ function BookingsPage() {
           ) : bookings === null || !place ? (
             <LoadingList />
           ) : (
-            <MonthCalendar month={month} bookings={bookings} today={todayIn(place.timezone)} onMonth={setMonth} />
+            <MonthCalendar month={month} bookings={bookings} repairs={repairs} today={todayIn(place.timezone)} onMonth={setMonth} />
           )}
         </Panel>
       )}

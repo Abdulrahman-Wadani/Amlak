@@ -43,7 +43,6 @@ import { Route as PLangSlugRouteImport } from './routes/p/$lang/$slug'
 import { Route as AuthenticatedExpenseEditExpense_idRouteImport } from './routes/_authenticated/expense/edit/$expense_id'
 import { Route as AuthenticatedPlaceAssetAsset_idRouteImport } from './routes/_authenticated/place/asset/$asset_id'
 import { Route as AuthenticatedPlaceEditPlace_idRouteImport } from './routes/_authenticated/place/edit/$place_id'
-import { Route as AuthenticatedTicketCompleteTicket_idRouteImport } from './routes/_authenticated/ticket/complete/$ticket_id'
 import { Route as AuthenticatedPlaceAssetEditAsset_idRouteImport } from './routes/_authenticated/place/asset/edit/$asset_id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -229,12 +228,6 @@ const AuthenticatedPlaceEditPlace_idRoute =
     path: '/place/edit/$place_id',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedTicketCompleteTicket_idRoute =
-  AuthenticatedTicketCompleteTicket_idRouteImport.update({
-    id: '/ticket/complete/$ticket_id',
-    path: '/ticket/complete/$ticket_id',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedPlaceAssetEditAsset_idRoute =
   AuthenticatedPlaceAssetEditAsset_idRouteImport.update({
     id: '/place/asset/edit/$asset_id',
@@ -276,7 +269,6 @@ export interface FileRoutesByFullPath {
   '/expense/edit/$expense_id': typeof AuthenticatedExpenseEditExpense_idRoute
   '/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/place/edit/$place_id': typeof AuthenticatedPlaceEditPlace_idRoute
-  '/ticket/complete/$ticket_id': typeof AuthenticatedTicketCompleteTicket_idRoute
   '/place/asset/edit/$asset_id': typeof AuthenticatedPlaceAssetEditAsset_idRoute
 }
 export interface FileRoutesByTo {
@@ -313,7 +305,6 @@ export interface FileRoutesByTo {
   '/expense/edit/$expense_id': typeof AuthenticatedExpenseEditExpense_idRoute
   '/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/place/edit/$place_id': typeof AuthenticatedPlaceEditPlace_idRoute
-  '/ticket/complete/$ticket_id': typeof AuthenticatedTicketCompleteTicket_idRoute
   '/place/asset/edit/$asset_id': typeof AuthenticatedPlaceAssetEditAsset_idRoute
 }
 export interface FileRoutesById {
@@ -352,7 +343,6 @@ export interface FileRoutesById {
   '/_authenticated/expense/edit/$expense_id': typeof AuthenticatedExpenseEditExpense_idRoute
   '/_authenticated/place/asset/$asset_id': typeof AuthenticatedPlaceAssetAsset_idRoute
   '/_authenticated/place/edit/$place_id': typeof AuthenticatedPlaceEditPlace_idRoute
-  '/_authenticated/ticket/complete/$ticket_id': typeof AuthenticatedTicketCompleteTicket_idRoute
   '/_authenticated/place/asset/edit/$asset_id': typeof AuthenticatedPlaceAssetEditAsset_idRoute
 }
 export interface FileRouteTypes {
@@ -391,7 +381,6 @@ export interface FileRouteTypes {
     | '/expense/edit/$expense_id'
     | '/place/asset/$asset_id'
     | '/place/edit/$place_id'
-    | '/ticket/complete/$ticket_id'
     | '/place/asset/edit/$asset_id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -428,7 +417,6 @@ export interface FileRouteTypes {
     | '/expense/edit/$expense_id'
     | '/place/asset/$asset_id'
     | '/place/edit/$place_id'
-    | '/ticket/complete/$ticket_id'
     | '/place/asset/edit/$asset_id'
   id:
     | '__root__'
@@ -466,7 +454,6 @@ export interface FileRouteTypes {
     | '/_authenticated/expense/edit/$expense_id'
     | '/_authenticated/place/asset/$asset_id'
     | '/_authenticated/place/edit/$place_id'
-    | '/_authenticated/ticket/complete/$ticket_id'
     | '/_authenticated/place/asset/edit/$asset_id'
   fileRoutesById: FileRoutesById
 }
@@ -722,13 +709,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPlaceEditPlace_idRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/ticket/complete/$ticket_id': {
-      id: '/_authenticated/ticket/complete/$ticket_id'
-      path: '/ticket/complete/$ticket_id'
-      fullPath: '/ticket/complete/$ticket_id'
-      preLoaderRoute: typeof AuthenticatedTicketCompleteTicket_idRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/place/asset/edit/$asset_id': {
       id: '/_authenticated/place/asset/edit/$asset_id'
       path: '/place/asset/edit/$asset_id'
@@ -765,7 +745,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedExpenseEditExpense_idRoute: typeof AuthenticatedExpenseEditExpense_idRoute
   AuthenticatedPlaceAssetAsset_idRoute: typeof AuthenticatedPlaceAssetAsset_idRoute
   AuthenticatedPlaceEditPlace_idRoute: typeof AuthenticatedPlaceEditPlace_idRoute
-  AuthenticatedTicketCompleteTicket_idRoute: typeof AuthenticatedTicketCompleteTicket_idRoute
   AuthenticatedPlaceAssetEditAsset_idRoute: typeof AuthenticatedPlaceAssetEditAsset_idRoute
 }
 
@@ -796,8 +775,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedExpenseEditExpense_idRoute,
   AuthenticatedPlaceAssetAsset_idRoute: AuthenticatedPlaceAssetAsset_idRoute,
   AuthenticatedPlaceEditPlace_idRoute: AuthenticatedPlaceEditPlace_idRoute,
-  AuthenticatedTicketCompleteTicket_idRoute:
-    AuthenticatedTicketCompleteTicket_idRoute,
   AuthenticatedPlaceAssetEditAsset_idRoute:
     AuthenticatedPlaceAssetEditAsset_idRoute,
 }

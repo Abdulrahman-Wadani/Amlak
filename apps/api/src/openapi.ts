@@ -17,7 +17,7 @@ import {
 	createPlaceSchema,
 	createScheduleSchema,
 	createSupportTicketSchema,
-	createTicketSchema,
+	createTicketFieldsSchema,
 	createWorkerSchema,
 	dashboardQuerySchema,
 	expenseSchema,
@@ -364,7 +364,7 @@ export const openApiDocument = createDocument({
 				requestBody: {
 					content: {
 						"multipart/form-data": {
-							schema: createTicketSchema.extend({
+							schema: createTicketFieldsSchema.extend({
 								photos: z
 									.array(z.file())
 									.min(1)
@@ -375,7 +375,10 @@ export const openApiDocument = createDocument({
 					},
 				},
 				responses: {
-					"201": ok("The new ticket, waiting for review", ticketSchema),
+					"201": ok(
+						"The new ticket, waiting for review, or APPROVED when the Manager sent assignee_id and due_date (same rules as approval: confirmed bookings on the repair day are cancelled, a staying guest makes it a 422)",
+						ticketSchema,
+					),
 					"404": fail("Place not found"),
 					"422": fail(
 						"Some fields are invalid, a photo is missing, or the asset is not in this place",
@@ -419,6 +422,8 @@ export const openApiDocument = createDocument({
 			post: {
 				tags: ["Maintenance tickets"],
 				summary: "Approve a ticket and assign a worker and due date (Manager)",
+				description:
+					"For a corrective ticket, confirmed bookings covering the due date are cancelled with the repair as their reason, and the assignee gets a BOOKING_CANCELLED notification to contact each guest.",
 				security: loggedIn,
 				requestParams: { path: ticketParams },
 				requestBody: json(approveTicketSchema),
@@ -427,7 +432,7 @@ export const openApiDocument = createDocument({
 					"404": fail("Ticket not found"),
 					"409": fail("The ticket is not waiting for review"),
 					"422": fail(
-						"Some fields are invalid, the assignee is not allowed for this place, or the due date is past",
+						"Some fields are invalid, the assignee is not allowed for this place, the due date is past, or (corrective tickets) a guest is staying on the due date; see details.check_out_date",
 					),
 					...guarded,
 				},
@@ -453,6 +458,8 @@ export const openApiDocument = createDocument({
 			post: {
 				tags: ["Maintenance tickets"],
 				summary: "Change an approved ticket's assignee and due date (Manager)",
+				description:
+					"For a corrective ticket, the new due date clears the place as on approval.",
 				security: loggedIn,
 				requestParams: { path: ticketParams },
 				requestBody: json(reassignTicketSchema),
@@ -461,7 +468,7 @@ export const openApiDocument = createDocument({
 					"404": fail("Ticket not found"),
 					"409": fail("The ticket is not approved"),
 					"422": fail(
-						"Some fields are invalid, the assignee is not allowed for this place, or the due date is past",
+						"Some fields are invalid, the assignee is not allowed for this place, the due date is past, or (corrective tickets) a guest is staying on the due date; see details.check_out_date",
 					),
 					...guarded,
 				},
@@ -561,14 +568,15 @@ export const openApiDocument = createDocument({
 				requestParams: { path: placeParams },
 				requestBody: json(createBookingSchema),
 				responses: {
-					"201": ok("The new booking, CONFIRMED", bookingSchema),
+					"201": ok(
+						"The new booking: CONFIRMED, or CHECKED_OUT when the stay is already over",
+						bookingSchema,
+					),
 					"404": fail("Place not found"),
 					"409": fail(
-						"The dates overlap another booking; see details.conflicting_booking_id",
+						"The dates overlap another booking (details.conflicting_booking_id) or an approved corrective ticket's due date (details.maintenance_ticket_id, details.due_date)",
 					),
-					"422": fail(
-						"Some fields are invalid, the stay is over, or the place is not ACTIVE",
-					),
+					"422": fail("Some fields are invalid, or the place is not ACTIVE"),
 					...guarded,
 				},
 			},

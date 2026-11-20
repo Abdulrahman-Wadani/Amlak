@@ -42,7 +42,7 @@ function monthsOf(from: string, to: string) {
 /** Income, expenses and profit for a period and the places, with a month by month chart and table. */
 function ReportsPage() {
   const { accessToken } = useAuth()
-  const { number, money, lang, locale, dateFormat } = useFormat()
+  const { number, money, lang, dateFormat } = useFormat()
   const [period, setPeriod] = useState<Period>("SIX")
   const today = isoDay(new Date())
   const [custom, setCustom] = useState({ from: isoDay(new Date(new Date().getFullYear(), new Date().getMonth() - 2, 1)), to: today })
@@ -106,20 +106,13 @@ function ReportsPage() {
   const expenses = sums?.total_expenses ?? 0
   const profit = sums?.profit ?? 0
   const margin = income > 0 ? Math.round((profit / income) * 100) : null
-  const currencyName = useMemo(() => {
-    try {
-      return currency ? (new Intl.DisplayNames([locale], { type: "currency" }).of(currency) ?? currency) : ""
-    } catch {
-      return currency
-    }
-  }, [currency, locale])
   const others = (total?.totals_by_currency ?? []).filter((x) => x.currency !== currency)
 
   return (
     <Page
       title={<Trans>Financial reports</Trans>}
       phoneTitle={<Trans>Reports</Trans>}
-      description={currencyName ? <Trans>In {currencyName}. Visible to the manager only.</Trans> : <Trans>Visible to the manager only.</Trans>}
+      description={<Trans>In Saudi riyals. Visible to the manager only.</Trans>}
       phoneEnd="none"
       actions={
         <Link to="/expenses" className={cn(buttonVariants({ variant: "outline" }))}>

@@ -6,7 +6,7 @@ import { Mail } from "lucide-react"
 import { errorMessage, readApiError } from "@/lib/errors"
 import { AuthCard, AuthLayout } from "@/components/auth-layout"
 import { PasswordInput, PasswordRules, passwordOk } from "@/components/password-field"
-import { Field } from "@/components/panel"
+import { Field, FieldNeed } from "@/components/panel"
 import { Notice } from "@/components/states"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -72,7 +72,7 @@ function AccountSetupPage() {
             </Field>
             <div className="flex flex-col gap-2">
               <label htmlFor="setup-password" className="text-sm font-semibold">
-                <Trans>Choose a password</Trans>
+                <Trans>Choose a password</Trans><FieldNeed required />
               </label>
               <PasswordInput id="setup-password" value={password} onChange={setPassword} invalid={Boolean(passwordError)} describedBy="setup-rules" />
               <PasswordRules id="setup-rules" value={password} />

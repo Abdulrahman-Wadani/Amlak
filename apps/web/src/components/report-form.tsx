@@ -1,45 +1,48 @@
 import { useEffect, useState, type FormEvent } from "react"
-import { Link } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
-import { Camera, CircleAlert, TriangleAlert, Wrench } from "lucide-react"
-import type { Asset, Place, Ticket } from "@amlak/shared"
+import { CircleAlert } from "lucide-react"
+import type { Asset, Place } from "@amlak/shared"
+import { todayIn } from "@/lib/dates"
 import { useAuth } from "@/lib/auth"
 import {
   createTicket,
   getPlaceAssets,
   getPlaces,
-  listTickets,
+  getPlaceWorkers,
   type TicketPriority,
 } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
-import { LIMITS, tooLong } from "@/lib/limits"
-import { useFormat } from "@/lib/format"
+import { LIMITS, tooLarge, tooLong } from "@/lib/limits"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { RepairDayNotice, useRepairDay } from "@/components/repair-day"
 import { FormCancel, FormPopup, useFormPopup } from "@/components/form-popup"
 import {
   Field,
+  FieldNeed,
+  FieldRow,
   FormButtons,
   NativeSelect,
   Panel,
-  PanelTitle,
   PhoneActionBar,
   Segmented,
   TwoColumns,
 } from "@/components/panel"
 import { PhotoPicker } from "@/components/photo-picker"
-import { TicketChip } from "@/components/ticket-parts"
 
-type FieldKey = "place" | "description"
+type FieldKey = "place" | "description" | "photos" | "cost" | "due"
 
 /**
  * Report damage, shown in a popup: the place (chosen here, or given by the
  * place page), the asset, photos, what happened and how urgent. The report
- * goes to the place manager for review.
+ * goes to the place manager for review. The place's manager also chooses
+ * who does it and by when (the review's fields), and the ticket is approved
+ * as it is added.
  */
 export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
-  const { accessToken } = useAuth()
+  const { accessToken, user } = useAuth()
   const popup = useFormPopup()
   const search = { place_id: startPlace }
 
@@ -53,7 +56,11 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [formError, setFormError] = useState("")
   const [sending, setSending] = useState(false)
-  const [earlier, setEarlier] = useState<Ticket[] | null>(null)
+  // The review's fields, for the place's manager.
+  const [people, setPeople] = useState<{ id: string; name: string }[]>([])
+  const [assignee, setAssignee] = useState("")
+  const [due, setDue] = useState("")
+  const [cost, setCost] = useState("")
 
   useEffect(() => {
     if (!accessToken) return
@@ -71,32 +78,59 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
     }
   }, [accessToken, search.place_id])
 
+  const place = places?.find((p) => p.id === placeId)
+  const approves = Boolean(place && user && place.owner_id === user.id)
+  const chosen = assignee || people[0]?.id || ""
+  const repair = useRepairDay(accessToken, approves, placeId, due)
+
   useEffect(() => {
     setAssetId("")
     setAssets([])
-    setEarlier(null)
+    setAssignee("")
+    setPeople([])
     if (!accessToken || !placeId) return
     let alive = true
     getPlaceAssets(accessToken, placeId)
       .then((list) => alive && setAssets(list))
       .catch(() => {})
-    listTickets(accessToken, { place_id: placeId }, 1, 3)
-      .then((result) => alive && setEarlier(result.data))
-      .catch(() => alive && setEarlier([]))
     return () => {
       alive = false
     }
   }, [accessToken, placeId])
+
+  // Who can take the ticket: the place's active workers, then the manager.
+  useEffect(() => {
+    if (!accessToken || !approves || !place) return
+    let alive = true
+    getPlaceWorkers(accessToken, place.id)
+      .catch(() => [])
+      .then((list) => {
+        if (!alive) return
+        setPeople([
+          ...list.filter((item) => item.worker.status === "ACTIVE").map((item) => ({ id: item.worker.id, name: item.worker.fullname })),
+          { id: place.owner_id, name: t`Me` },
+        ])
+      })
+    return () => {
+      alive = false
+    }
+  }, [accessToken, approves, place])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     if (!accessToken) return
     const next: Partial<Record<FieldKey, string>> = {}
     if (!placeId) next.place = t`Choose the place.`
+    if (photos.length === 0) next.photos = t`Add at least one photo of the damage.`
     if (!description.trim()) next.description = t`Write what happened.`
     else next.description = tooLong(description, LIMITS.longText)
+    if (approves) {
+      if (!due) next.due = t`Choose the due date.`
+      if (cost.trim() && !/^\d+(\.\d{1,2})?$/.test(cost.trim())) next.cost = t`Enter an amount of 0 or more, or leave it empty.`
+      else next.cost = tooLarge(cost)
+    }
     setErrors(next)
-    if (Object.values(next).some(Boolean)) return
+    if (Object.values(next).some(Boolean) || (approves && (!chosen || repair.staying))) return
 
     setSending(true)
     setFormError("")
@@ -106,6 +140,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
         priority,
         description: description.trim(),
         photos,
+        ...(approves ? { assignee_id: chosen, due_date: due, estimated_cost: cost.trim() || undefined } : {}),
       })
       popup?.saved()
     } catch (err) {
@@ -117,7 +152,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
 
   const send = (
     <Button type="submit" form="report-form" disabled={sending}>
-      {sending ? <Trans>Sending…</Trans> : <Trans>Send report</Trans>}
+      {sending ? <Trans>Sending…</Trans> : approves ? <Trans>Add and approve ticket</Trans> : <Trans>Send report</Trans>}
     </Button>
   )
 
@@ -133,6 +168,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
           >
             <Field
               id="r-place"
+              required
               label={<Trans>Place</Trans>}
               error={errors.place}
             >
@@ -155,6 +191,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
 
             <Field
               id="r-asset"
+              optional
               label={<Trans>Asset</Trans>}
               hint={
                 <Trans>
@@ -179,11 +216,12 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
 
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold">
-                <Trans>Photos</Trans>
+                <Trans>Photos</Trans><FieldNeed required />
               </span>
               <PhotoPicker
                 photos={photos}
                 onChange={setPhotos}
+                error={errors.photos}
                 label={<Trans>Take a photo</Trans>}
                 hint={<Trans>Add photos that show the damage.</Trans>}
               />
@@ -191,6 +229,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
 
             <Field
               id="r-desc"
+              required
               label={<Trans>What happened?</Trans>}
               error={errors.description}
             >
@@ -210,7 +249,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
 
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold">
-                <Trans>Priority</Trans>
+                <Trans>Priority</Trans><FieldNeed required />
               </span>
               <Segmented
                 label={t`Priority`}
@@ -224,6 +263,46 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
                 ]}
               />
             </div>
+
+            {approves && (
+              <>
+                <FieldRow>
+                  <Field id="r-assignee" required label={<Trans>Assign to</Trans>}>
+                    <NativeSelect id="r-assignee" value={chosen} onChange={setAssignee}>
+                      {people.map((person) => (
+                        <option key={person.id} value={person.id}>
+                          {person.name}
+                        </option>
+                      ))}
+                    </NativeSelect>
+                  </Field>
+                  <Field id="r-due" required label={<Trans>Due date</Trans>} error={errors.due}>
+                    <Input
+                      id="r-due"
+                      type="date"
+                      dir="ltr"
+                      min={place ? todayIn(place.timezone) : undefined}
+                      value={due}
+                      aria-invalid={errors.due ? true : undefined}
+                      aria-describedby={errors.due ? "r-due-error" : undefined}
+                      onChange={(e) => setDue(e.target.value)}
+                    />
+                  </Field>
+                </FieldRow>
+                <RepairDayNotice {...repair} />
+                <Field id="r-cost" optional label={<Trans>Estimated cost</Trans>} hint={<Trans>In Saudi riyals.</Trans>} error={errors.cost}>
+                  <Input
+                    id="r-cost"
+                    inputMode="decimal"
+                    dir="ltr"
+                    value={cost}
+                    aria-invalid={errors.cost ? true : undefined}
+                    aria-describedby={errors.cost ? "r-cost-error" : "r-cost-hint"}
+                    onChange={(e) => setCost(e.target.value)}
+                  />
+                </Field>
+              </>
+            )}
 
             {formError && (
               <p
@@ -245,86 +324,7 @@ export function ReportForm({ placeId: startPlace }: { placeId?: string }) {
           <PhoneActionBar>{send}</PhoneActionBar>
         </Panel>
       }
-      side={
-        <>
-          <Panel>
-            <PanelTitle small>
-              <Trans>For a clearer report</Trans>
-            </PanelTitle>
-            <Tip icon={<Camera />} tone="info">
-              <Trans>
-                One close photo of the damage, and one from further back that
-                shows where it is.
-              </Trans>
-            </Tip>
-            <Tip icon={<Wrench />} tone="info">
-              <Trans>
-                Pick the asset if you know it, so the report is linked to it.
-              </Trans>
-            </Tip>
-            <Tip icon={<TriangleAlert />} tone="warn">
-              <Trans>
-                “Urgent” only when a guest or the place is affected right now.
-              </Trans>
-            </Tip>
-          </Panel>
-          {placeId && earlier && earlier.length > 0 && (
-            <EarlierReports tickets={earlier} />
-          )}
-        </>
-      }
     />
-  )
-}
-
-function Tip({
-  icon,
-  tone,
-  children,
-}: {
-  icon: React.ReactNode
-  tone: "info" | "warn"
-  children: React.ReactNode
-}) {
-  return (
-    <div className="flex items-start gap-2.5 text-sm leading-[1.6]">
-      <span
-        aria-hidden="true"
-        className={`inline-flex size-8 flex-none items-center justify-center [&_svg]:size-4 [&_svg]:stroke-[1.8] ${tone === "warn" ? "bg-warn-50 text-warn" : "bg-info-50 text-info"}`}
-      >
-        {icon}
-      </span>
-      <span>{children}</span>
-    </div>
-  )
-}
-
-function EarlierReports({ tickets }: { tickets: Ticket[] }) {
-  const { relative } = useFormat()
-  return (
-    <Panel>
-      <PanelTitle small>
-        <Trans>Earlier reports at this place</Trans>
-      </PanelTitle>
-      <div className="flex flex-col gap-3">
-        {tickets.map((ticket) => (
-          <Link
-            key={ticket.id}
-            to="/ticket/$ticket_id"
-            params={{ ticket_id: ticket.id }}
-            className="am-lift box-border flex flex-col gap-2 border border-border bg-card p-3.5 text-foreground no-underline"
-          >
-            <span dir="auto" className="truncate font-semibold">
-              {ticket.description}
-            </span>
-            <span className="flex flex-wrap items-center justify-between gap-2 text-[13px] text-muted-foreground">
-              {relative(ticket.created_at)}
-              <TicketChip ticket={ticket} />
-            </span>
-          </Link>
-        ))}
-      </div>
-    </Panel>
   )
 }
 
@@ -338,8 +338,10 @@ export function ReportPopup({
   onClose: () => void
   onSaved: () => void
 }) {
+  // A manager's ticket is approved as it is added.
+  const manager = useAuth().user?.role === "MANAGER"
   return (
-    <FormPopup title={<Trans>Report damage</Trans>} onClose={onClose} onSaved={onSaved}>
+    <FormPopup title={manager ? <Trans>Add maintenance ticket</Trans> : <Trans>Report damage</Trans>} onClose={onClose} onSaved={onSaved}>
       <ReportForm placeId={placeId} />
     </FormPopup>
   )

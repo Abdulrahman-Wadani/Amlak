@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth"
 import { ApiError, errorMessage } from "@/lib/errors"
 import { LIMITS } from "@/lib/limits"
 import { AuthCard, AuthLayout } from "@/components/auth-layout"
-import { Field } from "@/components/panel"
+import { Field, FieldNeed } from "@/components/panel"
 import { Notice } from "@/components/states"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -192,7 +192,7 @@ function SignIn() {
               )}
             </div>
           )}
-          <Field id="email" label={<Trans>Email</Trans>} error={errors.email}>
+          <Field id="email" required label={<Trans>Email</Trans>} error={errors.email}>
             <Input
               id="email"
               maxLength={LIMITS.email}
@@ -209,7 +209,7 @@ function SignIn() {
           <div className="flex flex-col gap-2">
             <div className="flex items-baseline justify-between gap-3">
               <label htmlFor="password" className="text-sm font-semibold">
-                <Trans>Password</Trans>
+                <Trans>Password</Trans><FieldNeed required />
               </label>
               <Link
                 to="/forgot-password"
