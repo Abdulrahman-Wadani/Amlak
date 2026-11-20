@@ -22,12 +22,11 @@ import { canCompleteTicket } from "@/lib/tickets"
 import { ApiError, errorMessage } from "@/lib/errors"
 import { LIMITS, tooLarge, tooLong } from "@/lib/limits"
 import { useFormat } from "@/lib/format"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
-import { cn } from "cn"
 import { Page } from "@/components/page"
 import { Field, InfoRows, NativeSelect, Panel, PanelTitle, PhoneActionBar } from "@/components/panel"
 import { PhotoTiles } from "@/components/photo-picker"
@@ -35,6 +34,7 @@ import { PriorityText } from "@/components/home-parts"
 import { LoadError, Notice } from "@/components/states"
 import { TicketChip } from "@/components/ticket-parts"
 import { RepairDayNotice, useRepairDay } from "@/components/repair-day"
+import { CompletePopup } from "@/components/complete-form"
 import { toast } from "@/components/toast"
 
 export const Route = createFileRoute("/_authenticated/ticket/$ticket_id")({
@@ -62,6 +62,7 @@ function TicketPage() {
   const [health, setHealth] = useState<DashboardPlace | null>(null)
   const [failed, setFailed] = useState(false)
   const [changed, setChanged] = useState(false)
+  const [completing, setCompleting] = useState(false)
 
   const load = useCallback(async () => {
     if (!accessToken) return
@@ -267,17 +268,34 @@ function TicketPage() {
               <ReassignPanel ticket={ticket} place={place} people={assignable} onDone={load} onConflict={onConflict} />
             )}
             {canCompleteTicket(ticket, user?.id) && (
-              <Panel>
-                <Link to="/ticket/complete/$ticket_id" params={{ ticket_id: ticket.id }} className={cn(buttonVariants(), "w-full")}>
-                  <Check aria-hidden="true" />
-                  <Trans>Complete task</Trans>
-                </Link>
+              // Built like the cards beside it: a title, what to know, the button at the bottom.
+              <Panel labelledBy="complete-title" className="gap-4">
+                <PanelTitle id="complete-title">
+                  <Trans>Your task</Trans>
+                </PanelTitle>
                 {due && (
-                  <span className="text-[13px] text-muted-foreground">
+                  <span className={ticket.is_overdue ? "text-sm font-semibold text-destructive" : "text-sm text-muted-foreground"}>
                     {ticket.is_overdue ? <Trans>Was due {due}</Trans> : <Trans>Due {due}</Trans>}
                   </span>
                 )}
+                <p className="m-0 text-sm leading-[1.7] text-muted-foreground">
+                  <Trans>When the repair is done, add photos of the finished work and what it cost.</Trans>
+                </p>
+                <Button type="button" className="mt-auto w-full" onClick={() => setCompleting(true)}>
+                  <Check aria-hidden="true" />
+                  <Trans>Complete task</Trans>
+                </Button>
               </Panel>
+            )}
+            {completing && (
+              <CompletePopup
+                ticketId={ticket.id}
+                onClose={() => setCompleting(false)}
+                onSaved={() => {
+                  setCompleting(false)
+                  void load()
+                }}
+              />
             )}
             <DetailsPanel rows={detailRows} />
           </div>

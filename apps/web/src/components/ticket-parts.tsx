@@ -6,8 +6,7 @@ import { Check, ChevronRight } from "lucide-react"
 import type { Ticket } from "@amlak/shared"
 import { getPlaceAssets, getPlaces } from "@/lib/api"
 import { useFormat } from "@/lib/format"
-import { buttonVariants } from "@/components/ui/button"
-import { cn } from "cn"
+import { Button } from "@/components/ui/button"
 import { OverdueChip, TicketStatusChip } from "@/components/place-shared"
 import { PriorityText } from "@/components/home-parts"
 
@@ -79,8 +78,8 @@ export function TicketCard({ ticket, asset, place }: { ticket: Ticket; asset?: s
   )
 }
 
-/** A card in the Worker's lists: the task, its place and due date, and Complete task when it is theirs to do. */
-export function TaskCard({ ticket, place, canComplete }: { ticket: Ticket; place?: string; canComplete: boolean }) {
+/** A card in the Worker's lists: the task, its place and due date, and Complete task (a popup) when it is theirs to do. */
+export function TaskCard({ ticket, place, onComplete }: { ticket: Ticket; place?: string; onComplete?: () => void }) {
   const { date, relative } = useFormat()
   const due = ticket.due_date ? date(ticket.due_date, { day: "numeric", month: "long" }) : null
   const when =
@@ -106,11 +105,11 @@ export function TaskCard({ ticket, place, canComplete }: { ticket: Ticket; place
       </div>
       <div className="mt-auto flex flex-wrap items-center justify-between gap-3 text-[15px]">
         <PriorityText priority={ticket.priority} />
-        {canComplete && (
-          <Link to="/ticket/complete/$ticket_id" params={{ ticket_id: ticket.id }} className={cn(buttonVariants())}>
+        {onComplete && (
+          <Button type="button" onClick={onComplete}>
             <Check aria-hidden="true" />
             <Trans>Complete task</Trans>
-          </Link>
+          </Button>
         )}
       </div>
     </div>
