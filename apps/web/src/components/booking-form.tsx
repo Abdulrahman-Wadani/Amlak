@@ -10,6 +10,7 @@ import {
   getPlaces,
   type Booking,
 } from "@/lib/api"
+import { todayIn } from "@/lib/dates"
 import { ApiError, errorMessage } from "@/lib/errors"
 import { LIMITS, tooLarge, tooLong } from "@/lib/limits"
 import { useFormat } from "@/lib/format"
@@ -241,6 +242,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
                 id="b-out"
                 required
                 label={<Trans>Check-out date</Trans>}
+                hint={place && checkOut && checkOut < todayIn(place.timezone) ? <Trans>This stay is over, so it is saved as checked out.</Trans> : undefined}
                 error={errors.out}
               >
                 <Input

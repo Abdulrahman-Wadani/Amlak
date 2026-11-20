@@ -68,6 +68,10 @@ export async function getBooking(
  * A Manager or an assigned Worker adds a booking. Its dates must not overlap
  * a booking whose guest is coming or staying. The check-out day is free, so
  * the next guest can arrive on it.
+ *
+ * A stay that is already over can be recorded too (to keep past bookings and
+ * their income): it is saved as checked out, and it must not overlap a past
+ * stay either, so the same stay is not counted twice.
  */
 export async function createBooking(
 	user: AuthUser,
@@ -82,19 +86,17 @@ export async function createBooking(
 				status: place.status,
 			});
 		}
-		// A stay that started earlier can be added late, but not one that is
-		// already over.
-		if (input.check_out_date < todayIn(place.timezone)) {
-			throw new AppError("VALIDATION_ERROR", "Some fields are invalid", {
-				fields: { check_out_date: "This stay has already ended" },
-			});
-		}
+		const over = input.check_out_date < todayIn(place.timezone);
 
 		await lockPlace(tx, place.id);
 		const conflicting = await tx.booking.findFirst({
 			where: {
 				place_id: place.id,
-				status: { in: ["CONFIRMED", "CHECKED_IN"] },
+				status: {
+					in: over
+						? ["CONFIRMED", "CHECKED_IN", "CHECKED_OUT"]
+						: ["CONFIRMED", "CHECKED_IN"],
+				},
 				check_in_date: { lt: toDbDate(input.check_out_date) },
 				check_out_date: { gt: toDbDate(input.check_in_date) },
 			},
@@ -118,6 +120,7 @@ export async function createBooking(
 				check_out_date: toDbDate(input.check_out_date),
 				total_price: input.total_price,
 				notes: input.notes,
+				...(over && { status: "CHECKED_OUT" as const }),
 			},
 			include: bookingInclude,
 		});

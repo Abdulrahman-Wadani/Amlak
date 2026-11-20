@@ -561,14 +561,15 @@ export const openApiDocument = createDocument({
 				requestParams: { path: placeParams },
 				requestBody: json(createBookingSchema),
 				responses: {
-					"201": ok("The new booking, CONFIRMED", bookingSchema),
+					"201": ok(
+						"The new booking: CONFIRMED, or CHECKED_OUT when the stay is already over",
+						bookingSchema,
+					),
 					"404": fail("Place not found"),
 					"409": fail(
 						"The dates overlap another booking; see details.conflicting_booking_id",
 					),
-					"422": fail(
-						"Some fields are invalid, the stay is over, or the place is not ACTIVE",
-					),
+					"422": fail("Some fields are invalid, or the place is not ACTIVE"),
 					...guarded,
 				},
 			},
