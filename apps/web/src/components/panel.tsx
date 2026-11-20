@@ -552,6 +552,7 @@ export function NativeSelect({
   disabled,
   invalid,
   describedBy,
+  label,
 }: {
   id: string
   value: string
@@ -560,12 +561,15 @@ export function NativeSelect({
   disabled?: boolean
   invalid?: boolean
   describedBy?: string
+  /** The name read out when no <label> points at the select. */
+  label?: string
 }) {
   return (
     <div className="relative">
       <select
         id={id}
         value={value}
+        aria-label={label}
         disabled={disabled}
         aria-invalid={invalid || undefined}
         aria-describedby={describedBy}

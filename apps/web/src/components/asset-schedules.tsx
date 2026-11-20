@@ -272,28 +272,30 @@ function ScheduleForm({
             {...invalid("description")}
           />
         </Field>
-        <div className="grid grid-cols-2 gap-3">
-          <Field id="s-count" required label={<Trans>Every</Trans>} error={errors.count}>
-            <Input
-              id="s-count"
-              inputMode="numeric"
-              dir="ltr"
-              value={count}
-              onChange={(e) => setCount(e.target.value)}
-              {...invalid("count")}
-            />
-          </Field>
-          <Field id="s-unit" required label={<Trans>Unit</Trans>}>
-            <NativeSelect id="s-unit" value={unit} onChange={(value) => setUnit(value as IntervalUnit)}>
-              {(["DAY", "WEEK", "MONTH", "YEAR"] as const).map((value) => (
-                <option key={value} value={value}>
-                  {unitLabel(value)}
-                </option>
-              ))}
-            </NativeSelect>
-          </Field>
-        </div>
+        {/* Two rows of two: how often and when it starts, then how early the ticket comes and who gets it. */}
         <FieldRow>
+          <Field id="s-count" required label={<Trans>Repeats every</Trans>} error={errors.count}>
+            <div className="flex gap-2">
+              <Input
+                id="s-count"
+                inputMode="numeric"
+                dir="ltr"
+                className="w-20 flex-none text-center"
+                value={count}
+                onChange={(e) => setCount(e.target.value)}
+                {...invalid("count")}
+              />
+              <div className="min-w-0 flex-1">
+                <NativeSelect id="s-unit" label={t`Unit`} value={unit} onChange={(value) => setUnit(value as IntervalUnit)}>
+                  {(["DAY", "WEEK", "MONTH", "YEAR"] as const).map((value) => (
+                    <option key={value} value={value}>
+                      {unitLabel(value)}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </div>
+            </div>
+          </Field>
           <Field id="s-due" required label={<Trans>First due date</Trans>} error={errors.due}>
             <Input
               id="s-due"
@@ -305,32 +307,34 @@ function ScheduleForm({
               {...invalid("due")}
             />
           </Field>
-          <Field
-            id="s-lead"
-            required
-            label={<Trans>Create the ticket this many days before</Trans>}
-            hint={<Trans>In days.</Trans>}
-            error={errors.lead}
-          >
-            <Input
-              id="s-lead"
-              inputMode="numeric"
-              dir="ltr"
-              value={lead}
-              onChange={(e) => setLead(e.target.value)}
-              {...invalid("lead")}
-            />
+        </FieldRow>
+        <FieldRow>
+          <Field id="s-lead" required label={<Trans>When to create the ticket</Trans>} error={errors.lead}>
+            <div className="flex">
+              <Input
+                id="s-lead"
+                inputMode="numeric"
+                dir="ltr"
+                className="w-20 flex-none text-center"
+                value={lead}
+                onChange={(e) => setLead(e.target.value)}
+                {...invalid("lead")}
+              />
+              <span className="box-border inline-flex h-11 flex-1 items-center border border-s-0 border-input bg-secondary px-3.5 text-[15px] text-muted-foreground">
+                {plural(Number(lead) || 0, { one: "day before the due date", other: "days before the due date" })}
+              </span>
+            </div>
+          </Field>
+          <Field id="s-worker" required label={<Trans>Default worker</Trans>}>
+            <NativeSelect id="s-worker" value={chosen} onChange={setAssignee}>
+              {people.map((person) => (
+                <option key={person.id} value={person.id}>
+                  {person.name}
+                </option>
+              ))}
+            </NativeSelect>
           </Field>
         </FieldRow>
-        <Field id="s-worker" required label={<Trans>Default worker</Trans>}>
-          <NativeSelect id="s-worker" value={chosen} onChange={setAssignee}>
-            {people.map((person) => (
-              <option key={person.id} value={person.id}>
-                {person.name}
-              </option>
-            ))}
-          </NativeSelect>
-        </Field>
         {formError && (
           <p role="alert" className="m-0 flex items-center gap-1.5 text-[13px] text-destructive">
             <CircleAlert aria-hidden="true" className="size-3.5 shrink-0" />

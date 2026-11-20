@@ -55,6 +55,11 @@ msgstr "(required)"
 msgid "{0, plural, one {# place} other {# places}}, {activeCount} of them active."
 msgstr "{0, plural, one {# place} other {# places}}, {activeCount} of them active."
 
+#. placeholder {0}: Number(lead) || 0
+#: src/components/asset-schedules.tsx:324
+msgid "{0, plural, one {day before the due date} other {days before the due date}}"
+msgstr "{0, plural, one {day before the due date} other {days before the due date}}"
+
 #. placeholder {0}: user.fullname
 #: src/routes/_authenticated/admin/index.tsx:162
 msgid "{0} (you)"
@@ -332,7 +337,7 @@ msgid "Add place"
 msgstr "Add place"
 
 #: src/components/asset-schedules.tsx:130
-#: src/components/asset-schedules.tsx:343
+#: src/components/asset-schedules.tsx:347
 msgid "Add schedule"
 msgstr "Add schedule"
 
@@ -1000,10 +1005,6 @@ msgstr "Create a manager account"
 msgid "Create account"
 msgstr "Create account"
 
-#: src/components/asset-schedules.tsx:311
-msgid "Create the ticket this many days before"
-msgstr "Create the ticket this many days before"
-
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:161
 msgid "created the ticket."
 msgstr "created the ticket."
@@ -1073,7 +1074,7 @@ msgstr "Deactivated"
 msgid "Deactivating…"
 msgstr "Deactivating…"
 
-#: src/components/asset-schedules.tsx:325
+#: src/components/asset-schedules.tsx:328
 msgid "Default worker"
 msgstr "Default worker"
 
@@ -1388,10 +1389,6 @@ msgstr "Enter your password"
 msgid "Estimated cost"
 msgstr "Estimated cost"
 
-#: src/components/asset-schedules.tsx:276
-msgid "Every"
-msgstr "Every"
-
 #: src/routes/_authenticated/announcements.tsx:105
 msgid "Everyone"
 msgstr "Everyone"
@@ -1469,7 +1466,7 @@ msgstr "Financial reports"
 msgid "Finding your location…"
 msgstr "Finding your location…"
 
-#: src/components/asset-schedules.tsx:297
+#: src/components/asset-schedules.tsx:299
 msgid "First due date"
 msgstr "First due date"
 
@@ -1593,10 +1590,6 @@ msgstr "If you reject, we will ask for a reason and send it to {reporter}."
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:528
 msgid "If you reject, we will ask for a reason and send it to the reporter."
 msgstr "If you reject, we will ask for a reason and send it to the reporter."
-
-#: src/components/asset-schedules.tsx:312
-msgid "In days."
-msgstr "In days."
 
 #: src/components/booking-form.tsx:332
 #: src/components/expense-form.tsx:138
@@ -2438,6 +2431,10 @@ msgstr "Remove asset"
 msgid "Repeat every"
 msgstr "Repeat every"
 
+#: src/components/asset-schedules.tsx:277
+msgid "Repeats every"
+msgstr "Repeats every"
+
 #: src/components/admin-support.tsx:143
 msgid "Reply"
 msgstr "Reply"
@@ -2565,7 +2562,7 @@ msgid "Save place"
 msgstr "Save place"
 
 #: src/components/asset-form.tsx:146
-#: src/components/asset-schedules.tsx:343
+#: src/components/asset-schedules.tsx:347
 #: src/components/booking-form.tsx:154
 #: src/components/expense-form.tsx:94
 #: src/components/place-bookings.tsx:608
@@ -3133,7 +3130,7 @@ msgstr "Unassigning…"
 msgid "Under maintenance"
 msgstr "Under maintenance"
 
-#: src/components/asset-schedules.tsx:286
+#: src/components/asset-schedules.tsx:289
 msgid "Unit"
 msgstr "Unit"
 
@@ -3347,6 +3344,10 @@ msgstr "What the repair cost"
 #: src/routes/_authenticated/tickets.tsx:158
 msgid "When a worker reports damage, the ticket will appear here."
 msgstr "When a worker reports damage, the ticket will appear here."
+
+#: src/components/asset-schedules.tsx:312
+msgid "When to create the ticket"
+msgstr "When to create the ticket"
 
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:338
 msgid "Who did what to this ticket and when, newest first."
