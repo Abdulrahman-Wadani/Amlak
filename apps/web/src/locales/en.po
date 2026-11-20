@@ -196,11 +196,11 @@ msgstr "{place}, was due {due}"
 msgid "{range}, {count}"
 msgstr "{range}, {count}"
 
-#: src/routes/_authenticated/reports.tsx:139
+#: src/routes/_authenticated/reports.tsx:132
 msgid "3 months"
 msgstr "3 months"
 
-#: src/routes/_authenticated/reports.tsx:140
+#: src/routes/_authenticated/reports.tsx:133
 msgid "6 months"
 msgstr "6 months"
 
@@ -217,7 +217,7 @@ msgstr "8 characters or more"
 msgid "A"
 msgstr "A"
 
-#: src/components/expense-form.tsx:178
+#: src/components/expense-form.tsx:176
 msgid "A clear photo of the amount and date."
 msgstr "A clear photo of the amount and date."
 
@@ -391,7 +391,7 @@ msgid "All places"
 msgstr "All places"
 
 #. placeholder {0}: number(places?.length ?? 0)
-#: src/routes/_authenticated/reports.tsx:148
+#: src/routes/_authenticated/reports.tsx:141
 msgid "All places ({0})"
 msgstr "All places ({0})"
 
@@ -434,7 +434,7 @@ msgstr "Amlak"
 msgid "Amlak {0}"
 msgstr "Amlak {0}"
 
-#: src/components/expense-form.tsx:140
+#: src/components/expense-form.tsx:138
 #: src/lib/errors.ts:138
 msgid "Amount"
 msgstr "Amount"
@@ -639,7 +639,7 @@ msgstr "Cancelled"
 msgid "Cancelling…"
 msgstr "Cancelling…"
 
-#: src/components/expense-form.tsx:119
+#: src/components/expense-form.tsx:117
 #: src/lib/errors.ts:140
 msgid "Category"
 msgstr "Category"
@@ -789,7 +789,7 @@ msgstr "Choose the check-in date."
 msgid "Choose the check-out date."
 msgstr "Choose the check-out date."
 
-#: src/components/expense-form.tsx:69
+#: src/components/expense-form.tsx:67
 msgid "Choose the date."
 msgstr "Choose the date."
 
@@ -802,7 +802,7 @@ msgid "Choose the first due date."
 msgstr "Choose the first due date."
 
 #: src/components/booking-form.tsx:205
-#: src/components/expense-form.tsx:108
+#: src/components/expense-form.tsx:106
 #: src/components/report-form.tsx:138
 msgid "Choose the place"
 msgstr "Choose the place"
@@ -816,7 +816,7 @@ msgid "Choose the place type."
 msgstr "Choose the place type."
 
 #: src/components/booking-form.tsx:96
-#: src/components/expense-form.tsx:66
+#: src/components/expense-form.tsx:64
 #: src/components/report-form.tsx:86
 msgid "Choose the place."
 msgstr "Choose the place."
@@ -938,7 +938,7 @@ msgstr "Could not load support requests"
 msgid "Could not load the pages"
 msgstr "Could not load the pages"
 
-#: src/routes/_authenticated/reports.tsx:169
+#: src/routes/_authenticated/reports.tsx:162
 msgid "Could not load the report"
 msgstr "Could not load the report"
 
@@ -1013,7 +1013,7 @@ msgstr "Creating account…"
 msgid "Currency"
 msgstr "Currency"
 
-#: src/routes/_authenticated/reports.tsx:141
+#: src/routes/_authenticated/reports.tsx:134
 msgid "Custom"
 msgstr "Custom"
 
@@ -1026,7 +1026,7 @@ msgstr "Damage photo {n}"
 msgid "Damage photos ({damageCount})"
 msgstr "Damage photos ({damageCount})"
 
-#: src/components/expense-form.tsx:150
+#: src/components/expense-form.tsx:148
 msgid "Date"
 msgstr "Date"
 
@@ -1149,7 +1149,7 @@ msgid "Deleting…"
 msgstr "Deleting…"
 
 #: src/components/asset-schedules.tsx:266
-#: src/components/expense-form.tsx:154
+#: src/components/expense-form.tsx:152
 #: src/components/place-form.tsx:200
 #: src/lib/errors.ts:112
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:288
@@ -1317,7 +1317,7 @@ msgstr "Enter an amount of 0 or more, or leave it empty."
 msgid "Enter an asset name"
 msgstr "Enter an asset name"
 
-#: src/components/expense-form.tsx:67
+#: src/components/expense-form.tsx:65
 msgid "Enter the amount, like 640 or 640.50."
 msgstr "Enter the amount, like 640 or 640.50."
 
@@ -1408,10 +1408,10 @@ msgstr "Expense deleted."
 #: src/components/account-links.tsx:29
 #: src/routes/_authenticated/expense/edit/$expense_id.tsx:33
 #: src/routes/_authenticated/expenses.tsx:107
-#: src/routes/_authenticated/reports.tsx:126
-#: src/routes/_authenticated/reports.tsx:178
-#: src/routes/_authenticated/reports.tsx:209
-#: src/routes/_authenticated/reports.tsx:277
+#: src/routes/_authenticated/reports.tsx:119
+#: src/routes/_authenticated/reports.tsx:171
+#: src/routes/_authenticated/reports.tsx:202
+#: src/routes/_authenticated/reports.tsx:270
 msgid "Expenses"
 msgstr "Expenses"
 
@@ -1458,7 +1458,7 @@ msgstr "Finance"
 
 #: src/components/account-links.tsx:32
 #: src/routes/_authenticated/expenses.tsx:162
-#: src/routes/_authenticated/reports.tsx:120
+#: src/routes/_authenticated/reports.tsx:113
 msgid "Financial reports"
 msgstr "Financial reports"
 
@@ -1486,7 +1486,7 @@ msgstr "Forgot password"
 msgid "Forgot password?"
 msgstr "Forgot password?"
 
-#: src/routes/_authenticated/reports.tsx:159
+#: src/routes/_authenticated/reports.tsx:152
 msgid "From"
 msgstr "From"
 
@@ -1591,27 +1591,21 @@ msgstr "If you reject, we will ask for a reason and send it to {reporter}."
 msgid "If you reject, we will ask for a reason and send it to the reporter."
 msgstr "If you reject, we will ask for a reason and send it to the reporter."
 
-#. placeholder {0}: currencyName(place.currency)
-#: src/components/booking-form.tsx:330
-#: src/components/expense-form.tsx:140
-msgid "In {0}"
-msgstr "In {0}"
-
-#. placeholder {0}: currencyName("SAR")
-#. placeholder {0}: currencyName(place.currency)
-#: src/components/place-form.tsx:281
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:488
-#: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:128
-msgid "In {0}."
-msgstr "In {0}."
-
-#: src/routes/_authenticated/reports.tsx:122
-msgid "In {currencyName}. Visible to the manager only."
-msgstr "In {currencyName}. Visible to the manager only."
-
 #: src/components/asset-schedules.tsx:312
 msgid "In days."
 msgstr "In days."
+
+#: src/components/booking-form.tsx:330
+#: src/components/expense-form.tsx:138
+#: src/components/place-form.tsx:281
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:488
+#: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:128
+msgid "In Saudi riyals."
+msgstr "In Saudi riyals."
+
+#: src/routes/_authenticated/reports.tsx:115
+msgid "In Saudi riyals. Visible to the manager only."
+msgstr "In Saudi riyals. Visible to the manager only."
 
 #: src/components/home-parts.tsx:145
 #: src/components/place-form.tsx:55
@@ -1620,13 +1614,13 @@ msgstr "In days."
 msgid "Inactive"
 msgstr "Inactive"
 
-#: src/routes/_authenticated/reports.tsx:175
-#: src/routes/_authenticated/reports.tsx:206
-#: src/routes/_authenticated/reports.tsx:273
+#: src/routes/_authenticated/reports.tsx:168
+#: src/routes/_authenticated/reports.tsx:199
+#: src/routes/_authenticated/reports.tsx:266
 msgid "Income"
 msgstr "Income"
 
-#: src/routes/_authenticated/reports.tsx:268
+#: src/routes/_authenticated/reports.tsx:261
 msgid "Income and expenses"
 msgstr "Income and expenses"
 
@@ -1785,7 +1779,7 @@ msgid "Map to pick the location"
 msgstr "Map to pick the location"
 
 #. placeholder {0}: number(margin)
-#: src/routes/_authenticated/reports.tsx:183
+#: src/routes/_authenticated/reports.tsx:176
 msgid "Margin {0}%"
 msgstr "Margin {0}%"
 
@@ -1812,7 +1806,7 @@ msgstr "Medium"
 msgid "Mobile number"
 msgstr "Mobile number"
 
-#: src/routes/_authenticated/reports.tsx:203
+#: src/routes/_authenticated/reports.tsx:196
 msgid "Month"
 msgstr "Month"
 
@@ -1863,7 +1857,7 @@ msgstr "My tasks"
 msgid "Needs maintenance"
 msgstr "Needs maintenance"
 
-#: src/routes/_authenticated/reports.tsx:182
+#: src/routes/_authenticated/reports.tsx:175
 msgid "Net profit"
 msgstr "Net profit"
 
@@ -2174,7 +2168,7 @@ msgstr "Pending review"
 msgid "Pending verification"
 msgstr "Pending verification"
 
-#: src/routes/_authenticated/reports.tsx:134
+#: src/routes/_authenticated/reports.tsx:127
 msgid "Period"
 msgstr "Period"
 
@@ -2212,7 +2206,7 @@ msgstr "Photo after repair {n}"
 msgid "Photo saved."
 msgstr "Photo saved."
 
-#: src/components/expense-form.tsx:175
+#: src/components/expense-form.tsx:173
 msgid "Photograph receipt"
 msgstr "Photograph receipt"
 
@@ -2236,7 +2230,7 @@ msgstr "Pick an arrival date on or after {0}. The next stay can start on the sam
 
 #: src/components/asset-form.tsx:122
 #: src/components/booking-form.tsx:195
-#: src/components/expense-form.tsx:105
+#: src/components/expense-form.tsx:103
 #: src/components/report-form.tsx:128
 #: src/routes/_authenticated/bookings.tsx:107
 #: src/routes/_authenticated/expenses.tsx:177
@@ -2277,7 +2271,7 @@ msgstr "Place type"
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:72
 #: src/routes/_authenticated/place/new.tsx:16
 #: src/routes/_authenticated/places.tsx:141
-#: src/routes/_authenticated/reports.tsx:147
+#: src/routes/_authenticated/reports.tsx:140
 msgid "Places"
 msgstr "Places"
 
@@ -2286,7 +2280,7 @@ msgid "Places assigned to you."
 msgstr "Places assigned to you."
 
 #. placeholder {0}: others.map((x) => money(x.profit, x.currency)).join(", ")
-#: src/routes/_authenticated/reports.tsx:190
+#: src/routes/_authenticated/reports.tsx:183
 msgid "Places in other currencies are not added to these totals: {0} profit."
 msgstr "Places in other currencies are not added to these totals: {0} profit."
 
@@ -2317,7 +2311,7 @@ msgstr "Previous month"
 msgid "Priority"
 msgstr "Priority"
 
-#: src/routes/_authenticated/reports.tsx:212
+#: src/routes/_authenticated/reports.tsx:205
 msgid "Profit"
 msgstr "Profit"
 
@@ -2387,12 +2381,12 @@ msgstr "Reason for rejection"
 msgid "Reassign"
 msgstr "Reassign"
 
-#: src/components/expense-form.tsx:159
+#: src/components/expense-form.tsx:157
 msgid "Receipt"
 msgstr "Receipt"
 
-#: src/components/expense-form.tsx:164
-#: src/components/expense-form.tsx:168
+#: src/components/expense-form.tsx:162
+#: src/components/expense-form.tsx:166
 msgid "Receipt photo"
 msgstr "Receipt photo"
 
@@ -2464,7 +2458,7 @@ msgstr "Report damage in this place"
 msgid "Reported by"
 msgstr "Reported by"
 
-#: src/routes/_authenticated/reports.tsx:121
+#: src/routes/_authenticated/reports.tsx:114
 msgid "Reports"
 msgstr "Reports"
 
@@ -2551,7 +2545,7 @@ msgstr "Save changes"
 msgid "Save draft"
 msgstr "Save draft"
 
-#: src/components/expense-form.tsx:96
+#: src/components/expense-form.tsx:94
 msgid "Save expense"
 msgstr "Save expense"
 
@@ -2570,7 +2564,7 @@ msgstr "Save place"
 #: src/components/asset-form.tsx:146
 #: src/components/asset-schedules.tsx:343
 #: src/components/booking-form.tsx:153
-#: src/components/expense-form.tsx:96
+#: src/components/expense-form.tsx:94
 #: src/components/place-bookings.tsx:608
 #: src/components/place-form.tsx:326
 #: src/components/worker-form.tsx:206
@@ -2976,7 +2970,7 @@ msgstr "This is a preview of the photo before saving."
 msgid "This link is already used in this language."
 msgstr "This link is already used in this language."
 
-#: src/routes/_authenticated/reports.tsx:138
+#: src/routes/_authenticated/reports.tsx:131
 msgid "This month"
 msgstr "This month"
 
@@ -3065,7 +3059,7 @@ msgstr "Title in Arabic"
 msgid "Title in English"
 msgstr "Title in English"
 
-#: src/routes/_authenticated/reports.tsx:162
+#: src/routes/_authenticated/reports.tsx:155
 msgid "To"
 msgstr "To"
 
@@ -3221,7 +3215,6 @@ msgstr "Villa"
 
 #: src/routes/_authenticated/expenses.tsx:108
 #: src/routes/_authenticated/place/$place_id.tsx:308
-#: src/routes/_authenticated/reports.tsx:122
 msgid "Visible to the manager only."
 msgstr "Visible to the manager only."
 

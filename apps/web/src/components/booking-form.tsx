@@ -50,7 +50,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
   const { accessToken } = useAuth()
   const popup = useFormPopup()
   const search = { place_id: startPlace }
-  const { date, currencyName } = useFormat()
+  const { date } = useFormat()
   const stay = useStayText()
 
   const [places, setPlaces] = useState<Place[] | null>(null)
@@ -327,7 +327,7 @@ export function BookingForm({ placeId: startPlace }: { placeId?: string }) {
                 label={<Trans>Total price</Trans>}
                 hint={
                   place ? (
-                    <Trans>In {currencyName(place.currency)}</Trans>
+                    <Trans>In Saudi riyals.</Trans>
                   ) : undefined
                 }
                 error={errors.price}

@@ -64,7 +64,7 @@ type Errors = Partial<Record<"name" | "type" | "city" | "address" | "description
  */
 export function PlaceForm({ token, place }: { token: string; place?: Place }) {
   const navigate = useNavigate()
-  const { lang, currencyName } = useFormat()
+  const { lang } = useFormat()
   const editing = place !== undefined
 
   const [name, setName] = useState(place?.place_name ?? "")
@@ -278,7 +278,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
               id="pbudget"
               optional
               label={<Trans>Monthly maintenance budget</Trans>}
-              hint={<Trans>In {currencyName("SAR")}.</Trans>}
+              hint={<Trans>In Saudi riyals.</Trans>}
               error={errors.budget}
             >
               <Input

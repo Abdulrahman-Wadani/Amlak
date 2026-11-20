@@ -9,7 +9,6 @@ import { todayIn } from "@/lib/dates"
 import { errorMessage } from "@/lib/errors"
 import { FormCancel, useFormPopup } from "@/components/form-popup"
 import { LIMITS, tooLarge, tooLong } from "@/lib/limits"
-import { useFormat } from "@/lib/format"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Field, FieldNeed, FieldRow, FormButtons, NativeSelect, Panel, PhoneActionBar, TwoColumns } from "@/components/panel"
@@ -23,7 +22,6 @@ type FieldKey = "place" | "amount" | "date" | "description"
 export function ExpenseForm({ token, expense }: { token: string; expense?: Expense }) {
   const navigate = useNavigate()
   const popup = useFormPopup()
-  const { currencyName } = useFormat()
   const [places, setPlaces] = useState<Place[] | null>(null)
   const [placeId, setPlaceId] = useState(expense?.place_id ?? "")
   const [category, setCategory] = useState<ExpenseCategory>(expense?.category ?? "MAINTENANCE")
@@ -137,7 +135,7 @@ export function ExpenseForm({ token, expense }: { token: string; expense?: Expen
               </div>
             </div>
             <FieldRow>
-              <Field id="e-amount" required label={<Trans>Amount</Trans>} hint={place ? <Trans>In {currencyName(place.currency)}</Trans> : undefined} error={errors.amount}>
+              <Field id="e-amount" required label={<Trans>Amount</Trans>} hint={<Trans>In Saudi riyals.</Trans>} error={errors.amount}>
                 <Input
                   id="e-amount"
                   inputMode="decimal"

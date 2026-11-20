@@ -196,11 +196,11 @@ msgstr "{place}، كان يستحق {due}"
 msgid "{range}, {count}"
 msgstr "{range}، {count}"
 
-#: src/routes/_authenticated/reports.tsx:139
+#: src/routes/_authenticated/reports.tsx:132
 msgid "3 months"
 msgstr "3 أشهر"
 
-#: src/routes/_authenticated/reports.tsx:140
+#: src/routes/_authenticated/reports.tsx:133
 msgid "6 months"
 msgstr "6 أشهر"
 
@@ -217,7 +217,7 @@ msgstr "8 أحرف على الأقل"
 msgid "A"
 msgstr "أ"
 
-#: src/components/expense-form.tsx:178
+#: src/components/expense-form.tsx:176
 msgid "A clear photo of the amount and date."
 msgstr "صورة واضحة للمبلغ والتاريخ."
 
@@ -391,7 +391,7 @@ msgid "All places"
 msgstr "كل العقارات"
 
 #. placeholder {0}: number(places?.length ?? 0)
-#: src/routes/_authenticated/reports.tsx:148
+#: src/routes/_authenticated/reports.tsx:141
 msgid "All places ({0})"
 msgstr "كل العقارات ({0})"
 
@@ -434,7 +434,7 @@ msgstr "أملاك"
 msgid "Amlak {0}"
 msgstr "أملاك {0}"
 
-#: src/components/expense-form.tsx:140
+#: src/components/expense-form.tsx:138
 #: src/lib/errors.ts:138
 msgid "Amount"
 msgstr "المبلغ"
@@ -639,7 +639,7 @@ msgstr "ملغى"
 msgid "Cancelling…"
 msgstr "جارٍ الإلغاء…"
 
-#: src/components/expense-form.tsx:119
+#: src/components/expense-form.tsx:117
 #: src/lib/errors.ts:140
 msgid "Category"
 msgstr "التصنيف"
@@ -789,7 +789,7 @@ msgstr "اختر تاريخ الوصول."
 msgid "Choose the check-out date."
 msgstr "اختر تاريخ المغادرة."
 
-#: src/components/expense-form.tsx:69
+#: src/components/expense-form.tsx:67
 msgid "Choose the date."
 msgstr "اختر التاريخ."
 
@@ -802,7 +802,7 @@ msgid "Choose the first due date."
 msgstr "اختر أول موعد."
 
 #: src/components/booking-form.tsx:205
-#: src/components/expense-form.tsx:108
+#: src/components/expense-form.tsx:106
 #: src/components/report-form.tsx:138
 msgid "Choose the place"
 msgstr "اختر العقار"
@@ -816,7 +816,7 @@ msgid "Choose the place type."
 msgstr "اختر نوع العقار."
 
 #: src/components/booking-form.tsx:96
-#: src/components/expense-form.tsx:66
+#: src/components/expense-form.tsx:64
 #: src/components/report-form.tsx:86
 msgid "Choose the place."
 msgstr "اختر العقار."
@@ -938,7 +938,7 @@ msgstr "تعذّر تحميل طلبات الدعم"
 msgid "Could not load the pages"
 msgstr "تعذّر تحميل الصفحات"
 
-#: src/routes/_authenticated/reports.tsx:169
+#: src/routes/_authenticated/reports.tsx:162
 msgid "Could not load the report"
 msgstr "تعذّر تحميل التقرير"
 
@@ -1013,7 +1013,7 @@ msgstr "جارٍ إنشاء الحساب…"
 msgid "Currency"
 msgstr "العملة"
 
-#: src/routes/_authenticated/reports.tsx:141
+#: src/routes/_authenticated/reports.tsx:134
 msgid "Custom"
 msgstr "مخصصة"
 
@@ -1026,7 +1026,7 @@ msgstr "صورة العطل {n}"
 msgid "Damage photos ({damageCount})"
 msgstr "صور العطل ({damageCount})"
 
-#: src/components/expense-form.tsx:150
+#: src/components/expense-form.tsx:148
 msgid "Date"
 msgstr "التاريخ"
 
@@ -1149,7 +1149,7 @@ msgid "Deleting…"
 msgstr "جارٍ الحذف…"
 
 #: src/components/asset-schedules.tsx:266
-#: src/components/expense-form.tsx:154
+#: src/components/expense-form.tsx:152
 #: src/components/place-form.tsx:200
 #: src/lib/errors.ts:112
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:288
@@ -1317,7 +1317,7 @@ msgstr "أدخل مبلغًا يساوي 0 أو أكثر، أو اتركه فا�
 msgid "Enter an asset name"
 msgstr "أدخل اسم الأصل"
 
-#: src/components/expense-form.tsx:67
+#: src/components/expense-form.tsx:65
 msgid "Enter the amount, like 640 or 640.50."
 msgstr "أدخل المبلغ، مثل 640 أو 640.50."
 
@@ -1408,10 +1408,10 @@ msgstr "حُذف المصروف."
 #: src/components/account-links.tsx:29
 #: src/routes/_authenticated/expense/edit/$expense_id.tsx:33
 #: src/routes/_authenticated/expenses.tsx:107
-#: src/routes/_authenticated/reports.tsx:126
-#: src/routes/_authenticated/reports.tsx:178
-#: src/routes/_authenticated/reports.tsx:209
-#: src/routes/_authenticated/reports.tsx:277
+#: src/routes/_authenticated/reports.tsx:119
+#: src/routes/_authenticated/reports.tsx:171
+#: src/routes/_authenticated/reports.tsx:202
+#: src/routes/_authenticated/reports.tsx:270
 msgid "Expenses"
 msgstr "المصروفات"
 
@@ -1458,7 +1458,7 @@ msgstr "المالية"
 
 #: src/components/account-links.tsx:32
 #: src/routes/_authenticated/expenses.tsx:162
-#: src/routes/_authenticated/reports.tsx:120
+#: src/routes/_authenticated/reports.tsx:113
 msgid "Financial reports"
 msgstr "التقارير المالية"
 
@@ -1486,7 +1486,7 @@ msgstr "نسيت كلمة المرور"
 msgid "Forgot password?"
 msgstr "نسيت كلمة المرور؟"
 
-#: src/routes/_authenticated/reports.tsx:159
+#: src/routes/_authenticated/reports.tsx:152
 msgid "From"
 msgstr "من تاريخ"
 
@@ -1591,27 +1591,21 @@ msgstr "عند الرفض سنطلب منك سبب الرفض ونرسله لـ{
 msgid "If you reject, we will ask for a reason and send it to the reporter."
 msgstr "عند الرفض سنطلب منك سبب الرفض ونرسله لمن أبلغ."
 
-#. placeholder {0}: currencyName(place.currency)
-#: src/components/booking-form.tsx:330
-#: src/components/expense-form.tsx:140
-msgid "In {0}"
-msgstr "بـ{0}"
-
-#. placeholder {0}: currencyName("SAR")
-#. placeholder {0}: currencyName(place.currency)
-#: src/components/place-form.tsx:281
-#: src/routes/_authenticated/ticket/$ticket_id.tsx:488
-#: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:128
-msgid "In {0}."
-msgstr "بـ{0}."
-
-#: src/routes/_authenticated/reports.tsx:122
-msgid "In {currencyName}. Visible to the manager only."
-msgstr "بـ{currencyName}. تظهر للمدير فقط."
-
 #: src/components/asset-schedules.tsx:312
 msgid "In days."
 msgstr "بالأيام."
+
+#: src/components/booking-form.tsx:330
+#: src/components/expense-form.tsx:138
+#: src/components/place-form.tsx:281
+#: src/routes/_authenticated/ticket/$ticket_id.tsx:488
+#: src/routes/_authenticated/ticket/complete/$ticket_id.tsx:128
+msgid "In Saudi riyals."
+msgstr "بالريال السعودي."
+
+#: src/routes/_authenticated/reports.tsx:115
+msgid "In Saudi riyals. Visible to the manager only."
+msgstr "بالريال السعودي. تظهر للمدير فقط."
 
 #: src/components/home-parts.tsx:145
 #: src/components/place-form.tsx:55
@@ -1620,13 +1614,13 @@ msgstr "بالأيام."
 msgid "Inactive"
 msgstr "غير نشط"
 
-#: src/routes/_authenticated/reports.tsx:175
-#: src/routes/_authenticated/reports.tsx:206
-#: src/routes/_authenticated/reports.tsx:273
+#: src/routes/_authenticated/reports.tsx:168
+#: src/routes/_authenticated/reports.tsx:199
+#: src/routes/_authenticated/reports.tsx:266
 msgid "Income"
 msgstr "الإيرادات"
 
-#: src/routes/_authenticated/reports.tsx:268
+#: src/routes/_authenticated/reports.tsx:261
 msgid "Income and expenses"
 msgstr "الدخل والمصروفات"
 
@@ -1785,7 +1779,7 @@ msgid "Map to pick the location"
 msgstr "خريطة لاختيار الموقع"
 
 #. placeholder {0}: number(margin)
-#: src/routes/_authenticated/reports.tsx:183
+#: src/routes/_authenticated/reports.tsx:176
 msgid "Margin {0}%"
 msgstr "هامش {0}%"
 
@@ -1812,7 +1806,7 @@ msgstr "متوسطة"
 msgid "Mobile number"
 msgstr "رقم الجوال"
 
-#: src/routes/_authenticated/reports.tsx:203
+#: src/routes/_authenticated/reports.tsx:196
 msgid "Month"
 msgstr "الشهر"
 
@@ -1863,7 +1857,7 @@ msgstr "مهامي"
 msgid "Needs maintenance"
 msgstr "يحتاج صيانة"
 
-#: src/routes/_authenticated/reports.tsx:182
+#: src/routes/_authenticated/reports.tsx:175
 msgid "Net profit"
 msgstr "صافي الربح"
 
@@ -2174,7 +2168,7 @@ msgstr "بانتظار المراجعة"
 msgid "Pending verification"
 msgstr "بانتظار التحقق"
 
-#: src/routes/_authenticated/reports.tsx:134
+#: src/routes/_authenticated/reports.tsx:127
 msgid "Period"
 msgstr "الفترة"
 
@@ -2212,7 +2206,7 @@ msgstr "صورة بعد الإصلاح {n}"
 msgid "Photo saved."
 msgstr "حُفظت الصورة."
 
-#: src/components/expense-form.tsx:175
+#: src/components/expense-form.tsx:173
 msgid "Photograph receipt"
 msgstr "تصوير الإيصال"
 
@@ -2236,7 +2230,7 @@ msgstr "اختر تاريخ وصول من {0} أو بعده. يمكن أن يب�
 
 #: src/components/asset-form.tsx:122
 #: src/components/booking-form.tsx:195
-#: src/components/expense-form.tsx:105
+#: src/components/expense-form.tsx:103
 #: src/components/report-form.tsx:128
 #: src/routes/_authenticated/bookings.tsx:107
 #: src/routes/_authenticated/expenses.tsx:177
@@ -2277,7 +2271,7 @@ msgstr "نوع العقار"
 #: src/routes/_authenticated/place/asset/$asset_id.tsx:72
 #: src/routes/_authenticated/place/new.tsx:16
 #: src/routes/_authenticated/places.tsx:141
-#: src/routes/_authenticated/reports.tsx:147
+#: src/routes/_authenticated/reports.tsx:140
 msgid "Places"
 msgstr "العقارات"
 
@@ -2286,7 +2280,7 @@ msgid "Places assigned to you."
 msgstr "العقارات المسندة إليك."
 
 #. placeholder {0}: others.map((x) => money(x.profit, x.currency)).join(", ")
-#: src/routes/_authenticated/reports.tsx:190
+#: src/routes/_authenticated/reports.tsx:183
 msgid "Places in other currencies are not added to these totals: {0} profit."
 msgstr "العقارات بعملات أخرى غير مضافة إلى هذه المجاميع: ربح {0}."
 
@@ -2317,7 +2311,7 @@ msgstr "الشهر السابق"
 msgid "Priority"
 msgstr "الأولوية"
 
-#: src/routes/_authenticated/reports.tsx:212
+#: src/routes/_authenticated/reports.tsx:205
 msgid "Profit"
 msgstr "الربح"
 
@@ -2387,12 +2381,12 @@ msgstr "سبب الرفض"
 msgid "Reassign"
 msgstr "إعادة تعيين المكلف"
 
-#: src/components/expense-form.tsx:159
+#: src/components/expense-form.tsx:157
 msgid "Receipt"
 msgstr "الإيصال"
 
-#: src/components/expense-form.tsx:164
-#: src/components/expense-form.tsx:168
+#: src/components/expense-form.tsx:162
+#: src/components/expense-form.tsx:166
 msgid "Receipt photo"
 msgstr "صورة الإيصال"
 
@@ -2464,7 +2458,7 @@ msgstr "بلاغ عطل في هذا العقار"
 msgid "Reported by"
 msgstr "مُبلّغ التذكرة"
 
-#: src/routes/_authenticated/reports.tsx:121
+#: src/routes/_authenticated/reports.tsx:114
 msgid "Reports"
 msgstr "التقارير"
 
@@ -2551,7 +2545,7 @@ msgstr "حفظ التغييرات"
 msgid "Save draft"
 msgstr "حفظ مسودة"
 
-#: src/components/expense-form.tsx:96
+#: src/components/expense-form.tsx:94
 msgid "Save expense"
 msgstr "حفظ المصروف"
 
@@ -2570,7 +2564,7 @@ msgstr "حفظ العقار"
 #: src/components/asset-form.tsx:146
 #: src/components/asset-schedules.tsx:343
 #: src/components/booking-form.tsx:153
-#: src/components/expense-form.tsx:96
+#: src/components/expense-form.tsx:94
 #: src/components/place-bookings.tsx:608
 #: src/components/place-form.tsx:326
 #: src/components/worker-form.tsx:206
@@ -2976,7 +2970,7 @@ msgstr "هذه معاينة الصورة قبل الحفظ."
 msgid "This link is already used in this language."
 msgstr "هذا الرابط مستخدم في هذه اللغة."
 
-#: src/routes/_authenticated/reports.tsx:138
+#: src/routes/_authenticated/reports.tsx:131
 msgid "This month"
 msgstr "هذا الشهر"
 
@@ -3065,7 +3059,7 @@ msgstr "العنوان بالعربية"
 msgid "Title in English"
 msgstr "العنوان بالإنجليزية"
 
-#: src/routes/_authenticated/reports.tsx:162
+#: src/routes/_authenticated/reports.tsx:155
 msgid "To"
 msgstr "إلى تاريخ"
 
@@ -3221,7 +3215,6 @@ msgstr "فيلا"
 
 #: src/routes/_authenticated/expenses.tsx:108
 #: src/routes/_authenticated/place/$place_id.tsx:308
-#: src/routes/_authenticated/reports.tsx:122
 msgid "Visible to the manager only."
 msgstr "تظهر للمدير فقط."
 
