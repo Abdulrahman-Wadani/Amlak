@@ -250,7 +250,7 @@ msgstr "Account language"
 msgid "Account reactivated."
 msgstr "Account reactivated."
 
-#: src/components/worker-form.tsx:222
+#: src/components/worker-form.tsx:246
 msgid "Account status"
 msgstr "Account status"
 
@@ -534,7 +534,7 @@ msgstr "Assign an active worker"
 msgid "Assign to"
 msgstr "Assign to"
 
-#: src/components/worker-form.tsx:275
+#: src/components/worker-form.tsx:299
 msgid "Assigned places"
 msgstr "Assigned places"
 
@@ -1038,7 +1038,7 @@ msgid "Days"
 msgstr "Days"
 
 #: src/components/asset-schedules.tsx:175
-#: src/components/worker-form.tsx:240
+#: src/components/worker-form.tsx:264
 #: src/routes/_authenticated/workers.tsx:239
 msgid "Deactivate"
 msgstr "Deactivate"
@@ -1068,7 +1068,7 @@ msgid "Deactivated"
 msgstr "Deactivated"
 
 #: src/components/asset-schedules.tsx:175
-#: src/components/worker-form.tsx:240
+#: src/components/worker-form.tsx:264
 #: src/routes/_authenticated/workers.tsx:239
 msgid "Deactivating…"
 msgstr "Deactivating…"
@@ -1095,7 +1095,7 @@ msgid "Delete {0}"
 msgstr "Delete {0}"
 
 #. placeholder {0}: worker.fullname
-#: src/components/worker-form.tsx:261
+#: src/components/worker-form.tsx:285
 msgid "Delete {0}’s account?"
 msgstr "Delete {0}’s account?"
 
@@ -1136,13 +1136,13 @@ msgstr "Delete the invitation for {0}?"
 msgid "Delete this expense?"
 msgstr "Delete this expense?"
 
-#: src/components/worker-form.tsx:257
-#: src/components/worker-form.tsx:263
+#: src/components/worker-form.tsx:281
+#: src/components/worker-form.tsx:287
 msgid "Delete worker"
 msgstr "Delete worker"
 
 #: src/components/asset-manage.tsx:95
-#: src/components/worker-form.tsx:263
+#: src/components/worker-form.tsx:287
 #: src/routes/_authenticated/content/index.tsx:150
 #: src/routes/_authenticated/expenses.tsx:250
 #: src/routes/_authenticated/place/$place_id.tsx:186
@@ -1251,7 +1251,7 @@ msgstr "Edit page"
 msgid "Edit place"
 msgstr "Edit place"
 
-#: src/components/worker-form.tsx:135
+#: src/components/worker-form.tsx:139
 #: src/lib/errors.ts:68
 #: src/routes/_authenticated/admin/$admin_id.tsx:115
 #: src/routes/_authenticated/booking/$booking_id.tsx:160
@@ -1289,12 +1289,12 @@ msgid "Enter a valid email"
 msgstr "Enter a valid email"
 
 #: src/components/booking-form.tsx:108
-#: src/components/worker-form.tsx:68
+#: src/components/worker-form.tsx:72
 msgid "Enter a valid email address."
 msgstr "Enter a valid email address."
 
 #: src/components/booking-form.tsx:106
-#: src/components/worker-form.tsx:70
+#: src/components/worker-form.tsx:74
 msgid "Enter a valid mobile number, e.g. 501234567."
 msgstr "Enter a valid mobile number, e.g. 501234567."
 
@@ -1345,7 +1345,7 @@ msgid "Enter the guest's name."
 msgstr "Enter the guest's name."
 
 #: src/components/booking-form.tsx:104
-#: src/components/worker-form.tsx:69
+#: src/components/worker-form.tsx:73
 msgid "Enter the mobile number."
 msgstr "Enter the mobile number."
 
@@ -1361,7 +1361,7 @@ msgstr "Enter the reason for the cancellation"
 msgid "Enter the total price."
 msgstr "Enter the total price."
 
-#: src/components/worker-form.tsx:66
+#: src/components/worker-form.tsx:70
 msgid "Enter the worker's full name."
 msgstr "Enter the worker's full name."
 
@@ -1493,7 +1493,7 @@ msgstr "Forgot password?"
 msgid "From"
 msgstr "From"
 
-#: src/components/worker-form.tsx:129
+#: src/components/worker-form.tsx:133
 #: src/lib/errors.ts:75
 #: src/routes/_authenticated/admin/$admin_id.tsx:112
 #: src/routes/_authenticated/profile.tsx:193
@@ -1802,7 +1802,7 @@ msgstr "Me"
 msgid "Medium"
 msgstr "Medium"
 
-#: src/components/worker-form.tsx:152
+#: src/components/worker-form.tsx:156
 #: src/routes/_authenticated/admin/$admin_id.tsx:118
 #: src/routes/_authenticated/profile.tsx:213
 #: src/routes/signup.tsx:140
@@ -2016,7 +2016,7 @@ msgstr "No workers yet"
 msgid "None of them is overdue"
 msgstr "None of them is overdue"
 
-#: src/components/worker-form.tsx:279
+#: src/components/worker-form.tsx:303
 msgid "Not assigned to any place. Assign workers from each place page."
 msgstr "Not assigned to any place. Assign workers from each place page."
 
@@ -2341,7 +2341,7 @@ msgstr "Publishing"
 msgid "Purchase date"
 msgstr "Purchase date"
 
-#: src/components/worker-form.tsx:245
+#: src/components/worker-form.tsx:269
 #: src/routes/_authenticated/workers.tsx:262
 msgid "Reactivate"
 msgstr "Reactivate"
@@ -2356,7 +2356,7 @@ msgstr "Reactivate {0}"
 msgid "Reactivate account"
 msgstr "Reactivate account"
 
-#: src/components/worker-form.tsx:245
+#: src/components/worker-form.tsx:269
 #: src/routes/_authenticated/workers.tsx:262
 msgid "Reactivating…"
 msgstr "Reactivating…"
@@ -2538,7 +2538,7 @@ msgstr "Save asset"
 msgid "Save booking"
 msgstr "Save booking"
 
-#: src/components/worker-form.tsx:208
+#: src/components/worker-form.tsx:232
 #: src/routes/_authenticated/admin/$admin_id.tsx:132
 #: src/routes/_authenticated/profile.tsx:227
 msgid "Save changes"
@@ -2570,7 +2570,7 @@ msgstr "Save place"
 #: src/components/expense-form.tsx:94
 #: src/components/place-bookings.tsx:608
 #: src/components/place-form.tsx:327
-#: src/components/worker-form.tsx:206
+#: src/components/worker-form.tsx:230
 #: src/routes/_authenticated/admin/$admin_id.tsx:132
 #: src/routes/_authenticated/profile.tsx:227
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:643
@@ -2616,7 +2616,7 @@ msgstr "Send a problem or a question to the Amlak team."
 msgid "Send announcement"
 msgstr "Send announcement"
 
-#: src/components/worker-form.tsx:210
+#: src/components/worker-form.tsx:234
 msgid "Send invitation"
 msgstr "Send invitation"
 
@@ -2791,7 +2791,7 @@ msgstr "That place name is already taken."
 msgid "The browser asks for permission after you tap the button. You can change it later in the browser settings."
 msgstr "The browser asks for permission after you tap the button. You can change it later in the browser settings."
 
-#: src/components/worker-form.tsx:198
+#: src/components/worker-form.tsx:222
 #: src/routes/_authenticated/admin/$admin_id.tsx:86
 #: src/routes/_authenticated/profile.tsx:96
 msgid "The changes are saved."
@@ -2817,7 +2817,7 @@ msgstr "The code is wrong or has expired. Check it or request a new one."
 msgid "The details you typed will be lost."
 msgstr "The details you typed will be lost."
 
-#: src/components/worker-form.tsx:137
+#: src/components/worker-form.tsx:141
 msgid "The email cannot be changed."
 msgstr "The email cannot be changed."
 
@@ -2832,6 +2832,10 @@ msgstr "The guest cannot check in before the check-in date."
 #: src/routes/_authenticated/booking/$booking_id.tsx:218
 msgid "The guest has checked out."
 msgstr "The guest has checked out."
+
+#: src/components/worker-form.tsx:192
+msgid "The invitation email and the app are in this language. The worker can change it later."
+msgstr "The invitation email and the app are in this language. The worker can change it later."
 
 #: src/routes/account-setup.tsx:65
 msgid "The invitation has expired."
@@ -2894,19 +2898,19 @@ msgstr "The two passwords do not match."
 msgid "The user can sign in again right away."
 msgstr "The user can sign in again right away."
 
-#: src/components/worker-form.tsx:229
+#: src/components/worker-form.tsx:253
 msgid "The worker can sign in."
 msgstr "The worker can sign in."
 
-#: src/components/worker-form.tsx:231
+#: src/components/worker-form.tsx:255
 msgid "The worker cannot sign in until you reactivate the account."
 msgstr "The worker cannot sign in until you reactivate the account."
 
-#: src/components/worker-form.tsx:181
+#: src/components/worker-form.tsx:205
 msgid "The worker chooses their own password from the invitation link, then you assign them to places from each place page."
 msgstr "The worker chooses their own password from the invitation link, then you assign them to places from each place page."
 
-#: src/components/worker-form.tsx:262
+#: src/components/worker-form.tsx:286
 msgid "Their assignments end and their past tickets stay in the records. This cannot be undone from the app."
 msgstr "Their assignments end and their past tickets stay in the records. This cannot be undone from the app."
 
@@ -3146,7 +3150,7 @@ msgstr "Unread"
 msgid "Unread notifications"
 msgstr "Unread notifications"
 
-#: src/components/worker-form.tsx:227
+#: src/components/worker-form.tsx:251
 msgid "Until the worker finishes setting up the account"
 msgstr "Until the worker finishes setting up the account"
 
@@ -3308,7 +3312,7 @@ msgstr "We use your location once to drop the place’s pin on the map. We do no
 msgid "We will send a verification code to your email after you register."
 msgstr "We will send a verification code to your email after you register."
 
-#: src/components/worker-form.tsx:178
+#: src/components/worker-form.tsx:202
 msgid "We will send an invitation to the worker's email."
 msgstr "We will send an invitation to the worker's email."
 
@@ -3357,6 +3361,11 @@ msgstr "Worker"
 #: src/routes/_authenticated/worker/$worker_id.tsx:36
 msgid "Worker not found"
 msgstr "Worker not found"
+
+#: src/components/worker-form.tsx:180
+#: src/components/worker-form.tsx:183
+msgid "Worker's language"
+msgstr "Worker's language"
 
 #: src/components/account-links.tsx:26
 #: src/lib/nav.tsx:171

@@ -250,7 +250,7 @@ msgstr "لغة الحساب"
 msgid "Account reactivated."
 msgstr "أُعيد تفعيل الحساب."
 
-#: src/components/worker-form.tsx:222
+#: src/components/worker-form.tsx:246
 msgid "Account status"
 msgstr "حالة الحساب"
 
@@ -534,7 +534,7 @@ msgstr "تعيين عامل نشط"
 msgid "Assign to"
 msgstr "تكليف"
 
-#: src/components/worker-form.tsx:275
+#: src/components/worker-form.tsx:299
 msgid "Assigned places"
 msgstr "الأماكن المسندة"
 
@@ -1038,7 +1038,7 @@ msgid "Days"
 msgstr "أيام"
 
 #: src/components/asset-schedules.tsx:175
-#: src/components/worker-form.tsx:240
+#: src/components/worker-form.tsx:264
 #: src/routes/_authenticated/workers.tsx:239
 msgid "Deactivate"
 msgstr "إيقاف"
@@ -1068,7 +1068,7 @@ msgid "Deactivated"
 msgstr "غير نشط"
 
 #: src/components/asset-schedules.tsx:175
-#: src/components/worker-form.tsx:240
+#: src/components/worker-form.tsx:264
 #: src/routes/_authenticated/workers.tsx:239
 msgid "Deactivating…"
 msgstr "جارٍ الإيقاف…"
@@ -1095,7 +1095,7 @@ msgid "Delete {0}"
 msgstr "حذف {0}"
 
 #. placeholder {0}: worker.fullname
-#: src/components/worker-form.tsx:261
+#: src/components/worker-form.tsx:285
 msgid "Delete {0}’s account?"
 msgstr "حذف حساب {0}؟"
 
@@ -1136,13 +1136,13 @@ msgstr "حذف دعوة {0}؟"
 msgid "Delete this expense?"
 msgstr "حذف هذا المصروف؟"
 
-#: src/components/worker-form.tsx:257
-#: src/components/worker-form.tsx:263
+#: src/components/worker-form.tsx:281
+#: src/components/worker-form.tsx:287
 msgid "Delete worker"
 msgstr "حذف العامل"
 
 #: src/components/asset-manage.tsx:95
-#: src/components/worker-form.tsx:263
+#: src/components/worker-form.tsx:287
 #: src/routes/_authenticated/content/index.tsx:150
 #: src/routes/_authenticated/expenses.tsx:250
 #: src/routes/_authenticated/place/$place_id.tsx:186
@@ -1251,7 +1251,7 @@ msgstr "تعديل صفحة"
 msgid "Edit place"
 msgstr "تعديل العقار"
 
-#: src/components/worker-form.tsx:135
+#: src/components/worker-form.tsx:139
 #: src/lib/errors.ts:68
 #: src/routes/_authenticated/admin/$admin_id.tsx:115
 #: src/routes/_authenticated/booking/$booking_id.tsx:160
@@ -1289,12 +1289,12 @@ msgid "Enter a valid email"
 msgstr "أدخل بريدًا إلكترونيًا صحيحًا"
 
 #: src/components/booking-form.tsx:108
-#: src/components/worker-form.tsx:68
+#: src/components/worker-form.tsx:72
 msgid "Enter a valid email address."
 msgstr "أدخل عنوان بريد إلكتروني صالحًا."
 
 #: src/components/booking-form.tsx:106
-#: src/components/worker-form.tsx:70
+#: src/components/worker-form.tsx:74
 msgid "Enter a valid mobile number, e.g. 501234567."
 msgstr "أدخل رقم جوال صحيحًا، مثل 501234567."
 
@@ -1345,7 +1345,7 @@ msgid "Enter the guest's name."
 msgstr "اكتب اسم الضيف."
 
 #: src/components/booking-form.tsx:104
-#: src/components/worker-form.tsx:69
+#: src/components/worker-form.tsx:73
 msgid "Enter the mobile number."
 msgstr "أدخل رقم الجوال."
 
@@ -1361,7 +1361,7 @@ msgstr "أدخل سبب الإلغاء"
 msgid "Enter the total price."
 msgstr "أدخل السعر الإجمالي."
 
-#: src/components/worker-form.tsx:66
+#: src/components/worker-form.tsx:70
 msgid "Enter the worker's full name."
 msgstr "اكتب الاسم الكامل للعامل."
 
@@ -1493,7 +1493,7 @@ msgstr "نسيت كلمة المرور؟"
 msgid "From"
 msgstr "من تاريخ"
 
-#: src/components/worker-form.tsx:129
+#: src/components/worker-form.tsx:133
 #: src/lib/errors.ts:75
 #: src/routes/_authenticated/admin/$admin_id.tsx:112
 #: src/routes/_authenticated/profile.tsx:193
@@ -1802,7 +1802,7 @@ msgstr "أنا"
 msgid "Medium"
 msgstr "متوسطة"
 
-#: src/components/worker-form.tsx:152
+#: src/components/worker-form.tsx:156
 #: src/routes/_authenticated/admin/$admin_id.tsx:118
 #: src/routes/_authenticated/profile.tsx:213
 #: src/routes/signup.tsx:140
@@ -2016,7 +2016,7 @@ msgstr "لا يوجد عمال حتى الآن"
 msgid "None of them is overdue"
 msgstr "لا شيء منها متأخر"
 
-#: src/components/worker-form.tsx:279
+#: src/components/worker-form.tsx:303
 msgid "Not assigned to any place. Assign workers from each place page."
 msgstr "غير معيّن على أي عقار. عيّن العمّال من صفحة كل عقار."
 
@@ -2341,7 +2341,7 @@ msgstr "إعدادات النشر"
 msgid "Purchase date"
 msgstr "تاريخ الشراء"
 
-#: src/components/worker-form.tsx:245
+#: src/components/worker-form.tsx:269
 #: src/routes/_authenticated/workers.tsx:262
 msgid "Reactivate"
 msgstr "إعادة التفعيل"
@@ -2356,7 +2356,7 @@ msgstr "إعادة تفعيل {0}"
 msgid "Reactivate account"
 msgstr "إعادة تفعيل الحساب"
 
-#: src/components/worker-form.tsx:245
+#: src/components/worker-form.tsx:269
 #: src/routes/_authenticated/workers.tsx:262
 msgid "Reactivating…"
 msgstr "جارٍ إعادة التفعيل…"
@@ -2538,7 +2538,7 @@ msgstr "حفظ الأصل"
 msgid "Save booking"
 msgstr "حفظ الحجز"
 
-#: src/components/worker-form.tsx:208
+#: src/components/worker-form.tsx:232
 #: src/routes/_authenticated/admin/$admin_id.tsx:132
 #: src/routes/_authenticated/profile.tsx:227
 msgid "Save changes"
@@ -2570,7 +2570,7 @@ msgstr "حفظ العقار"
 #: src/components/expense-form.tsx:94
 #: src/components/place-bookings.tsx:608
 #: src/components/place-form.tsx:327
-#: src/components/worker-form.tsx:206
+#: src/components/worker-form.tsx:230
 #: src/routes/_authenticated/admin/$admin_id.tsx:132
 #: src/routes/_authenticated/profile.tsx:227
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:643
@@ -2616,7 +2616,7 @@ msgstr "أرسل مشكلة أو سؤالًا لفريق أملاك."
 msgid "Send announcement"
 msgstr "إرسال إعلان"
 
-#: src/components/worker-form.tsx:210
+#: src/components/worker-form.tsx:234
 msgid "Send invitation"
 msgstr "إرسال الدعوة"
 
@@ -2791,7 +2791,7 @@ msgstr "اسم العقار مستخدم بالفعل."
 msgid "The browser asks for permission after you tap the button. You can change it later in the browser settings."
 msgstr "سيطلب المتصفح الإذن بعد الضغط على الزر. يمكنك تغييره لاحقًا من إعدادات المتصفح."
 
-#: src/components/worker-form.tsx:198
+#: src/components/worker-form.tsx:222
 #: src/routes/_authenticated/admin/$admin_id.tsx:86
 #: src/routes/_authenticated/profile.tsx:96
 msgid "The changes are saved."
@@ -2817,7 +2817,7 @@ msgstr "الرمز خاطئ أو منتهي. تحقق منه أو اطلب رم�
 msgid "The details you typed will be lost."
 msgstr "ستضيع البيانات التي كتبتها."
 
-#: src/components/worker-form.tsx:137
+#: src/components/worker-form.tsx:141
 msgid "The email cannot be changed."
 msgstr "لا يمكن تغيير البريد الإلكتروني."
 
@@ -2832,6 +2832,10 @@ msgstr "لا يمكن تسجيل دخول الضيف قبل تاريخ الوص�
 #: src/routes/_authenticated/booking/$booking_id.tsx:218
 msgid "The guest has checked out."
 msgstr "غادر الضيف."
+
+#: src/components/worker-form.tsx:192
+msgid "The invitation email and the app are in this language. The worker can change it later."
+msgstr "تصل الدعوة ويظهر التطبيق للعامل بهذه اللغة، ويمكنه تغييرها لاحقاً."
 
 #: src/routes/account-setup.tsx:65
 msgid "The invitation has expired."
@@ -2894,19 +2898,19 @@ msgstr "كلمتا المرور غير متطابقتين."
 msgid "The user can sign in again right away."
 msgstr "يستطيع المستخدم الدخول مجددًا فورًا."
 
-#: src/components/worker-form.tsx:229
+#: src/components/worker-form.tsx:253
 msgid "The worker can sign in."
 msgstr "يستطيع العامل تسجيل الدخول."
 
-#: src/components/worker-form.tsx:231
+#: src/components/worker-form.tsx:255
 msgid "The worker cannot sign in until you reactivate the account."
 msgstr "لا يستطيع العامل تسجيل الدخول حتى تعيد تفعيل الحساب."
 
-#: src/components/worker-form.tsx:181
+#: src/components/worker-form.tsx:205
 msgid "The worker chooses their own password from the invitation link, then you assign them to places from each place page."
 msgstr "يختار العامل كلمة المرور بنفسه من رابط الدعوة، ثم تعيّنه على عقاراتك من صفحة كل عقار."
 
-#: src/components/worker-form.tsx:262
+#: src/components/worker-form.tsx:286
 msgid "Their assignments end and their past tickets stay in the records. This cannot be undone from the app."
 msgstr "تنتهي تعييناته وتبقى تذاكره السابقة في السجلات. لا يمكن التراجع من الواجهة."
 
@@ -3146,7 +3150,7 @@ msgstr "غير مقروء"
 msgid "Unread notifications"
 msgstr "الإشعارات غير المقروءة"
 
-#: src/components/worker-form.tsx:227
+#: src/components/worker-form.tsx:251
 msgid "Until the worker finishes setting up the account"
 msgstr "حتى يُكمل العامل إعداد حسابه"
 
@@ -3308,7 +3312,7 @@ msgstr "نستخدم موقعك مرة واحدة لوضع دبوس العقار
 msgid "We will send a verification code to your email after you register."
 msgstr "سنرسل رمز تحقق إلى بريدك بعد التسجيل."
 
-#: src/components/worker-form.tsx:178
+#: src/components/worker-form.tsx:202
 msgid "We will send an invitation to the worker's email."
 msgstr "سنرسل دعوة إلى بريد العامل."
 
@@ -3357,6 +3361,11 @@ msgstr "عامل"
 #: src/routes/_authenticated/worker/$worker_id.tsx:36
 msgid "Worker not found"
 msgstr "لم يتم العثور على العامل"
+
+#: src/components/worker-form.tsx:180
+#: src/components/worker-form.tsx:183
+msgid "Worker's language"
+msgstr "لغة العامل"
 
 #: src/components/account-links.tsx:26
 #: src/lib/nav.tsx:171
