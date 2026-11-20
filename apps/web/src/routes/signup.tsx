@@ -11,7 +11,7 @@ import { LIMITS, tooLong } from "@/lib/limits"
 import { AuthCard, AuthLayout } from "@/components/auth-layout"
 import { EmailVerifyPanel } from "@/components/email-verify-panel"
 import { PasswordInput, PasswordRules, passwordOk } from "@/components/password-field"
-import { Field, Segmented } from "@/components/panel"
+import { Field, FieldNeed, Segmented } from "@/components/panel"
 import { toE164 } from "@/components/worker-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -131,13 +131,13 @@ function SignUp() {
         subtitle={<Trans>We will send a verification code to your email after you register.</Trans>}
       >
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-          <Field id="fullname" label={<Trans>Full name</Trans>} error={errors.fullname}>
+          <Field id="fullname" required label={<Trans>Full name</Trans>} error={errors.fullname}>
             <Input id="fullname" maxLength={LIMITS.name} autoComplete="name" value={fullname} onChange={(e) => setFullname(e.target.value)} disabled={loading} {...invalid("fullname", "fullname")} />
           </Field>
-          <Field id="email" label={<Trans>Email</Trans>} error={errorLine(errors.email)}>
+          <Field id="email" required label={<Trans>Email</Trans>} error={errorLine(errors.email)}>
             <Input id="email" type="email" maxLength={LIMITS.email} dir="ltr" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} {...invalid("email", "email")} />
           </Field>
-          <Field id="phone" label={<Trans>Mobile number</Trans>} hint={<Trans>Saudi mobile starting with 5</Trans>} error={errors.phone}>
+          <Field id="phone" required label={<Trans>Mobile number</Trans>} hint={<Trans>Saudi mobile starting with 5</Trans>} error={errors.phone}>
             <div dir="ltr" className="flex gap-2">
               <span className="box-border inline-flex h-11 flex-none items-center border border-border bg-secondary px-3 text-[15px]">+966</span>
               <Input id="phone" type="tel" dir="ltr" autoComplete="tel-national" value={phone} onChange={(e) => setPhone(e.target.value)} disabled={loading} {...invalid("phone", "phone")} />
@@ -145,7 +145,7 @@ function SignUp() {
           </Field>
           <div className="flex flex-col gap-2">
             <label htmlFor="password" className="text-sm font-semibold">
-              <Trans>Password</Trans>
+              <Trans>Password</Trans><FieldNeed required />
             </label>
             <PasswordInput id="password" value={password} onChange={setPassword} invalid={Boolean(errors.password)} disabled={loading} describedBy="password-rules" />
             <PasswordRules id="password-rules" value={password} />
@@ -157,7 +157,7 @@ function SignUp() {
           </div>
           <div className="flex flex-col gap-2">
             <span className="text-sm font-semibold">
-              <Trans>Account language</Trans>
+              <Trans>Account language</Trans><FieldNeed required />
             </span>
             <Segmented<Language>
               label={t`Account language`}

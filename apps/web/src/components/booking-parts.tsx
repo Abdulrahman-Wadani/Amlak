@@ -1,12 +1,11 @@
-import { useState } from "react"
 import { Link } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { plural, t } from "@lingui/core/macro"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Wrench } from "lucide-react"
+import type { Ticket } from "@amlak/shared"
 import type { Booking } from "@/lib/api"
 import { useFormat } from "@/lib/format"
-import { BookingStatusChip } from "@/components/place-shared"
-import { Panel, PanelTitle, ScrollHint, ScrollList } from "@/components/panel"
+import { Panel } from "@/components/panel"
 
 export function isoDay(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
@@ -33,22 +32,43 @@ export function useStayText() {
   }
 }
 
+/** The colours of a stay in the calendar, those of the booking status chips. */
+const STAY_TONE: Record<string, string> = {
+  CONFIRMED: "bg-info text-white desk:border-info",
+  CHECKED_IN: "bg-good text-white desk:border-good",
+  CHECKED_OUT: "bg-muted-foreground/50 desk:border-border desk:bg-secondary desk:text-muted-foreground",
+}
+
+/** The colours of a repair in the calendar. */
+const REPAIR_TONE: Record<string, string> = {
+  CORRECTIVE: "border-warn bg-warn text-white",
+  PREVENTIVE: "border-warn bg-warn-50 text-warn-900",
+}
+
 /**
- * A month of a place's bookings: the nights of each stay are shaded and the
- * guest's name is on the arrival day (names on the desktop only).
+ * A month of a place's bookings. Each night of a stay has a bar in the
+ * booking's status colour, with the guest's name where the stay starts and at
+ * the start of each week (names on the desktop; a thin bar on the phone). A
+ * day of a stay opens its booking. Repairs show on their day, corrective and
+ * preventive in two colours, and open their ticket. The key under the month
+ * names the colours.
  */
 export function MonthCalendar({
   month,
   bookings,
+  repairs = [],
   today,
   onMonth,
 }: {
   month: Date
   bookings: Booking[]
+  /** Tickets with a due date this month. */
+  repairs?: Ticket[]
   today: string
   onMonth: (month: Date) => void
 }) {
   const { dateFormat } = useFormat()
+  const stay = useStayText()
   const year = month.getFullYear()
   const index = month.getMonth()
   const first = new Date(year, index, 1)
@@ -95,68 +115,76 @@ export function MonthCalendar({
           <div key={`gap-${i}`} />
         ))}
         {Array.from({ length: days }, (_, i) => {
-          const day = isoDay(new Date(year, index, i + 1))
-          const staying = stays.find((b) => b.check_in_date <= day && day < b.check_out_date)
-          const arriving = stays.find((b) => b.check_in_date === day)
+          const date = new Date(year, index, i + 1)
+          const day = isoDay(date)
+          const next = isoDay(new Date(year, index, i + 2))
+          const booking = stays.find((b) => b.check_in_date <= day && day < b.check_out_date)
+          // The bar's ends are rounded where the stay starts or ends, and it
+          // breaks at the end of a week or month, where the name shows again.
+          const starts = booking && (booking.check_in_date === day || date.getDay() === 0 || i === 0)
+          const ends = booking && (booking.check_out_date === next || date.getDay() === 6 || i === days - 1)
           return (
             <div
               key={day}
-              className={`box-border flex min-h-11 min-w-0 flex-col items-center gap-1 rounded-[2px] border border-border p-1 desk:min-h-[92px] desk:items-start desk:p-2 ${staying ? "bg-primary/12" : "bg-card"}`}
+              className={`relative box-border flex min-h-11 min-w-0 flex-col items-center gap-1 rounded-[2px] border border-border bg-card p-1 desk:min-h-[92px] desk:items-stretch desk:p-2 ${day < today ? "text-muted-foreground" : "text-foreground"}`}
             >
               <span
-                className={`inline-flex size-[26px] items-center justify-center rounded-full text-[13px] ${day === today ? "bg-primary font-bold text-white" : "font-medium text-foreground"}`}
+                className={`inline-flex size-[26px] flex-none items-center justify-center self-center rounded-full text-[13px] desk:self-end ${day === today ? "bg-primary font-bold text-white" : "font-medium"}`}
               >
                 {i + 1}
               </span>
-              {arriving && (
-                <span className="hidden w-full truncate text-xs font-semibold text-primary desk:block">{arriving.guest_name}</span>
+              {repairs
+                .filter((ticket) => ticket.due_date === day)
+                .map((ticket) => (
+                  <Link
+                    key={ticket.id}
+                    to="/ticket/$ticket_id"
+                    params={{ ticket_id: ticket.id }}
+                    title={ticket.description}
+                    aria-label={ticket.ticket_type === "PREVENTIVE" ? t`Periodic maintenance: ${ticket.description}` : t`Repair: ${ticket.description}`}
+                    // Above the stay's link, which covers the whole day.
+                    className={`relative z-10 box-border inline-flex min-w-0 items-center gap-1 rounded-[3px] border p-0.5 text-xs font-semibold no-underline desk:h-6 desk:px-1.5 ${REPAIR_TONE[ticket.ticket_type] ?? REPAIR_TONE.CORRECTIVE} ${ticket.status === "COMPLETED" ? "opacity-55" : ""}`}
+                  >
+                    <Wrench aria-hidden="true" className="size-3.5 flex-none" strokeWidth={2} />
+                    <span aria-hidden="true" className="hidden truncate desk:inline">
+                      {ticket.ticket_type === "PREVENTIVE" ? t`Periodic` : t`Repair`}
+                    </span>
+                  </Link>
+                ))}
+              {booking && (
+                <Link
+                  to="/booking/$booking_id"
+                  params={{ booking_id: booking.id }}
+                  aria-label={t`${booking.guest_name}, ${stay(booking)}`}
+                  title={`${booking.guest_name} · ${stay(booking)}`}
+                  className={`mt-auto box-border block h-1.5 w-full min-w-0 truncate border-0 text-xs leading-[22px] font-semibold no-underline after:absolute after:inset-0 after:content-[''] desk:h-6 desk:border desk:px-1.5 ${STAY_TONE[booking.status] ?? STAY_TONE.CONFIRMED} ${starts ? "rounded-s-[3px]" : "desk:border-s-0"} ${ends ? "rounded-e-[3px]" : "desk:border-e-0"}`}
+                >
+                  <span aria-hidden="true" className="hidden desk:inline">
+                    {starts ? <bdi>{booking.guest_name}</bdi> : null}
+                  </span>
+                </Link>
               )}
             </div>
           )
         })}
       </div>
+      <ul className="m-0 flex list-none flex-wrap gap-x-5 gap-y-2 p-0 text-[13px] text-muted-foreground">
+        {(
+          [
+            ["CONFIRMED", "bg-info", <Trans key="c">Confirmed</Trans>],
+            ["CHECKED_IN", "bg-good", <Trans key="s">Staying</Trans>],
+            ["CHECKED_OUT", "bg-muted-foreground/50", <Trans key="o">Checked out</Trans>],
+            ["CORRECTIVE", "bg-warn", <Trans key="r">Repair (no bookings that day)</Trans>],
+            ["PREVENTIVE", "border border-warn bg-warn-50", <Trans key="p">Periodic maintenance</Trans>],
+          ] as const
+        ).map(([key, swatch, label]) => (
+          <li key={key} className="inline-flex items-center gap-2">
+            <span aria-hidden="true" className={`size-3 rounded-[2px] ${swatch}`} />
+            {label}
+          </li>
+        ))}
+      </ul>
     </Panel>
   )
 }
 
-/** The month's bookings as a list that scrolls inside its card. */
-export function MonthBookings({ bookings }: { bookings: Booking[] }) {
-  const [scrolls, setScrolls] = useState(false)
-  const stay = useStayText()
-  return (
-    <Panel labelledBy="month-bookings">
-      <div className="flex flex-col gap-0.5">
-        <PanelTitle id="month-bookings">
-          <Trans>Bookings this month</Trans>
-        </PanelTitle>
-        {scrolls && <ScrollHint />}
-      </div>
-      {bookings.length === 0 ? (
-        <p className="m-0 text-sm text-muted-foreground">
-          <Trans>No bookings this month.</Trans>
-        </p>
-      ) : (
-        <ScrollList label={t`Bookings this month`} onScrollable={setScrolls}>
-          {bookings.map((booking) => (
-            <Link
-              key={booking.id}
-              to="/booking/$booking_id"
-              params={{ booking_id: booking.id }}
-              className="am-lift box-border flex min-h-[76px] flex-none snap-start items-center justify-between gap-3 border border-border bg-card p-3.5 text-foreground no-underline"
-            >
-              <span className="flex min-w-0 flex-col leading-[1.5]">
-                <span dir="auto" className="truncate font-semibold">
-                  {booking.guest_name}
-                </span>
-                <span className="text-[13px] text-muted-foreground">
-                  {stay(booking, booking.status === "CONFIRMED" || booking.status === "CHECKED_IN")}
-                </span>
-              </span>
-              <BookingStatusChip status={booking.status} />
-            </Link>
-          ))}
-        </ScrollList>
-      )}
-    </Panel>
-  )
-}

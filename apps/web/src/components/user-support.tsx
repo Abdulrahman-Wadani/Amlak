@@ -140,10 +140,10 @@ function SupportRequestForm({ token }: { token: string }) {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-      <Field id="s-subject" label={<Trans>Subject</Trans>} error={errors.subject}>
+      <Field id="s-subject" required label={<Trans>Subject</Trans>} error={errors.subject}>
         <Input id="s-subject" dir="auto" maxLength={LIMITS.title} value={subject} aria-invalid={errors.subject ? true : undefined} onChange={(e) => setSubject(e.target.value)} />
       </Field>
-      <Field id="s-details" label={<Trans>Details</Trans>} error={errors.details}>
+      <Field id="s-details" required label={<Trans>Details</Trans>} error={errors.details}>
         <Textarea id="s-details" rows={4} dir="auto" maxLength={LIMITS.message} value={details} aria-invalid={errors.details ? true : undefined} onChange={(e) => setDetails(e.target.value)} />
       </Field>
       {formError && (

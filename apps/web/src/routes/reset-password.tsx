@@ -6,7 +6,7 @@ import { Clock3 } from "lucide-react"
 import { errorMessage, readApiError } from "@/lib/errors"
 import { AuthCard, AuthLayout } from "@/components/auth-layout"
 import { PasswordInput, PasswordRules, passwordOk } from "@/components/password-field"
-import { Field } from "@/components/panel"
+import { Field, FieldNeed } from "@/components/panel"
 import { Notice } from "@/components/states"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "cn"
@@ -87,7 +87,7 @@ function ResetPasswordPage() {
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
               <label htmlFor="new-password" className="text-sm font-semibold">
-                <Trans>New password</Trans>
+                <Trans>New password</Trans><FieldNeed required />
               </label>
               <PasswordInput id="new-password" value={password} onChange={setPassword} invalid={Boolean(errors.password)} describedBy="new-password-rules" />
               <PasswordRules id="new-password-rules" value={password} />
@@ -97,7 +97,7 @@ function ResetPasswordPage() {
                 </span>
               )}
             </div>
-            <Field id="confirm-password" label={<Trans>Confirm password</Trans>} error={errors.confirm}>
+            <Field id="confirm-password" required label={<Trans>Confirm password</Trans>} error={errors.confirm}>
               <PasswordInput id="confirm-password" value={confirm} onChange={setConfirm} invalid={Boolean(errors.confirm)} />
             </Field>
             {error && (

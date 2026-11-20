@@ -13,7 +13,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "cn"
-import { Field, FormButtons, InfoRows, Panel, PanelTitle, Segmented, TwoColumns } from "@/components/panel"
+import { Field, FieldNeed, FormButtons, InfoRows, Panel, PanelTitle, Segmented, TwoColumns } from "@/components/panel"
 import { toast } from "@/components/toast"
 
 /** A draft or published chip for a content page. */
@@ -108,7 +108,7 @@ export function ContentForm({ token, page }: { token: string; page?: WebContent 
           >
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold">
-                <Trans>Language</Trans>
+                <Trans>Language</Trans><FieldNeed required />
               </span>
               <div className={current ? "pointer-events-none opacity-60" : undefined} aria-disabled={current ? true : undefined}>
                 <Segmented<ContentLanguage>
@@ -127,11 +127,12 @@ export function ContentForm({ token, page }: { token: string; page?: WebContent 
                 </span>
               )}
             </div>
-            <Field id="c-title" label={<Trans>Address</Trans>} error={errors.title}>
+            <Field id="c-title" required label={<Trans>Address</Trans>} error={errors.title}>
               <Input id="c-title" maxLength={LIMITS.title} dir={language === "ar" ? "rtl" : "ltr"} value={title} aria-invalid={errors.title ? true : undefined} onChange={(e) => setTitle(e.target.value)} />
             </Field>
             <Field
               id="c-slug"
+              required
               label={<Trans>Link</Trans>}
               error={errors.slug}
               hint={
@@ -142,7 +143,7 @@ export function ContentForm({ token, page }: { token: string; page?: WebContent 
             >
               <Input id="c-slug" maxLength={100} dir="ltr" value={slug} aria-invalid={errors.slug ? true : undefined} aria-describedby={errors.slug ? "c-slug-error" : "c-slug-hint"} onChange={(e) => setSlug(e.target.value)} />
             </Field>
-            <Field id="c-body" label={<Trans>Content</Trans>} error={errors.body}>
+            <Field id="c-body" required label={<Trans>Content</Trans>} error={errors.body}>
               <Textarea id="c-body" rows={8} maxLength={LIMITS.body} dir={language === "ar" ? "rtl" : "ltr"} value={body} aria-invalid={errors.body ? true : undefined} onChange={(e) => setBody(e.target.value)} />
             </Field>
             {error && (

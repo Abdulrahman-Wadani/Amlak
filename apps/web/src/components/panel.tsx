@@ -184,10 +184,16 @@ export function PanelTitle({ children, id, small = false }: { children: ReactNod
   )
 }
 
-/** The main column and the side column; the side column goes under the main one when there is no room. */
-export function TwoColumns({ main, side }: { main: ReactNode; side: ReactNode }) {
+/**
+ * The main column and the side column; the side column goes under the main one
+ * when there is no room. Without a side column the main one takes the whole
+ * width, under the band, like the card of any other page.
+ */
+export function TwoColumns({ main, side }: { main: ReactNode; side?: ReactNode }) {
+  const inPopup = useContext(InPopupContext)
+  if (!side) return <div className="flex min-w-0 flex-col gap-4 desk:gap-6">{main}</div>
   // A popup has no room for two columns: one under the other.
-  if (useContext(InPopupContext)) {
+  if (inPopup) {
     return (
       <div className="flex min-w-0 flex-col gap-5">
         {main}
@@ -283,21 +289,6 @@ export function ScrollHint() {
       <ChevronDown aria-hidden="true" className="size-3.5" strokeWidth={1.8} />
       <Trans>Scroll to see the rest</Trans>
     </span>
-  )
-}
-
-/** Square bullets, as in the side cards ("Before saving", "What a worker sees"). */
-export function Bullets({ items }: { items: ReactNode[] }) {
-  return (
-    <ul className="m-0 flex list-none flex-col gap-2 p-0 text-sm leading-[1.6]">
-      {items.map((item, index) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: a fixed list
-        <li key={index} className="flex items-start gap-2.5">
-          <span aria-hidden="true" className="mt-[9px] size-1.5 flex-none bg-muted-foreground" />
-          <span>{item}</span>
-        </li>
-      ))}
-    </ul>
   )
 }
 
@@ -479,23 +470,59 @@ export function ListFooter({
 }
 
 /** A form field: the label above, a grey hint or a red error under it. */
+/**
+ * After a field's label: a red star for a field that must be filled, or
+ * "(Optional)" for one that may stay empty. Every form marks each field it
+ * asks for one way or the other; read-only fields get neither.
+ */
+export function FieldNeed({ required, optional }: { required?: boolean; optional?: boolean }) {
+  if (required) {
+    return (
+      <>
+        <span aria-hidden="true" className="ms-1 text-destructive">
+          *
+        </span>
+        <span className="sr-only">
+          {" "}
+          <Trans>(required)</Trans>
+        </span>
+      </>
+    )
+  }
+  if (optional) {
+    return (
+      <span className="ms-1.5 text-[13px] font-normal text-muted-foreground">
+        <Trans>(optional)</Trans>
+      </span>
+    )
+  }
+  return null
+}
+
 export function Field({
   id,
   label,
   hint,
   error,
+  required,
+  optional,
   children,
 }: {
   id: string
   label: ReactNode
   hint?: ReactNode
   error?: ReactNode
+  /** The field must be filled: a red star after the label. */
+  required?: boolean
+  /** The field may stay empty: "(optional)" after the label. */
+  optional?: boolean
   children: ReactNode
 }) {
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <label htmlFor={id} className="text-sm font-semibold">
         {label}
+        <FieldNeed required={required} optional={optional} />
       </label>
       {children}
       {error ? (
@@ -525,6 +552,7 @@ export function NativeSelect({
   disabled,
   invalid,
   describedBy,
+  label,
 }: {
   id: string
   value: string
@@ -533,12 +561,15 @@ export function NativeSelect({
   disabled?: boolean
   invalid?: boolean
   describedBy?: string
+  /** The name read out when no <label> points at the select. */
+  label?: string
 }) {
   return (
     <div className="relative">
       <select
         id={id}
         value={value}
+        aria-label={label}
         disabled={disabled}
         aria-invalid={invalid || undefined}
         aria-describedby={describedBy}

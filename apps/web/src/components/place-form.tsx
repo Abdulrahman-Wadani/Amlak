@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react"
+import { useState, type FormEvent } from "react"
 import { Link, useNavigate } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
@@ -15,15 +15,13 @@ import { cn } from "cn"
 import LocationPicker, { type LocationData } from "@/components/location-picker"
 import { LocationPermission } from "@/components/location-permission"
 import { Notice } from "@/components/states"
-import { StatusBadge, TypeLabel } from "@/components/place-shared"
 import {
-  Bullets,
   Field,
+  FieldNeed,
   FieldRow,
   FormButtons,
   NativeSelect,
   Panel,
-  PanelTitle,
   TwoColumns,
 } from "@/components/panel"
 
@@ -58,27 +56,15 @@ function statusLabel(status: PlaceStatus): string {
   }
 }
 
-// The region's currencies first; the API takes any ISO 4217 code.
-const CURRENCIES = ["SAR", "AED", "KWD", "BHD", "QAR", "OMR", "EGP", "JOD", "USD", "EUR", "GBP"]
-
-function timeZones(): string[] {
-  try {
-    return Intl.supportedValuesOf("timeZone")
-  } catch {
-    return ["Asia/Riyadh"]
-  }
-}
-
 type Errors = Partial<Record<"name" | "type" | "city" | "address" | "description" | "budget", string>>
 
 /**
- * Add place and Edit place. Currency and time zone are chosen when the place
- * is created; the API refuses to change them after, so editing shows them
- * read-only.
+ * Add place and Edit place. Places use Saudi riyals and Saudi time, the only
+ * choices for now, so the form asks for neither.
  */
 export function PlaceForm({ token, place }: { token: string; place?: Place }) {
   const navigate = useNavigate()
-  const { lang, locale } = useFormat()
+  const { lang } = useFormat()
   const editing = place !== undefined
 
   const [name, setName] = useState(place?.place_name ?? "")
@@ -89,8 +75,6 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(
     place?.latitude != null && place.longitude != null ? { latitude: place.latitude, longitude: place.longitude } : null,
   )
-  const [currency, setCurrency] = useState(place?.currency ?? "SAR")
-  const [timezone, setTimezone] = useState(place?.timezone ?? "Asia/Riyadh")
   const [budget, setBudget] = useState(place?.monthly_maintenance_budget?.toString() ?? "")
   const [status, setStatus] = useState<PlaceStatus>(place?.status ?? "ACTIVE")
 
@@ -104,11 +88,6 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
   const [formError, setFormError] = useState("")
   const [saving, setSaving] = useState(false)
 
-  const zones = useMemo(timeZones, [])
-  const currencyName = useMemo(() => {
-    const names = new Intl.DisplayNames([locale], { type: "currency" })
-    return (code: string) => names.of(code) ?? code
-  }, [locale])
 
   const types: string[] = PLACE_TYPES.includes(type as (typeof PLACE_TYPES)[number]) || !type ? [...PLACE_TYPES] : [type, ...PLACE_TYPES]
 
@@ -178,7 +157,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
         await updatePlace(token, place.id, { ...fields, status })
         await navigate({ to: "/place/$place_id", params: { place_id: place.id } })
       } else {
-        const input: CreatePlaceInput = { ...fields, currency, timezone }
+        const input: CreatePlaceInput = fields
         const created = await createPlace(token, input)
         await navigate({ to: "/place/$place_id", params: { place_id: created.id } })
       }
@@ -189,38 +168,37 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
     }
   }
 
-  const fixed = <Trans>Set when the place is created and cannot change.</Trans>
-
   return (
     <TwoColumns
       main={
         <Panel pad="lg">
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-            <Field id="pname" label={<Trans>Place name</Trans>} error={errors.name}>
-              <Input
-                id="pname"
-                maxLength={LIMITS.name}
-                value={name}
-                aria-invalid={errors.name ? true : undefined}
-                aria-describedby={errors.name ? "pname-error" : undefined}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </Field>
-
-            <Field id="ptype" label={<Trans>Place type</Trans>} error={errors.type}>
-              <NativeSelect id="ptype" value={type} onChange={setType} invalid={Boolean(errors.type)}>
-                <option value="" disabled>
-                  {t`Choose the place type`}
-                </option>
-                {types.map((value) => (
-                  <option key={value} value={value}>
-                    {typeLabel(value)}
+            <FieldRow>
+              <Field id="pname" required label={<Trans>Place name</Trans>} error={errors.name}>
+                <Input
+                  id="pname"
+                  maxLength={LIMITS.name}
+                  value={name}
+                  aria-invalid={errors.name ? true : undefined}
+                  aria-describedby={errors.name ? "pname-error" : undefined}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </Field>
+              <Field id="ptype" required label={<Trans>Place type</Trans>} error={errors.type}>
+                <NativeSelect id="ptype" value={type} onChange={setType} invalid={Boolean(errors.type)}>
+                  <option value="" disabled>
+                    {t`Choose the place type`}
                   </option>
-                ))}
-              </NativeSelect>
-            </Field>
+                  {types.map((value) => (
+                    <option key={value} value={value}>
+                      {typeLabel(value)}
+                    </option>
+                  ))}
+                </NativeSelect>
+              </Field>
+            </FieldRow>
 
-            <Field id="pdesc" label={<Trans>Description</Trans>} error={errors.description}>
+            <Field id="pdesc" optional label={<Trans>Description</Trans>} error={errors.description}>
               <Textarea
                 id="pdesc"
                 rows={3}
@@ -233,7 +211,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
             </Field>
 
             <FieldRow>
-              <Field id="pcity" label={<Trans>City</Trans>} error={errors.city}>
+              <Field id="pcity" required label={<Trans>City</Trans>} error={errors.city}>
                 <Input
                   id="pcity"
                   maxLength={LIMITS.short}
@@ -243,7 +221,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
                   onChange={(e) => setCity(e.target.value)}
                 />
               </Field>
-              <Field id="paddr" label={<Trans>Address</Trans>} error={errors.address}>
+              <Field id="paddr" optional label={<Trans>Address</Trans>} error={errors.address}>
                 <Input
                   id="paddr"
                   maxLength={LIMITS.address}
@@ -257,7 +235,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
 
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold">
-                <Trans>Location on the map</Trans>
+                <Trans>Location on the map</Trans><FieldNeed optional />
               </span>
               <LocationPicker
                 onLocationSelect={handleLocation}
@@ -297,31 +275,11 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
               )}
             </div>
 
-            <FieldRow>
-              <Field id="pcur" label={<Trans>Currency</Trans>} hint={fixed}>
-                <NativeSelect id="pcur" value={currency} onChange={setCurrency} disabled={editing}>
-                  {[...new Set([currency, ...CURRENCIES])].map((code) => (
-                    <option key={code} value={code}>
-                      {`${currencyName(code)} (${code})`}
-                    </option>
-                  ))}
-                </NativeSelect>
-              </Field>
-              <Field id="ptz" label={<Trans>Time zone</Trans>} hint={fixed}>
-                <NativeSelect id="ptz" value={timezone} onChange={setTimezone} disabled={editing}>
-                  {[...new Set([timezone, ...zones])].map((zone) => (
-                    <option key={zone} value={zone} dir="ltr">
-                      {zone}
-                    </option>
-                  ))}
-                </NativeSelect>
-              </Field>
-            </FieldRow>
-
             <Field
               id="pbudget"
+              optional
               label={<Trans>Monthly maintenance budget</Trans>}
-              hint={<Trans>Optional. In {currencyName(currency)}.</Trans>}
+              hint={<Trans>In Saudi riyals.</Trans>}
               error={errors.budget}
             >
               <Input
@@ -337,7 +295,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
             </Field>
 
             {editing && (
-              <Field id="pstatus" label={<Trans>Status</Trans>}>
+              <Field id="pstatus" required label={<Trans>Status</Trans>}>
                 <NativeSelect id="pstatus" value={status} onChange={(value) => setStatus(value as PlaceStatus)}>
                   {(["ACTIVE", "UNDER_MAINTENANCE", "INACTIVE"] as const).map((value) => (
                     <option key={value} value={value}>
@@ -373,60 +331,6 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
 
           <LocationPermission open={asking} onAllow={locate} onClose={() => setAsking(false)} />
         </Panel>
-      }
-      side={
-        <>
-          <Panel>
-            <PanelTitle small>
-              <Trans>How it will look in your list</Trans>
-            </PanelTitle>
-            <div className="box-border flex min-w-0 flex-col gap-4 border border-border bg-card p-5 shadow-sm">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex min-w-0 flex-col gap-1">
-                  <span className="text-lg leading-[1.4] font-bold [overflow-wrap:anywhere]">
-                    {name.trim() || <Trans>Place name</Trans>}
-                  </span>
-                  <span className="flex items-center gap-1 text-sm text-muted-foreground">
-                    <MapPin aria-hidden="true" className="size-4 flex-none" strokeWidth={1.8} />
-                    <span>
-                      {type ? <TypeLabel type={type} /> : <Trans>Place type</Trans>}
-                      {city.trim() && <>, {city.trim()}</>}
-                    </span>
-                  </span>
-                </div>
-                <StatusBadge status={status} />
-              </div>
-              {!editing && (
-                <div className="grid grid-cols-3 gap-3 border-t border-border pt-3.5">
-                  {(
-                    [
-                      ["assets", <Trans key="assets">Assets</Trans>],
-                      ["tickets", <Trans key="tickets">Open tickets</Trans>],
-                      ["workers", <Trans key="workers">Workers</Trans>],
-                    ] as const
-                  ).map(([key, label]) => (
-                      <div key={key} className="flex flex-col leading-[1.4]">
-                        <span className="text-[13px] text-muted-foreground">{label}</span>
-                        <span className="font-mono font-semibold tabular-nums">0</span>
-                      </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </Panel>
-          <Panel>
-            <PanelTitle small>
-              <Trans>Before saving</Trans>
-            </PanelTitle>
-            <Bullets
-              items={[
-                <Trans key="1">Currency and time zone are set when the place is created and do not change after.</Trans>,
-                <Trans key="2">You add assets and assign workers from the place page once it is saved.</Trans>,
-                <Trans key="3">The monthly budget is visible to you only; workers never see it.</Trans>,
-              ]}
-            />
-          </Panel>
-        </>
       }
     />
   )

@@ -736,6 +736,10 @@ export interface CreateTicketInput {
   priority?: TicketPriority
   description?: string
   photos?: File[]
+  /** The place's Manager approves at once: who does it, by when, and the estimate. */
+  assignee_id?: string
+  due_date?: string
+  estimated_cost?: string
 }
 
 export async function createTicket(
@@ -759,6 +763,12 @@ export async function createTicket(
 
   for (const photo of input.photos ?? []) {
     formData.append("photos", photo)
+  }
+
+  if (input.assignee_id && input.due_date) {
+    formData.append("assignee_id", input.assignee_id)
+    formData.append("due_date", input.due_date)
+    if (input.estimated_cost) formData.append("estimated_cost", input.estimated_cost)
   }
 
   const res = await authFetch(`/places/${placeId}/tickets`, token, {

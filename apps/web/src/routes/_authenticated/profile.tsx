@@ -190,7 +190,7 @@ function ProfilePage() {
                   </span>
                 </div>
                 <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-                  <Field id="p-name" label={<Trans>Full name</Trans>} error={errors.fullname}>
+                  <Field id="p-name" required label={<Trans>Full name</Trans>} error={errors.fullname}>
                     <Input id="p-name" maxLength={LIMITS.name} autoComplete="name" value={fullname} aria-invalid={errors.fullname ? true : undefined} onChange={(e) => setFullname(e.target.value)} />
                   </Field>
                   <div className="flex flex-col gap-2">
@@ -210,7 +210,7 @@ function ProfilePage() {
                       <Trans>To change your email, contact support.</Trans>
                     </span>
                   </div>
-                  <Field id="p-phone" label={<Trans>Mobile number</Trans>} error={errors.phone}>
+                  <Field id="p-phone" optional label={<Trans>Mobile number</Trans>} error={errors.phone}>
                     <div dir="ltr" className="flex gap-2">
                       <span className="box-border inline-flex h-11 flex-none items-center border border-border bg-secondary px-3 text-[15px]">+966</span>
                       <Input id="p-phone" type="tel" dir="ltr" value={phone} aria-invalid={errors.phone ? true : undefined} onChange={(e) => setPhone(e.target.value)} />

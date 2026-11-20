@@ -3,16 +3,17 @@ import { Link, useNavigate } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
 import { CircleAlert, Info, MapPin } from "lucide-react"
-import type { Worker } from "@amlak/shared"
+import type { Language, Worker } from "@amlak/shared"
 import { createWorker, deleteWorker, updateWorker } from "@/lib/api"
 import { errorMessage } from "@/lib/errors"
+import { LANGUAGE_NAMES, useLanguage } from "@/lib/i18n"
 import { FormCancel, useFormPopup } from "@/components/form-popup"
 import { LIMITS, tooLong } from "@/lib/limits"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { WorkerStatusChip } from "@/components/place-shared"
 import { ConfirmDialog } from "@/components/states"
-import { Bullets, Field, FormButtons, Panel, PanelTitle, TwoColumns } from "@/components/panel"
+import { Field, FieldNeed, FormButtons, Panel, PanelTitle, Segmented, TwoColumns } from "@/components/panel"
 
 const PREFIX = "+966"
 
@@ -52,6 +53,9 @@ export function WorkerForm({
   const [email, setEmail] = useState(worker?.email ?? "")
   // A new worker's number is typed after +966; an existing one is shown whole.
   const [phone, setPhone] = useState(worker?.phone ?? "")
+  // The invitation email and the worker's app use it; it starts as the manager's.
+  const { lang: myLang } = useLanguage()
+  const [language, setLanguage] = useState<Language>(myLang)
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({})
   const [formError, setFormError] = useState("")
   const [saved, setSaved] = useState(false)
@@ -80,7 +84,7 @@ export function WorkerForm({
         onSaved?.({ ...worker, ...updated })
         setSaved(true)
       } else {
-        await createWorker(token, { fullname: name.trim(), email: email.trim(), phone: number })
+        await createWorker(token, { fullname: name.trim(), email: email.trim(), phone: number, preferred_language: language })
         if (popup) popup.saved()
         else await navigate({ to: "/workers" })
       }
@@ -126,11 +130,12 @@ export function WorkerForm({
       main={
         <Panel pad="lg">
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
-            <Field id="wn" label={<Trans>Full name</Trans>} error={errors.name}>
+            <Field id="wn" required label={<Trans>Full name</Trans>} error={errors.name}>
               <Input id="wn" autoComplete="off" maxLength={LIMITS.name} value={name} onChange={(e) => setName(e.target.value)} {...invalid("name", "wn")} />
             </Field>
             <Field
               id="we"
+              required={!editing}
               label={<Trans>Email</Trans>}
               error={errors.email}
               hint={editing ? <Trans>The email cannot be changed.</Trans> : undefined}
@@ -148,7 +153,7 @@ export function WorkerForm({
                 {...invalid("email", "we")}
               />
             </Field>
-            <Field id="wp" label={<Trans>Mobile number</Trans>} error={errors.phone}>
+            <Field id="wp" required label={<Trans>Mobile number</Trans>} error={errors.phone}>
               {editing ? (
                 <Input id="wp" type="tel" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} {...invalid("phone", "wp")} />
               ) : (
@@ -168,6 +173,26 @@ export function WorkerForm({
                 </div>
               )}
             </Field>
+
+            {!editing && (
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-semibold">
+                  <Trans>Worker's language</Trans><FieldNeed required />
+                </span>
+                <Segmented<Language>
+                  label={t`Worker's language`}
+                  value={language}
+                  onChange={setLanguage}
+                  options={[
+                    { key: "ar", label: <span lang="ar">{LANGUAGE_NAMES.ar}</span> },
+                    { key: "en", label: <span lang="en">{LANGUAGE_NAMES.en}</span> },
+                  ]}
+                />
+                <span className="text-[13px] text-muted-foreground">
+                  <Trans>The invitation email and the app are in this language. The worker can change it later.</Trans>
+                </span>
+              </div>
+            )}
 
             {!editing && (
               <div className="flex items-start gap-2.5 border border-info-200 bg-info-50 px-3.5 py-3 text-sm leading-[1.6]">
@@ -214,6 +239,7 @@ export function WorkerForm({
         </Panel>
       }
       side={
+        worker ? (
         <>
           <Panel>
             <PanelTitle small>
@@ -293,22 +319,9 @@ export function WorkerForm({
                 </ul>
               )}
             </Panel>
-          ) : (
-            <Panel>
-              <PanelTitle small>
-                <Trans>What a worker sees</Trans>
-              </PanelTitle>
-              <Bullets
-                items={[
-                  <Trans key="1">Only the places assigned to them and their assets.</Trans>,
-                  <Trans key="2">Bookings at those places, where they check guests in and out.</Trans>,
-                  <Trans key="3">Their tasks, their reports and the photos.</Trans>,
-                  <Trans key="4">No expenses and no financial reports.</Trans>,
-                ]}
-              />
-            </Panel>
-          )}
+          ) : null}
         </>
+        ) : null
       }
     />
   )

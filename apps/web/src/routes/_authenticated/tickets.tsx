@@ -9,6 +9,7 @@ import { getPlaces, listAllTickets, listTickets } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Page } from "@/components/page"
 import { ReportPopup } from "@/components/report-form"
+import { CompletePopup } from "@/components/complete-form"
 import { FilterTabs, ListFooter, ListToolbar, Panel, ToolbarSelect } from "@/components/panel"
 import { EmptyState, LoadError, LoadingList } from "@/components/states"
 import { TaskCard, TicketCard, useTicketNames } from "@/components/ticket-parts"
@@ -197,6 +198,7 @@ function MyTasks() {
   const [failed, setFailed] = useState(false)
   const [reload, setReload] = useState(0)
   const [reporting, setReporting] = useState(false)
+  const [completing, setCompleting] = useState<string | null>(null)
   const names = useTicketNames(accessToken, [])
 
   useEffect(() => {
@@ -241,6 +243,16 @@ function MyTasks() {
           }}
         />
       )}
+      {completing && (
+        <CompletePopup
+          ticketId={completing}
+          onClose={() => setCompleting(null)}
+          onSaved={() => {
+            setCompleting(null)
+            setReload((n) => n + 1)
+          }}
+        />
+      )}
       {/* One card holds the page's list, its filters and its pages. */}
       <Panel className="gap-5">
         <FilterTabs
@@ -278,7 +290,7 @@ function MyTasks() {
                 key={ticket.id}
                 ticket={ticket}
                 place={names.places[ticket.place_id]}
-                canComplete={tab === "ASSIGNED"}
+                onComplete={tab === "ASSIGNED" ? () => setCompleting(ticket.id) : undefined}
               />
             ))}
           </div>

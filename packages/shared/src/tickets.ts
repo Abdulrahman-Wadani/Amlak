@@ -75,12 +75,41 @@ export const ticketSchema = z
 	.meta({ id: "MaintenanceTicket" });
 export type Ticket = z.infer<typeof ticketSchema>;
 
-/** The text fields of a damage report; the photos come as files. */
-export const createTicketSchema = z.object({
+/**
+ * The text fields of a damage report; the photos come as files. A Manager
+ * can approve the ticket as they add it by sending the approval's fields
+ * too (assignee and due date together, the estimated cost with them).
+ */
+export const createTicketFieldsSchema = z.object({
 	description: z.string().trim().min(1).max(LIMITS.longText),
 	priority: z.enum(TICKET_PRIORITIES),
 	asset_id: z.uuid().optional(),
+	assignee_id: z.uuid().optional().meta({
+		description:
+			"Manager only, to approve at once: an ACTIVE worker assigned to the place, or the place's owner",
+	}),
+	due_date: z.iso
+		.date("Use the YYYY-MM-DD format")
+		.optional()
+		.meta({ description: "Manager only, with assignee_id" }),
+	estimated_cost: z
+		.string()
+		.trim()
+		.regex(/^\d+(\.\d{1,2})?$/, "Use a number like 320 or 320.50")
+		.transform(Number)
+		.refine((cost) => cost <= LIMITS.money, "Too large")
+		.optional()
+		.meta({ description: "Manager only, with assignee_id and due_date" }),
 });
+export const createTicketSchema = createTicketFieldsSchema
+	.refine((input) => !input.assignee_id === !input.due_date, {
+		message: "Send assignee_id and due_date together",
+		path: ["due_date"],
+	})
+	.refine((input) => input.estimated_cost === undefined || input.due_date, {
+		message: "Send the estimated cost with assignee_id and due_date",
+		path: ["estimated_cost"],
+	});
 export type CreateTicketInput = z.infer<typeof createTicketSchema>;
 
 export const listTicketsQuerySchema = z.object({

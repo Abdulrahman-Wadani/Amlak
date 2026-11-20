@@ -238,7 +238,7 @@ function BookingPage() {
           <DialogTitle className="m-0 text-xl leading-[1.4] font-bold">
             <Trans>Cancel this booking?</Trans>
           </DialogTitle>
-          <Field id="cancel-reason" label={<Trans>Reason for cancelling</Trans>} error={reasonError}>
+          <Field id="cancel-reason" required label={<Trans>Reason for cancelling</Trans>} error={reasonError}>
             <Textarea id="cancel-reason" rows={3} dir="auto" maxLength={LIMITS.text} value={reason} onChange={(e) => setReason(e.target.value)} />
           </Field>
           <div className="flex flex-wrap justify-end gap-2.5 pt-1">
