@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react"
+import { useState, type FormEvent } from "react"
 import { Link, useNavigate } from "@tanstack/react-router"
 import { Trans } from "@lingui/react/macro"
 import { t } from "@lingui/core/macro"
@@ -58,22 +58,11 @@ function statusLabel(status: PlaceStatus): string {
   }
 }
 
-// The region's currencies first; the API takes any ISO 4217 code.
-
-function timeZones(): string[] {
-  try {
-    return Intl.supportedValuesOf("timeZone")
-  } catch {
-    return ["Asia/Riyadh"]
-  }
-}
-
 type Errors = Partial<Record<"name" | "type" | "city" | "address" | "description" | "budget", string>>
 
 /**
- * Add place and Edit place. Amounts are in Saudi riyals, the only currency
- * for now. The time zone is chosen when the place is created; the API refuses
- * to change it after, so editing shows it read-only.
+ * Add place and Edit place. Places use Saudi riyals and Saudi time, the only
+ * choices for now, so the form asks for neither.
  */
 export function PlaceForm({ token, place }: { token: string; place?: Place }) {
   const navigate = useNavigate()
@@ -88,7 +77,6 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(
     place?.latitude != null && place.longitude != null ? { latitude: place.latitude, longitude: place.longitude } : null,
   )
-  const [timezone, setTimezone] = useState(place?.timezone ?? "Asia/Riyadh")
   const [budget, setBudget] = useState(place?.monthly_maintenance_budget?.toString() ?? "")
   const [status, setStatus] = useState<PlaceStatus>(place?.status ?? "ACTIVE")
 
@@ -102,7 +90,6 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
   const [formError, setFormError] = useState("")
   const [saving, setSaving] = useState(false)
 
-  const zones = useMemo(timeZones, [])
 
   const types: string[] = PLACE_TYPES.includes(type as (typeof PLACE_TYPES)[number]) || !type ? [...PLACE_TYPES] : [type, ...PLACE_TYPES]
 
@@ -172,7 +159,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
         await updatePlace(token, place.id, { ...fields, status })
         await navigate({ to: "/place/$place_id", params: { place_id: place.id } })
       } else {
-        const input: CreatePlaceInput = { ...fields, timezone }
+        const input: CreatePlaceInput = fields
         const created = await createPlace(token, input)
         await navigate({ to: "/place/$place_id", params: { place_id: created.id } })
       }
@@ -182,8 +169,6 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
       setSaving(false)
     }
   }
-
-  const fixed = <Trans>Set when the place is created and cannot change.</Trans>
 
   return (
     <TwoColumns
@@ -291,34 +276,23 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
               )}
             </div>
 
-            <FieldRow>
-              <Field id="ptz" label={<Trans>Time zone</Trans>} hint={fixed}>
-                <NativeSelect id="ptz" value={timezone} onChange={setTimezone} disabled={editing}>
-                  {[...new Set([timezone, ...zones])].map((zone) => (
-                    <option key={zone} value={zone} dir="ltr">
-                      {zone}
-                    </option>
-                  ))}
-                </NativeSelect>
-              </Field>
-              <Field
+            <Field
+              id="pbudget"
+              label={<Trans>Monthly maintenance budget</Trans>}
+              hint={<Trans>Optional. In {currencyName("SAR")}.</Trans>}
+              error={errors.budget}
+            >
+              <Input
                 id="pbudget"
-                label={<Trans>Monthly maintenance budget</Trans>}
-                hint={<Trans>Optional. In {currencyName("SAR")}.</Trans>}
-                error={errors.budget}
-              >
-                <Input
-                  id="pbudget"
-                  inputMode="decimal"
-                  dir="ltr"
-                  className={lang === "ar" ? "text-end" : undefined}
-                  value={budget}
-                  aria-invalid={errors.budget ? true : undefined}
-                  aria-describedby={errors.budget ? "pbudget-error" : "pbudget-hint"}
-                  onChange={(e) => setBudget(e.target.value)}
-                />
-              </Field>
-            </FieldRow>
+                inputMode="decimal"
+                dir="ltr"
+                className={lang === "ar" ? "text-end" : undefined}
+                value={budget}
+                aria-invalid={errors.budget ? true : undefined}
+                aria-describedby={errors.budget ? "pbudget-error" : "pbudget-hint"}
+                onChange={(e) => setBudget(e.target.value)}
+              />
+            </Field>
 
             {editing && (
               <Field id="pstatus" label={<Trans>Status</Trans>}>
@@ -404,7 +378,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
             </PanelTitle>
             <Bullets
               items={[
-                <Trans key="1">Amounts are in Saudi riyals. The time zone is set when the place is created and does not change after.</Trans>,
+                <Trans key="1">Amounts are in Saudi riyals.</Trans>,
                 <Trans key="2">You add assets and assign workers from the place page once it is saved.</Trans>,
                 <Trans key="3">The monthly budget is visible to you only; workers never see it.</Trans>,
               ]}

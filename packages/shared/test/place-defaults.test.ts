@@ -14,3 +14,17 @@ test("places use Saudi riyals only", () => {
 	const update = updatePlaceSchema.safeParse({ currency: "AED" });
 	assert.ok(update.success && !("currency" in update.data));
 });
+
+test("places use Saudi time only", () => {
+	assert.ok(
+		createPlaceSchema.safeParse({ ...place, timezone: "Asia/Riyadh" }).success,
+	);
+	const other = createPlaceSchema.safeParse({
+		...place,
+		timezone: "Asia/Dubai",
+	});
+	assert.ok(!other.success);
+	assert.deepEqual(other.error.issues[0]?.path, ["timezone"]);
+	const update = updatePlaceSchema.safeParse({ timezone: "Asia/Dubai" });
+	assert.ok(update.success && !("timezone" in update.data));
+});

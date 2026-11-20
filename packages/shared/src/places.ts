@@ -33,15 +33,6 @@ export const placeSchema = z
 	.meta({ id: "Place" });
 export type Place = z.infer<typeof placeSchema>;
 
-const isTimeZone = (name: string) => {
-	try {
-		new Intl.DateTimeFormat("en", { timeZone: name });
-		return true;
-	} catch {
-		return false;
-	}
-};
-
 const placeFields = z.object({
 	place_name: z.string().trim().min(1).max(LIMITS.name),
 	place_type: z.string().trim().min(1).max(LIMITS.short),
@@ -62,10 +53,11 @@ const placeFields = z.object({
 		.literal("SAR", "Places use Saudi riyals (SAR) only")
 		.optional()
 		.meta({ description: "Saudi riyals only for now; leave it out" }),
+	// Saudi time only for now, like the currency.
 	timezone: z
-		.string()
-		.refine(isTimeZone, "Use an IANA time zone, e.g. Asia/Riyadh")
-		.optional(),
+		.literal("Asia/Riyadh", "Places use Saudi time (Asia/Riyadh) only")
+		.optional()
+		.meta({ description: "Saudi time only for now; leave it out" }),
 });
 
 const presence = (value: number | null | undefined) =>
