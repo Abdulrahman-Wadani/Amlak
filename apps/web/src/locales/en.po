@@ -350,7 +350,7 @@ msgid "Add your first property to see it here."
 msgstr "Add your first property to see it here."
 
 #: src/components/content-form.tsx:130
-#: src/components/place-form.tsx:246
+#: src/components/place-form.tsx:240
 #: src/lib/errors.ts:85
 #: src/routes/_authenticated/place/$place_id.tsx:547
 msgid "Address"
@@ -441,6 +441,10 @@ msgstr "Amlak {0}"
 msgid "Amount"
 msgstr "Amount"
 
+#: src/components/place-form.tsx:407
+msgid "Amounts are in Saudi riyals. The time zone is set when the place is created and does not change after."
+msgstr "Amounts are in Saudi riyals. The time zone is set when the place is created and does not change after."
+
 #: src/routes/_authenticated/notifications.tsx:328
 msgid "Announcement"
 msgstr "Announcement"
@@ -515,7 +519,7 @@ msgstr "Asset not found"
 msgid "Asset sections"
 msgstr "Asset sections"
 
-#: src/components/place-form.tsx:403
+#: src/components/place-form.tsx:387
 #: src/routes/_authenticated/home.tsx:388
 #: src/routes/_authenticated/place/$place_id.tsx:231
 #: src/routes/_authenticated/place/$place_id.tsx:337
@@ -577,7 +581,7 @@ msgid "Back to sign in"
 msgstr "Back to sign in"
 
 #: src/components/booking-form.tsx:407
-#: src/components/place-form.tsx:419
+#: src/components/place-form.tsx:403
 msgid "Before saving"
 msgstr "Before saving"
 
@@ -624,8 +628,8 @@ msgstr "Bookings today"
 #: src/components/asset-form.tsx:163
 #: src/components/form-popup.tsx:99
 #: src/components/form-popup.tsx:105
-#: src/components/place-form.tsx:361
-#: src/components/place-form.tsx:365
+#: src/components/place-form.tsx:345
+#: src/components/place-form.tsx:349
 #: src/components/states.tsx:187
 #: src/routes/_authenticated/profile.tsx:152
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:560
@@ -778,7 +782,7 @@ msgstr "Checked out {0}."
 msgid "Checking…"
 msgstr "Checking…"
 
-#: src/components/place-form.tsx:281
+#: src/components/place-form.tsx:275
 msgid "Choose “Location”, then “Allow”."
 msgstr "Choose “Location”, then “Allow”."
 
@@ -824,11 +828,11 @@ msgstr "Choose the first due date."
 msgid "Choose the place"
 msgstr "Choose the place"
 
-#: src/components/place-form.tsx:213
+#: src/components/place-form.tsx:207
 msgid "Choose the place type"
 msgstr "Choose the place type"
 
-#: src/components/place-form.tsx:151
+#: src/components/place-form.tsx:145
 msgid "Choose the place type."
 msgstr "Choose the place type."
 
@@ -838,7 +842,7 @@ msgstr "Choose the place type."
 msgid "Choose the place."
 msgstr "Choose the place."
 
-#: src/components/place-form.tsx:236
+#: src/components/place-form.tsx:230
 #: src/lib/errors.ts:83
 msgid "City"
 msgstr "City"
@@ -1026,14 +1030,9 @@ msgstr "created the ticket."
 msgid "Creating account…"
 msgstr "Creating account…"
 
-#: src/components/place-form.tsx:301
 #: src/routes/_authenticated/place/$place_id.tsx:550
 msgid "Currency"
 msgstr "Currency"
-
-#: src/components/place-form.tsx:423
-msgid "Currency and time zone are set when the place is created and do not change after."
-msgstr "Currency and time zone are set when the place is created and do not change after."
 
 #: src/components/asset-form.tsx:191
 msgid "Current assets"
@@ -1181,7 +1180,7 @@ msgstr "Deleting…"
 
 #: src/components/asset-schedules.tsx:266
 #: src/components/expense-form.tsx:176
-#: src/components/place-form.tsx:223
+#: src/components/place-form.tsx:217
 #: src/lib/errors.ts:112
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:288
 msgid "Description"
@@ -1342,7 +1341,7 @@ msgstr "Enter a whole number from 1 to 100."
 msgid "Enter a whole number from 1 to 365."
 msgstr "Enter a whole number from 1 to 365."
 
-#: src/components/place-form.tsx:158
+#: src/components/place-form.tsx:152
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:417
 msgid "Enter an amount of 0 or more, or leave it empty."
 msgstr "Enter an amount of 0 or more, or leave it empty."
@@ -1356,7 +1355,7 @@ msgstr "Enter an asset name"
 msgid "Enter the amount, like 640 or 640.50."
 msgstr "Enter the amount, like 640 or 640.50."
 
-#: src/components/place-form.tsx:152
+#: src/components/place-form.tsx:146
 msgid "Enter the city."
 msgstr "Enter the city."
 
@@ -1381,7 +1380,7 @@ msgstr "Enter the guest's name."
 msgid "Enter the mobile number."
 msgstr "Enter the mobile number."
 
-#: src/components/place-form.tsx:149
+#: src/components/place-form.tsx:143
 msgid "Enter the place name."
 msgstr "Enter the place name."
 
@@ -1497,7 +1496,7 @@ msgstr "Finance"
 msgid "Financial reports"
 msgstr "Financial reports"
 
-#: src/components/place-form.tsx:270
+#: src/components/place-form.tsx:264
 msgid "Finding your location…"
 msgstr "Finding your location…"
 
@@ -1618,7 +1617,7 @@ msgstr "High"
 msgid "Home"
 msgstr "Home"
 
-#: src/components/place-form.tsx:381
+#: src/components/place-form.tsx:365
 msgid "How it will look in your list"
 msgstr "How it will look in your list"
 
@@ -1755,7 +1754,7 @@ msgstr "Loading"
 msgid "Loading…"
 msgstr "Loading…"
 
-#: src/components/place-form.tsx:260
+#: src/components/place-form.tsx:254
 msgid "Location on the map"
 msgstr "Location on the map"
 
@@ -1864,7 +1863,7 @@ msgstr "Month"
 msgid "Monthly budget"
 msgstr "Monthly budget"
 
-#: src/components/place-form.tsx:323
+#: src/components/place-form.tsx:306
 msgid "Monthly maintenance budget"
 msgstr "Monthly maintenance budget"
 
@@ -2177,7 +2176,7 @@ msgstr "Open the invitation email and choose a password."
 msgid "Open the receipt"
 msgstr "Open the receipt"
 
-#: src/components/place-form.tsx:404
+#: src/components/place-form.tsx:388
 #: src/routes/_authenticated/home.tsx:389
 #: src/routes/_authenticated/places.tsx:35
 msgid "Open tickets"
@@ -2191,9 +2190,9 @@ msgstr "Optional"
 msgid "Optional. A clear photo of the amount and date."
 msgstr "Optional. A clear photo of the amount and date."
 
-#. placeholder {0}: currencyName(currency)
+#. placeholder {0}: currencyName("SAR")
 #. placeholder {0}: currencyName(place.currency)
-#: src/components/place-form.tsx:324
+#: src/components/place-form.tsx:307
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:487
 msgid "Optional. In {0}."
 msgstr "Optional. In {0}."
@@ -2344,8 +2343,8 @@ msgstr "Place"
 msgid "Place information"
 msgstr "Place information"
 
-#: src/components/place-form.tsx:199
-#: src/components/place-form.tsx:387
+#: src/components/place-form.tsx:193
+#: src/components/place-form.tsx:371
 #: src/lib/errors.ts:79
 msgid "Place name"
 msgstr "Place name"
@@ -2358,8 +2357,8 @@ msgstr "Place not found"
 msgid "Place sections"
 msgstr "Place sections"
 
-#: src/components/place-form.tsx:210
-#: src/components/place-form.tsx:392
+#: src/components/place-form.tsx:204
+#: src/components/place-form.tsx:376
 #: src/lib/errors.ts:81
 msgid "Place type"
 msgstr "Place type"
@@ -2512,7 +2511,7 @@ msgstr "Rejected"
 msgid "rejected the ticket."
 msgstr "rejected the ticket."
 
-#: src/components/place-form.tsx:284
+#: src/components/place-form.tsx:278
 msgid "Reload the page."
 msgstr "Reload the page."
 
@@ -2656,7 +2655,7 @@ msgstr "Save password"
 msgid "Save photo"
 msgstr "Save photo"
 
-#: src/components/place-form.tsx:369
+#: src/components/place-form.tsx:353
 msgid "Save place"
 msgstr "Save place"
 
@@ -2665,7 +2664,7 @@ msgstr "Save place"
 #: src/components/booking-form.tsx:183
 #: src/components/expense-form.tsx:116
 #: src/components/place-bookings.tsx:608
-#: src/components/place-form.tsx:369
+#: src/components/place-form.tsx:353
 #: src/components/worker-form.tsx:205
 #: src/routes/_authenticated/admin/$admin_id.tsx:132
 #: src/routes/_authenticated/profile.tsx:227
@@ -2749,7 +2748,7 @@ msgstr "Sending…"
 msgid "Set a new password"
 msgstr "Set a new password"
 
-#: src/components/place-form.tsx:192
+#: src/components/place-form.tsx:186
 msgid "Set when the place is created and cannot change."
 msgstr "Set when the place is created and cannot change."
 
@@ -2810,7 +2809,7 @@ msgstr "Something went wrong. Try again."
 
 #: src/components/asset-form.tsx:114
 #: src/components/content-form.tsx:174
-#: src/components/place-form.tsx:340
+#: src/components/place-form.tsx:324
 #: src/lib/errors.ts:97
 #: src/routes/_authenticated/admin/$admin_id.tsx:147
 #: src/routes/_authenticated/place/$place_id.tsx:545
@@ -2862,7 +2861,7 @@ msgstr "Support ticket resolved"
 msgid "Take a photo"
 msgstr "Take a photo"
 
-#: src/components/place-form.tsx:278
+#: src/components/place-form.tsx:272
 msgid "Tap the lock icon next to the site address."
 msgstr "Tap the lock icon next to the site address."
 
@@ -2952,7 +2951,7 @@ msgstr "The link has expired."
 msgid "The link will look like this: <0>{link}</0>"
 msgstr "The link will look like this: <0>{link}</0>"
 
-#: src/components/place-form.tsx:275
+#: src/components/place-form.tsx:269
 msgid "The location is blocked in the browser."
 msgstr "The location is blocked in the browser."
 
@@ -2964,7 +2963,7 @@ msgstr "The map could not load. Use your current location below, or check that t
 msgid "The map is not available: the TomTom key is missing."
 msgstr "The map is not available: the TomTom key is missing."
 
-#: src/components/place-form.tsx:425
+#: src/components/place-form.tsx:409
 msgid "The monthly budget is visible to you only; workers never see it."
 msgstr "The monthly budget is visible to you only; workers never see it."
 
@@ -3061,7 +3060,7 @@ msgstr "This booking can no longer be moved to another state."
 msgid "This booking is cancelled."
 msgstr "This booking is cancelled."
 
-#: src/components/place-form.tsx:126
+#: src/components/place-form.tsx:120
 msgid "This browser cannot share your location. Pick the place on the map."
 msgstr "This browser cannot share your location. Pick the place on the map."
 
@@ -3158,7 +3157,7 @@ msgstr "Tickets waiting for your review"
 msgid "Tickets with this status will appear here."
 msgstr "Tickets with this status will appear here."
 
-#: src/components/place-form.tsx:310
+#: src/components/place-form.tsx:295
 #: src/routes/_authenticated/place/$place_id.tsx:551
 msgid "Time zone"
 msgstr "Time zone"
@@ -3284,7 +3283,7 @@ msgstr "Use {max} characters or fewer."
 msgid "Use lowercase English letters, digits and single dashes, like about-us."
 msgstr "Use lowercase English letters, digits and single dashes, like about-us."
 
-#: src/components/place-form.tsx:270
+#: src/components/place-form.tsx:264
 msgid "Use my current location"
 msgstr "Use my current location"
 
@@ -3352,7 +3351,7 @@ msgstr "Wait a little, then try again."
 msgid "Was due {due}"
 msgstr "Was due {due}"
 
-#: src/components/place-form.tsx:295
+#: src/components/place-form.tsx:289
 msgid "We ask for location only when you tap the button, and we never track workers."
 msgstr "We ask for location only when you tap the button, and we never track workers."
 
@@ -3360,7 +3359,7 @@ msgstr "We ask for location only when you tap the button, and we never track wor
 msgid "We could not find it. It may have been deleted."
 msgstr "We could not find it. It may have been deleted."
 
-#: src/components/place-form.tsx:140
+#: src/components/place-form.tsx:134
 msgid "We could not get your location. Pick the place on the map."
 msgstr "We could not get your location. Pick the place on the map."
 
@@ -3476,7 +3475,7 @@ msgid "Worker not found"
 msgstr "Worker not found"
 
 #: src/components/account-links.tsx:26
-#: src/components/place-form.tsx:405
+#: src/components/place-form.tsx:389
 #: src/lib/nav.tsx:171
 #: src/routes/_authenticated/announcements.tsx:107
 #: src/routes/_authenticated/home.tsx:391
@@ -3548,7 +3547,7 @@ msgstr "Wrong email or password."
 msgid "Years"
 msgstr "Years"
 
-#: src/components/place-form.tsx:424
+#: src/components/place-form.tsx:408
 msgid "You add assets and assign workers from the place page once it is saved."
 msgstr "You add assets and assign workers from the place page once it is saved."
 

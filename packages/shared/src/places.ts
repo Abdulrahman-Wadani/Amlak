@@ -57,10 +57,11 @@ const placeFields = z.object({
 		.max(LIMITS.money)
 		.nullable()
 		.optional(),
+	// Saudi riyals only for now; the column stays so other currencies can come back.
 	currency: z
-		.string()
-		.regex(/^[A-Z]{3}$/, "Use a 3-letter ISO 4217 code, e.g. SAR")
-		.optional(),
+		.literal("SAR", "Places use Saudi riyals (SAR) only")
+		.optional()
+		.meta({ description: "Saudi riyals only for now; leave it out" }),
 	timezone: z
 		.string()
 		.refine(isTimeZone, "Use an IANA time zone, e.g. Asia/Riyadh")

@@ -350,7 +350,7 @@ msgid "Add your first property to see it here."
 msgstr "أضف أول عقار لتظهر هنا."
 
 #: src/components/content-form.tsx:130
-#: src/components/place-form.tsx:246
+#: src/components/place-form.tsx:240
 #: src/lib/errors.ts:85
 #: src/routes/_authenticated/place/$place_id.tsx:547
 msgid "Address"
@@ -441,6 +441,10 @@ msgstr "أملاك {0}"
 msgid "Amount"
 msgstr "المبلغ"
 
+#: src/components/place-form.tsx:407
+msgid "Amounts are in Saudi riyals. The time zone is set when the place is created and does not change after."
+msgstr "المبالغ بالريال السعودي. والمنطقة الزمنية تُحدَّد عند إنشاء العقار ولا تتغير بعده."
+
 #: src/routes/_authenticated/notifications.tsx:328
 msgid "Announcement"
 msgstr "إعلان"
@@ -515,7 +519,7 @@ msgstr "لم يتم العثور على الأصل"
 msgid "Asset sections"
 msgstr "أقسام الأصل"
 
-#: src/components/place-form.tsx:403
+#: src/components/place-form.tsx:387
 #: src/routes/_authenticated/home.tsx:388
 #: src/routes/_authenticated/place/$place_id.tsx:231
 #: src/routes/_authenticated/place/$place_id.tsx:337
@@ -577,7 +581,7 @@ msgid "Back to sign in"
 msgstr "العودة لتسجيل الدخول"
 
 #: src/components/booking-form.tsx:407
-#: src/components/place-form.tsx:419
+#: src/components/place-form.tsx:403
 msgid "Before saving"
 msgstr "قبل الحفظ"
 
@@ -624,8 +628,8 @@ msgstr "حجوزات اليوم"
 #: src/components/asset-form.tsx:163
 #: src/components/form-popup.tsx:99
 #: src/components/form-popup.tsx:105
-#: src/components/place-form.tsx:361
-#: src/components/place-form.tsx:365
+#: src/components/place-form.tsx:345
+#: src/components/place-form.tsx:349
 #: src/components/states.tsx:187
 #: src/routes/_authenticated/profile.tsx:152
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:560
@@ -778,7 +782,7 @@ msgstr "غادر {0}."
 msgid "Checking…"
 msgstr "جارٍ التحقق…"
 
-#: src/components/place-form.tsx:281
+#: src/components/place-form.tsx:275
 msgid "Choose “Location”, then “Allow”."
 msgstr "اختر «الموقع» ثم «السماح»."
 
@@ -824,11 +828,11 @@ msgstr "اختر أول موعد."
 msgid "Choose the place"
 msgstr "اختر العقار"
 
-#: src/components/place-form.tsx:213
+#: src/components/place-form.tsx:207
 msgid "Choose the place type"
 msgstr "اختر نوع العقار"
 
-#: src/components/place-form.tsx:151
+#: src/components/place-form.tsx:145
 msgid "Choose the place type."
 msgstr "اختر نوع العقار."
 
@@ -838,7 +842,7 @@ msgstr "اختر نوع العقار."
 msgid "Choose the place."
 msgstr "اختر العقار."
 
-#: src/components/place-form.tsx:236
+#: src/components/place-form.tsx:230
 #: src/lib/errors.ts:83
 msgid "City"
 msgstr "المدينة"
@@ -1026,14 +1030,9 @@ msgstr "أنشأ التذكرة."
 msgid "Creating account…"
 msgstr "جارٍ إنشاء الحساب…"
 
-#: src/components/place-form.tsx:301
 #: src/routes/_authenticated/place/$place_id.tsx:550
 msgid "Currency"
 msgstr "العملة"
-
-#: src/components/place-form.tsx:423
-msgid "Currency and time zone are set when the place is created and do not change after."
-msgstr "العملة والمنطقة الزمنية تُحددان عند الإنشاء ولا تتغيران بعدها."
 
 #: src/components/asset-form.tsx:191
 msgid "Current assets"
@@ -1181,7 +1180,7 @@ msgstr "جارٍ الحذف…"
 
 #: src/components/asset-schedules.tsx:266
 #: src/components/expense-form.tsx:176
-#: src/components/place-form.tsx:223
+#: src/components/place-form.tsx:217
 #: src/lib/errors.ts:112
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:288
 msgid "Description"
@@ -1342,7 +1341,7 @@ msgstr "أدخل رقمًا صحيحًا من 1 إلى 100."
 msgid "Enter a whole number from 1 to 365."
 msgstr "أدخل رقمًا صحيحًا من 1 إلى 365."
 
-#: src/components/place-form.tsx:158
+#: src/components/place-form.tsx:152
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:417
 msgid "Enter an amount of 0 or more, or leave it empty."
 msgstr "أدخل مبلغًا يساوي 0 أو أكثر، أو اتركه فارغًا."
@@ -1356,7 +1355,7 @@ msgstr "أدخل اسم الأصل"
 msgid "Enter the amount, like 640 or 640.50."
 msgstr "أدخل المبلغ، مثل 640 أو 640.50."
 
-#: src/components/place-form.tsx:152
+#: src/components/place-form.tsx:146
 msgid "Enter the city."
 msgstr "اكتب المدينة."
 
@@ -1381,7 +1380,7 @@ msgstr "اكتب اسم الضيف."
 msgid "Enter the mobile number."
 msgstr "أدخل رقم الجوال."
 
-#: src/components/place-form.tsx:149
+#: src/components/place-form.tsx:143
 msgid "Enter the place name."
 msgstr "اكتب اسم العقار."
 
@@ -1497,7 +1496,7 @@ msgstr "المالية"
 msgid "Financial reports"
 msgstr "التقارير المالية"
 
-#: src/components/place-form.tsx:270
+#: src/components/place-form.tsx:264
 msgid "Finding your location…"
 msgstr "جارٍ تحديد موقعك…"
 
@@ -1618,7 +1617,7 @@ msgstr "عالية"
 msgid "Home"
 msgstr "الرئيسية"
 
-#: src/components/place-form.tsx:381
+#: src/components/place-form.tsx:365
 msgid "How it will look in your list"
 msgstr "هكذا سيظهر في قائمتك"
 
@@ -1755,7 +1754,7 @@ msgstr "جارٍ التحميل"
 msgid "Loading…"
 msgstr "جارٍ التحميل…"
 
-#: src/components/place-form.tsx:260
+#: src/components/place-form.tsx:254
 msgid "Location on the map"
 msgstr "الموقع على الخريطة"
 
@@ -1864,7 +1863,7 @@ msgstr "الشهر"
 msgid "Monthly budget"
 msgstr "الميزانية الشهرية"
 
-#: src/components/place-form.tsx:323
+#: src/components/place-form.tsx:306
 msgid "Monthly maintenance budget"
 msgstr "ميزانية الصيانة الشهرية"
 
@@ -2177,7 +2176,7 @@ msgstr "افتح رسالة الدعوة في بريدك واختر كلمة م�
 msgid "Open the receipt"
 msgstr "فتح الإيصال"
 
-#: src/components/place-form.tsx:404
+#: src/components/place-form.tsx:388
 #: src/routes/_authenticated/home.tsx:389
 #: src/routes/_authenticated/places.tsx:35
 msgid "Open tickets"
@@ -2191,9 +2190,9 @@ msgstr "اختياري"
 msgid "Optional. A clear photo of the amount and date."
 msgstr "اختياري. صورة واضحة للمبلغ والتاريخ."
 
-#. placeholder {0}: currencyName(currency)
+#. placeholder {0}: currencyName("SAR")
 #. placeholder {0}: currencyName(place.currency)
-#: src/components/place-form.tsx:324
+#: src/components/place-form.tsx:307
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:487
 msgid "Optional. In {0}."
 msgstr "اختياري. بـ{0}."
@@ -2344,8 +2343,8 @@ msgstr "العقار"
 msgid "Place information"
 msgstr "معلومات العقار"
 
-#: src/components/place-form.tsx:199
-#: src/components/place-form.tsx:387
+#: src/components/place-form.tsx:193
+#: src/components/place-form.tsx:371
 #: src/lib/errors.ts:79
 msgid "Place name"
 msgstr "اسم العقار"
@@ -2358,8 +2357,8 @@ msgstr "لم يتم العثور على العقار"
 msgid "Place sections"
 msgstr "أقسام العقار"
 
-#: src/components/place-form.tsx:210
-#: src/components/place-form.tsx:392
+#: src/components/place-form.tsx:204
+#: src/components/place-form.tsx:376
 #: src/lib/errors.ts:81
 msgid "Place type"
 msgstr "نوع العقار"
@@ -2512,7 +2511,7 @@ msgstr "مرفوضة"
 msgid "rejected the ticket."
 msgstr "رفض التذكرة."
 
-#: src/components/place-form.tsx:284
+#: src/components/place-form.tsx:278
 msgid "Reload the page."
 msgstr "أعد تحميل الصفحة."
 
@@ -2656,7 +2655,7 @@ msgstr "حفظ كلمة المرور"
 msgid "Save photo"
 msgstr "حفظ الصورة"
 
-#: src/components/place-form.tsx:369
+#: src/components/place-form.tsx:353
 msgid "Save place"
 msgstr "حفظ العقار"
 
@@ -2665,7 +2664,7 @@ msgstr "حفظ العقار"
 #: src/components/booking-form.tsx:183
 #: src/components/expense-form.tsx:116
 #: src/components/place-bookings.tsx:608
-#: src/components/place-form.tsx:369
+#: src/components/place-form.tsx:353
 #: src/components/worker-form.tsx:205
 #: src/routes/_authenticated/admin/$admin_id.tsx:132
 #: src/routes/_authenticated/profile.tsx:227
@@ -2749,7 +2748,7 @@ msgstr "جارٍ الإرسال…"
 msgid "Set a new password"
 msgstr "تعيين كلمة مرور جديدة"
 
-#: src/components/place-form.tsx:192
+#: src/components/place-form.tsx:186
 msgid "Set when the place is created and cannot change."
 msgstr "تُحدد عند الإنشاء ولا تتغير."
 
@@ -2810,7 +2809,7 @@ msgstr "حدث خطأ ما. حاول مرة أخرى."
 
 #: src/components/asset-form.tsx:114
 #: src/components/content-form.tsx:174
-#: src/components/place-form.tsx:340
+#: src/components/place-form.tsx:324
 #: src/lib/errors.ts:97
 #: src/routes/_authenticated/admin/$admin_id.tsx:147
 #: src/routes/_authenticated/place/$place_id.tsx:545
@@ -2862,7 +2861,7 @@ msgstr "حُلّت تذكرة الدعم"
 msgid "Take a photo"
 msgstr "التقاط صورة"
 
-#: src/components/place-form.tsx:278
+#: src/components/place-form.tsx:272
 msgid "Tap the lock icon next to the site address."
 msgstr "اضغط على رمز القفل بجانب عنوان الموقع."
 
@@ -2952,7 +2951,7 @@ msgstr "انتهت صلاحية الرابط."
 msgid "The link will look like this: <0>{link}</0>"
 msgstr "سيظهر الرابط هكذا: <0>{link}</0>"
 
-#: src/components/place-form.tsx:275
+#: src/components/place-form.tsx:269
 msgid "The location is blocked in the browser."
 msgstr "الموقع محجوب في المتصفح."
 
@@ -2964,7 +2963,7 @@ msgstr "تعذّر تحميل الخريطة. استخدم موقعك الحال
 msgid "The map is not available: the TomTom key is missing."
 msgstr "الخريطة غير متاحة: مفتاح TomTom غير موجود."
 
-#: src/components/place-form.tsx:425
+#: src/components/place-form.tsx:409
 msgid "The monthly budget is visible to you only; workers never see it."
 msgstr "الميزانية الشهرية تظهر لك وحدك، ولا يراها العمّال."
 
@@ -3061,7 +3060,7 @@ msgstr "لم يعد بإمكانه تغيير حالته."
 msgid "This booking is cancelled."
 msgstr "هذا الحجز ملغى."
 
-#: src/components/place-form.tsx:126
+#: src/components/place-form.tsx:120
 msgid "This browser cannot share your location. Pick the place on the map."
 msgstr "لا يستطيع هذا المتصفح مشاركة موقعك. اختر المكان على الخريطة."
 
@@ -3158,7 +3157,7 @@ msgstr "تذاكر بانتظار مراجعتك"
 msgid "Tickets with this status will appear here."
 msgstr "تظهر هنا التذاكر بهذه الحالة."
 
-#: src/components/place-form.tsx:310
+#: src/components/place-form.tsx:295
 #: src/routes/_authenticated/place/$place_id.tsx:551
 msgid "Time zone"
 msgstr "المنطقة الزمنية"
@@ -3284,7 +3283,7 @@ msgstr "استخدم {max} حرفًا أو أقل."
 msgid "Use lowercase English letters, digits and single dashes, like about-us."
 msgstr "استخدم حروفًا إنجليزية صغيرة وأرقامًا وشرطات مفردة، مثل about-us."
 
-#: src/components/place-form.tsx:270
+#: src/components/place-form.tsx:264
 msgid "Use my current location"
 msgstr "استخدام موقعي الحالي"
 
@@ -3352,7 +3351,7 @@ msgstr "انتظر قليلًا ثم حاول مرة أخرى."
 msgid "Was due {due}"
 msgstr "كان يستحق {due}"
 
-#: src/components/place-form.tsx:295
+#: src/components/place-form.tsx:289
 msgid "We ask for location only when you tap the button, and we never track workers."
 msgstr "نطلب إذن الموقع فقط عند الضغط على الزر، ولا نتتبع العمّال."
 
@@ -3360,7 +3359,7 @@ msgstr "نطلب إذن الموقع فقط عند الضغط على الزر، 
 msgid "We could not find it. It may have been deleted."
 msgstr "لم نعثر عليه. ربما حُذف."
 
-#: src/components/place-form.tsx:140
+#: src/components/place-form.tsx:134
 msgid "We could not get your location. Pick the place on the map."
 msgstr "تعذّر تحديد موقعك. اختر المكان على الخريطة."
 
@@ -3476,7 +3475,7 @@ msgid "Worker not found"
 msgstr "لم يتم العثور على العامل"
 
 #: src/components/account-links.tsx:26
-#: src/components/place-form.tsx:405
+#: src/components/place-form.tsx:389
 #: src/lib/nav.tsx:171
 #: src/routes/_authenticated/announcements.tsx:107
 #: src/routes/_authenticated/home.tsx:391
@@ -3548,7 +3547,7 @@ msgstr "البريد أو كلمة المرور غير صحيحة."
 msgid "Years"
 msgstr "سنوات"
 
-#: src/components/place-form.tsx:424
+#: src/components/place-form.tsx:408
 msgid "You add assets and assign workers from the place page once it is saved."
 msgstr "تضيف الأصول وتعيّن العمّال من صفحة العقار بعد حفظه."
 

@@ -59,7 +59,6 @@ function statusLabel(status: PlaceStatus): string {
 }
 
 // The region's currencies first; the API takes any ISO 4217 code.
-const CURRENCIES = ["SAR", "AED", "KWD", "BHD", "QAR", "OMR", "EGP", "JOD", "USD", "EUR", "GBP"]
 
 function timeZones(): string[] {
   try {
@@ -72,13 +71,13 @@ function timeZones(): string[] {
 type Errors = Partial<Record<"name" | "type" | "city" | "address" | "description" | "budget", string>>
 
 /**
- * Add place and Edit place. Currency and time zone are chosen when the place
- * is created; the API refuses to change them after, so editing shows them
- * read-only.
+ * Add place and Edit place. Amounts are in Saudi riyals, the only currency
+ * for now. The time zone is chosen when the place is created; the API refuses
+ * to change it after, so editing shows it read-only.
  */
 export function PlaceForm({ token, place }: { token: string; place?: Place }) {
   const navigate = useNavigate()
-  const { lang, locale } = useFormat()
+  const { lang, currencyName } = useFormat()
   const editing = place !== undefined
 
   const [name, setName] = useState(place?.place_name ?? "")
@@ -89,7 +88,6 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
   const [coords, setCoords] = useState<{ latitude: number; longitude: number } | null>(
     place?.latitude != null && place.longitude != null ? { latitude: place.latitude, longitude: place.longitude } : null,
   )
-  const [currency, setCurrency] = useState(place?.currency ?? "SAR")
   const [timezone, setTimezone] = useState(place?.timezone ?? "Asia/Riyadh")
   const [budget, setBudget] = useState(place?.monthly_maintenance_budget?.toString() ?? "")
   const [status, setStatus] = useState<PlaceStatus>(place?.status ?? "ACTIVE")
@@ -105,10 +103,6 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
   const [saving, setSaving] = useState(false)
 
   const zones = useMemo(timeZones, [])
-  const currencyName = useMemo(() => {
-    const names = new Intl.DisplayNames([locale], { type: "currency" })
-    return (code: string) => names.of(code) ?? code
-  }, [locale])
 
   const types: string[] = PLACE_TYPES.includes(type as (typeof PLACE_TYPES)[number]) || !type ? [...PLACE_TYPES] : [type, ...PLACE_TYPES]
 
@@ -178,7 +172,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
         await updatePlace(token, place.id, { ...fields, status })
         await navigate({ to: "/place/$place_id", params: { place_id: place.id } })
       } else {
-        const input: CreatePlaceInput = { ...fields, currency, timezone }
+        const input: CreatePlaceInput = { ...fields, timezone }
         const created = await createPlace(token, input)
         await navigate({ to: "/place/$place_id", params: { place_id: created.id } })
       }
@@ -298,15 +292,6 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
             </div>
 
             <FieldRow>
-              <Field id="pcur" label={<Trans>Currency</Trans>} hint={fixed}>
-                <NativeSelect id="pcur" value={currency} onChange={setCurrency} disabled={editing}>
-                  {[...new Set([currency, ...CURRENCIES])].map((code) => (
-                    <option key={code} value={code}>
-                      {`${currencyName(code)} (${code})`}
-                    </option>
-                  ))}
-                </NativeSelect>
-              </Field>
               <Field id="ptz" label={<Trans>Time zone</Trans>} hint={fixed}>
                 <NativeSelect id="ptz" value={timezone} onChange={setTimezone} disabled={editing}>
                   {[...new Set([timezone, ...zones])].map((zone) => (
@@ -316,25 +301,24 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
                   ))}
                 </NativeSelect>
               </Field>
-            </FieldRow>
-
-            <Field
-              id="pbudget"
-              label={<Trans>Monthly maintenance budget</Trans>}
-              hint={<Trans>Optional. In {currencyName(currency)}.</Trans>}
-              error={errors.budget}
-            >
-              <Input
+              <Field
                 id="pbudget"
-                inputMode="decimal"
-                dir="ltr"
-                className={lang === "ar" ? "text-end" : undefined}
-                value={budget}
-                aria-invalid={errors.budget ? true : undefined}
-                aria-describedby={errors.budget ? "pbudget-error" : "pbudget-hint"}
-                onChange={(e) => setBudget(e.target.value)}
-              />
-            </Field>
+                label={<Trans>Monthly maintenance budget</Trans>}
+                hint={<Trans>Optional. In {currencyName("SAR")}.</Trans>}
+                error={errors.budget}
+              >
+                <Input
+                  id="pbudget"
+                  inputMode="decimal"
+                  dir="ltr"
+                  className={lang === "ar" ? "text-end" : undefined}
+                  value={budget}
+                  aria-invalid={errors.budget ? true : undefined}
+                  aria-describedby={errors.budget ? "pbudget-error" : "pbudget-hint"}
+                  onChange={(e) => setBudget(e.target.value)}
+                />
+              </Field>
+            </FieldRow>
 
             {editing && (
               <Field id="pstatus" label={<Trans>Status</Trans>}>
@@ -420,7 +404,7 @@ export function PlaceForm({ token, place }: { token: string; place?: Place }) {
             </PanelTitle>
             <Bullets
               items={[
-                <Trans key="1">Currency and time zone are set when the place is created and do not change after.</Trans>,
+                <Trans key="1">Amounts are in Saudi riyals. The time zone is set when the place is created and does not change after.</Trans>,
                 <Trans key="2">You add assets and assign workers from the place page once it is saved.</Trans>,
                 <Trans key="3">The monthly budget is visible to you only; workers never see it.</Trans>,
               ]}
