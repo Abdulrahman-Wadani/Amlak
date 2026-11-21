@@ -8,6 +8,7 @@
 	],
 	"scripts": {
 		"typecheck": "bun run --filter \"*\" typecheck",
+		"test": "bun run --filter @amlak/shared test && bun run --filter api test && bun run --filter web test:run",
 		"check": "biome check",
 		"fix": "biome check --write"
 	},
