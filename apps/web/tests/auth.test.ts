@@ -19,11 +19,6 @@ describe("storedUser", () => {
     expect(storedUser()).toBeNull()
   })
 
-  it("returns the user saved in sessionStorage", () => {
-    sessionStorage.setItem("authUser", JSON.stringify(user))
-    expect(storedUser()).toEqual(user)
-  })
-
   it("returns null when the saved value is not valid JSON", () => {
     sessionStorage.setItem("authUser", "{not json")
     expect(storedUser()).toBeNull()
@@ -80,5 +75,69 @@ describe("authFetch session refresh", () => {
 
     expect(refresh).not.toHaveBeenCalled()
     expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+})
+
+// The session is no longer kept in sessionStorage: on each page load the app
+// asks /auth/refresh once and the refresh cookie decides (lib/auth.tsx).
+describe("restoreSession", () => {
+  let fetchMock: ReturnType<typeof vi.fn>
+  const json = (body: unknown, status = 200) =>
+    new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } })
+
+  beforeEach(() => {
+    // Each test is a fresh page load: the module remembers its first restore.
+    vi.resetModules()
+    fetchMock = vi.fn()
+    vi.stubGlobal("fetch", fetchMock)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it("asks /auth/refresh with the cookie when the app opens, then loads the user", async () => {
+    fetchMock
+      .mockResolvedValueOnce(json({ access_token: "token-1" }))
+      .mockResolvedValueOnce(json(user))
+    const auth = await import("@/lib/auth")
+
+    await expect(auth.restoreSession()).resolves.toEqual(user)
+
+    const [refreshUrl, refreshInit] = fetchMock.mock.calls[0]
+    expect(refreshUrl).toBe("/api/v1/auth/refresh")
+    expect(refreshInit.method).toBe("POST")
+    expect(refreshInit.credentials).toBe("same-origin")
+    const [meUrl, meInit] = fetchMock.mock.calls[1]
+    expect(meUrl).toBe("/api/v1/users/me")
+    expect(new Headers(meInit.headers).get("Authorization")).toBe("Bearer token-1")
+    expect(auth.storedUser()).toEqual(user)
+    expect(sessionStorage.length).toBe(0)
+    expect(localStorage.length).toBe(0)
+  })
+
+  it("asks only once per page load", async () => {
+    fetchMock
+      .mockResolvedValueOnce(json({ access_token: "token-1" }))
+      .mockResolvedValueOnce(json(user))
+    const auth = await import("@/lib/auth")
+
+    await Promise.all([auth.restoreSession(), auth.restoreSession()])
+    await auth.restoreSession()
+
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it("ends with no user when the refresh cookie is missing or expired", async () => {
+    fetchMock.mockImplementation(() =>
+      Promise.resolve(json({ code: "UNAUTHENTICATED", message: "Your session is invalid or has expired" }, 401)),
+    )
+    const auth = await import("@/lib/auth")
+
+    await expect(auth.restoreSession()).resolves.toBeNull()
+
+    expect(auth.storedUser()).toBeNull()
+    expect(fetchMock).toHaveBeenCalled()
+    for (const [url] of fetchMock.mock.calls) expect(url).toBe("/api/v1/auth/refresh")
   })
 })

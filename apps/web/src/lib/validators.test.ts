@@ -1,11 +1,29 @@
-import { describe, expect, it } from "vitest"
+import { createElement } from "react"
+import { describe, expect, it, vi } from "vitest"
+import { fireEvent, render, waitFor } from "@testing-library/react"
+import { I18nProvider } from "@lingui/react"
+import { i18n } from "@lingui/core"
+import { createBookingSchema } from "@amlak/shared"
+import { createBooking } from "@/lib/api"
+import { AddBookingPopup } from "@/components/booking-form"
 import {
   assetInput,
-  bookingInput,
   placeInput,
   signInInput,
   signUpInput,
 } from "@/lib/validators"
+
+// The booking form reads the signed-in token and the places, and saves
+// through the API; the tests give it a token and one place, and catch the save.
+vi.mock("@/lib/auth", () => ({ useAuth: () => ({ accessToken: "token" }) }))
+vi.mock("@/lib/api", async (original) => ({
+  ...(await original<typeof import("@/lib/api")>()),
+  getPlaces: vi.fn().mockResolvedValue([
+    { id: "p1", place_name: "Sea View Villa", status: "ACTIVE", timezone: "Asia/Riyadh", currency: "SAR" },
+  ]),
+  getBooking: vi.fn(),
+  createBooking: vi.fn().mockResolvedValue({}),
+}))
 
 const validBooking = {
   guest_name: "Sara Ahmed",
@@ -158,13 +176,16 @@ describe("assetInput", () => {
   })
 })
 
-describe("bookingInput", () => {
+// The booking form's rules now live in createBookingSchema (@amlak/shared),
+// which the API applies to every new booking; lib/validators re-exported a
+// copy of it as bookingInput until the shared schema existed.
+describe("createBookingSchema (the booking form, checked by the API)", () => {
   it("accepts a valid booking", () => {
-    expect(bookingInput.safeParse(validBooking).success).toBe(true)
+    expect(createBookingSchema.safeParse(validBooking).success).toBe(true)
   })
 
   it("requires check-out to be after check-in", () => {
-    const result = bookingInput.safeParse({ ...validBooking, check_out_date: "2026-12-01" })
+    const result = createBookingSchema.safeParse({ ...validBooking, check_out_date: "2026-12-01" })
     expect(result.success).toBe(false)
     if (!result.success) {
       expect(result.error.issues[0].path).toEqual(["check_out_date"])
@@ -173,36 +194,61 @@ describe("bookingInput", () => {
 
   it("rejects a check-out before check-in", () => {
     expect(
-      bookingInput.safeParse({ ...validBooking, check_out_date: "2026-11-30" }).success,
+      createBookingSchema.safeParse({ ...validBooking, check_out_date: "2026-11-30" }).success,
     ).toBe(false)
   })
 
-  it("converts guest count and price sent as text", () => {
-    const result = bookingInput.parse({ ...validBooking, guest_count: "3", total_price: "250.5" })
-    expect(result.guest_count).toBe(3)
-    expect(result.total_price).toBe(250.5)
+  // The form's fields hold text; the form turns the count and the price into
+  // numbers before it sends them, and the API takes only numbers.
+  it("converts guest count and price sent as text", async () => {
+    const onSaved = vi.fn()
+    render(
+      createElement(
+        I18nProvider,
+        { i18n },
+        createElement(AddBookingPopup, { placeId: "p1", onClose: vi.fn(), onSaved }),
+      ),
+    )
+    // The popup renders in a portal, so the fields are looked up in the document.
+    const field = (id: string) => document.querySelector(`#${id}`) as HTMLInputElement
+    await waitFor(() => expect(field("b-place").value).toBe("p1"))
+    fireEvent.change(field("b-in"), { target: { value: validBooking.check_in_date } })
+    fireEvent.change(field("b-out"), { target: { value: validBooking.check_out_date } })
+    fireEvent.change(field("b-name"), { target: { value: validBooking.guest_name } })
+    fireEvent.change(field("b-phone"), { target: { value: "500000000" } })
+    fireEvent.change(field("b-count"), { target: { value: "3" } })
+    fireEvent.change(field("b-price"), { target: { value: "250.5" } })
+    fireEvent.submit(document.querySelector("#booking-form") as HTMLFormElement)
+
+    await waitFor(() => expect(createBooking).toHaveBeenCalledTimes(1))
+    const sent = vi.mocked(createBooking).mock.calls[0][2]
+    expect(sent.guest_count).toBe(3)
+    expect(sent.total_price).toBe(250.5)
+    expect(sent.guest_phone).toBe(validBooking.guest_phone)
+    expect(createBookingSchema.safeParse(sent).success).toBe(true)
+    await waitFor(() => expect(onSaved).toHaveBeenCalledTimes(1))
   })
 
   it("keeps the guest count between 1 and 100 and a whole number", () => {
-    expect(bookingInput.safeParse({ ...validBooking, guest_count: 0 }).success).toBe(false)
-    expect(bookingInput.safeParse({ ...validBooking, guest_count: 101 }).success).toBe(false)
-    expect(bookingInput.safeParse({ ...validBooking, guest_count: 2.5 }).success).toBe(false)
+    expect(createBookingSchema.safeParse({ ...validBooking, guest_count: 0 }).success).toBe(false)
+    expect(createBookingSchema.safeParse({ ...validBooking, guest_count: 101 }).success).toBe(false)
+    expect(createBookingSchema.safeParse({ ...validBooking, guest_count: 2.5 }).success).toBe(false)
   })
 
   it("requires the guest phone to start with + and a country code", () => {
-    expect(bookingInput.safeParse({ ...validBooking, guest_phone: "0500000000" }).success).toBe(
+    expect(createBookingSchema.safeParse({ ...validBooking, guest_phone: "0500000000" }).success).toBe(
       false,
     )
   })
 
   it("does not allow a negative price", () => {
-    expect(bookingInput.safeParse({ ...validBooking, total_price: -10 }).success).toBe(false)
+    expect(createBookingSchema.safeParse({ ...validBooking, total_price: -10 }).success).toBe(false)
   })
 
   it("accepts an optional guest email, but rejects a malformed one", () => {
     expect(
-      bookingInput.safeParse({ ...validBooking, guest_email: "guest@example.com" }).success,
+      createBookingSchema.safeParse({ ...validBooking, guest_email: "guest@example.com" }).success,
     ).toBe(true)
-    expect(bookingInput.safeParse({ ...validBooking, guest_email: "guest" }).success).toBe(false)
+    expect(createBookingSchema.safeParse({ ...validBooking, guest_email: "guest" }).success).toBe(false)
   })
 })
