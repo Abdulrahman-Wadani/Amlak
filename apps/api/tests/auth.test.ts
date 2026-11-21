@@ -1,6 +1,10 @@
 import { createHash } from "node:crypto";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { hashCode, newLinkToken, newVerificationCode } from "../src/auth/codes.ts";
+import {
+	hashCode,
+	newLinkToken,
+	newVerificationCode,
+} from "../src/auth/codes.ts";
 import { hashPassword, verifyPassword } from "../src/auth/passwords.ts";
 import { signAccessToken, verifyAccessToken } from "../src/auth/tokens.ts";
 
@@ -17,7 +21,9 @@ describe("verification codes", () => {
 		expect(hashCode("123456")).toBe(
 			"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
 		);
-		expect(hashCode("123456")).toBe(createHash("sha256").update("123456").digest("hex"));
+		expect(hashCode("123456")).toBe(
+			createHash("sha256").update("123456").digest("hex"),
+		);
 	});
 
 	it("never stores the code itself in the hash", () => {
@@ -42,7 +48,9 @@ describe("passwords", () => {
 	// Bun.password is only available under Bun; stand in for it here.
 	const bunPassword = {
 		hash: vi.fn(async (plain: string) => `hashed:${plain}`),
-		verify: vi.fn(async (plain: string, hash: string) => hash === `hashed:${plain}`),
+		verify: vi.fn(
+			async (plain: string, hash: string) => hash === `hashed:${plain}`,
+		),
 	};
 
 	beforeEach(() => {
@@ -60,8 +68,12 @@ describe("passwords", () => {
 	});
 
 	it("accepts the right password and rejects a wrong one", async () => {
-		await expect(verifyPassword("Passw0rd!", "hashed:Passw0rd!")).resolves.toBe(true);
-		await expect(verifyPassword("wrong", "hashed:Passw0rd!")).resolves.toBe(false);
+		await expect(verifyPassword("Passw0rd!", "hashed:Passw0rd!")).resolves.toBe(
+			true,
+		);
+		await expect(verifyPassword("wrong", "hashed:Passw0rd!")).resolves.toBe(
+			false,
+		);
 	});
 });
 
@@ -79,14 +91,24 @@ describe("access tokens", () => {
 		const token = await signAccessToken({ user_id: USER_ID, role: "WORKER" });
 		const [header, , signature] = token.split(".");
 		const forged = Buffer.from(
-			JSON.stringify({ user_id: USER_ID, role: "ADMIN", iat: 1, exp: 9999999999 }),
+			JSON.stringify({
+				user_id: USER_ID,
+				role: "ADMIN",
+				iat: 1,
+				exp: 9999999999,
+			}),
 		).toString("base64url");
 
-		await expect(verifyAccessToken(`${header}.${forged}.${signature}`)).rejects.toThrow();
+		await expect(
+			verifyAccessToken(`${header}.${forged}.${signature}`),
+		).rejects.toThrow();
 	});
 
 	it("reject a role that the app does not know", async () => {
-		const token = await signAccessToken({ user_id: USER_ID, role: "SUPERUSER" as never });
+		const token = await signAccessToken({
+			user_id: USER_ID,
+			role: "SUPERUSER" as never,
+		});
 
 		await expect(verifyAccessToken(token)).rejects.toThrow();
 	});

@@ -1,5 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { addDays, addMonths, fromDbDate, toDbDate, todayIn } from "../src/dates.ts";
+import {
+	addDays,
+	addMonths,
+	fromDbDate,
+	toDbDate,
+	todayIn,
+} from "../src/dates.ts";
 
 describe("todayIn", () => {
 	beforeEach(() => vi.useFakeTimers());

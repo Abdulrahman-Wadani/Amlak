@@ -27,7 +27,9 @@ describe("errorHandler", () => {
 	afterEach(() => vi.restoreAllMocks());
 
 	it("sends an AppError with its status, code, message and details", () => {
-		const res = run(new AppError("CONFLICT", "Name taken", { fields: { name: "taken" } }));
+		const res = run(
+			new AppError("CONFLICT", "Name taken", { fields: { name: "taken" } }),
+		);
 
 		expect(res.status).toHaveBeenCalledWith(409);
 		expect(res.json).toHaveBeenCalledWith({
@@ -44,7 +46,9 @@ describe("errorHandler", () => {
 	});
 
 	it("sends Retry-After on RATE_LIMITED", () => {
-		const res = run(new AppError("RATE_LIMITED", "Too many", { retry_after_seconds: 42 }));
+		const res = run(
+			new AppError("RATE_LIMITED", "Too many", { retry_after_seconds: 42 }),
+		);
 
 		expect(res.status).toHaveBeenCalledWith(429);
 		expect(res.set).toHaveBeenCalledWith("Retry-After", "42");

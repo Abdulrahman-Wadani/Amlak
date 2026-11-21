@@ -17,7 +17,9 @@ describe("AppError", () => {
 	});
 
 	it("keeps the code, message and details", () => {
-		const error = new AppError("CONFLICT", "Name taken", { fields: { name: "taken" } });
+		const error = new AppError("CONFLICT", "Name taken", {
+			fields: { name: "taken" },
+		});
 
 		expect(error).toBeInstanceOf(Error);
 		expect(error.code).toBe("CONFLICT");

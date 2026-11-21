@@ -21,7 +21,9 @@ describe("parse", () => {
 	});
 
 	it("returns the parsed data when it is valid", () => {
-		expect(parse(schema, { name: "A", amount: 1, address: { city: "Jeddah" } })).toEqual({
+		expect(
+			parse(schema, { name: "A", amount: 1, address: { city: "Jeddah" } }),
+		).toEqual({
 			name: "A",
 			amount: 1,
 			address: { city: "Jeddah" },
@@ -29,7 +31,9 @@ describe("parse", () => {
 	});
 
 	it("throws a VALIDATION_ERROR that names each invalid field", () => {
-		const error = errorOf(() => parse(schema, { name: "", amount: "x", address: { city: 5 } }));
+		const error = errorOf(() =>
+			parse(schema, { name: "", amount: "x", address: { city: 5 } }),
+		);
 
 		expect(error).toBeInstanceOf(AppError);
 		expect(error.code).toBe("VALIDATION_ERROR");

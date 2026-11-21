@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { BookingRow } from "../src/bookings/access.ts";
 import { toBooking } from "../src/bookings/present.ts";
 import { toPlaceHealth } from "../src/dashboard/present.ts";
-import { type PlaceSums, toPlaceFinancials } from "../src/reports/present.ts";
 import { Prisma } from "../src/generated/prisma/client.ts";
+import { type PlaceSums, toPlaceFinancials } from "../src/reports/present.ts";
 
 const PLACE_ID = "3f2b8c1e-9a4d-4e7b-8c2a-1d5f6e7a8b9c";
 const TIMESTAMP = new Date("2026-11-01T10:00:00Z");
@@ -23,7 +23,9 @@ function placeRow(overrides: Record<string, unknown> = {}) {
 	} as never;
 }
 
-function bookingRow(overrides: Partial<Record<string, unknown>> = {}): BookingRow {
+function bookingRow(
+	overrides: Partial<Record<string, unknown>> = {},
+): BookingRow {
 	return {
 		id: "b1",
 		place_id: PLACE_ID,
@@ -73,7 +75,9 @@ describe("toBooking", () => {
 	});
 
 	it("is not ready while another guest is staying", () => {
-		expect(toBooking(bookingRow(), "other-booking").ready_for_check_in).toBe(false);
+		expect(toBooking(bookingRow(), "other-booking").ready_for_check_in).toBe(
+			false,
+		);
 	});
 
 	it("is not ready before the check-in date", () => {
@@ -83,7 +87,9 @@ describe("toBooking", () => {
 	});
 
 	it("is not ready once the guest has checked in", () => {
-		expect(toBooking(bookingRow({ status: "CHECKED_IN" }), null).ready_for_check_in).toBe(false);
+		expect(
+			toBooking(bookingRow({ status: "CHECKED_IN" }), null).ready_for_check_in,
+		).toBe(false);
 	});
 });
 
@@ -143,7 +149,9 @@ describe("toPlaceHealth", () => {
 					{ place_id: PLACE_ID, status: "GOOD", _count: { _all: 4 } },
 					{ place_id: PLACE_ID, status: "OUT_OF_SERVICE", _count: { _all: 1 } },
 				],
-				tickets: [{ place_id: PLACE_ID, status: "PENDING_REVIEW", _count: { _all: 2 } }],
+				tickets: [
+					{ place_id: PLACE_ID, status: "PENDING_REVIEW", _count: { _all: 2 } },
+				],
 				overdue: [{ place_id: PLACE_ID, _count: { _all: 1 } }],
 				checkIns: [{ place_id: PLACE_ID, _count: { _all: 1 } }],
 			},
@@ -156,7 +164,11 @@ describe("toPlaceHealth", () => {
 			UNDER_MAINTENANCE: 0,
 			OUT_OF_SERVICE: 1,
 		});
-		expect(health.open_tickets).toEqual({ PENDING_REVIEW: 2, APPROVED: 0, overdue: 1 });
+		expect(health.open_tickets).toEqual({
+			PENDING_REVIEW: 2,
+			APPROVED: 0,
+			overdue: 1,
+		});
 		expect(health.today).toEqual({ check_ins: 1, check_outs: 0 });
 	});
 
@@ -165,7 +177,9 @@ describe("toPlaceHealth", () => {
 			placeRow({ monthly_maintenance_budget: new Prisma.Decimal("1500") }),
 			{
 				...emptyCounts,
-				spent: [{ place_id: PLACE_ID, _sum: { amount: new Prisma.Decimal("300.5") } }],
+				spent: [
+					{ place_id: PLACE_ID, _sum: { amount: new Prisma.Decimal("300.5") } },
+				],
 			},
 			"MANAGER",
 		);
@@ -197,6 +211,10 @@ describe("toPlaceHealth", () => {
 			emptyCounts,
 			"ADMIN",
 		);
-		expect(noSpend.maintenance_budget).toMatchObject({ budget: 800, spent: 0, remaining: 800 });
+		expect(noSpend.maintenance_budget).toMatchObject({
+			budget: 800,
+			spent: 0,
+			remaining: 800,
+		});
 	});
 });
