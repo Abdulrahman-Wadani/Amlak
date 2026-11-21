@@ -1,7 +1,5 @@
 # Amlak — Stage 4: MVP Development and Execution
 
-Nov 21, 2026 · @abdulrahman
-
 Amlak's MVP was built in two sprints (11 Oct – 20 Nov 2026) and is live at [amlak.software](https://amlak.software); a third sprint (22 Nov – 5 Dec) covers final integration, QA and the demo.
 
 ## Deliverables
@@ -12,9 +10,9 @@ Amlak's MVP was built in two sprints (11 Oct – 20 Nov 2026) and is live at [am
 | Sprint reviews | [Sprint 0 issues](https://abdulrahmanqmb.atlassian.net/issues/?jql=project%3DSCRUM%20AND%20sprint%3D2) · [Sprint 1 issues](https://abdulrahmanqmb.atlassian.net/issues/?jql=project%3DSCRUM%20AND%20sprint%3D1) | Review notes in the Sprint reviews section |
 | Retrospectives | This document, Retrospectives section | Written at sprint close from Jira and GitHub records |
 | Source repository | [github.com/Abdulrahman-Wadani/Amlak](https://github.com/Abdulrahman-Wadani/Amlak) | Bun monorepo: `apps/api`, `apps/web`, `packages/shared` |
-| Pull requests | [All PRs](https://github.com/Abdulrahman-Wadani/Amlak/pulls?q=is%3Apr) | 87 PRs, 86 merged (14 Oct – 20 Nov) |
+| Pull requests | [All PRs](https://github.com/Abdulrahman-Wadani/Amlak/pulls?q=is%3Apr) | 88 PRs, 87 merged (14 Oct – 21 Nov) |
 | Bug tracking | [Jira: label = bug](https://abdulrahmanqmb.atlassian.net/issues/?jql=project%3DSCRUM%20AND%20labels%3Dbug%20ORDER%20BY%20key) | 17 bugs logged, 17 fixed, each linked to its PR |
-| Testing evidence | [Web tests](https://github.com/Abdulrahman-Wadani/Amlak/tree/develop/apps/web/src/lib) · [Shared tests](https://github.com/Abdulrahman-Wadani/Amlak/tree/develop/packages/shared/test) · this document | Results in the QA section |
+| Testing evidence | [Web tests](https://github.com/Abdulrahman-Wadani/Amlak/tree/develop/apps/web/src/lib) · [API tests](https://github.com/Abdulrahman-Wadani/Amlak/tree/develop/apps/api/tests) · [Shared tests](https://github.com/Abdulrahman-Wadani/Amlak/tree/develop/packages/shared/test) · this document | Results in the QA section |
 | Production environment | [amlak.software](https://amlak.software) · [API docs](https://amlak.software/api/docs) | AWS EC2, Docker Compose, Caddy with HTTPS |
 
 ## Team and working agreements
@@ -92,7 +90,7 @@ Sprint 0 ran 3.5 weeks because it included project setup. Counts are Jira issues
 
 ## Execution
 
-Every Must-have user story was delivered through 86 merged pull requests; the API was finished first, then the web app was completed and brought to the approved design.
+Every Must-have user story was delivered through 87 merged pull requests; the API was finished first, then the web app was completed and brought to the approved design.
 
 **Stack.** Bun workspaces; API on Express 5, Prisma 7 and PostgreSQL, validated with zod schemas shared with the web app and published as OpenAPI at `/api/docs`; web app on React 19, TanStack Router and Lingui (Arabic right-to-left and English); photos on AWS S3; email through Resend.
 
@@ -105,13 +103,13 @@ Every Must-have user story was delivered through 86 merged pull requests; the AP
 - Web: every screen built, then fixed and completed in PRs #63 to #74: session refresh, role-based actions, full Arabic and English translation, zero type errors, tests and translated API errors.
 - Design: the web app was brought to the approved design ("Amlak v3.1 screens") in PRs #76 to #86: one top bar and phone layout, design-system components, popups for add forms, input limits on API and web, and the rule that bookings and repairs never share a day.
 
-**Source control in numbers** (from GitHub, 14 Oct – 20 Nov)
+**Source control in numbers** (from GitHub, 14 Oct – 21 Nov)
 
 | Measure | Value |
 | --- | --- |
 | Pull requests opened | 88 |
-| Merged | 88 (77 into `develop`, 11 releases into `main`) |
-| Merged with an approving review by another member | 25 of 86 |
+| Merged | 87 (76 into `develop`, 11 releases into `main`); 1 closed without merging |
+| Merged with an approving review by another member | 25 of 87 |
 | PRs by author | Abdulrahman 71 · Abdulwahab 9 · Azzam 8 |
 | Reviews by member (approvals of others' PRs) | Abdulwahab 13 · Azzam 12 · Abdulrahman 1 |
 
@@ -168,7 +166,7 @@ Not done and carried over: profile, the web sign-up and login screens, propertie
 | Arabic and English throughout, phone and desktop layouts to the approved design | SCRUM-60, 61; PRs #68, #76 to #86 |
 | Production deployment with HTTPS | SCRUM-67; [amlak.software](https://amlak.software) |
 
-Not done and moved to Sprint 2: CI with GitHub Actions (SCRUM-65), merging the unit tests written on the unittest branch (SCRUM-76), integration tests (SCRUM-77), end-to-end test and demo rehearsal (SCRUM-68).
+Not done and moved to Sprint 2: CI with GitHub Actions (SCRUM-65), integration tests (SCRUM-77), end-to-end test and demo rehearsal (SCRUM-68).
 
 ## Retrospectives
 
@@ -185,7 +183,7 @@ No retrospective meeting was held during the sprints; this one covers Sprints 0 
 **Challenges**
 
 - The web app lagged the API: 10 web stories slipped from Sprint 0, and in Sprint 1 the API owner had to take over web fixes.
-- The review rule did not hold: only 25 of 86 merged PRs had an approval from another member; the rest were merged by the repository owner with an admin bypass.
+- The review rule did not hold: only 25 of 87 merged PRs had an approval from another member; the rest were merged by the repository owner with an admin bypass.
 - Jira statuses fell behind the code, so the board did not show real progress until Sprint 1 closed.
 - Quality debt built up: 165 type errors, a test setup that ran no tests, and about 530 lines of hard-coded Arabic, all found late.
 - The first web screens drifted from the approved design and needed a full design pass.
@@ -202,15 +200,15 @@ No retrospective meeting was held during the sprints; this one covers Sprints 0 
 
 ## Final integration and QA testing
 
-All automated checks pass on `develop` (93 tests, zero type errors, 781 messages translated), and every end-to-end API scenario below gave the expected result; unit tests for the API and more web tests are written on the unittest branch and pass (54 and 116); merging them, an integration suite and CI are the open QA work in Sprint 2.
+After PR #88, all automated checks pass on `develop` (221 tests across the three packages, zero type errors, 781 messages translated), and every end-to-end API scenario below gave the expected result; an integration suite and CI are the open QA work in Sprint 2.
 
 **Automated checks** (run locally before each PR; CI to run them comes in Sprint 2)
 
-| Check | Command | Result on `develop` (PR #86) |
+| Check | Command | Result on `develop` (PR #88) |
 | --- | --- | --- |
-| Lint and format | `bun run check` (Biome) | Pass, 123 files |
+| Lint and format | `bun run check` (Biome) | Pass, 130 files |
 | Type check, all three packages | `bun run typecheck` | Pass, 0 errors |
-| Web unit and component tests | `bunx vitest run` in `apps/web` | 84 passed in 15 files |
+| Web unit and component tests | `bunx vitest run` in `apps/web` | 158 passed in 25 files |
 | Shared schema tests (input limits, place defaults) | `bun run test` in `packages/shared` | 9 passed |
 | Translations | `bun run i18n:check` | 781 messages, each in Arabic and English |
 | Production build with type check | `bun run build` (`tsc -b` and Vite) | Pass |
@@ -222,7 +220,7 @@ Web tests cover session refresh and retry (`authFetch`), translated API errors, 
 | API unit tests: auth, dates, errors and the error handler, presenters, validation (`apps/api/tests`, `bun run test`) | Azzam | 6 | 54 passed |
 | Web unit and page tests: auth, bookings, expenses, home, places, tickets, users, validators and the shared helpers (`apps/web`, `vitest run`) | Abdulwahab and Azzam | 21 | 116 passed |
 
-Both suites were run on that branch for this report, with every test passing.
+Both suites were merged into develop in PR #88 (21 Nov), with 9 web tests updated for code changed since 18 Nov and none weakened. The root command bun run test now runs shared (9), API (54) and web (158) tests: 221 passed.
 
 **End-to-end API scenarios** (run against a local API and PostgreSQL)
 
@@ -247,7 +245,7 @@ Both suites were run on that branch for this report, with every test passing.
 
 **Sprint 2 test plan (open)**
 
-- [ ] Merge the unittest branch into develop (54 API tests, 116 web tests) and keep them passing (SCRUM-76). A trial merge on 21 Nov had no conflicts and all 54 API tests passed; 9 web tests in 2 files need updating for code changed since 18 Nov (session restore and the booking validator)
+- [ ] Unit tests for the API and web merged into develop in PR #88 on 21 Nov: 221 tests passing (SCRUM-76)
 - [ ] Integration tests across web, API and database (SCRUM-77)
 - [ ] CI running every check above on each PR (SCRUM-65)
 - [ ] End-to-end test on production with the whole team and demo rehearsal (SCRUM-68)
