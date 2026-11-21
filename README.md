@@ -59,6 +59,26 @@ docker compose exec -e ADMIN_EMAIL=admin@example.com -e ADMIN_PASSWORD='Choose@1
 
 The web app runs on http://localhost:5173 and the API on http://localhost:3001, with its docs at http://localhost:3001/api/docs. For development without Docker, see `apps/api/.env.example` and run `bun run dev` inside `apps/api` and `apps/web`.
 
+## Testing
+
+From the repository root:
+
+```bash
+bun run test        # every package: shared, then the API, then the web app
+bun run check       # Biome: lint and format
+bun run typecheck   # TypeScript in every package
+```
+
+`bun run test` runs the unit tests of the three packages in turn and stops at the first one that fails:
+
+| Package | Runner | Where the tests are |
+|---|---|---|
+| `packages/shared` | `node --test` | `packages/shared/test` |
+| `apps/api` | Vitest | `apps/api/tests` |
+| `apps/web` | Vitest (happy-dom) | `apps/web/src/**/*.test.ts(x)` and `apps/web/tests` |
+
+None of them needs Docker, a database or the network. To run one package alone, use `bun run test` inside its folder (`bun run test:run` in `apps/web`, since its `test` script watches for changes).
+
 ## Team
 
 | Member | Main contribution |
