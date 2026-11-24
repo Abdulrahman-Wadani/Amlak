@@ -27,6 +27,9 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3001
+      # Metrics for Alloy only: this port is not published.
+      METRICS_PORT: 9464
+      LOG_LEVEL: info
       DATABASE_URL: postgresql://amlak:${POSTGRES_PASSWORD}@db:5432/amlak
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
@@ -59,7 +62,37 @@ services:
     depends_on:
       - api
 
+  # Collects metrics and logs and sends them to Grafana Cloud. No ports.
+  alloy:
+    image: grafana/alloy:v1.21.0
+    restart: unless-stopped
+    command:
+      - run
+      - --storage.path=/var/lib/alloy/data
+      - /etc/alloy/config.alloy
+    environment:
+      GRAFANA_CLOUD_PROM_URL: ${GRAFANA_CLOUD_PROM_URL:?Set GRAFANA_CLOUD_PROM_URL in .env}
+      GRAFANA_CLOUD_PROM_USER: ${GRAFANA_CLOUD_PROM_USER:?Set GRAFANA_CLOUD_PROM_USER in .env}
+      GRAFANA_CLOUD_LOKI_URL: ${GRAFANA_CLOUD_LOKI_URL:?Set GRAFANA_CLOUD_LOKI_URL in .env}
+      GRAFANA_CLOUD_LOKI_USER: ${GRAFANA_CLOUD_LOKI_USER:?Set GRAFANA_CLOUD_LOKI_USER in .env}
+      GRAFANA_CLOUD_TOKEN: ${GRAFANA_CLOUD_TOKEN:?Set GRAFANA_CLOUD_TOKEN in .env}
+      POSTGRES_MONITOR_PASSWORD: ${POSTGRES_MONITOR_PASSWORD:?Set POSTGRES_MONITOR_PASSWORD in .env}
+    volumes:
+      - ./deploy/alloy/config.alloy:/etc/alloy/config.alloy:ro
+      - alloy-data:/var/lib/alloy/data
+      # Read-only host views for the server's CPU, memory and disk.
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      # Read-only, to find the containers and read their logs.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    mem_limit: 300m
+    depends_on:
+      - api
+      - db
+
 volumes:
   db-data:
   caddy-data:
   caddy-config:
+  alloy-data:

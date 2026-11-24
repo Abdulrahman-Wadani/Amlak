@@ -1,6 +1,7 @@
 import { addDays, fromDbDate, todayIn } from "../dates.ts";
 import { prisma } from "../db.ts";
 import { sendEmail } from "../email.ts";
+import { logger } from "../logger.ts";
 import { assignedEmail } from "./messages.ts";
 
 /**
@@ -29,7 +30,10 @@ export async function emailAssignee(ticketId: string): Promise<void> {
 			text: email.body,
 		});
 	} catch (error) {
-		console.error("Could not email the assignee of ticket", ticketId, error);
+		logger.error(
+			{ err: error, ticket_id: ticketId },
+			"Could not email the assignee of ticket",
+		);
 	}
 }
 

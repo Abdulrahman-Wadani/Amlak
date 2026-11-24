@@ -112,6 +112,23 @@ export const openApiDocument = createDocument({
 		},
 	},
 	paths: {
+		"/health": {
+			get: {
+				tags: ["Health"],
+				summary: "Check that the API and its database answer",
+				description: "Public. Used by uptime checks.",
+				responses: {
+					"200": ok(
+						"The API and the database answer",
+						z.object({ status: z.literal("ok") }),
+					),
+					"503": ok(
+						"The database does not answer",
+						z.object({ status: z.literal("unavailable") }),
+					),
+				},
+			},
+		},
 		"/auth/register": {
 			post: {
 				tags: ["Auth"],

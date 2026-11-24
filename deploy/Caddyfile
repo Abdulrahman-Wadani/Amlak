@@ -3,6 +3,12 @@
 {$DOMAIN} {
 	encode zstd gzip
 
+	# Access logs as JSON on stderr; Alloy ships them to Grafana Cloud.
+	log {
+		output stderr
+		format json
+	}
+
 	header {
 		Strict-Transport-Security "max-age=31536000"
 		X-Content-Type-Options "nosniff"

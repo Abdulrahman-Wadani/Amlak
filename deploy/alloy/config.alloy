@@ -1,0 +1,89 @@
+// Grafana Alloy on the production server: collects metrics and logs and
+// sends them to Grafana Cloud. Secrets come from the environment (.env).
+
+// ---------- Metrics ----------
+
+// The server itself: CPU, memory, disk. Host paths are mounted read-only.
+prometheus.exporter.unix "node" {
+	procfs_path = "/host/proc"
+	sysfs_path  = "/host/sys"
+	rootfs_path = "/rootfs"
+}
+
+// PostgreSQL, read through the "alloy" user (pg_monitor role only).
+prometheus.exporter.postgres "db" {
+	data_source_names = [string.format("postgresql://alloy:%s@db:5432/amlak?sslmode=disable", sys.env("POSTGRES_MONITOR_PASSWORD"))]
+}
+
+prometheus.scrape "api" {
+	job_name        = "amlak-api"
+	targets         = [{"__address__" = "api:9464"}]
+	scrape_interval = "60s"
+	forward_to      = [prometheus.remote_write.cloud.receiver]
+}
+
+prometheus.scrape "node" {
+	job_name        = "node"
+	targets         = prometheus.exporter.unix.node.targets
+	scrape_interval = "60s"
+	forward_to      = [prometheus.remote_write.cloud.receiver]
+}
+
+prometheus.scrape "postgres" {
+	job_name        = "postgres"
+	targets         = prometheus.exporter.postgres.db.targets
+	scrape_interval = "60s"
+	forward_to      = [prometheus.remote_write.cloud.receiver]
+}
+
+prometheus.remote_write "cloud" {
+	endpoint {
+		url = sys.env("GRAFANA_CLOUD_PROM_URL")
+
+		basic_auth {
+			username = sys.env("GRAFANA_CLOUD_PROM_USER")
+			password = sys.env("GRAFANA_CLOUD_TOKEN")
+		}
+	}
+	external_labels = {server = "amlak-prod"}
+}
+
+// ---------- Logs ----------
+
+// Every container of this compose project, labelled by its service name.
+discovery.docker "containers" {
+	host = "unix:///var/run/docker.sock"
+}
+
+discovery.relabel "containers" {
+	targets = discovery.docker.containers.targets
+
+	rule {
+		source_labels = ["__meta_docker_container_label_com_docker_compose_project"]
+		regex         = "amlak-prod"
+		action        = "keep"
+	}
+
+	rule {
+		source_labels = ["__meta_docker_container_label_com_docker_compose_service"]
+		target_label  = "service"
+	}
+}
+
+loki.source.docker "containers" {
+	host       = "unix:///var/run/docker.sock"
+	targets    = discovery.relabel.containers.output
+	forward_to = [loki.write.cloud.receiver]
+}
+
+loki.write "cloud" {
+	endpoint {
+		url = sys.env("GRAFANA_CLOUD_LOKI_URL")
+
+		basic_auth {
+			username = sys.env("GRAFANA_CLOUD_LOKI_USER")
+			password = sys.env("GRAFANA_CLOUD_TOKEN")
+		}
+	}
+	external_labels = {server = "amlak-prod"}
+}

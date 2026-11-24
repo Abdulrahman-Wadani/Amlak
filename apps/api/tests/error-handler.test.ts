@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AppError } from "../src/errors.ts";
+import { logger } from "../src/logger.ts";
 import { errorHandler } from "../src/middleware/error-handler.ts";
 
 function fakeResponse() {
@@ -7,6 +8,7 @@ function fakeResponse() {
 		set: vi.fn(),
 		status: vi.fn(),
 		json: vi.fn(),
+		locals: { requestId: "req-1" },
 	};
 	res.status.mockReturnValue(res);
 	res.json.mockReturnValue(res);
@@ -22,7 +24,7 @@ const run = (error: unknown) => {
 
 describe("errorHandler", () => {
 	beforeEach(() => {
-		vi.spyOn(console, "error").mockImplementation(() => {});
+		vi.spyOn(logger, "error").mockImplementation(() => {});
 	});
 	afterEach(() => vi.restoreAllMocks());
 
@@ -63,7 +65,10 @@ describe("errorHandler", () => {
 			message: "Something went wrong",
 		});
 		expect(JSON.stringify(res.json.mock.calls)).not.toContain("hunter2");
-		expect(console.error).toHaveBeenCalled();
+		expect(logger.error).toHaveBeenCalledWith(
+			expect.objectContaining({ request_id: "req-1" }),
+			"Unhandled error",
+		);
 	});
 
 	it("turns invalid JSON bodies into a 422 validation error", () => {
