@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { msg } from "@lingui/core/macro"
 import { useLingui } from "@lingui/react"
 import { Trans } from "@lingui/react/macro"
@@ -20,17 +20,11 @@ import {
 } from "lucide-react"
 import type { ReactNode } from "react"
 import { cn } from "cn"
-import { restoreSession } from "@/lib/auth"
+import { useAuth } from "@/lib/auth"
 import { LanguageButton } from "@/components/auth-layout"
 import { buttonVariants } from "@/components/ui/button"
 
 export const Route = createFileRoute("/")({
-  // A signed-in user goes straight to the home; anyone else sees the landing page.
-  beforeLoad: async () => {
-    if (await restoreSession()) {
-      throw redirect({ to: "/home" })
-    }
-  },
   component: Landing,
 })
 
@@ -217,6 +211,7 @@ function SectionLinks({ className }: { className: string }) {
 }
 
 function SiteHeader() {
+  const { user } = useAuth()
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-card">
       <div className="mx-auto flex h-[64px] max-w-6xl items-center justify-between gap-3 px-4 desk:h-[72px] desk:px-8">
@@ -226,19 +221,26 @@ function SiteHeader() {
         <SectionLinks className="hidden items-center gap-1 desk:flex" />
         <div className="flex items-center gap-2">
           <LanguageButton />
-          <Link to="/signin" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "hidden desk:inline-flex")}>
-            <Trans>Sign in</Trans>
-          </Link>
-          <Link to="/signup" className={buttonVariants({ size: "sm" })}>
-            <Trans>Create account</Trans>
-          </Link>
+          {user ? (
+            <Link to="/home" className={buttonVariants({ size: "sm" })}>
+              <Trans>Home</Trans>
+            </Link>
+          ) : (
+            <>
+              <Link to="/signin" className={cn(buttonVariants({ variant: "outline", size: "sm" }), "hidden desk:inline-flex")}>
+                <Trans>Sign in</Trans>
+              </Link>
+              <Link to="/signup" className={buttonVariants({ size: "sm" })}>
+                <Trans>Create account</Trans>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>
   )
 }
 
-// The buildings of the skyline: where each stands in a 600 by 900 picture, and its colour.
 const BUILDINGS = [
   { x: -20, y: 600, w: 130, h: 300, fill: "#243041" },
   { x: 110, y: 480, w: 90, h: 420, fill: "#375674" },
@@ -248,7 +250,6 @@ const BUILDINGS = [
   { x: 560, y: 570, w: 80, h: 330, fill: "#243041" },
 ]
 
-/** The skyline. Each building rises from the ground in turn (motion.css: am-bar). */
 function SkylineArt() {
   return (
     <svg
@@ -479,7 +480,6 @@ function HowToUse() {
   )
 }
 
-// The team's contact details. Set CONTACT_EMAIL to show the email in the footer.
 const CONTACT_EMAIL = ""
 
 const TEAM_ACCOUNTS = [
