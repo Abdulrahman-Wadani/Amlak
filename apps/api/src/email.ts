@@ -1,5 +1,6 @@
 import { Resend } from "resend";
 import { config } from "./config.ts";
+import { logger } from "./logger.ts";
 
 export type Email = {
 	to: string;
@@ -32,7 +33,7 @@ export async function sendEmailOrLog(email: Email): Promise<void> {
 	try {
 		await sendEmail(email);
 	} catch (error) {
-		console.error("Email failed after retries", email.to, error);
+		logger.error({ err: error }, "Email failed after retries");
 	}
 }
 
@@ -53,7 +54,7 @@ export async function sendEmailsOrLog(emails: Email[]): Promise<void> {
 		try {
 			await withRetries(label, () => sendBatchOnce(resend, batch));
 		} catch (error) {
-			console.error(`Sending ${label} failed after retries`, error);
+			logger.error({ err: error }, `Sending ${label} failed after retries`);
 		}
 	}
 }
@@ -71,7 +72,7 @@ async function withRetries(
 			if (delay === undefined) {
 				throw error;
 			}
-			console.warn(`Sending ${label} failed; retrying in ${delay} ms`);
+			logger.warn(`Sending ${label} failed; retrying in ${delay} ms`);
 			await new Promise((resolve) => setTimeout(resolve, delay));
 		}
 	}

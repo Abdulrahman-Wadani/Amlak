@@ -1,3 +1,5 @@
+import { logger } from "../logger.ts";
+import { jobRuns } from "../metrics.ts";
 import { sendOverdueAlerts } from "./overdue.ts";
 import { createPreventiveTickets } from "./preventive-tickets.ts";
 import { sendReminders } from "./reminders.ts";
@@ -15,13 +17,13 @@ export async function runJobs(): Promise<void> {
 		const tickets = await createPreventiveTickets();
 		const reminders = await sendReminders();
 		const alerts = await sendOverdueAlerts();
+		jobRuns.inc({ result: "success" });
 		if (tickets + reminders + alerts > 0) {
-			console.log(
-				`Jobs: ${tickets} preventive tickets, ${reminders} reminders, ${alerts} overdue alerts`,
-			);
+			logger.info({ tickets, reminders, alerts }, "Jobs ran");
 		}
 	} catch (error) {
-		console.error("Jobs failed", error);
+		jobRuns.inc({ result: "failure" });
+		logger.error({ err: error }, "Jobs failed");
 	}
 }
 

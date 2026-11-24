@@ -7,6 +7,9 @@ import { bookingsRouter } from "./bookings/routes.ts";
 import { contentRouter } from "./content/routes.ts";
 import { dashboardRouter } from "./dashboard/routes.ts";
 import { expensesRouter } from "./expenses/routes.ts";
+import { healthRouter } from "./health.ts";
+import { logRequests } from "./logger.ts";
+import { recordMetrics } from "./metrics.ts";
 import { errorHandler } from "./middleware/error-handler.ts";
 import { notFound } from "./middleware/not-found.ts";
 import { notificationsRouter } from "./notifications/routes.ts";
@@ -26,9 +29,14 @@ export const app = express();
 // makes req.ip the user's address, as the audit log needs, not Caddy's.
 app.set("trust proxy", 1);
 
+app.use(recordMetrics);
+app.use(logRequests);
+app.use(express.json());
+app.use(cookieParser());
 app.use(express.json());
 app.use(cookieParser());
 
+app.use("/api/v1", healthRouter);
 app.use("/api/v1", authRouter);
 app.use("/api/v1", usersRouter);
 app.use("/api/v1", placesRouter);

@@ -28,6 +28,7 @@ Built as the Holberton School portfolio project by a team of three.
 | Files and email | AWS S3 (photo uploads), sharp (image checks and resizing), Resend (transactional email) |
 | Web | React, TanStack Router, Tailwind CSS, shadcn/ui, Lingui (Arabic / English) |
 | Tooling | Bun workspaces monorepo, Biome, Docker Compose |
+| Monitoring | Grafana Cloud (Prometheus, Loki), Grafana Alloy, prom-client, pino |
 
 ## Project structure
 
@@ -78,6 +79,22 @@ bun run typecheck   # TypeScript in every package
 | `apps/web` | Vitest (happy-dom) | `apps/web/src/**/*.test.ts(x)` and `apps/web/tests` |
 
 None of them needs Docker, a database or the network. To run one package alone, use `bun run test` inside its folder (`bun run test:run` in `apps/web`, since its `test` script watches for changes).
+
+## Monitoring
+
+Production sends metrics and logs to Grafana Cloud through a Grafana Alloy container (`deploy/alloy/config.alloy`):
+
+- **API metrics** (requests, response times by route, background jobs, process) on port 9464 inside the Docker network. Caddy only forwards `/api/*`, and the port is not published, so `/metrics` is never public.
+- **Server and PostgreSQL metrics** through Alloy's built-in exporters.
+- **Logs** from every container: the API writes one JSON line per request with a `request_id` (also sent back in the `x-request-id` header); passwords, tokens, emails and phone numbers are redacted.
+- **Health**: `GET /api/v1/health` answers 200 when the database answers, else 503.
+
+Server `.env` needs `GRAFANA_CLOUD_PROM_URL`, `GRAFANA_CLOUD_PROM_USER`, `GRAFANA_CLOUD_LOKI_URL`, `GRAFANA_CLOUD_LOKI_USER`, `GRAFANA_CLOUD_TOKEN` and `POSTGRES_MONITOR_PASSWORD`. Create the read-only monitoring user once:
+
+```sh
+docker compose -f compose.prod.yaml exec -T -e POSTGRES_MONITOR_PASSWORD db \
+  psql -U amlak -d amlak < deploy/postgres/monitor-user.sql
+```
 
 ## Team
 
