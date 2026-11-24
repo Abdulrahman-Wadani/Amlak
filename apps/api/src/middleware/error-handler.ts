@@ -1,6 +1,7 @@
 import type { ErrorRequestHandler } from "express";
 import multer from "multer";
 import { AppError } from "../errors.ts";
+import { logger } from "../logger.ts";
 
 export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
 	if (error instanceof AppError) {
@@ -35,7 +36,10 @@ export const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
 		return;
 	}
 
-	console.error(error);
+	logger.error(
+		{ err: error, request_id: res.locals.requestId },
+		"Unhandled error",
+	);
 	res.status(500).json({
 		code: "INTERNAL_ERROR",
 		message: "Something went wrong",

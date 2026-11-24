@@ -9,6 +9,7 @@ import type { AuthUser } from "../auth/tokens.ts";
 import { prisma } from "../db.ts";
 import { sendEmail } from "../email.ts";
 import { AppError } from "../errors.ts";
+import { logger } from "../logger.ts";
 import { notify } from "../notifications.ts";
 import { type Page, paginated } from "../pagination.ts";
 import { findSupportTicketFor, visibleSupportTickets } from "./access.ts";
@@ -116,6 +117,9 @@ async function emailSubmitter(
 			text: email.body,
 		});
 	} catch (error) {
-		console.error("Could not email the support ticket's submitter", error);
+		logger.error(
+			{ err: error },
+			"Could not email the support ticket's submitter",
+		);
 	}
 }

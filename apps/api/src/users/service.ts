@@ -1,6 +1,7 @@
 import type { UpdateProfileInput, User } from "@amlak/shared";
 import type { AuthUser } from "../auth/tokens.ts";
 import { prisma } from "../db.ts";
+import { logger } from "../logger.ts";
 import { type ImageFile, removeImage, storeImage } from "../uploads/storage.ts";
 import { toUser } from "./present.ts";
 
@@ -44,6 +45,6 @@ async function removeOldPicture(key: string): Promise<void> {
 	try {
 		await removeImage(key);
 	} catch (error) {
-		console.error("Could not remove the old picture", key, error);
+		logger.error({ err: error, key }, "Could not remove the old picture");
 	}
 }

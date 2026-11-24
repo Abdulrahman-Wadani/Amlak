@@ -12,6 +12,7 @@ import { toDbDate } from "../dates.ts";
 import { prisma } from "../db.ts";
 import { AppError } from "../errors.ts";
 import type { Prisma } from "../generated/prisma/client.ts";
+import { logger } from "../logger.ts";
 import { type Page, paginated } from "../pagination.ts";
 import { findPlaceFor } from "../places/access.ts";
 import { type ImageFile, removeImage, storeImage } from "../uploads/storage.ts";
@@ -205,6 +206,6 @@ async function removeReceipt(key: string): Promise<void> {
 	try {
 		await removeImage(key);
 	} catch (error) {
-		console.error("Could not remove the old receipt", key, error);
+		logger.error({ err: error, key }, "Could not remove the old receipt");
 	}
 }

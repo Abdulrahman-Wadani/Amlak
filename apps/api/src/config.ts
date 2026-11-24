@@ -7,6 +7,7 @@ const envSchema = z
 			.enum(["development", "test", "production"])
 			.default("development"),
 		PORT: z.coerce.number().int().positive().default(3001),
+		METRICS_PORT: z.coerce.number().int().positive().default(9464),
 		DATABASE_URL: z.url(),
 		JWT_SECRET: z.string().min(32),
 		RESEND_API_KEY: z.literal("").or(z.string().startsWith("re_")).optional(),
