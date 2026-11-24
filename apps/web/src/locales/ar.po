@@ -223,19 +223,33 @@ msgstr "8 أحرف على الأقل"
 #. Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ
 #. Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ
 #. Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ
+#. Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ
 #: src/components/app-shell.tsx:60
 #: src/components/auth-layout.tsx:81
+#: src/routes/index.tsx:187
 #: src/routes/p/$lang/$slug.tsx:59
 msgid "A"
 msgstr "أ"
+
+#: src/routes/index.tsx:50
+msgid "A broken tap or a leaking pipe is sent by phone or message, then forgotten."
+msgstr "يُرسل بلاغ عن صنبور معطّل أو تسريب في الأنابيب عبر الهاتف أو الرسائل، ثم يُنسى."
 
 #: src/components/expense-form.tsx:176
 msgid "A clear photo of the amount and date."
 msgstr "صورة واضحة للمبلغ والتاريخ."
 
+#: src/routes/index.tsx:100
+msgid "A dashboard for every place"
+msgstr "لوحة متابعة لكل عقار"
+
 #: src/components/repair-day.tsx:44
 msgid "A guest is staying on this day"
 msgstr "يوجد ضيف مقيم في هذا اليوم"
+
+#: src/routes/index.tsx:80
+msgid "A paper calendar and double bookings"
+msgstr "تقويم ورقي وحجوزات متداخلة"
 
 #: src/components/booking-form.tsx:141
 msgid "A repair is due at this place on {day}. Choose other dates."
@@ -341,6 +355,10 @@ msgstr "أضف صورة واحدة على الأقل للعمل بعد الإص�
 msgid "Add booking"
 msgstr "إضافة حجز"
 
+#: src/routes/index.tsx:148
+msgid "Add each property and the assets inside it, then set who works on them."
+msgstr "أضف كل عقار والأصول داخله، ثم حدّد من يعمل عليها."
+
 #: src/routes/_authenticated/expenses.tsx:110
 #: src/routes/_authenticated/expenses.tsx:114
 #: src/routes/_authenticated/expenses.tsx:120
@@ -382,6 +400,14 @@ msgstr "أضف أول عقار من زر «إضافة عقار»."
 #: src/routes/_authenticated/home.tsx:353
 msgid "Add your first property to see it here."
 msgstr "أضف أول عقار لتظهر هنا."
+
+#: src/routes/index.tsx:147
+msgid "Add your places"
+msgstr "أضف عقاراتك"
+
+#: src/routes/index.tsx:95
+msgid "Add your properties and the assets inside them. Owners and assigned workers get the access they need."
+msgstr "أضف عقاراتك والأصول داخلها. يحصل المالكون والعمّال المسندون على الصلاحيات التي يحتاجونها."
 
 #: src/components/content-form.tsx:130
 #: src/components/place-form.tsx:224
@@ -437,6 +463,7 @@ msgstr "كل عمّالك النشطين معيّنون على هذا العقا
 
 #: src/components/auth-layout.tsx:31
 #: src/components/auth-layout.tsx:64
+#: src/routes/index.tsx:249
 msgid "All your places, their maintenance and bookings in one place."
 msgstr "كل عقاراتك وصيانتها وحجوزاتها في مكان واحد."
 
@@ -454,9 +481,11 @@ msgstr "لديك حساب بالفعل؟ <0>دخول</0>"
 
 #. Brand wordmark, Latin letters only in English
 #. Brand wordmark, Latin letters only in English
+#. Brand wordmark, Latin letters only in English
 #: src/components/app-shell.tsx:83
 #: src/components/auth-layout.tsx:84
 #: src/lib/i18n.tsx:40
+#: src/routes/index.tsx:190
 #: src/routes/p/$lang/$slug.tsx:62
 msgid "Amlak"
 msgstr "أملاك"
@@ -465,6 +494,11 @@ msgstr "أملاك"
 #: src/routes/p/$lang/$slug.tsx:123
 msgid "Amlak {0}"
 msgstr "أملاك {0}"
+
+#: src/routes/index.tsx:199
+#: src/routes/index.tsx:329
+msgid "Amlak features"
+msgstr "مميزات أملاك"
 
 #: src/components/expense-form.tsx:138
 #: src/lib/errors.ts:138
@@ -553,6 +587,10 @@ msgstr "أقسام الأصل"
 msgid "Assets"
 msgstr "الأصول"
 
+#: src/routes/index.tsx:101
+msgid "Assets by status, open and overdue tickets, today's check-ins and check-outs, and the maintenance budget."
+msgstr "الأصول حسب حالتها، والتذاكر المفتوحة والمتأخرة، وتسجيلات الدخول والخروج لهذا اليوم، وميزانية الصيانة."
+
 #: src/routes/_authenticated/place/$place_id.tsx:512
 msgid "Assign"
 msgstr "تعيين"
@@ -598,6 +636,10 @@ msgstr "المكلّف وتاريخ الاستحقاق"
 msgid "Assigning…"
 msgstr "جارٍ التعيين…"
 
+#: src/routes/index.tsx:131
+msgid "Automatic reminders and overdue alerts by email and in the app, written in each person's language."
+msgstr "تذكيرات تلقائية وتنبيهات بالتأخير عبر البريد وداخل التطبيق، مكتوبة بلغة كل شخص."
+
 #: src/components/page.tsx:153
 #: src/components/page.tsx:157
 #: src/components/place-bookings.tsx:519
@@ -638,12 +680,21 @@ msgstr "أُلغي الحجز."
 #: src/routes/_authenticated/booking/$booking_id.tsx:131
 #: src/routes/_authenticated/bookings.tsx:84
 #: src/routes/_authenticated/place/$place_id.tsx:266
+#: src/routes/index.tsx:79
 msgid "Bookings"
 msgstr "الحجوزات"
+
+#: src/routes/index.tsx:61
+msgid "Bookings overlap"
+msgstr "الحجوزات تتداخل"
 
 #: src/routes/_authenticated/home.tsx:282
 msgid "Bookings today"
 msgstr "حجوزات اليوم"
+
+#: src/routes/index.tsx:118
+msgid "Bookings without conflicts"
+msgstr "حجوزات بلا تعارض"
 
 #: src/components/asset-form.tsx:140
 #: src/components/form-popup.tsx:99
@@ -936,6 +987,10 @@ msgstr "يتعارض مع حجز {0} ({1})."
 msgid "Conflicts with another booking"
 msgstr "يتعارض مع حجز آخر"
 
+#: src/routes/index.tsx:488
+msgid "Contact"
+msgstr "التواصل"
+
 #: src/routes/signin.tsx:80
 msgid "Contact your manager or support to reactivate it."
 msgstr "تواصل مع مديرك أو مع الدعم لإعادة تفعيله."
@@ -1035,9 +1090,20 @@ msgstr "تعذّر تحميل طلباتك"
 msgid "Create a manager account"
 msgstr "أنشئ حساب مدير"
 
+#: src/routes/index.tsx:233
+#: src/routes/index.tsx:256
+#: src/routes/index.tsx:448
 #: src/routes/signup.tsx:179
 msgid "Create account"
 msgstr "إنشاء الحساب"
+
+#: src/routes/index.tsx:443
+msgid "Create an account in a minute, then add your first place."
+msgstr "أنشئ حسابك في دقيقة، ثم أضف أول عقار لك."
+
+#: src/routes/index.tsx:143
+msgid "Create your account"
+msgstr "أنشئ حسابك"
 
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:163
 msgid "created the ticket."
@@ -1425,6 +1491,10 @@ msgstr "التكلفة التقديرية"
 msgid "Everyone"
 msgstr "الجميع"
 
+#: src/routes/index.tsx:330
+msgid "Everything you need to run your properties, in one app."
+msgstr "كل ما تحتاجه لإدارة عقاراتك في تطبيق واحد."
+
 #: src/components/place-bookings.tsx:485
 msgid "Example: the guest changed their plans"
 msgstr "مثال: غيّر الضيف خطته"
@@ -1446,6 +1516,14 @@ msgstr "حُذف المصروف."
 #: src/routes/_authenticated/reports.tsx:270
 msgid "Expenses"
 msgstr "المصروفات"
+
+#: src/routes/index.tsx:68
+msgid "Expenses and income for each place are hard to total, so the profit is a guess."
+msgstr "يصعب جمع مصروفات ودخل كل عقار، فيصبح الربح مجرد تخمين."
+
+#: src/routes/index.tsx:124
+msgid "Expenses and reports"
+msgstr "المصروفات والتقارير"
 
 #: src/routes/_authenticated/expenses.tsx:194
 msgid "Expenses you add for this month will appear here."
@@ -1502,11 +1580,16 @@ msgstr "جارٍ تحديد موقعك…"
 msgid "First due date"
 msgstr "أول موعد"
 
+#: src/routes/index.tsx:155
+msgid "Follow everything"
+msgstr "تابع كل شيء"
+
 #: src/routes/reset-password.tsx:68
 msgid "For account <0>{email}</0>"
 msgstr "لحساب <0>{email}</0>"
 
 #: src/components/auth-layout.tsx:67
+#: src/routes/index.tsx:252
 msgid "For managers and workers, on phone and desktop."
 msgstr "للمدراء والعمّال، على الجوال وسطح المكتب."
 
@@ -1517,6 +1600,10 @@ msgstr "نسيت كلمة المرور"
 #: src/routes/signin.tsx:218
 msgid "Forgot password?"
 msgstr "نسيت كلمة المرور؟"
+
+#: src/routes/index.tsx:416
+msgid "Four steps from signing up to running your properties."
+msgstr "أربع خطوات من التسجيل إلى إدارة عقاراتك."
 
 #: src/routes/_authenticated/reports.tsx:152
 msgid "From"
@@ -1533,6 +1620,10 @@ msgstr "الاسم الكامل"
 #: src/components/location-picker.tsx:207
 msgid "Getting the address…"
 msgstr "جارٍ جلب العنوان…"
+
+#: src/routes/index.tsx:513
+msgid "GitHub"
+msgstr "GitHub"
 
 #: src/components/asset-manage.tsx:14
 #: src/components/place-shared.tsx:99
@@ -1611,6 +1702,11 @@ msgstr "عالية"
 msgid "Home"
 msgstr "الرئيسية"
 
+#: src/routes/index.tsx:202
+#: src/routes/index.tsx:415
+msgid "How to use"
+msgstr "طريقة الاستخدام"
+
 #: src/routes/forgot-password.tsx:75
 msgid "If the email is registered with us, a message will arrive within minutes."
 msgstr "إذا كان البريد مسجّلًا عندنا ستصلك رسالة خلال دقائق."
@@ -1653,6 +1749,14 @@ msgstr "الإيرادات"
 msgid "Income and expenses"
 msgstr "الدخل والمصروفات"
 
+#: src/routes/index.tsx:85
+msgid "Income and expenses in separate notebooks"
+msgstr "الدخل والمصروفات في دفاتر منفصلة"
+
+#: src/routes/index.tsx:86
+msgid "Income, expenses and profit for each place and currency"
+msgstr "الدخل والمصروفات والربح لكل عقار وعملة"
+
 #: src/routes/_authenticated/profile.tsx:243
 #: src/routes/_authenticated/profile.tsx:246
 msgid "Interface and message language"
@@ -1664,9 +1768,17 @@ msgstr "لغة الواجهة والرسائل"
 msgid "Invite worker"
 msgstr "دعوة عامل"
 
+#: src/routes/index.tsx:152
+msgid "Invite workers by email and set up the periodic maintenance schedules."
+msgstr "ادعُ العمّال بالبريد، وضع جداول الصيانة الدورية."
+
 #: src/routes/_authenticated/workers.tsx:139
 msgid "Invite your first worker with the Invite worker button."
 msgstr "ادعُ أول عامل بزر دعوة عامل."
+
+#: src/routes/index.tsx:151
+msgid "Invite your team"
+msgstr "ادعُ فريقك"
 
 #: src/components/place-shared.tsx:202
 #: src/routes/_authenticated/admin/index.tsx:28
@@ -1738,6 +1850,10 @@ msgstr "جارٍ التحميل…"
 msgid "Location on the map"
 msgstr "الموقع على الخريطة"
 
+#: src/routes/index.tsx:125
+msgid "Log expenses with receipt photos, and see income, expenses and profit per place and currency."
+msgstr "سجّل المصروفات مع صور الفواتير، واطلع على الدخل والمصروفات والربح لكل عقار وعملة."
+
 #: src/lib/errors.ts:89
 msgid "Longitude"
 msgstr "خط الطول"
@@ -1752,6 +1868,10 @@ msgstr "منخفضة"
 msgid "Lowercase English letter"
 msgstr "حرف إنجليزي صغير"
 
+#: src/routes/index.tsx:205
+msgid "Main"
+msgstr "القائمة الرئيسية"
+
 #: src/components/app-shell.tsx:76
 #: src/components/app-shell.tsx:131
 msgid "Main menu"
@@ -1760,6 +1880,7 @@ msgstr "القائمة الرئيسية"
 #: src/components/finance-parts.tsx:10
 #: src/lib/nav.tsx:168
 #: src/routes/_authenticated/tickets.tsx:117
+#: src/routes/index.tsx:74
 msgid "Maintenance"
 msgstr "الصيانة"
 
@@ -1784,6 +1905,7 @@ msgstr "تذكرة صيانة"
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:138
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:223
 #: src/routes/_authenticated/tickets.tsx:117
+#: src/routes/index.tsx:106
 msgid "Maintenance tickets"
 msgstr "تذاكر الصيانة"
 
@@ -1795,6 +1917,10 @@ msgstr "تذاكر صيانة الأصل"
 msgid "Manage"
 msgstr "الإدارة"
 
+#: src/routes/index.tsx:119
+msgid "Manage stays on a calendar that blocks double bookings, and check guests in and out."
+msgstr "أدر الحجوزات في تقويم يمنع التكرار، وسجّل دخول النزلاء وخروجهم."
+
 #: src/lib/nav.tsx:215
 msgid "Manager"
 msgstr "مدير"
@@ -1802,6 +1928,10 @@ msgstr "مدير"
 #: src/routes/_authenticated/announcements.tsx:106
 msgid "Managers"
 msgstr "المدراء"
+
+#: src/routes/index.tsx:353
+msgid "Managing properties the old way wastes time and money."
+msgstr "إدارة العقارات بالطريقة القديمة تهدر الوقت والمال."
 
 #: src/components/location-picker.tsx:187
 msgid "Map to pick the location"
@@ -1835,6 +1965,14 @@ msgstr "متوسطة"
 #: src/routes/signup.tsx:140
 msgid "Mobile number"
 msgstr "رقم الجوال"
+
+#: src/routes/index.tsx:84
+msgid "Money"
+msgstr "المال"
+
+#: src/routes/index.tsx:67
+msgid "Money is spread across notebooks"
+msgstr "المال موزّع على دفاتر متفرقة"
 
 #: src/routes/_authenticated/reports.tsx:196
 msgid "Month"
@@ -2034,6 +2172,10 @@ msgstr "لا يوجد عمّال بهذه الحالة."
 msgid "No workers yet"
 msgstr "لا يوجد عمال حتى الآن"
 
+#: src/routes/index.tsx:55
+msgid "Nobody knows who fixes what"
+msgstr "لا أحد يعرف من يُصلح ماذا"
+
 #: src/routes/_authenticated/home.tsx:504
 msgid "None of them is overdue"
 msgstr "لا شيء منها متأخر"
@@ -2091,6 +2233,18 @@ msgstr "من ميزانية {0}"
 msgid "On this device."
 msgstr "من هذا الجهاز."
 
+#: src/routes/index.tsx:81
+msgid "One calendar that blocks overlapping stays"
+msgstr "تقويم واحد يمنع الحجوزات المتداخلة"
+
+#: src/routes/index.tsx:377
+msgid "One platform that brings places, maintenance and money together."
+msgstr "منصة واحدة تجمع العقارات والصيانة والمال."
+
+#: src/routes/index.tsx:76
+msgid "One ticket with photos, an assigned worker and a clear status"
+msgstr "تذكرة واحدة بالصور وعامل مسند وحالة واضحة"
+
 #: src/routes/_authenticated/admin/$admin_id.tsx:163
 msgid "Only an account with a verified email can be reactivated."
 msgstr "لا يُعاد تفعيل إلا حساب تحقّق بريده."
@@ -2142,6 +2296,10 @@ msgstr "خارج الخدمة"
 #: src/components/place-shared.tsx:280
 msgid "Overdue"
 msgstr "متأخرة"
+
+#: src/routes/index.tsx:137
+msgid "Owners, workers and the admin each see what they need. Workers join through an invitation from their manager."
+msgstr "يرى المالكون والعمّال والمدير ما يحتاجونه كلٌّ بحسب دوره. ينضم العمّال عبر دعوة من مديرهم."
 
 #: src/components/pager.tsx:35
 msgid "Page {page} of {totalPages}"
@@ -2310,6 +2468,10 @@ msgstr "نوع العقار"
 msgid "Places"
 msgstr "العقارات"
 
+#: src/routes/index.tsx:94
+msgid "Places and assets"
+msgstr "العقارات والأصول"
+
 #: src/routes/_authenticated/places.tsx:136
 msgid "Places assigned to you."
 msgstr "العقارات المسندة إليك."
@@ -2327,6 +2489,10 @@ msgstr "تظهر هنا العقارات التي يسندك إليها مدير
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:192
 msgid "Preventive"
 msgstr "وقائية"
+
+#: src/routes/index.tsx:112
+msgid "Preventive maintenance"
+msgstr "الصيانة الوقائية"
 
 #: src/components/pager.tsx:32
 #: src/components/panel.tsx:462
@@ -2349,6 +2515,11 @@ msgstr "الأولوية"
 #: src/routes/_authenticated/reports.tsx:205
 msgid "Profit"
 msgstr "الربح"
+
+#: src/routes/index.tsx:246
+#: src/routes/index.tsx:481
+msgid "Property and maintenance management"
+msgstr "إدارة الأملاك والصيانة"
 
 #: src/routes/_authenticated/content/index.tsx:70
 msgid "Public pages that visitors read."
@@ -2451,6 +2622,10 @@ msgstr "أعد تحميل الصفحة."
 msgid "Reminder before due date"
 msgstr "التنبيه قبل الموعد"
 
+#: src/routes/index.tsx:130
+msgid "Reminders and notifications"
+msgstr "التذكيرات والإشعارات"
+
 #. placeholder {0}: asset.name
 #: src/components/asset-manage.tsx:89
 msgid "Remove “{0}”?"
@@ -2501,6 +2676,10 @@ msgstr "بلاغ عطل"
 msgid "Report damage in this place"
 msgstr "بلاغ عطل في هذا العقار"
 
+#: src/routes/index.tsx:107
+msgid "Report issues with photos. Approve, reject or reassign them, then close them with after-photos."
+msgstr "أبلغ عن المشكلات بالصور. اعتمدها أو ارفضها أو أعد إسنادها، ثم أغلقها بصور ما بعد الإصلاح."
+
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:211
 msgid "Reported by"
 msgstr "مُبلّغ التذكرة"
@@ -2508,6 +2687,14 @@ msgstr "مُبلّغ التذكرة"
 #: src/routes/_authenticated/reports.tsx:114
 msgid "Reports"
 msgstr "التقارير"
+
+#: src/routes/index.tsx:49
+msgid "Reports get lost in calls and chats"
+msgstr "البلاغات تضيع بين المكالمات والمحادثات"
+
+#: src/routes/index.tsx:75
+msgid "Reports scattered across calls and chats"
+msgstr "بلاغات متفرقة بين المكالمات والمحادثات"
 
 #: src/routes/reset-password.tsx:83
 msgid "Request a new link"
@@ -2560,6 +2747,10 @@ msgstr "مراجعة التذاكر"
 #: src/routes/_authenticated/profile.tsx:181
 msgid "Role"
 msgstr "الصلاحية"
+
+#: src/routes/index.tsx:136
+msgid "Roles and accounts"
+msgstr "الأدوار والحسابات"
 
 #: src/components/place-form.tsx:42
 #: src/components/place-shared.tsx:228
@@ -2623,6 +2814,10 @@ msgstr "حفظ العقار"
 #: src/routes/reset-password.tsx:109
 msgid "Saving…"
 msgstr "جارٍ الحفظ…"
+
+#: src/routes/index.tsx:113
+msgid "Schedule periodic work for each asset. Tickets are created for you when the work is due."
+msgstr "جدوِل أعمالاً دورية لكل أصل، وتُنشأ التذاكر تلقائياً عند حلول موعدها."
 
 #: src/components/panel.tsx:290
 msgid "Scroll to see the rest"
@@ -2703,6 +2898,9 @@ msgid "Show password"
 msgstr "إظهار كلمة المرور"
 
 #. Page title
+#: src/routes/index.tsx:230
+#: src/routes/index.tsx:265
+#: src/routes/index.tsx:457
 #: src/routes/p/$lang/$slug.tsx:66
 #: src/routes/signin.tsx:147
 #: src/routes/signin.tsx:245
@@ -2717,6 +2915,10 @@ msgstr "سجّل الدخول للمتابعة."
 #: src/components/account-links.tsx:78
 msgid "Sign out"
 msgstr "تسجيل الخروج"
+
+#: src/routes/index.tsx:144
+msgid "Sign up with your email and enter the code we send you."
+msgstr "سجّل ببريدك الإلكتروني وأدخل الرمز الذي نرسله إليك."
 
 #: src/routes/_authenticated/admin/$admin_id.tsx:148
 msgid "Signed up"
@@ -2753,6 +2955,10 @@ msgstr "تصرّف فيها شخص آخر قبل قليل. أعدنا تحميل
 msgid "Something went wrong. Try again."
 msgstr "حدث خطأ ما. حاول مرة أخرى."
 
+#: src/routes/index.tsx:440
+msgid "Start managing your properties today."
+msgstr "ابدأ بإدارة عقاراتك اليوم."
+
 #: src/components/asset-form.tsx:90
 #: src/components/content-form.tsx:175
 #: src/components/place-form.tsx:298
@@ -2778,6 +2984,10 @@ msgstr "تابع آخر نشاطاتك والإعلانات الجديدة."
 #: src/components/place-shared.tsx:148
 msgid "Staying"
 msgstr "مقيم الآن"
+
+#: src/routes/index.tsx:62
+msgid "Stays written on paper or in separate chats end up on the same dates."
+msgstr "تعارض في تواريخ الحجوزات."
 
 #: src/components/user-support.tsx:143
 #: src/lib/errors.ts:110
@@ -2819,6 +3029,10 @@ msgstr "تظهر هنا المهام التي يعتمدها مديرك لك."
 #: src/components/finance-parts.tsx:14
 msgid "Taxes"
 msgstr "ضرائب"
+
+#: src/routes/index.tsx:501
+msgid "Team accounts"
+msgstr "حسابات الفريق"
 
 #: src/routes/_authenticated/announcements.tsx:121
 msgid "Text in Arabic"
@@ -2934,10 +3148,20 @@ msgstr "سيختفي العقار من القوائم ويبقى سجله في �
 msgid "The place is ready for arrival."
 msgstr "العقار جاهز للوصول."
 
+#: src/routes/index.tsx:200
+#: src/routes/index.tsx:352
+msgid "The problem"
+msgstr "المشكلة"
+
 #: src/components/asset-form.tsx:43
 #: src/components/asset-manage.tsx:33
 msgid "The purchase date cannot be in the future."
 msgstr "تاريخ الشراء لا يمكن أن يكون في المستقبل."
+
+#: src/routes/index.tsx:201
+#: src/routes/index.tsx:376
+msgid "The solution"
+msgstr "الحل"
 
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:230
 msgid "The ticket status changed."
@@ -3151,6 +3375,10 @@ msgstr "محاولات كثيرة. انتظر قليلًا ثم حاول مرة 
 #: src/routes/_authenticated/booking/$booking_id.tsx:162
 msgid "Total price"
 msgstr "السعر الإجمالي"
+
+#: src/routes/index.tsx:156
+msgid "Track tickets, bookings and expenses from your dashboard, on phone or desktop."
+msgstr "تابع التذاكر والحجوزات والمصروفات من لوحة التحكم، على الجوال أو سطح المكتب."
 
 #: src/components/states.tsx:101
 msgid "Try again"
@@ -3412,6 +3640,18 @@ msgstr "موعد إنشاء التذكرة"
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:357
 msgid "Who did what to this ticket and when, newest first."
 msgstr "من فعل ماذا في هذه التذكرة ومتى، الأحدث أولًا."
+
+#: src/routes/index.tsx:386
+msgid "With Amlak"
+msgstr "مع أملاك"
+
+#: src/routes/index.tsx:56
+msgid "Without a clear assignment, workers repeat work or wait for someone to act."
+msgstr "بلا إسناد واضح، يكرر العمّال العمل أو ينتظرون من يتحرك."
+
+#: src/routes/index.tsx:383
+msgid "Without Amlak"
+msgstr "بدون أملاك"
 
 #: src/lib/nav.tsx:213
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:644
