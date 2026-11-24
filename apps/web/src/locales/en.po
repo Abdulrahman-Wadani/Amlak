@@ -223,19 +223,33 @@ msgstr "8 characters or more"
 #. Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ
 #. Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ
 #. Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ
+#. Brand glyph: negative-space letter inside the white tile; Arabic uses the letter أ
 #: src/components/app-shell.tsx:60
 #: src/components/auth-layout.tsx:81
+#: src/routes/index.tsx:187
 #: src/routes/p/$lang/$slug.tsx:59
 msgid "A"
 msgstr "A"
+
+#: src/routes/index.tsx:50
+msgid "A broken tap or a leaking pipe is sent by phone or message, then forgotten."
+msgstr "A broken tap or a leaking pipe is sent by phone or message, then forgotten."
 
 #: src/components/expense-form.tsx:176
 msgid "A clear photo of the amount and date."
 msgstr "A clear photo of the amount and date."
 
+#: src/routes/index.tsx:100
+msgid "A dashboard for every place"
+msgstr "A dashboard for every place"
+
 #: src/components/repair-day.tsx:44
 msgid "A guest is staying on this day"
 msgstr "A guest is staying on this day"
+
+#: src/routes/index.tsx:80
+msgid "A paper calendar and double bookings"
+msgstr "A paper calendar and double bookings"
 
 #: src/components/booking-form.tsx:141
 msgid "A repair is due at this place on {day}. Choose other dates."
@@ -341,6 +355,10 @@ msgstr "Add at least one photo of the finished work."
 msgid "Add booking"
 msgstr "Add booking"
 
+#: src/routes/index.tsx:148
+msgid "Add each property and the assets inside it, then set who works on them."
+msgstr "Add each property and the assets inside it, then set who works on them."
+
 #: src/routes/_authenticated/expenses.tsx:110
 #: src/routes/_authenticated/expenses.tsx:114
 #: src/routes/_authenticated/expenses.tsx:120
@@ -382,6 +400,14 @@ msgstr "Add your first place with the Add place button."
 #: src/routes/_authenticated/home.tsx:353
 msgid "Add your first property to see it here."
 msgstr "Add your first property to see it here."
+
+#: src/routes/index.tsx:147
+msgid "Add your places"
+msgstr "Add your places"
+
+#: src/routes/index.tsx:95
+msgid "Add your properties and the assets inside them. Owners and assigned workers get the access they need."
+msgstr "Add your properties and the assets inside them. Owners and assigned workers get the access they need."
 
 #: src/components/content-form.tsx:130
 #: src/components/place-form.tsx:224
@@ -437,6 +463,7 @@ msgstr "All your active workers are already assigned to this place."
 
 #: src/components/auth-layout.tsx:31
 #: src/components/auth-layout.tsx:64
+#: src/routes/index.tsx:249
 msgid "All your places, their maintenance and bookings in one place."
 msgstr "All your places, their maintenance and bookings in one place."
 
@@ -454,9 +481,11 @@ msgstr "Already have an account? <0>Sign in</0>"
 
 #. Brand wordmark, Latin letters only in English
 #. Brand wordmark, Latin letters only in English
+#. Brand wordmark, Latin letters only in English
 #: src/components/app-shell.tsx:83
 #: src/components/auth-layout.tsx:84
 #: src/lib/i18n.tsx:40
+#: src/routes/index.tsx:190
 #: src/routes/p/$lang/$slug.tsx:62
 msgid "Amlak"
 msgstr "Amlak"
@@ -465,6 +494,11 @@ msgstr "Amlak"
 #: src/routes/p/$lang/$slug.tsx:123
 msgid "Amlak {0}"
 msgstr "Amlak {0}"
+
+#: src/routes/index.tsx:199
+#: src/routes/index.tsx:329
+msgid "Amlak features"
+msgstr "Amlak features"
 
 #: src/components/expense-form.tsx:138
 #: src/lib/errors.ts:138
@@ -553,6 +587,10 @@ msgstr "Asset sections"
 msgid "Assets"
 msgstr "Assets"
 
+#: src/routes/index.tsx:101
+msgid "Assets by status, open and overdue tickets, today's check-ins and check-outs, and the maintenance budget."
+msgstr "Assets by status, open and overdue tickets, today's check-ins and check-outs, and the maintenance budget."
+
 #: src/routes/_authenticated/place/$place_id.tsx:512
 msgid "Assign"
 msgstr "Assign"
@@ -598,6 +636,10 @@ msgstr "Assignee and due date"
 msgid "Assigning…"
 msgstr "Assigning…"
 
+#: src/routes/index.tsx:131
+msgid "Automatic reminders and overdue alerts by email and in the app, written in each person's language."
+msgstr "Automatic reminders and overdue alerts by email and in the app, written in each person's language."
+
 #: src/components/page.tsx:153
 #: src/components/page.tsx:157
 #: src/components/place-bookings.tsx:519
@@ -638,12 +680,21 @@ msgstr "Booking cancelled."
 #: src/routes/_authenticated/booking/$booking_id.tsx:131
 #: src/routes/_authenticated/bookings.tsx:84
 #: src/routes/_authenticated/place/$place_id.tsx:266
+#: src/routes/index.tsx:79
 msgid "Bookings"
 msgstr "Bookings"
+
+#: src/routes/index.tsx:61
+msgid "Bookings overlap"
+msgstr "Bookings overlap"
 
 #: src/routes/_authenticated/home.tsx:282
 msgid "Bookings today"
 msgstr "Bookings today"
+
+#: src/routes/index.tsx:118
+msgid "Bookings without conflicts"
+msgstr "Bookings without conflicts"
 
 #: src/components/asset-form.tsx:140
 #: src/components/form-popup.tsx:99
@@ -936,6 +987,10 @@ msgstr "Conflicts with {0}’s booking ({1})."
 msgid "Conflicts with another booking"
 msgstr "Conflicts with another booking"
 
+#: src/routes/index.tsx:488
+msgid "Contact"
+msgstr "Contact"
+
 #: src/routes/signin.tsx:80
 msgid "Contact your manager or support to reactivate it."
 msgstr "Contact your manager or support to reactivate it."
@@ -1035,9 +1090,20 @@ msgstr "Could not load your requests"
 msgid "Create a manager account"
 msgstr "Create a manager account"
 
+#: src/routes/index.tsx:233
+#: src/routes/index.tsx:256
+#: src/routes/index.tsx:448
 #: src/routes/signup.tsx:179
 msgid "Create account"
 msgstr "Create account"
+
+#: src/routes/index.tsx:443
+msgid "Create an account in a minute, then add your first place."
+msgstr "Create an account in a minute, then add your first place."
+
+#: src/routes/index.tsx:143
+msgid "Create your account"
+msgstr "Create your account"
 
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:163
 msgid "created the ticket."
@@ -1425,6 +1491,10 @@ msgstr "Estimated cost"
 msgid "Everyone"
 msgstr "Everyone"
 
+#: src/routes/index.tsx:330
+msgid "Everything you need to run your properties, in one app."
+msgstr "Everything you need to run your properties, in one app."
+
 #: src/components/place-bookings.tsx:485
 msgid "Example: the guest changed their plans"
 msgstr "Example: the guest changed their plans"
@@ -1446,6 +1516,14 @@ msgstr "Expense deleted."
 #: src/routes/_authenticated/reports.tsx:270
 msgid "Expenses"
 msgstr "Expenses"
+
+#: src/routes/index.tsx:68
+msgid "Expenses and income for each place are hard to total, so the profit is a guess."
+msgstr "Expenses and income for each place are hard to total, so the profit is a guess."
+
+#: src/routes/index.tsx:124
+msgid "Expenses and reports"
+msgstr "Expenses and reports"
 
 #: src/routes/_authenticated/expenses.tsx:194
 msgid "Expenses you add for this month will appear here."
@@ -1502,11 +1580,16 @@ msgstr "Finding your location…"
 msgid "First due date"
 msgstr "First due date"
 
+#: src/routes/index.tsx:155
+msgid "Follow everything"
+msgstr "Follow everything"
+
 #: src/routes/reset-password.tsx:68
 msgid "For account <0>{email}</0>"
 msgstr "For account <0>{email}</0>"
 
 #: src/components/auth-layout.tsx:67
+#: src/routes/index.tsx:252
 msgid "For managers and workers, on phone and desktop."
 msgstr "For managers and workers, on phone and desktop."
 
@@ -1517,6 +1600,10 @@ msgstr "Forgot password"
 #: src/routes/signin.tsx:218
 msgid "Forgot password?"
 msgstr "Forgot password?"
+
+#: src/routes/index.tsx:416
+msgid "Four steps from signing up to running your properties."
+msgstr "Four steps from signing up to running your properties."
 
 #: src/routes/_authenticated/reports.tsx:152
 msgid "From"
@@ -1533,6 +1620,10 @@ msgstr "Full name"
 #: src/components/location-picker.tsx:207
 msgid "Getting the address…"
 msgstr "Getting the address…"
+
+#: src/routes/index.tsx:513
+msgid "GitHub"
+msgstr "GitHub"
 
 #: src/components/asset-manage.tsx:14
 #: src/components/place-shared.tsx:99
@@ -1611,6 +1702,11 @@ msgstr "High"
 msgid "Home"
 msgstr "Home"
 
+#: src/routes/index.tsx:202
+#: src/routes/index.tsx:415
+msgid "How to use"
+msgstr "How to use"
+
 #: src/routes/forgot-password.tsx:75
 msgid "If the email is registered with us, a message will arrive within minutes."
 msgstr "If the email is registered with us, a message will arrive within minutes."
@@ -1653,6 +1749,14 @@ msgstr "Income"
 msgid "Income and expenses"
 msgstr "Income and expenses"
 
+#: src/routes/index.tsx:85
+msgid "Income and expenses in separate notebooks"
+msgstr "Income and expenses in separate notebooks"
+
+#: src/routes/index.tsx:86
+msgid "Income, expenses and profit for each place and currency"
+msgstr "Income, expenses and profit for each place and currency"
+
 #: src/routes/_authenticated/profile.tsx:243
 #: src/routes/_authenticated/profile.tsx:246
 msgid "Interface and message language"
@@ -1664,9 +1768,17 @@ msgstr "Interface and message language"
 msgid "Invite worker"
 msgstr "Invite worker"
 
+#: src/routes/index.tsx:152
+msgid "Invite workers by email and set up the periodic maintenance schedules."
+msgstr "Invite workers by email and set up the periodic maintenance schedules."
+
 #: src/routes/_authenticated/workers.tsx:139
 msgid "Invite your first worker with the Invite worker button."
 msgstr "Invite your first worker with the Invite worker button."
+
+#: src/routes/index.tsx:151
+msgid "Invite your team"
+msgstr "Invite your team"
 
 #: src/components/place-shared.tsx:202
 #: src/routes/_authenticated/admin/index.tsx:28
@@ -1738,6 +1850,10 @@ msgstr "Loading…"
 msgid "Location on the map"
 msgstr "Location on the map"
 
+#: src/routes/index.tsx:125
+msgid "Log expenses with receipt photos, and see income, expenses and profit per place and currency."
+msgstr "Log expenses with receipt photos, and see income, expenses and profit per place and currency."
+
 #: src/lib/errors.ts:89
 msgid "Longitude"
 msgstr "Longitude"
@@ -1752,6 +1868,10 @@ msgstr "Low"
 msgid "Lowercase English letter"
 msgstr "Lowercase English letter"
 
+#: src/routes/index.tsx:205
+msgid "Main"
+msgstr "Main"
+
 #: src/components/app-shell.tsx:76
 #: src/components/app-shell.tsx:131
 msgid "Main menu"
@@ -1760,6 +1880,7 @@ msgstr "Main menu"
 #: src/components/finance-parts.tsx:10
 #: src/lib/nav.tsx:168
 #: src/routes/_authenticated/tickets.tsx:117
+#: src/routes/index.tsx:74
 msgid "Maintenance"
 msgstr "Maintenance"
 
@@ -1784,6 +1905,7 @@ msgstr "Maintenance ticket"
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:138
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:223
 #: src/routes/_authenticated/tickets.tsx:117
+#: src/routes/index.tsx:106
 msgid "Maintenance tickets"
 msgstr "Maintenance tickets"
 
@@ -1795,6 +1917,10 @@ msgstr "Maintenance tickets for this asset"
 msgid "Manage"
 msgstr "Manage"
 
+#: src/routes/index.tsx:119
+msgid "Manage stays on a calendar that blocks double bookings, and check guests in and out."
+msgstr "Manage stays on a calendar that blocks double bookings, and check guests in and out."
+
 #: src/lib/nav.tsx:215
 msgid "Manager"
 msgstr "Manager"
@@ -1802,6 +1928,10 @@ msgstr "Manager"
 #: src/routes/_authenticated/announcements.tsx:106
 msgid "Managers"
 msgstr "Managers"
+
+#: src/routes/index.tsx:353
+msgid "Managing properties the old way wastes time and money."
+msgstr "Managing properties the old way wastes time and money."
 
 #: src/components/location-picker.tsx:187
 msgid "Map to pick the location"
@@ -1835,6 +1965,14 @@ msgstr "Medium"
 #: src/routes/signup.tsx:140
 msgid "Mobile number"
 msgstr "Mobile number"
+
+#: src/routes/index.tsx:84
+msgid "Money"
+msgstr "Money"
+
+#: src/routes/index.tsx:67
+msgid "Money is spread across notebooks"
+msgstr "Money is spread across notebooks"
 
 #: src/routes/_authenticated/reports.tsx:196
 msgid "Month"
@@ -2034,6 +2172,10 @@ msgstr "No workers have this status."
 msgid "No workers yet"
 msgstr "No workers yet"
 
+#: src/routes/index.tsx:55
+msgid "Nobody knows who fixes what"
+msgstr "Nobody knows who fixes what"
+
 #: src/routes/_authenticated/home.tsx:504
 msgid "None of them is overdue"
 msgstr "None of them is overdue"
@@ -2091,6 +2233,18 @@ msgstr "of a {0} budget"
 msgid "On this device."
 msgstr "On this device."
 
+#: src/routes/index.tsx:81
+msgid "One calendar that blocks overlapping stays"
+msgstr "One calendar that blocks overlapping stays"
+
+#: src/routes/index.tsx:377
+msgid "One platform that brings places, maintenance and money together."
+msgstr "One platform that brings places, maintenance and money together."
+
+#: src/routes/index.tsx:76
+msgid "One ticket with photos, an assigned worker and a clear status"
+msgstr "One ticket with photos, an assigned worker and a clear status"
+
 #: src/routes/_authenticated/admin/$admin_id.tsx:163
 msgid "Only an account with a verified email can be reactivated."
 msgstr "Only an account with a verified email can be reactivated."
@@ -2142,6 +2296,10 @@ msgstr "Out of service"
 #: src/components/place-shared.tsx:280
 msgid "Overdue"
 msgstr "Overdue"
+
+#: src/routes/index.tsx:137
+msgid "Owners, workers and the admin each see what they need. Workers join through an invitation from their manager."
+msgstr "Owners, workers and the admin each see what they need. Workers join through an invitation from their manager."
 
 #: src/components/pager.tsx:35
 msgid "Page {page} of {totalPages}"
@@ -2310,6 +2468,10 @@ msgstr "Place type"
 msgid "Places"
 msgstr "Places"
 
+#: src/routes/index.tsx:94
+msgid "Places and assets"
+msgstr "Places and assets"
+
 #: src/routes/_authenticated/places.tsx:136
 msgid "Places assigned to you."
 msgstr "Places assigned to you."
@@ -2327,6 +2489,10 @@ msgstr "Places your manager assigns you to show here."
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:192
 msgid "Preventive"
 msgstr "Preventive"
+
+#: src/routes/index.tsx:112
+msgid "Preventive maintenance"
+msgstr "Preventive maintenance"
 
 #: src/components/pager.tsx:32
 #: src/components/panel.tsx:462
@@ -2349,6 +2515,11 @@ msgstr "Priority"
 #: src/routes/_authenticated/reports.tsx:205
 msgid "Profit"
 msgstr "Profit"
+
+#: src/routes/index.tsx:246
+#: src/routes/index.tsx:481
+msgid "Property and maintenance management"
+msgstr "Property and maintenance management"
 
 #: src/routes/_authenticated/content/index.tsx:70
 msgid "Public pages that visitors read."
@@ -2451,6 +2622,10 @@ msgstr "Reload the page."
 msgid "Reminder before due date"
 msgstr "Reminder before due date"
 
+#: src/routes/index.tsx:130
+msgid "Reminders and notifications"
+msgstr "Reminders and notifications"
+
 #. placeholder {0}: asset.name
 #: src/components/asset-manage.tsx:89
 msgid "Remove “{0}”?"
@@ -2501,6 +2676,10 @@ msgstr "Report damage"
 msgid "Report damage in this place"
 msgstr "Report damage in this place"
 
+#: src/routes/index.tsx:107
+msgid "Report issues with photos. Approve, reject or reassign them, then close them with after-photos."
+msgstr "Report issues with photos. Approve, reject or reassign them, then close them with after-photos."
+
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:211
 msgid "Reported by"
 msgstr "Reported by"
@@ -2508,6 +2687,14 @@ msgstr "Reported by"
 #: src/routes/_authenticated/reports.tsx:114
 msgid "Reports"
 msgstr "Reports"
+
+#: src/routes/index.tsx:49
+msgid "Reports get lost in calls and chats"
+msgstr "Reports get lost in calls and chats"
+
+#: src/routes/index.tsx:75
+msgid "Reports scattered across calls and chats"
+msgstr "Reports scattered across calls and chats"
 
 #: src/routes/reset-password.tsx:83
 msgid "Request a new link"
@@ -2560,6 +2747,10 @@ msgstr "Review tickets"
 #: src/routes/_authenticated/profile.tsx:181
 msgid "Role"
 msgstr "Role"
+
+#: src/routes/index.tsx:136
+msgid "Roles and accounts"
+msgstr "Roles and accounts"
 
 #: src/components/place-form.tsx:42
 #: src/components/place-shared.tsx:228
@@ -2623,6 +2814,10 @@ msgstr "Save place"
 #: src/routes/reset-password.tsx:109
 msgid "Saving…"
 msgstr "Saving…"
+
+#: src/routes/index.tsx:113
+msgid "Schedule periodic work for each asset. Tickets are created for you when the work is due."
+msgstr "Schedule periodic work for each asset. Tickets are created for you when the work is due."
 
 #: src/components/panel.tsx:290
 msgid "Scroll to see the rest"
@@ -2703,6 +2898,9 @@ msgid "Show password"
 msgstr "Show password"
 
 #. Page title
+#: src/routes/index.tsx:230
+#: src/routes/index.tsx:265
+#: src/routes/index.tsx:457
 #: src/routes/p/$lang/$slug.tsx:66
 #: src/routes/signin.tsx:147
 #: src/routes/signin.tsx:245
@@ -2717,6 +2915,10 @@ msgstr "Sign in to continue."
 #: src/components/account-links.tsx:78
 msgid "Sign out"
 msgstr "Sign out"
+
+#: src/routes/index.tsx:144
+msgid "Sign up with your email and enter the code we send you."
+msgstr "Sign up with your email and enter the code we send you."
 
 #: src/routes/_authenticated/admin/$admin_id.tsx:148
 msgid "Signed up"
@@ -2753,6 +2955,10 @@ msgstr "Someone else acted on it a moment ago. We reloaded it so you see the lat
 msgid "Something went wrong. Try again."
 msgstr "Something went wrong. Try again."
 
+#: src/routes/index.tsx:440
+msgid "Start managing your properties today."
+msgstr "Start managing your properties today."
+
 #: src/components/asset-form.tsx:90
 #: src/components/content-form.tsx:175
 #: src/components/place-form.tsx:298
@@ -2778,6 +2984,10 @@ msgstr "Stay updated with your latest activity and announcements."
 #: src/components/place-shared.tsx:148
 msgid "Staying"
 msgstr "Staying"
+
+#: src/routes/index.tsx:62
+msgid "Stays written on paper or in separate chats end up on the same dates."
+msgstr "Stays written on paper or in separate chats end up on the same dates."
 
 #: src/components/user-support.tsx:143
 #: src/lib/errors.ts:110
@@ -2819,6 +3029,10 @@ msgstr "Tasks your manager approves for you will appear here."
 #: src/components/finance-parts.tsx:14
 msgid "Taxes"
 msgstr "Taxes"
+
+#: src/routes/index.tsx:501
+msgid "Team accounts"
+msgstr "Team accounts"
 
 #: src/routes/_authenticated/announcements.tsx:121
 msgid "Text in Arabic"
@@ -2934,10 +3148,20 @@ msgstr "The place disappears from lists and its history stays in reports. This c
 msgid "The place is ready for arrival."
 msgstr "The place is ready for arrival."
 
+#: src/routes/index.tsx:200
+#: src/routes/index.tsx:352
+msgid "The problem"
+msgstr "The problem"
+
 #: src/components/asset-form.tsx:43
 #: src/components/asset-manage.tsx:33
 msgid "The purchase date cannot be in the future."
 msgstr "The purchase date cannot be in the future."
+
+#: src/routes/index.tsx:201
+#: src/routes/index.tsx:376
+msgid "The solution"
+msgstr "The solution"
 
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:230
 msgid "The ticket status changed."
@@ -3151,6 +3375,10 @@ msgstr "Too many attempts. Wait a little and try again."
 #: src/routes/_authenticated/booking/$booking_id.tsx:162
 msgid "Total price"
 msgstr "Total price"
+
+#: src/routes/index.tsx:156
+msgid "Track tickets, bookings and expenses from your dashboard, on phone or desktop."
+msgstr "Track tickets, bookings and expenses from your dashboard, on phone or desktop."
 
 #: src/components/states.tsx:101
 msgid "Try again"
@@ -3412,6 +3640,18 @@ msgstr "When to create the ticket"
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:357
 msgid "Who did what to this ticket and when, newest first."
 msgstr "Who did what to this ticket and when, newest first."
+
+#: src/routes/index.tsx:386
+msgid "With Amlak"
+msgstr "With Amlak"
+
+#: src/routes/index.tsx:56
+msgid "Without a clear assignment, workers repeat work or wait for someone to act."
+msgstr "Without a clear assignment, workers repeat work or wait for someone to act."
+
+#: src/routes/index.tsx:383
+msgid "Without Amlak"
+msgstr "Without Amlak"
 
 #: src/lib/nav.tsx:213
 #: src/routes/_authenticated/ticket/$ticket_id.tsx:644
